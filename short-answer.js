@@ -3,6 +3,8 @@ const User = require('./User.js');
 const mongoose = require('mongoose');
 
 const uri = 'mongodb+srv://shortAnswer:shortAnswer@cluster0-x2hks.mongodb.net/test?retryWrites=true&w=majority';
+const token = "";
+
 
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 const connectDB = mongoose.connection;
@@ -17,7 +19,7 @@ const findUser = async function (params) {
 
 
 
-connectDB.once('open', async function () {
+await connectDB.once('open', async function () {
 
 
     User.find({ displayName: "WOW" }, function (err, result) {
@@ -29,6 +31,9 @@ connectDB.once('open', async function () {
         //         console.log("found: " + element);
         // });//
     })
+
+
+    token = await findUser({name: "bot"});
 
     let userSteve = await findUser({displayName: "WOW"})
     console.log("next line: " + userSteve.displayName);
@@ -69,7 +74,6 @@ var guild = new discord.Guild();
 
 const prefix = "sa!";
 
-const token = "Njg5MzE1MjcyNTMxOTAyNjA2.XnBE7g.-LKsWcD8HQkUH9bWLq-KdObMWcQ";
 
 client.login(token);
 
