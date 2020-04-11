@@ -93,11 +93,12 @@ connectDB.once('open', async function () {
     client.on("message", async (message) => {
 
 
-        if (message.substr(0, prefix.length) == prefix) {
+        if (message.content.substr(0, prefix.length) == prefix) {
 
-            message = message.substr(prefix.length);
+            //message = message.substr(prefix.length);
 
             let command = message.content.split(' ')[0];
+            command = command.substr(prefix.length);
             let param1 = message.content.split(' ')[1];
 
             if ((message.author.id == 99615909085220864) && command.startsWith("delete")) {
