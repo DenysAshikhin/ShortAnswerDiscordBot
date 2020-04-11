@@ -15,14 +15,16 @@ mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
 
 
-const findUser = async function (params) { 
-    try {  return await User.findOne(params)
-    } catch(err) { console.log(err) }
+const findUser = async function (params) {
+    try {
+        return await User.findOne(params)
+    } catch (err) { console.log(err) }
 }
 
 const findBot = async function (params) {
-    try{ return await Bot.findOne(params)
-    } catch(err){ console.log(err)}
+    try {
+        return await Bot.findOne(params)
+    } catch (err) { console.log(err) }
 }
 
 connectDB.once('open', async function () {
@@ -30,7 +32,7 @@ connectDB.once('open', async function () {
 
     User.find({ displayName: "WOW" }, function (err, result) {
 
-       //console.log("SIZE: " + result.length);
+        //console.log("SIZE: " + result.length);
 
 
         // result.forEach(element => {
@@ -39,13 +41,13 @@ connectDB.once('open', async function () {
     })
 
 
-    token = await findBot({name: "bot"});
+    token = await findBot({ name: "bot" });
     token = token.token;
 
 
-    let userSteve = await findUser({displayName: "WOW"})
+    let userSteve = await findUser({ displayName: "WOW" })
 
-    if(userSteve.displayName == "WOWP"){
+    if (userSteve.displayName == "WOWP") {
 
         let newUser = {
             displayName: "WOW",
@@ -58,15 +60,15 @@ connectDB.once('open', async function () {
             timeAFK: 7,
             dateJoined: "Not Yet lol"
         }
-    
+
         let userModel = new User(newUser);
         await userModel.save(function (err, user) {
-    
+
             if (err) return console.error(err)
             console.log('saved ' + user.displayName);
         });
     }
-    else{
+    else {
 
         console.log("User already exists");
     }
@@ -74,63 +76,69 @@ connectDB.once('open', async function () {
 
 
     //let changed = await User.findOneAndUpdate({displayName: "WOW"}, {$set: {displayName: "MOM"}});
-    
-    
+
+
     client.login(token);
-    
+
     client.on("ready", () => {
-    
+
         console.log("Ready!");
-    
+
         client.user.setActivity("Giving Answers");
     })
-    
-    
+
+
     let questions = new Array();
-    
+
     client.on("message", async (message) => {
-    
-        let command = message.content.split(' ')[0];
-        let param1 = message.content.split(' ')[1];
-    
-        if ((message.author.id == 99615909085220864) && command.startsWith(prefix + "delete")) {
-    
-            message.delete().catch(function (err) {
-    
-                console.log(err);
-            });
-    
-            try {
-                await message.channel.messages.fetch({ limit: param1 }).then(messages => { // Fetches the messages
-                    message.channel.bulkDelete(messages)
+
+
+        if (message.substr(0, prefix.length) == prefix) {
+
+            message = message.substr(prefix.length);
+
+            let command = message.content.split(' ')[0];
+            let param1 = message.content.split(' ')[1];
+
+            if ((message.author.id == 99615909085220864) && command.startsWith("delete")) {
+
+                message.delete().catch(function (err) {
+
+                    console.log(err);
                 });
-            } catch (err) {
-                console.log(err)
+
+                try {
+                    await message.channel.messages.fetch({ limit: param1 }).then(messages => { // Fetches the messages
+                        message.channel.bulkDelete(messages)
+                    });
+                } catch (err) {
+                    console.log(err)
+                }
+
+                message.delete();
             }
-    
-            message.delete();
-        }
-    
-        if (command.startsWith(prefix + "populate")) {
-    
-            for (i = 1; i <= param1; i++) {
-    
-                await message.channel.send(i).then(sent => {
-    
-                    reactAnswers(sent);
-                    message.reactions.length;
-                    questions.push(sent);
-                });
+
+            if (command.startsWith("populate")) {
+
+                for (i = 1; i <= param1; i++) {
+
+                    await message.channel.send(i).then(sent => {
+
+                        reactAnswers(sent);
+                        message.reactions.length;
+                        questions.push(sent);
+                    });
+                }
+                message.delete();
+                // graphs();
             }
-            message.delete();
-            // graphs();
         }
     });
-    
+
     client.on('guildMemberAdd', member => {
         member.guild.channels.cache.get('697610639132327966').send("Welcome to the server " + member.displayName + "!");
     });
-  
+
     //console.log(userModel); - what I want
     //console.log(JSON.stringify(userModel)); works but the one above is better
 });
