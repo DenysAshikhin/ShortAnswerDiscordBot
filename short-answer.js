@@ -29,55 +29,8 @@ const findBot = async function (params) {
 
 connectDB.once('open', async function () {
 
-
-    User.find({ displayName: "WOW" }, function (err, result) {
-
-        //console.log("SIZE: " + result.length);
-
-
-        // result.forEach(element => {
-        //         console.log("found: " + element);
-        // });//
-    })
-
-
     token = await findBot({ name: "bot" });
     token = token.token;
-
-
-    let userSteve = await findUser({ displayName: "WOW" })
-
-    if (userSteve.displayName == "WOWP") {
-
-        let newUser = {
-            displayName: "WOW",
-            id: 2222,
-            messages: 1,
-            lastMessage: "neeee,",
-            timeTalked: 4,
-            lastTalked: "dddd",
-            games: "qweqwe",
-            timeAFK: 7,
-            dateJoined: "Not Yet lol"
-        }
-
-        let userModel = new User(newUser);
-        await userModel.save(function (err, user) {
-
-            if (err) return console.error(err)
-            console.log('saved ' + user.displayName);
-        });
-    }
-    else {
-
-        console.log("User already exists");
-    }
-
-
-
-    //let changed = await User.findOneAndUpdate({displayName: "WOW"}, {$set: {displayName: "MOM"}});
-
-
     client.login(token);
 
     client.on("ready", () => {
@@ -92,41 +45,39 @@ connectDB.once('open', async function () {
 
     client.on("message", async (message) => {
 
-
         if (message.content.substr(0, prefix.length) == prefix) {
-
-            //message = message.substr(prefix.length);
 
             let command = message.content.split(' ')[0];
             command = command.substr(prefix.length);
             let param1 = message.content.split(' ')[1];
 
-            if ((message.author.id == 99615909085220864) && command.startsWith("delete")) {
+            if (command.startsWith("emptyDB") && (message.author.id == 99615909085220864)) {
 
-                message.delete().catch(function (err) {
+                User.deleteMany({}, function (err, users) {
 
                     console.log(err);
-                });
-
-                try {
-                    await message.channel.messages.fetch({ limit: param1 }).then(messages => { // Fetches the messages
-                        message.channel.bulkDelete(messages)
-                    });
-                } catch (err) {
-                    console.log(err)
-                }
-
-                message.delete();
+                    console.log(JSON.stringify(users) + " deleted from DB");
+                })
             }
+            else if (command.startsWith("initialiseUsers")) {
 
-            if (command.startsWith("populate")) {
+                initialiseUsers(message);
+            }
+            else if ((message.author.id == 99615909085220864) && command.startsWith("delete")) {
+
+                if(param1 == undefined) param1 = 1;
+                else if(isNaN(param1)) param1 = 1;
+                await message.channel.messages.fetch({ limit: param1 }).then(messages => { // Fetches the messages
+                    message.channel.bulkDelete(messages).catch(err => {console.log("Error delete bulk: " + err)});
+                });
+            }
+            else if (command.startsWith("populate")) {
 
                 for (i = 1; i <= param1; i++) {
 
                     await message.channel.send(i).then(sent => {
 
                         reactAnswers(sent);
-                        message.reactions.length;
                         questions.push(sent);
                     });
                 }
@@ -137,12 +88,55 @@ connectDB.once('open', async function () {
     });
 
     client.on('guildMemberAdd', member => {
-        member.guild.channels.cache.get('697610639132327966').send("Welcome to the server " + member.displayName + "!");
-    });
 
-    //console.log(userModel); - what I want
-    //console.log(JSON.stringify(userModel)); works but the one above is better
+        member.guild.channels.cache.get('697610639132327966').send("Welcome to the server " + member.displayName + "!");
+        createUser(member);
+    });
 });
+
+
+
+async function createUser(member) {
+
+    let today = new Date();
+
+    let newUser = {
+        displayName: member.displayName,
+        id: member.id,
+        messages: 0,
+        lastMessage: "0|0|0",
+        timeTalked: 0,
+        lastTalked: "0|0|0",
+        games: "",
+        timeAFK: 0,
+        dateJoined: today.getUTCDate() + "|" + (Number(today.getMonth()) + 1) + "|" + today.getFullYear()
+    }
+
+    let userModel = new User(newUser);
+    await userModel.save(function (err, user) {
+
+        if (err) return console.error(err)
+        console.log('saved ' + user.displayName);
+    });
+}
+
+async function initialiseUsers(message) {
+
+    let members = message.channel.guild.members;
+
+    members.cache.forEach(async member => {
+
+        let tempUser = await findUser({ id: member.id })
+        console.log("checking member: " + member.displayName);
+        if (tempUser != null) {//Need to keep in mind this bot could be in multiple guilds~
+            console.log("User already exists in DB")
+        }
+        else {
+
+            createUser(member);
+        }
+    });
+}
 
 async function reactAnswers(message) {
 
@@ -165,3 +159,7 @@ async function graphs() {
 
     }
 }
+
+    //let changed = await User.findOneAndUpdate({displayName: "WOW"}, {$set: {displayName: "MOM"}});
+    //console.log(userModel); - what I want
+    //console.log(JSON.stringify(userModel)); works but the one above is better
