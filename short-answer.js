@@ -17,10 +17,10 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
 
-const games = ["HALO", "LEAGE_OF_LEGENDS", "ROCKET_LEAGUE", "BORDERLANDS_3", "WARFRAME", "RUST", "OSU", "RISK_OF_RAIN", "RISK_OF_RAIN_2",
+const games = ["HALO", "LEAGUE_OF_LEGENDS", "ROCKET_LEAGUE", "BORDERLANDS_3", "WARFRAME", "RUST", "OSU", "RISK_OF_RAIN", "RISK_OF_RAIN_2",
     "SPACE_ENGINEERS", "INSURGENCY", "MINECRAFT", "PORTAL_2", "PATH_OF_EXILE", "COUNTER_STRIKE:GLOBAL_OFFENSIVE",
-    "VALIRANT", "FOREST", "KILLING_FLOOR", "CIVILIZATION_V", "CIVILIZATION_VI", "UNTURNED", "DUNGEON_OF_THE_ENDLESS",
-    "DECEIT", "ENDLESS_SPACE_2"];
+    "VALORANT", "FOREST", "KILLING_FLOOR", "CIVILIZATION_V", "CIVILIZATION_VI", "UNTURNED", "DUNGEON_OF_THE_ENDLESS",
+    "DECEIT", "ENDLESS_SPACE_2", "APEX LEGENDS"];
 
 
 const getUsers = async function () {
@@ -109,11 +109,10 @@ connectDB.once('open', async function () {
                 }
                 else if (command.startsWith("signUp")) {
 
-                    await updateGames(message.member, message.content.split(' ').splice(1));
-                    await signedUpGames(message);
+                    await updateGames(message, message.content.split(' ').splice(1));
                 }
                 else if (command.startsWith("gamesList")) {
-                    message.channel.send("```" + games.toString() + "```");
+                    gamesList(message);
                 }
                 else if (command.startsWith("myGames")) {
                     message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: " +
@@ -137,6 +136,12 @@ connectDB.once('open', async function () {
                 else if (command.startsWith("help")) {
                     listCommands(message);
                 }
+                else if (command.startsWith("userStats")) {
+                    specificStats(message, param1);
+                }
+                else if (command.startsWith("topStats")) {
+                    topStats(message);
+                }
                 updateMessage(message);
             }
         }
@@ -149,6 +154,96 @@ connectDB.once('open', async function () {
         checkExistance(member);
     });
 });
+//
+function findFurthestDate(date1, date2) {
+
+    let lastDate = "";
+    if ((date1.substr(6).localeCompare(date2.substr(6))) <= 0) {
+
+        if ((date1.substr(1, 4).localeCompare(date2.substr(1, 4))) > 0) {
+            return date2;
+        }
+        else {
+            return date1;
+        }
+    }
+    else {
+        return date2
+    }
+}
+
+async function topStats(message) {
+    //create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
+    let allUsers = await getUsers();
+    let guild = message.guild;
+    let silentType;
+    let loudMouth;
+    let ghost;
+    let MIA;
+    for (let i = 0; i < allUsers.length; i++) {
+
+        user = allUsers[i];
+        if (user.guilds.split("|").includes(guild.id)) {
+
+            let index = user.guilds.split("|").indexOf(guild.id);
+            console.log("Checking: " + user.displayName);
+
+            if (silentType == undefined)
+                silentType = user;
+            if (loudMouth == undefined)
+                loudMouth = user;
+            if (ghost == undefined)
+                ghost = user;
+            if (MIA == undefined)
+                MIA = user;
+
+            if (Number(silentType.messages.split("|")[index]) < Number(user.messages.split("|")[index]))
+                silentType = user;
+
+            if (Number(loudMouth.timeTalked.split("|")[index]) < Number(user.timeTalked.split("|")[index]))
+                loudMouth = user;
+
+            if (Number(ghost.timeAFK.split("|")[index]) < Number(user.timeAFK.split("|")[index]))
+                ghost = user;
+
+            let userDate = findFurthestDate(user.lastMessage, user.lastTalked);
+            let MIADate = findFurthestDate(MIA.lastMessage, MIA.lastTalked);
+
+            if(userDate == findFurthestDate(userDate, MIADate)){
+                MIA = user;
+            }
+        }
+    }
+
+    let index = user.guilds.split("|").indexOf(guild.id);
+
+    message.channel.send("Here are the tops stats for this server: \n```" + "The silent type: " + silentType.displayName + " : " 
+    + silentType.messages.split("|")[index] + " messages sent.\n"
+    + "The loud mouth: " + loudMouth.displayName + " : " + loudMouth.timeTalked.split("|")[index] + " minutes spent talking.\n" 
+    + "The ghost: " + ghost.displayName + " : " + ghost.timeAFK.split("|")[index] + " minutes spent AFK.\n"
+    + "The MIA: " + MIA.displayName + " : " + findFurthestDate(MIA.lastTalked.split("|")[index], MIA.lastMessage.split("|")[index]) + " last seen date."
+    +"```");
+
+}
+
+async function specificStats(message) {
+
+    message.channel.send(message.guild.members.cache.get(message.mentions.members.first().id).user.username + ", ```" + message.member.displayName + "``` requested your stats: ```"
+        + (await getStats(message.mentions.members.first())) + "```");
+}
+
+async function gamesList(message) {
+
+    let finalList = "";
+    games.sort();
+
+    for (let i = 0; i < games.length; i++) {
+
+        finalList += i + ") " + games[i] + "\n";
+    }
+
+    message.channel.send("```" + finalList + "```");
+}
 
 async function listCommands(message) {
 
@@ -156,7 +251,7 @@ async function listCommands(message) {
         + "all commands are to start with the prefix: " + prefix + " - i.e. " + prefix + "command [parameter1] [parameter2] [parameter3]... all paremeters are case insensitive\n\n"
         + "A complete example: " + prefix + "signUp minecraft halo forest will add 'minecraft', 'halo', and 'forest' to your games list.\n\n"
         + "Command 1: populate [number] || Creates [number] of questions numbered 1 - [number] with an emoji for letters A-E.\n\n"
-        + "Command 2: signUp [game1] [game2] [game3]... || Signs you up to be summoned when someone pings any of the [games] in your games list.\n\n"
+        + "Command 2: signUp [game1] [game2] [game3]... || Signs you up to be summoned when someone pings any of the [games] in your games list. You can either write the full game title or the associated number.\n\n"
         + "Command 3: gamesList || Shows you a list of all the possible games to sign up for.\n\n"
         + "Command 4: myGames || Shows you a list of all the games you have signed up for.\n\n"
         + "Command 5: ping [game] || Pings all users who have signed up to be summoned for that [game].\n\n"
@@ -291,7 +386,7 @@ async function exclude(message, bool) {
         message.channel.send(mention(message.member.id) + " will be excluded from any further summons.");
         return;
     }
-    else if(bool == "FALSE"){
+    else if (bool == "FALSE") {
         let changed = await User.findOneAndUpdate({ id: message.member.id },
             {
                 $set: { exclude: false }
@@ -352,11 +447,9 @@ async function pingUsers(message, game) {
 
     users.forEach(async user => {
         //  console.log(user.displayName + "||" + user.exclude);
-        if (user.exclude == false) {
+        if (user.exclude == false && user.id != message.member.id) {
 
             if (user.guilds.split("|").includes(message.guild.id)) {
-
-                console.log("considering: " + user.displayName);
 
                 if (user.games.split("|").includes(game)) {
 
@@ -371,7 +464,10 @@ async function pingUsers(message, game) {
         }
     });
 
-    message.channel.send(message.member.displayName + " has summoned " + signedUp + " for some " + game);
+    if (signedUp.length > 3)
+        message.channel.send(message.member.displayName + " has summoned " + signedUp + " for some " + game);
+    else
+        message.channel.send("No one has signed up for " + game + ".");
     // if (defaulted.length > 1) {
 
     //     message.channel.send(defaulted + "``` you have yet to exlcude yourself from summons or signUp for a game so have been pinged by default"
@@ -404,6 +500,7 @@ async function createUser(member) {
 }
 
 async function addGuild(member, memberDB) {
+
     let changed = await User.findOneAndUpdate({ id: member.id },
         {
             $set: {
@@ -418,40 +515,90 @@ async function addGuild(member, memberDB) {
         });
 }
 
-async function updateGames(member, game) {
+async function updateGames(message, game) {
 
+    let member = message.member;
     let setty = new Set(game);
     game = Array.from(setty);
+    games.sort();
     let memberDB = await findUser({ id: member.id });
     let existingGames = memberDB.games.split("|");
-    let finalString = memberDB.games;
+    let finalString = "";
+    let alreadyTracked = "";
+    let invalidGames = "";
 
     game.forEach(async gameTitle => {
 
-        gameTitle = gameTitle.toUpperCase();
+        if (isNaN(gameTitle)) {
 
-        if (games.includes(gameTitle)) {
+            gameTitle = gameTitle.toUpperCase();
 
-
-            if (!existingGames.includes(gameTitle)) {
-
-                finalString += gameTitle + "|";
+            if (games.includes(gameTitle)) {
+                if (!existingGames.includes(gameTitle))
+                    finalString += gameTitle + "|";
+                else
+                    alreadyTracked += gameTitle + "|"
             }
+            else
+                invalidGames += gameTitle + "|";
+        }
+        else {
+            if (gameTitle < games.length && gameTitle >= 0) {
+
+                if (!existingGames.includes(games[gameTitle])) {
+                    finalString += games[gameTitle] + "|";
+                }
+                else
+                    alreadyTracked += gameTitle + "|"
+            }
+            else
+                invalidGames += gameTitle + "|";
         }
     });
 
+    if (finalString.length > 2) {
+
+        let congrats = "";
+        let tempArr = finalString.split("|");
+        for (let i = 0; i < tempArr.length; i++) {
+            if (tempArr[i].length > 1)
+                congrats += i + ") " + tempArr[i] + "\n";
+        }
+        message.channel.send("Succesfuly signed up for: ``` " + congrats + "```");
+    }
+
+    if (alreadyTracked.length > 2) {
+
+        let congrats = "";
+        let tempArr = alreadyTracked.split("|");
+        for (let i = 0; i < tempArr.length; i++) {
+            if (tempArr[i].length > 1)
+                congrats += i + ") " + tempArr[i] + "\n";
+        }
+        message.channel.send("The following games are already tracked for you: ``` " + congrats + "```");
+    }
+
+    if (invalidGames.length > 2) {
+
+        let congrats = "";
+        let tempArr = invalidGames.split("|");
+        for (let i = 0; i < tempArr.length; i++) {
+            if (tempArr[i].length > 1)
+                congrats += i + ") " + tempArr[i] + "\n";
+        }
+        message.channel.send("The following are invalid games: ``` " + congrats + "```");
+    }
+
     let changed = await User.findOneAndUpdate({ id: member.id },
         {
-            $set: { games: finalString }
+            $set: { games: memberDB.games + finalString }
         });
 }
 
 async function checkExistance(member) {
 
     let tempUser = await findUser({ id: member.id })
-    if (tempUser != null) {//Need to keep in mind this bot could be in multiple guilds~
-
-        let guilds = tempUser.guilds.split("|");
+    if (tempUser != null) {
 
         if (tempUser.guilds.split("|").includes(member.guild.id + ""))
             return true;
@@ -467,14 +614,18 @@ async function checkExistance(member) {
 async function initialiseUsers(message) {
 
     let members = message.channel.guild.members;
+    let newUsers = 0;
+    let existingUsers = 0;
 
     members.cache.forEach(async member => {
 
         if (await (checkExistance(member))) {//User exists with a matching guild in the DB
+            existingUsers++;
         }
         else {
 
-            createUser(member);
+            (await createUser(member));
+            newUsers++;
         }
     });
 }
@@ -501,11 +652,7 @@ async function graphs() {
     }
 }
 
-
-//When adding invalid game, say this game is invalid
-//Make game list look nicer
-//add feedback for initialise users
-//if there is no one to summon, change message
+//create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
 
 
 async function minuteCount() {
@@ -513,3 +660,5 @@ async function minuteCount() {
 }
 
 setInterval(minuteCount, 60 * 1000);
+
+//OSU|LEAGUE_OF_LEGENDS|COUNTER_STRIKE:GLOBAL_OFFENSIVE|
