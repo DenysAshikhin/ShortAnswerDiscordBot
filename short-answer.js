@@ -11,6 +11,7 @@ var Client = new Discord.Client();
 var guild = new Discord.Guild();
 
 const createrID = '99615909085220864';
+const botID = '689315272531902606';
 
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useFindAndModify', false);
@@ -58,71 +59,76 @@ connectDB.once('open', async function () {
 
     Client.on("message", async (message) => {
 
-        if (message.content.substr(0, prefix.length) == prefix) {
+        if (message.member.id != botID) {
 
-            let command = message.content.split(' ')[0];
-            command = command.substr(prefix.length);
-            let param1 = message.content.split(' ')[1];
-            if (param1 == undefined)
-                param1 = "";
+            updateMessage(message);
 
-            if (command.startsWith("emptyDB") && (message.author.id == createrID)) {
+            if (message.content.substr(0, prefix.length) == prefix) {
 
-                User.deleteMany({}, function (err, users) {
+                let command = message.content.split(' ')[0];
+                command = command.substr(prefix.length);
+                let param1 = message.content.split(' ')[1];
+                if (param1 == undefined)
+                    param1 = "";
 
-                    console.log(err);
-                    console.log(JSON.stringify(users) + " deleted from DB");
-                })
-            }
-            else if (command.startsWith("initialiseUsers")) {
+                if (command.startsWith("emptyDB") && (message.author.id == createrID)) {
 
-                initialiseUsers(message);
-            }//Need to test the one below
-            else if ((message.member.hasPermission(Discord.Permissions.MANAGE_MESSAGES, { checkAdmin: false, checkOwner: false })) && command.startsWith("delete")) {
+                    User.deleteMany({}, function (err, users) {
 
-                if (param1 == undefined) param1 = 1;
-                else if (isNaN(param1)) param1 = 1;
-                else if (param1 > 100) param1 = 100;
-                await message.channel.messages.fetch({ limit: param1 }).then(messages => { // Fetches the messages
-                    message.channel.bulkDelete(messages).catch(err => {
-                        console.log("Error deleting bulk messages: " + err);
-                        message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
-                    });
-                });
-            }
-            else if (command.startsWith("populate")) {
+                        console.log(err);
+                        console.log(JSON.stringify(users) + " deleted from DB");
+                    })
+                }
+                else if (command.startsWith("initialiseUsers")) {
 
-                for (i = 1; i <= param1; i++) {
+                    initialiseUsers(message);
+                }//Need to test the one below
+                else if ((message.member.hasPermission(Discord.Permissions.MANAGE_MESSAGES, { checkAdmin: false, checkOwner: false })) && command.startsWith("delete")) {
 
-                    await message.channel.send(i).then(sent => {
-
-                        reactAnswers(sent);
-                        questions.push(sent);
+                    if (param1 == undefined) param1 = 1;
+                    else if (isNaN(param1)) param1 = 1;
+                    else if (param1 > 100) param1 = 100;
+                    await message.channel.messages.fetch({ limit: param1 }).then(messages => { // Fetches the messages
+                        message.channel.bulkDelete(messages).catch(err => {
+                            console.log("Error deleting bulk messages: " + err);
+                            message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                        });
                     });
                 }
-                message.delete();
-                // graphs();
-            }
-            else if (command.startsWith("signUp")) {
+                else if (command.startsWith("populate")) {
 
-                await updateGames(message.member, message.content.split(' ').splice(1));
-                await signedUpGames(message);
-            }
-            else if (command.startsWith("gamesList")) {
-                message.channel.send("```" + games.toString() + "```");
-            }
-            else if (command.startsWith("myGames")) {
-                message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: " +
-                    (await findUser({ id: message.member.id })).games + "```");
-            }
-            else if (command.startsWith("ping")) {
-                pingUsers(message, param1.toUpperCase());
-            }
-            else if (command.startsWith("removeGame")) {
-                removeGame(message, param1.toUpperCase());
-            }
-            else if (command.startsWith("exclude")) {
-                exclude(message, param1);
+                    for (i = 1; i <= param1; i++) {
+
+                        await message.channel.send(i).then(sent => {
+
+                            reactAnswers(sent);
+                            questions.push(sent);
+                        });
+                    }
+                    message.delete();
+                    // graphs();
+                }
+                else if (command.startsWith("signUp")) {
+
+                    await updateGames(message.member, message.content.split(' ').splice(1));
+                    await signedUpGames(message);
+                }
+                else if (command.startsWith("gamesList")) {
+                    message.channel.send("```" + games.toString() + "```");
+                }
+                else if (command.startsWith("myGames")) {
+                    message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: " +
+                        (await findUser({ id: message.member.id })).games + "```");
+                }
+                else if (command.startsWith("ping")) {
+                    pingUsers(message, param1.toUpperCase());
+                }
+                else if (command.startsWith("removeGame")) {
+                    removeGame(message, param1.toUpperCase());
+                }
+                else if (command.startsWith("exclude")) {
+                    exclude(message, param1);
+                }
             }
         }
     });
@@ -135,10 +141,41 @@ connectDB.once('open', async function () {
     });
 });
 
+async function updateMessage(message) {
+
+    let user = await findUser({ id: message.member.id });
+    let messages = user.messages.split("|");
+    let lastMessage = user.lastMessage.split("|");
+    let guilds = user.guilds.split("|");
+    let index = guilds.indexOf(message.guild.id);
+
+
+    messages[index] = Number(messages[index]) + 1 + "";
+    lastMessage[index] = getDate();
+
+    let stringMessage = "";
+    let stringLastMessage = "";
+
+    messages.forEach(message => {
+
+        if (message.length > 0)
+            stringMessage += message + "|";
+    });
+
+    lastMessage.forEach(element => {
+
+        console.log("ON: " + element.length);
+        if (element.length > 0)
+            stringLastMessage += element + "|";
+    });
+
+    let changed = await User.findOneAndUpdate({ id: message.member.id },
+        {
+            $set: { messages: stringMessage, lastMessage: stringLastMessage }
+        });
+}
+
 async function exclude(message, bool) {
-
-
-    console.log("exclude: " + (await findUser({ id: message.member.id })).exclude);
 
     if (bool == "true") {
 
@@ -197,6 +234,7 @@ async function signedUpGames(message) {
 function mention(id) {
     return "<@" + id + ">"
 }
+
 async function pingUsers(message, game) {
 
     if (!games.includes(game))
@@ -223,11 +261,11 @@ async function pingUsers(message, game) {
     });
 
     message.channel.send(message.member.displayName + " has summoned " + signedUp + " for some " + game);
-    if (defaulted.length > 1) {
+    // if (defaulted.length > 1) {
 
-        message.channel.send(defaulted + "``` you have yet to exlcude yourself from summons or signUp for a game so have been pinged by default"
-            + " if you wish to never be summoned for games, type sa!exclude, or signUp for at least one game. Type " + prefix + " for more information```");
-    }
+    //     message.channel.send(defaulted + "``` you have yet to exlcude yourself from summons or signUp for a game so have been pinged by default"
+    //         + " if you wish to never be summoned for games, type sa!exclude, or signUp for at least one game. Type " + prefix + " for more information```");
+    // }NOTE ENABLE LATER
 }
 
 async function createUser(member) {
