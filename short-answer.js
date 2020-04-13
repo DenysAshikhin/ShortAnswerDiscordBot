@@ -209,7 +209,7 @@ async function topStats(message) {
             let userDate = findFurthestDate(user.lastMessage, user.lastTalked);
             let MIADate = findFurthestDate(MIA.lastMessage, MIA.lastTalked);
 
-            if(userDate == findFurthestDate(userDate, MIADate)){
+            if (userDate == findFurthestDate(userDate, MIADate)) {
                 MIA = user;
             }
         }
@@ -217,12 +217,12 @@ async function topStats(message) {
 
     let index = user.guilds.split("|").indexOf(guild.id);
 
-    message.channel.send("Here are the tops stats for this server: \n```" + "The silent type: " + silentType.displayName + " : " 
-    + silentType.messages.split("|")[index] + " messages sent.\n"
-    + "The loud mouth: " + loudMouth.displayName + " : " + loudMouth.timeTalked.split("|")[index] + " minutes spent talking.\n" 
-    + "The ghost: " + ghost.displayName + " : " + ghost.timeAFK.split("|")[index] + " minutes spent AFK.\n"
-    + "The MIA: " + MIA.displayName + " : " + findFurthestDate(MIA.lastTalked.split("|")[index], MIA.lastMessage.split("|")[index]) + " last seen date."
-    +"```");
+    message.channel.send("Here are the tops stats for this server: \n```" + "The silent type: " + silentType.displayName + " : "
+        + silentType.messages.split("|")[index] + " messages sent.\n"
+        + "The loud mouth: " + loudMouth.displayName + " : " + loudMouth.timeTalked.split("|")[index] + " minutes spent talking.\n"
+        + "The ghost: " + ghost.displayName + " : " + ghost.timeAFK.split("|")[index] + " minutes spent AFK.\n"
+        + "The MIA: " + MIA.displayName + " : " + findFurthestDate(MIA.lastTalked.split("|")[index], MIA.lastMessage.split("|")[index]) + " last seen date."
+        + "```");
 
 }
 
@@ -254,7 +254,7 @@ async function listCommands(message) {
         + "Command 2: signUp [game1] [game2] [game3]... || Signs you up to be summoned when someone pings any of the [games] in your games list. You can either write the full game title or the associated number.\n\n"
         + "Command 3: gamesList || Shows you a list of all the possible games to sign up for.\n\n"
         + "Command 4: myGames || Shows you a list of all the games you have signed up for.\n\n"
-        + "Command 5: ping [game] || Pings all users who have signed up to be summoned for that [game].\n\n"
+        + "Command 5: ping [game] || Pings all users who have signed up to be summoned for that [game]. [game] can either be the name or the corresponding number\n\n"
         + "Command 6: removeGame [game] || Removes [game] from your game list.\n\n"
         + "Command 7: exclude [true/false]|| If you pass true, you will be excluded from all future game summons, if set to false, you will be summoned for applicable game summons.\n\n"
         + "Command 8: myStats || Displays all of your stats from the called server.\n\n"
@@ -438,8 +438,17 @@ function mention(id) {
 
 async function pingUsers(message, game) {
 
-    if (!games.includes(game))
+
+    if (!isNaN(game)) {
+
+        if (game < 0 || game >= games.length)
+            message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "gamesList to view the list of all games.");
         return;
+    }
+    else if (!games.includes(game)) {
+        message.channel.send(game + " is not a valid game, please try again or type " + prefix + "gamesList to view the list of all games.");
+        return;
+    }
 
     let users = await getUsers();
     let signedUp = "";
@@ -451,11 +460,17 @@ async function pingUsers(message, game) {
 
             if (user.guilds.split("|").includes(message.guild.id)) {
 
-                if (user.games.split("|").includes(game)) {
+                if (isNaN(game)) {
+
+                    if (user.games.split("|").includes(game)) {
+
+                        signedUp += mention(user.id);
+                    }
+                }
+                else if (user.games.split("|").includes(games[game])) {
 
                     signedUp += mention(user.id);
                 }
-
                 else if (user.games.length < 2) {
 
                     defaulted += mention(user.id);
@@ -564,7 +579,7 @@ async function updateGames(message, game) {
             if (tempArr[i].length > 1)
                 congrats += i + ") " + tempArr[i] + "\n";
         }
-        message.channel.send("Succesfuly signed up for: ``` " + congrats + "```");
+        message.channel.send("Succesfuly signed up for: ```" + congrats + "```");
     }
 
     if (alreadyTracked.length > 2) {
@@ -575,7 +590,7 @@ async function updateGames(message, game) {
             if (tempArr[i].length > 1)
                 congrats += i + ") " + tempArr[i] + "\n";
         }
-        message.channel.send("The following games are already tracked for you: ``` " + congrats + "```");
+        message.channel.send("The following games are already tracked for you: ```" + congrats + "```");
     }
 
     if (invalidGames.length > 2) {
@@ -586,7 +601,7 @@ async function updateGames(message, game) {
             if (tempArr[i].length > 1)
                 congrats += i + ") " + tempArr[i] + "\n";
         }
-        message.channel.send("The following are invalid games: ``` " + congrats + "```");
+        message.channel.send("The following are invalid games: ```" + congrats + "```");
     }
 
     let changed = await User.findOneAndUpdate({ id: member.id },
