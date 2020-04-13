@@ -50,17 +50,14 @@ connectDB.once('open', async function () {
 
         console.log("Ready!");
 
-        Client.user.setActivity("Giving Answers");
+        Client.user.setActivity("sa!help for information");
     })
-
 
     let questions = new Array();
 
     Client.on("message", async (message) => {
 
         if (message.member.id != botID) {
-
-
 
             if (message.content.substr(0, prefix.length) == prefix) {
 
@@ -79,10 +76,11 @@ connectDB.once('open', async function () {
                     })
                     return;
                 }
-                
+
                 if (command.startsWith("initialiseUsers")) {
 
                     initialiseUsers(message);
+                    message.channel.send("The server's users are now tracked!");
                 }//Need to test the one below
                 else if ((message.member.hasPermission(Discord.Permissions.MANAGE_MESSAGES, { checkAdmin: false, checkOwner: false })) && command.startsWith("delete")) {
 
@@ -128,13 +126,16 @@ connectDB.once('open', async function () {
                     removeGame(message, param1.toUpperCase());
                 }
                 else if (command.startsWith("exclude")) {
-                    exclude(message, param1);
+                    exclude(message, param1.toUpperCase());
                 }
                 else if (command.startsWith("myStats")) {
                     personalStats(message);
                 }
                 else if (command.startsWith("allStats")) {
                     guildStats(message);
+                }
+                else if (command.startsWith("help")) {
+                    listCommands(message);
                 }
                 updateMessage(message);
             }
@@ -148,6 +149,27 @@ connectDB.once('open', async function () {
         checkExistance(member);
     });
 });
+
+async function listCommands(message) {
+
+    let commandsSummary = "Here is the list of all current commands and the appropriate parameters: \n```"
+        + "all commands are to start with the prefix: " + prefix + " - i.e. " + prefix + "command [parameter1] [parameter2] [parameter3]... all paremeters are case insensitive\n\n"
+        + "A complete example: " + prefix + "signUp minecraft halo forest will add 'minecraft', 'halo', and 'forest' to your games list.\n\n"
+        + "Command 1: populate [number] || Creates [number] of questions numbered 1 - [number] with an emoji for letters A-E.\n\n"
+        + "Command 2: signUp [game1] [game2] [game3]... || Signs you up to be summoned when someone pings any of the [games] in your games list.\n\n"
+        + "Command 3: gamesList || Shows you a list of all the possible games to sign up for.\n\n"
+        + "Command 4: myGames || Shows you a list of all the games you have signed up for.\n\n"
+        + "Command 5: ping [game] || Pings all users who have signed up to be summoned for that [game].\n\n"
+        + "Command 6: removeGame [game] || Removes [game] from your game list.\n\n"
+        + "Command 7: exclude [true/false]|| If you pass true, you will be excluded from all future game summons, if set to false, you will be summoned for applicable game summons.\n\n"
+        + "Command 8: myStats || Displays all of your stats from the called server.\n\n"
+        + "Command 9: allStats || Displays stats of every member from the called server.\n\n"
+        + "Command 10: help || Displays this message again.\n\n"
+        + "Command 11: delete [number] || Deletes the last [number] of messages if you have the 'manage messages' permission.\n\n"
+        + "Command 12: initiliaseUsers || Adds all users from the called server to the bot's tracker.\n\n"
+        + "```"
+    message.channel.send(commandsSummary);
+}
 
 async function getStats(member) {
 
@@ -179,7 +201,7 @@ async function guildStats(message) {
     message.guild.members.cache.forEach(async member => {
 
         message.channel.send("Here are the stats for " + member.displayName + ": ```"
-        + (await getStats(member)) + "```");
+            + (await getStats(member)) + "```");
     })
 }
 
@@ -260,7 +282,7 @@ async function updateMessage(message) {
 
 async function exclude(message, bool) {
 
-    if (bool == "true") {
+    if (bool == "TRUE") {
 
         let changed = await User.findOneAndUpdate({ id: message.member.id },
             {
@@ -269,12 +291,13 @@ async function exclude(message, bool) {
         message.channel.send(mention(message.member.id) + " will be excluded from any further summons.");
         return;
     }
-    else
-        User.findOneAndUpdate({ id: message.member.id },
+    else if(bool == "FALSE"){
+        let changed = await User.findOneAndUpdate({ id: message.member.id },
             {
                 $set: { exclude: false }
             });
-    message.channel.send(mention(message.member.id) + " can now be summoned once more.");
+        message.channel.send(mention(message.member.id) + " can now be summoned once more.");
+    }
 }
 
 function getDate() {
@@ -328,17 +351,22 @@ async function pingUsers(message, game) {
     let defaulted = "";
 
     users.forEach(async user => {
+        //  console.log(user.displayName + "||" + user.exclude);
+        if (user.exclude == false) {
 
-        if (user.guilds.split("|").includes(message.guild.id)) {
+            if (user.guilds.split("|").includes(message.guild.id)) {
 
-            if (user.games.split("|").includes(game)) {
+                console.log("considering: " + user.displayName);
 
-                signedUp += mention(user.id);
-            }
+                if (user.games.split("|").includes(game)) {
 
-            else if (user.games.length < 2) {
+                    signedUp += mention(user.id);
+                }
 
-                defaulted += mention(user.id);
+                else if (user.games.length < 2) {
+
+                    defaulted += mention(user.id);
+                }
             }
         }
     });
@@ -357,9 +385,9 @@ async function createUser(member) {
         displayName: member.displayName,
         id: member.id,
         messages: 0 + "|",
-        lastMessage: "0%0%0|",
+        lastMessage: "0-0-0|",
         timeTalked: 0 + "|",
-        lastTalked: "0%0%0|",
+        lastTalked: "0-0-0|",
         games: "",
         timeAFK: 0 + "|",
         dateJoined: getDate() + "|",
@@ -380,9 +408,9 @@ async function addGuild(member, memberDB) {
         {
             $set: {
                 messages: memberDB.messages + 0 + "|",
-                lastMessage: memberDB.lastMessage + "0%0%0|",
+                lastMessage: memberDB.lastMessage + "0-0-0|",
                 timeTalked: memberDB.timeTalked + 0 + "|",
-                lastTalked: memberDB.lastTalked + "0%0%0|",
+                lastTalked: memberDB.lastTalked + "0-0-0|",
                 timeAFK: memberDB.timeAFK + 0 + "|",
                 dateJoined: memberDB.dateJoined + getDate() + "|",
                 guilds: memberDB.guilds + member.guild.id + "|"
@@ -474,7 +502,10 @@ async function graphs() {
 }
 
 
-
+//When adding invalid game, say this game is invalid
+//Make game list look nicer
+//add feedback for initialise users
+//if there is no one to summon, change message
 
 
 async function minuteCount() {
