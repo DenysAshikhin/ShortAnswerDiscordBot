@@ -40,7 +40,6 @@ const findBot = async function (params) {
         return await Bot.findOne(params)
     } catch (err) { console.log(err) }
 }
-
 connectDB.once('open', async function () {
 
     token = await findBot({ name: "bot" });
@@ -61,7 +60,7 @@ connectDB.once('open', async function () {
 
         if (message.member.id != botID) {
 
-            updateMessage(message);
+
 
             if (message.content.substr(0, prefix.length) == prefix) {
 
@@ -78,8 +77,10 @@ connectDB.once('open', async function () {
                         console.log(err);
                         console.log(JSON.stringify(users) + " deleted from DB");
                     })
+                    return;
                 }
-                else if (command.startsWith("initialiseUsers")) {
+                
+                if (command.startsWith("initialiseUsers")) {
 
                     initialiseUsers(message);
                 }//Need to test the one below
@@ -129,6 +130,13 @@ connectDB.once('open', async function () {
                 else if (command.startsWith("exclude")) {
                     exclude(message, param1);
                 }
+                else if (command.startsWith("myStats")) {
+                    personalStats(message);
+                }
+                else if (command.startsWith("allStats")) {
+                    guildStats(message);
+                }
+                updateMessage(message);
             }
         }
     });
@@ -141,6 +149,98 @@ connectDB.once('open', async function () {
     });
 });
 
+async function getStats(member) {
+
+    let user = await findUser({ id: member.id });
+    let guilds = user.guilds.split("|");
+    let index = guilds.indexOf(member.guild.id);
+    let stats = "";
+
+    stats = "Total number of messages sent: " + user.messages.split("|")[index] + "\n"
+        + "Last message sent: " + user.lastMessage.split("|")[index] + "\n"
+        + "Total time spent talking (in minutes): " + user.timeTalked.split("|")[index] + "\n"
+        + "Last time you talked was: " + user.lastTalked.split("|")[index] + "\n"
+        + "The games you are signed up for: " + user.games + "\n"
+        + "Time spent AFK (in minutes): " + user.timeAFK.split("|")[index] + "\n"
+        + "You joined this server on: " + user.dateJoined.split("|")[index] + "\n"
+        + "Whether you are excluded from summons: " + user.exclude + "\n";
+
+    return stats;
+}
+
+async function personalStats(message) {
+
+    message.channel.send(mention(message.member.id) + " here are your stats: ```"
+        + (await getStats(message.member)) + "```");
+}
+
+async function guildStats(message) {
+
+    message.guild.members.cache.forEach(async member => {
+
+        message.channel.send("Here are the stats for " + member.displayName + ": ```"
+        + (await getStats(member)) + "```");
+    })
+}
+
+function convertToString(array) {
+
+    let finaly = "";
+
+    array.forEach(element => {
+
+        if (element.length > 0)
+            finaly += element + "|";
+    });
+    return finaly
+}
+
+async function countTalk() {
+
+    Client.guilds.cache.forEach(async guild => {
+
+        guild.channels.cache.forEach(async channel => {
+
+            if (channel.type == "voice") {
+
+                channel.members.forEach(async member => {
+
+                    let user = await findUser({ id: member.id });
+                    let guilds = user.guilds.split("|");
+                    let index = guilds.indexOf(guild.id);
+
+                    if (channel.id == guild.afkChannelID) {
+
+                        let timeAFK = user.timeAFK.split("|");
+                        timeAFK[index] = (Number(timeAFK[index]) + 1).toString();
+
+                        User.findOneAndUpdate({ id: member.id },
+                            {
+                                $set: { timeAFK: convertToString(timeAFK) }
+                            }, function (err, doc, res) {
+                                //console.log(doc);
+                            });
+                    } else {
+
+                        let timeTalked = user.timeTalked.split("|");
+                        timeTalked[index] = (Number(timeTalked[index]) + 1).toString();
+
+                        let lastTalked = user.lastTalked.split("|");
+                        lastTalked[index] = getDate();
+
+                        User.findOneAndUpdate({ id: member.id },
+                            {
+                                $set: { timeTalked: convertToString(timeTalked), lastTalked: convertToString(lastTalked) }
+                            }, function (err, doc, res) {
+                                //console.log(doc);
+                            });
+                    }
+                })
+            }
+        })
+    })
+}
+
 async function updateMessage(message) {
 
     let user = await findUser({ id: message.member.id });
@@ -149,29 +249,12 @@ async function updateMessage(message) {
     let guilds = user.guilds.split("|");
     let index = guilds.indexOf(message.guild.id);
 
-
     messages[index] = Number(messages[index]) + 1 + "";
     lastMessage[index] = getDate();
 
-    let stringMessage = "";
-    let stringLastMessage = "";
-
-    messages.forEach(message => {
-
-        if (message.length > 0)
-            stringMessage += message + "|";
-    });
-
-    lastMessage.forEach(element => {
-
-        console.log("ON: " + element.length);
-        if (element.length > 0)
-            stringLastMessage += element + "|";
-    });
-
     let changed = await User.findOneAndUpdate({ id: message.member.id },
         {
-            $set: { messages: stringMessage, lastMessage: stringLastMessage }
+            $set: { messages: convertToString(messages), lastMessage: convertToString(lastMessage) }
         });
 }
 
@@ -197,7 +280,7 @@ async function exclude(message, bool) {
 function getDate() {
 
     let today = new Date();
-    return today.getUTCDate() + "%" + (Number(today.getMonth()) + 1) + "%" + today.getFullYear();
+    return today.getUTCDate() + "-" + (Number(today.getMonth()) + 1) + "-" + today.getFullYear();
 }
 
 async function removeGame(message, game) {
@@ -293,7 +376,6 @@ async function createUser(member) {
 }
 
 async function addGuild(member, memberDB) {
-
     let changed = await User.findOneAndUpdate({ id: member.id },
         {
             $set: {
@@ -391,6 +473,12 @@ async function graphs() {
     }
 }
 
-    //let changed = await User.findOneAndUpdate({displayName: "WOW"}, {$set: {displayName: "MOM"}});
-    //console.log(userModel); - what I want
-    //console.log(JSON.stringify(userModel)); works but the one above is better
+
+
+
+
+async function minuteCount() {
+    countTalk();
+}
+
+setInterval(minuteCount, 60 * 1000);
