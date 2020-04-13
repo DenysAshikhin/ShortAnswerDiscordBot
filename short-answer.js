@@ -2,6 +2,8 @@ const Discord = require('discord.js');
 const User = require('./User.js');
 const Bot = require('./Bot.js');
 const mongoose = require('mongoose');
+const fs = require('fs');
+const gameJSON = require('./gamesList.json')
 
 const prefix = "sa!";
 const uri = 'mongodb+srv://shortAnswer:shortAnswer@cluster0-x2hks.mongodb.net/test?retryWrites=true&w=majority';
@@ -17,10 +19,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
 
-const games = ["HALO", "LEAGUE_OF_LEGENDS", "ROCKET_LEAGUE", "BORDERLANDS_3", "WARFRAME", "RUST", "OSU", "RISK_OF_RAIN", "RISK_OF_RAIN_2",
-    "SPACE_ENGINEERS", "INSURGENCY", "MINECRAFT", "PORTAL_2", "PATH_OF_EXILE", "COUNTER_STRIKE:GLOBAL_OFFENSIVE",
-    "VALORANT", "FOREST", "KILLING_FLOOR", "CIVILIZATION_V", "CIVILIZATION_VI", "UNTURNED", "DUNGEON_OF_THE_ENDLESS",
-    "DECEIT", "ENDLESS_SPACE_2", "APEX LEGENDS"];
+const games = new Array();
 
 
 const getUsers = async function () {
@@ -46,6 +45,12 @@ connectDB.once('open', async function () {
     token = token.token;
     Client.login(token);
 
+    gameJSON.forEach(element => {
+
+        //console.log(element.name.split(' ').join('_'));
+        games.push(element.name.split(' ').join('_').toUpperCase());
+    })
+
     Client.on("ready", () => {
 
         console.log("Ready!");
@@ -56,6 +61,9 @@ connectDB.once('open', async function () {
     let questions = new Array();
 
     Client.on("message", async (message) => {
+
+
+
 
         if (message.member.id != botID) {
 
@@ -112,7 +120,7 @@ connectDB.once('open', async function () {
                     await updateGames(message, message.content.split(' ').splice(1));
                 }
                 else if (command.startsWith("gamesList")) {
-                    gamesList(message);
+                    gamesList(message, param1.toUpperCase());
                 }
                 else if (command.startsWith("myGames")) {
                     message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: " +
@@ -154,7 +162,12 @@ connectDB.once('open', async function () {
         checkExistance(member);
     });
 });
-//
+
+async function gameSuggestion(member) {
+
+
+}
+
 function findFurthestDate(date1, date2) {
 
     let lastDate = "";
@@ -232,17 +245,34 @@ async function specificStats(message) {
         + (await getStats(message.mentions.members.first())) + "```");
 }
 
-async function gamesList(message) {
+async function gamesList(message, letter) {
+
+    if (letter == undefined || letter == null || letter.length < 1) {
+
+        message.channel.send("You didn't provide a starting letter, try again - i.e. " + prefix + "gamesList a");
+        return;
+    }
 
     let finalList = "";
+    let finalArray = new Array();
     games.sort();
 
     for (let i = 0; i < games.length; i++) {
 
-        finalList += i + ") " + games[i] + "\n";
+        if (games[i].startsWith(letter)){
+            
+            finalList += i + ") " + games[i] + "\n";
+        }
+        if(finalList.length >= 1000){
+            finalArray.push(finalList);
+            finalList = "";
+        }
     }
 
-    message.channel.send("```" + finalList + "```");
+    for(let i = 0; i < finalArray.length; i++){
+
+        message.channel.send("```" + finalArray[i] + "```");
+    }    
 }
 
 async function listCommands(message) {
@@ -252,7 +282,7 @@ async function listCommands(message) {
         + "A complete example: " + prefix + "signUp minecraft halo forest will add 'minecraft', 'halo', and 'forest' to your games list.\n\n"
         + "Command 1: populate [number] || Creates [number] of questions numbered 1 - [number] with an emoji for letters A-E.\n\n"
         + "Command 2: signUp [game1] [game2] [game3]... || Signs you up to be summoned when someone pings any of the [games] in your games list. You can either write the full game title or the associated number.\n\n"
-        + "Command 3: gamesList || Shows you a list of all the possible games to sign up for.\n\n"
+        + "Command 3: gamesList [starting letters]|| Shows you a list of all the possible games to sign up for starting with the specified letters.\n\n"
         + "Command 4: myGames || Shows you a list of all the games you have signed up for.\n\n"
         + "Command 5: ping [game] || Pings all users who have signed up to be summoned for that [game]. [game] can either be the name or the corresponding number\n\n"
         + "Command 6: removeGame [game] || Removes [game] from your game list.\n\n"
@@ -262,6 +292,8 @@ async function listCommands(message) {
         + "Command 10: help || Displays this message again.\n\n"
         + "Command 11: delete [number] || Deletes the last [number] of messages if you have the 'manage messages' permission.\n\n"
         + "Command 12: initiliaseUsers || Adds all users from the called server to the bot's tracker.\n\n"
+        + "Command 13: userStats @User || Displays all the stats for the pinged/mentioned user.\n\n"
+        + "Command 14: topStats || Displays all of the top stats for the called server.\n\n"
         + "```"
     message.channel.send(commandsSummary);
 }
