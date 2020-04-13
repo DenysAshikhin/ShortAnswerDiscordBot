@@ -9,13 +9,13 @@ const UserSchema = new mongoose.Schema({
         type: Number
     },
     messages:{
-        type: Number
+        type: String
     },
     lastMessage:{
         type: String
     },
     timeTalked:{
-        type: Number
+        type: String
     },
     lastTalked:{
         type: String
@@ -24,10 +24,16 @@ const UserSchema = new mongoose.Schema({
         type: String
     },
     timeAFK:{
-        type: Number
+        type: String
     },
     dateJoined:{
-        
+        type: String   
+    },
+    exclude:{
+        type: Boolean
+    },
+    guilds: {
+        type: String
     }
 });
 
