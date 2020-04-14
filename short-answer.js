@@ -185,8 +185,13 @@ async function personalGames(message) {
             finalList += i + ") " + games[i] + "\n";
     }
 
-    message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: \n" +
-        finalList + "```");
+    if (finalList.length > 2)
+        message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: \n" +
+            finalList + "```");
+
+    else
+        message.channel.send("You are not signed up for any games.");
+
 }
 
 async function gameSuggestion(member) {//
@@ -467,25 +472,26 @@ async function removeGame(message, game) {
 
     let boring = await findUser({ id: message.member.id });
     let gameArr = boring.games.split("|");
+    let removedGame = "";
 
-    if(isNaN(game)){
+    if (isNaN(game)) {
         game = game.toUpperCase();
-        if(gameArr.indexOf(game) == -1){
-         
-            message.channel.send(game + " is not related to any valid game in your game list - aborting.");
-            return;
-        }
-        gameArr.splice(gameArr.indexOf(game), 1);
-    }
-    else{
+        if (gameArr.indexOf(game) == -1) {
 
-        if(game < 0 || game > gameArr.length){
             message.channel.send(game + " is not related to any valid game in your game list - aborting.");
             return;
         }
-        gameArr.splice(game,1)
+        removedGame = gameArr.splice(gameArr.indexOf(game), 1);
     }
-    
+    else {
+
+        if (game < 0 || game > gameArr.length) {
+            message.channel.send(game + " is not related to any valid game in your game list - aborting.");
+            return;
+        }
+        removedGame = gameArr.splice(game, 1)
+    }
+
     let finalGameList = "";
 
     for (let i = 0; i < gameArr.length; i++) {
@@ -501,7 +507,7 @@ async function removeGame(message, game) {
             $set: { games: finalGameList }
         });
 
-    signedUpGames(message)
+    message.channel.send("Succesfuly removed ```" + removedGame + "``` from your games list.");
 }
 
 async function signedUpGames(message) {
@@ -755,3 +761,4 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 //OSU|LEAGUE_OF_LEGENDS|COUNTER_STRIKE:GLOBAL_OFFENSIVE|
+//make remove game array
