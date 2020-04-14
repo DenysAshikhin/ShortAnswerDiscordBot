@@ -123,14 +123,13 @@ connectDB.once('open', async function () {
                     gamesList(message, param1.toUpperCase());
                 }
                 else if (command.startsWith("myGames")) {
-                    message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: " +
-                        (await findUser({ id: message.member.id })).games + "```");
+                    personalGames(message);
                 }
                 else if (command.startsWith("ping")) {
                     pingUsers(message, param1.toUpperCase());
                 }
                 else if (command.startsWith("removeGame")) {
-                    removeGame(message, param1.toUpperCase());
+                    removeGame(message, param1);
                 }
                 else if (command.startsWith("exclude")) {
                     exclude(message, param1.toUpperCase());
@@ -161,9 +160,36 @@ connectDB.once('open', async function () {
 
         checkExistance(member);
     });
+
+    // Client.on('presenceUpdate', (oldMember, newMember) => {
+
+    //     if (newMember.activities[0] != undefined) {
+
+    //         console.log(newMember.activities[0].type);
+    //         console.log(newMember.activities[0].name);
+    //         console.log(newMember.guild.members.cache.get(newMember.userID).user);
+    //     }
+    // });
 });
 
-async function gameSuggestion(member) {
+
+async function personalGames(message) {
+
+    let games = await findUser({ id: message.member.id });
+    games = games.games.split("|");
+    let finalList = "";
+
+    for (let i = 0; i < games.length; i++) {
+
+        if (games[i].length > 1)
+            finalList += i + ") " + games[i] + "\n";
+    }
+
+    message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: \n" +
+        finalList + "```");
+}
+
+async function gameSuggestion(member) {//
 
 
 }
@@ -249,7 +275,7 @@ async function gamesList(message, letter) {
 
     if (letter == undefined || letter == null || letter.length < 1) {
 
-        message.channel.send("You didn't provide a starting letter, try again - i.e. " + prefix + "gamesList a");
+        message.channel.send("You didn't provide a starting letter(s), try again - i.e. " + prefix + "gamesList a");
         return;
     }
 
@@ -257,22 +283,26 @@ async function gamesList(message, letter) {
     let finalArray = new Array();
     games.sort();
 
+    console.log("ThE LETTER: " + letter);
+
     for (let i = 0; i < games.length; i++) {
 
-        if (games[i].startsWith(letter)){
-            
+        if (games[i].startsWith(letter)) {
+
             finalList += i + ") " + games[i] + "\n";
         }
-        if(finalList.length >= 1000){
+        if (finalList.length >= 1000) {
             finalArray.push(finalList);
             finalList = "";
         }
     }
 
-    for(let i = 0; i < finalArray.length; i++){
+    finalArray.push(finalList);
+
+    for (let i = 0; i < finalArray.length; i++) {
 
         message.channel.send("```" + finalArray[i] + "```");
-    }    
+    }
 }
 
 async function listCommands(message) {
@@ -438,7 +468,24 @@ async function removeGame(message, game) {
     let boring = await findUser({ id: message.member.id });
     let gameArr = boring.games.split("|");
 
-    gameArr.splice(gameArr.indexOf(game), 1);
+    if(isNaN(game)){
+        game = game.toUpperCase();
+        if(gameArr.indexOf(game) == -1){
+         
+            message.channel.send(game + " is not related to any valid game in your game list - aborting.");
+            return;
+        }
+        gameArr.splice(gameArr.indexOf(game), 1);
+    }
+    else{
+
+        if(game < 0 || game > gameArr.length){
+            message.channel.send(game + " is not related to any valid game in your game list - aborting.");
+            return;
+        }
+        gameArr.splice(game,1)
+    }
+    
     let finalGameList = "";
 
     for (let i = 0; i < gameArr.length; i++) {
@@ -446,7 +493,6 @@ async function removeGame(message, game) {
         if (gameArr[i].length > 1) {
 
             finalGameList += gameArr[i] + "|";
-            console.log('adding: ' + gameArr[i]);
         }
     }
 
