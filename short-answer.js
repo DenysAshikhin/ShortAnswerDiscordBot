@@ -62,9 +62,6 @@ connectDB.once('open', async function () {
 
     Client.on("message", async (message) => {
 
-
-
-
         if (message.member.id != botID) {
 
             if (message.content.substr(0, prefix.length) == prefix) {
@@ -90,7 +87,7 @@ connectDB.once('open', async function () {
                     initialiseUsers(message);
                     message.channel.send("The server's users are now tracked!");
                 }//Need to test the one below
-                else if ((message.member.hasPermission(Discord.Permissions.MANAGE_MESSAGES, { checkAdmin: false, checkOwner: false })) && command.startsWith("delete")) {
+                else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command.startsWith("delete")) {
 
                     if (param1 == undefined) param1 = 1;
                     else if (isNaN(param1)) param1 = 1;
@@ -137,7 +134,7 @@ connectDB.once('open', async function () {
                 else if (command.startsWith("myStats")) {
                     personalStats(message);
                 }
-                else if (command.startsWith("allStats")) {
+                else if (command.startsWith("allStats") && message.member.hasPermission("ADMINISTRATOR")) {
                     guildStats(message);
                 }
                 else if (command.startsWith("help")) {
@@ -230,7 +227,6 @@ async function topStats(message) {
         if (user.guilds.split("|").includes(guild.id)) {
 
             let index = user.guilds.split("|").indexOf(guild.id);
-            console.log("Checking: " + user.displayName);
 
             if (silentType == undefined)
                 silentType = user;
@@ -287,8 +283,6 @@ async function gamesList(message, letter) {
     let finalList = "";
     let finalArray = new Array();
     games.sort();
-
-    console.log("ThE LETTER: " + letter);
 
     for (let i = 0; i < games.length; i++) {
 
@@ -496,7 +490,7 @@ async function removeGame(message, game) {
         else {
             if (gameTitle < gameArr.length && gameTitle >= 0) {
 
-                removedGames += regameArr.splice(gameTitle, 1) + "|";
+                removedGames += gameArr.splice(gameTitle, 1) + "|";
             }
             else
                 invalidGames += gameTitle + "|";
@@ -504,7 +498,7 @@ async function removeGame(message, game) {
     });
 
     let finalGameList = "";
-    gamerArr.sort();
+    gameArr.sort();
 
     for (let i = 0; i < gameArr.length; i++) {
 
@@ -796,3 +790,10 @@ setInterval(minuteCount, 60 * 1000);
 
 //OSU|LEAGUE_OF_LEGENDS|COUNTER_STRIKE:GLOBAL_OFFENSIVE|
 //make remove game array
+
+//gamesList border , league
+//relative search
+//ping by number
+//make commands not case senstive
+//games list invalid characters
+//fix delte paramater invalidation
