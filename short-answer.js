@@ -2,6 +2,8 @@ const Discord = require('discord.js');
 const User = require('./User.js');
 const Bot = require('./Bot.js');
 const mongoose = require('mongoose');
+const Fuse = require('fuse.js');
+
 const fs = require('fs');
 const gameJSON = require('./gamesList.json')
 
@@ -20,6 +22,26 @@ mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
 
 const games = new Array();
+
+
+const options = {
+    isCaseSensitive: true,
+    findAllMatches: true,
+    includeMatches: false,
+    includeScore: false,
+    useExtendedSearch: false,
+    minMatchCharLength: 3,
+    shouldSort: true,
+    threshold: 0.6,
+    location: 0,
+    distance: 100,
+    keys: [
+        "name"
+    ]
+};
+
+
+
 
 
 const getUsers = async function () {
@@ -48,8 +70,10 @@ connectDB.once('open', async function () {
     gameJSON.forEach(element => {
 
         //console.log(element.name.split(' ').join('_'));
-        games.push(element.name.split(' ').join('_').toUpperCase());
+        //games.push(element.name.split(' ').join('_').toUpperCase());
+        games.push(element.name);
     })
+    games.sort();
 
     Client.on("ready", () => {
 
@@ -66,11 +90,13 @@ connectDB.once('open', async function () {
 
             if (message.content.substr(0, prefix.length) == prefix) {
 
-                let command = message.content.split(' ')[0];
+                let messageArray = message.content.split(' ');
+                let command = messageArray[0];
                 command = command.substr(prefix.length);
-                let param1 = message.content.split(' ')[1];
-                if (param1 == undefined)
-                    param1 = "";
+                let params = messageArray.slice(1, messageArray.length + 1);
+
+                if (params[0] == undefined)
+                    params[0] = "";
 
                 // if (command.startsWith("emptyDB") && (message.author.id == createrID)) {
 
@@ -89,19 +115,27 @@ connectDB.once('open', async function () {
                 }//Need to test the one below
                 else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command.startsWith("delete")) {
 
-                    if (param1 == undefined) param1 = 1;
-                    else if (isNaN(param1)) param1 = 1;
-                    else if (param1 > 100) param1 = 100;
-                    await message.channel.messages.fetch({ limit: param1 }).then(messages => { // Fetches the messages
-                        message.channel.bulkDelete(messages).catch(err => {
-                            console.log("Error deleting bulk messages: " + err);
-                            message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                    let amount = 0;
+                    console.log(params);
+                    if(params[0].length <= 0)message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else if (params[0] > 100) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else {
+
+                        amount = Number(params[0]) + 1;
+                        console.log(params[0]);
+                        await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
+                            message.channel.bulkDelete(messages).catch(err => {
+                                console.log("Error deleting bulk messages: " + err);
+                                message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                            });
                         });
-                    });
+                    }
                 }
                 else if (command.startsWith("populate")) {
 
-                    for (i = 1; i <= param1; i++) {
+                    for (i = 1; i <= params; i++) {
 
                         await message.channel.send(i).then(sent => {
 
@@ -117,19 +151,19 @@ connectDB.once('open', async function () {
                     await updateGames(message, message.content.split(' ').splice(1));
                 }
                 else if (command.startsWith("gamesList")) {
-                    gamesList(message, param1.toUpperCase());
+                    gamesList(message, params);
                 }
                 else if (command.startsWith("myGames")) {
                     personalGames(message);
                 }
                 else if (command.startsWith("ping")) {
-                    pingUsers(message, param1.toUpperCase());
+                    pingUsers(message, params.toUpperCase());
                 }
                 else if (command.startsWith("removeGame")) {
-                    removeGame(message, param1);
+                    removeGame(message, params);
                 }
                 else if (command.startsWith("exclude")) {
-                    exclude(message, param1.toUpperCase());
+                    exclude(message, params.toUpperCase());
                 }
                 else if (command.startsWith("myStats")) {
                     personalStats(message);
@@ -141,7 +175,7 @@ connectDB.once('open', async function () {
                     listCommands(message);
                 }
                 else if (command.startsWith("userStats")) {
-                    specificStats(message, param1);
+                    specificStats(message, params);
                 }
                 else if (command.startsWith("topStats")) {
                     topStats(message);
@@ -272,36 +306,51 @@ async function specificStats(message) {
         + (await getStats(message.mentions.members.first())) + "```");
 }
 
-async function gamesList(message, letter) {
+async function gamesList(message, searches) {
 
-    if (letter == undefined || letter == null || letter.length < 1) {
+    if (searches == undefined || searches == null || searches.length < 1) {
 
-        message.channel.send("You didn't provide a starting letter(s), try again - i.e. " + prefix + "gamesList a");
+        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "gamesList counter");
         return;
     }
 
-    let finalList = "";
-    let finalArray = new Array();
-    games.sort();
 
-    for (let i = 0; i < games.length; i++) {
+    searches = searches.split(",");
 
-        if (games[i].startsWith(letter)) {
+    console.log("searches: " + searches);
 
-            finalList += i + ") " + games[i] + "\n";
-        }
-        if (finalList.length >= 1000) {
+    searches.forEach(query => {
+
+        if (query.length > 0) {
+
+            message.channel.send(mention(message.member.id) + "! Here are the result for: " + query + "\n");
+            let finalArray = new Array();
+            let finalList = "";
+            let fuse = new Fuse(games, options);
+
+            let result = fuse.search(query);
+
+            for (let i = 0; i < result.length; i++) {
+
+                if (finalList.length <= 1900) {
+
+                    finalList += result[i].refIndex + ") " + result[i].item + "\n";
+                }
+                // if (finalList.length >= 1800) {
+                //     finalArray.push(finalList);
+                //     finalList = "";
+                // }//Commented out because the messages just get too long and the wanted search results would be closer to the top anyways
+            }
+
             finalArray.push(finalList);
-            finalList = "";
+
+            for (let i = 0; i < finalArray.length; i++) {
+
+                message.channel.send("```" + finalArray[i] + "```");
+            }
         }
-    }
 
-    finalArray.push(finalList);
-
-    for (let i = 0; i < finalArray.length; i++) {
-
-        message.channel.send("```" + finalArray[i] + "```");
-    }
+    });
 }
 
 async function listCommands(message) {
