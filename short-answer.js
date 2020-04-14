@@ -72,15 +72,15 @@ connectDB.once('open', async function () {
                 if (param1 == undefined)
                     param1 = "";
 
-                if (command.startsWith("emptyDB") && (message.author.id == createrID)) {
+                // if (command.startsWith("emptyDB") && (message.author.id == createrID)) {
 
-                    User.deleteMany({}, function (err, users) {
+                //     User.deleteMany({}, function (err, users) {
 
-                        console.log(err);
-                        console.log(JSON.stringify(users) + " deleted from DB");
-                    })
-                    return;
-                }
+                //         console.log(err);
+                //         console.log(JSON.stringify(users) + " deleted from DB");
+                //     })
+                //     return;
+                // }
 
                 if (command.startsWith("initialiseUsers")) {
 
@@ -797,3 +797,8 @@ setInterval(minuteCount, 60 * 1000);
 //make commands not case senstive
 //games list invalid characters
 //fix delte paramater invalidation
+//seal idan easter eggs
+//if someone is playing stuff, send a suggestion to sign up for it
+//make a channel solely to explain bot usage
+//View users signed up for a game
+//add a purge my game list
