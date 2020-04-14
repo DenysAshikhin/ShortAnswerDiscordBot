@@ -93,7 +93,8 @@ connectDB.once('open', async function () {
                 let messageArray = message.content.split(' ');
                 let command = messageArray[0];
                 command = command.substr(prefix.length);
-                let params = messageArray.slice(1, messageArray.length + 1);
+
+                let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
                 if (params[0] == undefined)
                     params[0] = "";
@@ -117,9 +118,9 @@ connectDB.once('open', async function () {
 
                     let amount = 0;
                     console.log(params);
-                    if(params[0].length <= 0)message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
                     else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else if (params[0] > 100) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
                     else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
                     else {
 
@@ -135,7 +136,7 @@ connectDB.once('open', async function () {
                 }
                 else if (command.startsWith("populate")) {
 
-                    for (i = 1; i <= params; i++) {
+                    for (i = 1; i <= params[0]; i++) {
 
                         await message.channel.send(i).then(sent => {
 
@@ -148,7 +149,7 @@ connectDB.once('open', async function () {
                 }
                 else if (command.startsWith("signUp")) {
 
-                    await updateGames(message, message.content.split(' ').splice(1));
+                    await updateGames(message, params);
                 }
                 else if (command.startsWith("gamesList")) {
                     gamesList(message, params);
@@ -157,13 +158,16 @@ connectDB.once('open', async function () {
                     personalGames(message);
                 }
                 else if (command.startsWith("ping")) {
-                    pingUsers(message, params.toUpperCase());
+                    pingUsers(message, params[0].trim());
                 }
                 else if (command.startsWith("removeGame")) {
                     removeGame(message, params);
                 }
                 else if (command.startsWith("exclude")) {
-                    exclude(message, params.toUpperCase());
+                    if (params[0].length != undefined && params[0].length == 0)
+                        message.channel.send("You must enter either true or false: " + prefix + "exclude true/false");
+                    else
+                        exclude(message, params[0].toUpperCase());
                 }
                 else if (command.startsWith("myStats")) {
                     personalStats(message);
@@ -313,9 +317,6 @@ async function gamesList(message, searches) {
         message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "gamesList counter");
         return;
     }
-
-
-    searches = searches.split(",");
 
     console.log("searches: " + searches);
 
@@ -503,6 +504,9 @@ async function exclude(message, bool) {
             });
         message.channel.send(mention(message.member.id) + " can now be summoned once more.");
     }
+    else {
+        message.channel.send("You must enter either true or false: " + prefix + "exclude true/false");
+    }
 }
 
 function getDate() {
@@ -524,27 +528,29 @@ async function removeGame(message, game) {
     games.sort();
 
 
-    game.forEach(async gameTitle => {
+    //game.forEach(async gameTitle => {
 
-        if (isNaN(gameTitle)) {
+    let gameTitle = game[0];
 
-            gameTitle = gameTitle.toUpperCase();
+    if (isNaN(gameTitle)) {
 
-            if (gameArr.includes(gameTitle)) {
-                removedGames += regameArr.splice(gameArr.indexOf(gameTitle), 1) + "|";
-            }
-            else
-                invalidGames += gameTitle + "|";
+        gameTitle = gameTitle.toUpperCase();
+
+        if (gameArr.includes(gameTitle)) {
+            removedGames += gameArr.splice(gameArr.indexOf(gameTitle), 1) + "|";
         }
-        else {
-            if (gameTitle < gameArr.length && gameTitle >= 0) {
+        else
+            invalidGames += gameTitle + "|";
+    }
+    else {
+        if (gameTitle < gameArr.length && gameTitle >= 0) {
 
-                removedGames += gameArr.splice(gameTitle, 1) + "|";
-            }
-            else
-                invalidGames += gameTitle + "|";
+            removedGames += gameArr.splice(gameTitle, 1) + "|";
         }
-    });
+        else
+            invalidGames += gameTitle + "|";
+    }
+    //});
 
     let finalGameList = "";
     gameArr.sort();
@@ -693,6 +699,8 @@ async function addGuild(member, memberDB) {
 
 async function updateGames(message, game) {
 
+
+    console.log("UPDATEGAME: " + game);
     let member = message.member;
     let setty = new Set(game);
     game = Array.from(setty);
@@ -707,7 +715,7 @@ async function updateGames(message, game) {
 
         if (isNaN(gameTitle)) {
 
-            gameTitle = gameTitle.toUpperCase();
+            gameTitle = gameTitle.trim();
 
             if (games.includes(gameTitle)) {
                 if (!existingGames.includes(gameTitle))
@@ -721,14 +729,16 @@ async function updateGames(message, game) {
         else {
             if (gameTitle < games.length && gameTitle >= 0) {
 
+                console.log(games[gameTitle]);
+
                 if (!existingGames.includes(games[gameTitle])) {
                     finalString += games[gameTitle] + "|";
                 }
                 else
-                    alreadyTracked += gameTitle + "|"
+                    alreadyTracked += games[gameTitle] + "|"
             }
             else
-                invalidGames += gameTitle + "|";
+                invalidGames += games[gameTitle] + "|";
         }
     });
 
@@ -838,14 +848,10 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
-//make remove game array
+//make remove game array - it is but broken
 
-//gamesList border , league
-//relative search
 //ping by number
 //make commands not case senstive
-//games list invalid characters
-//fix delte paramater invalidation
 //seal idan easter eggs
 //if someone is playing stuff, send a suggestion to sign up for it
 //make a channel solely to explain bot usage
