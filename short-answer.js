@@ -788,7 +788,7 @@ async function minuteCount() {
 
 setInterval(minuteCount, 60 * 1000);
 
-//OSU|LEAGUE_OF_LEGENDS|COUNTER_STRIKE:GLOBAL_OFFENSIVE|
+
 //make remove game array
 
 //gamesList border , league
@@ -802,3 +802,4 @@ setInterval(minuteCount, 60 * 1000);
 //make a channel solely to explain bot usage
 //View users signed up for a game
 //add a purge my game list
+//backup DB?
