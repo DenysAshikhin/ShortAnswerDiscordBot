@@ -472,27 +472,39 @@ async function removeGame(message, game) {
 
     let boring = await findUser({ id: message.member.id });
     let gameArr = boring.games.split("|");
-    let removedGame = "";
+    let invalidGames = "";
+    let removedGames = "";
 
-    if (isNaN(game)) {
-        game = game.toUpperCase();
-        if (gameArr.indexOf(game) == -1) {
 
-            message.channel.send(game + " is not related to any valid game in your game list - aborting.");
-            return;
+    let setty = new Set(game);
+    game = Array.from(setty);
+    games.sort();
+
+
+    game.forEach(async gameTitle => {
+
+        if (isNaN(gameTitle)) {
+
+            gameTitle = gameTitle.toUpperCase();
+
+            if (gameArr.includes(gameTitle)) {
+                removedGames += regameArr.splice(gameArr.indexOf(gameTitle), 1) + "|";
+            }
+            else
+                invalidGames += gameTitle + "|";
         }
-        removedGame = gameArr.splice(gameArr.indexOf(game), 1);
-    }
-    else {
+        else {
+            if (gameTitle < gameArr.length && gameTitle >= 0) {
 
-        if (game < 0 || game > gameArr.length) {
-            message.channel.send(game + " is not related to any valid game in your game list - aborting.");
-            return;
+                removedGames += regameArr.splice(gameTitle, 1) + "|";
+            }
+            else
+                invalidGames += gameTitle + "|";
         }
-        removedGame = gameArr.splice(game, 1)
-    }
+    });
 
     let finalGameList = "";
+    gamerArr.sort();
 
     for (let i = 0; i < gameArr.length; i++) {
 
@@ -502,12 +514,34 @@ async function removeGame(message, game) {
         }
     }
 
+    if (invalidGames.length > 2) {
+
+        let congrats = "";
+        let tempArr = invalidGames.split("|");
+        tempArr.sort();
+        for (let i = 0; i < tempArr.length; i++) {
+            if (tempArr[i].length > 1)
+                congrats += i + ") " + tempArr[i] + "\n";
+        }
+        message.channel.send("The following are invalid games: ```" + congrats + "```");
+    }
+
+    if (removedGames.length > 2) {
+
+        let congrats = "";
+        let tempArr = removedGames.split("|");
+        tempArr.sort();
+        for (let i = 0; i < tempArr.length; i++) {
+            if (tempArr[i].length > 1)
+                congrats += i + ") " + tempArr[i] + "\n";
+        }
+        message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
+    }
+
     let changed = await User.findOneAndUpdate({ id: message.member.id },
         {
             $set: { games: finalGameList }
         });
-
-    message.channel.send("Succesfuly removed ```" + removedGame + "``` from your games list.");
 }
 
 async function signedUpGames(message) {
