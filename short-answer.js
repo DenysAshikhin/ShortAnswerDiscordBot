@@ -86,7 +86,7 @@ connectDB.once('open', async function () {
 
     Client.on("message", async (message) => {
 
-        if (message.member.id != botID) {
+        if (message.author.id != botID) {
 
             if (message.content.substr(0, prefix.length) == prefix) {
 
@@ -603,6 +603,13 @@ function mention(id) {
     return "<@" + id + ">"
 }
 
+
+function directMessage(message, memberID, game){
+
+    message.guild.members.cache.get(memberID).user.send(message.member.displayName + " has summoned you for " + game + " in "
+     + message.guild.name + "!");
+}
+
 async function pingUsers(message, game) {
 
 
@@ -632,11 +639,13 @@ async function pingUsers(message, game) {
                     if (user.games.split("|").includes(game)) {
 
                         signedUp += mention(user.id);
+                        directMessage(message, user.id, game);
                     }
                 }
                 else if (user.games.split("|").includes(games[game])) {
 
                     signedUp += mention(user.id);
+                    directMessage(message, user.id, games[game]);
                 }
                 else if (user.games.length < 2) {
 
