@@ -333,7 +333,7 @@ async function gamesList(message, searches) {
 
             for (let i = 0; i < result.length; i++) {
 
-                if (finalList.length <= 1900) {
+                if (finalList.length <= 500) {
 
                     finalList += result[i].refIndex + ") " + result[i].item + "\n";
                 }
@@ -699,8 +699,6 @@ async function addGuild(member, memberDB) {
 
 async function updateGames(message, game) {
 
-
-    console.log("UPDATEGAME: " + game);
     let member = message.member;
     let setty = new Set(game);
     game = Array.from(setty);
