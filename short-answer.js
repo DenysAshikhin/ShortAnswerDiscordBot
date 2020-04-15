@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const Fuse = require('fuse.js');
 
 const fs = require('fs');
-const gameJSON = require('./gamesList.json')
+const gameJSON = require('./gameslist.json')
 
 const prefix = "sa!";
 const uri = 'mongodb+srv://shortAnswer:shortAnswer@cluster0-x2hks.mongodb.net/test?retryWrites=true&w=majority';
