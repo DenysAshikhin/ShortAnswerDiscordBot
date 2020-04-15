@@ -151,8 +151,8 @@ connectDB.once('open', async function () {
 
                     await updateGames(message, params);
                 }
-                else if (command.startsWith("gamesList")) {
-                    gamesList(message, params);
+                else if (command.startsWith("search")) {
+                    search(message, params);
                 }
                 else if (command.startsWith("myGames")) {
                     personalGames(message);
@@ -175,14 +175,23 @@ connectDB.once('open', async function () {
                 else if (command.startsWith("allStats") && message.member.hasPermission("ADMINISTRATOR")) {
                     guildStats(message);
                 }
-                else if (command.startsWith("help")) {
-                    listCommands(message);
+                else if (command == ("help")) {
+                    generalHelp(message);
                 }
                 else if (command.startsWith("userStats")) {
                     specificStats(message, params);
                 }
                 else if (command.startsWith("topStats")) {
                     topStats(message);
+                }
+                else if (command.startsWith("helpGames")) {
+                    gameHelp(message);
+                }
+                else if(command.startsWith("helpStats")){
+                    helpStats(message);
+                }
+                else if(command.startsWith("helpMiscellaneous")){
+                    helpMiscellaneous(message);
                 }
                 updateMessage(message);
             }
@@ -310,7 +319,7 @@ async function specificStats(message) {
         + (await getStats(message.mentions.members.first())) + "```");
 }
 
-async function gamesList(message, searches) {
+async function search(message, searches) {
 
     if (searches == undefined || searches == null || searches.length < 1) {
 
@@ -354,27 +363,70 @@ async function gamesList(message, searches) {
     });
 }
 
+async function helpMiscellaneous(message){
+
+    let help = 
+    "Command 1: " + prefix + "delete [number]\n``` Deletes the last [number] of messages if you have the 'manage messages' permission.```\n"
+    + "Command 2: " + prefix + "populate [number]\n```Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.```\n"
+    message.channel.send(help);
+}
+
 async function listCommands(message) {
 
-    let commandsSummary = "Here is the list of all current commands and the appropriate parameters: \n```"
-        + "all commands are to start with the prefix: " + prefix + " - i.e. " + prefix + "command [parameter1] [parameter2] [parameter3]... all paremeters are case insensitive\n\n"
-        + "A complete example: " + prefix + "signUp minecraft halo forest will add 'minecraft', 'halo', and 'forest' to your games list.\n\n"
-        + "Command 1: populate [number] || Creates [number] of questions numbered 1 - [number] with an emoji for letters A-E.\n\n"
-        + "Command 2: signUp [game1] [game2] [game3]... || Signs you up to be summoned when someone pings any of the [games] in your games list. You can either write the full game title or the associated number.\n\n"
-        + "Command 3: gamesList [starting letters]|| Shows you a list of all the possible games to sign up for starting with the specified letters.\n\n"
-        + "Command 4: myGames || Shows you a list of all the games you have signed up for.\n\n"
-        + "Command 5: ping [game] || Pings all users who have signed up to be summoned for that [game]. [game] can either be the name or the corresponding number\n\n"
-        + "Command 6: removeGame [game] || Removes [game] from your game list.\n\n"
-        + "Command 7: exclude [true/false]|| If you pass true, you will be excluded from all future game summons, if set to false, you will be summoned for applicable game summons.\n\n"
-        + "Command 8: myStats || Displays all of your stats from the called server.\n\n"
-        + "Command 9: allStats || Displays stats of every member from the called server.\n\n"
-        + "Command 10: help || Displays this message again.\n\n"
+    let commandsSummary = 
+
         + "Command 11: delete [number] || Deletes the last [number] of messages if you have the 'manage messages' permission.\n\n"
-        + "Command 12: initiliaseUsers || Adds all users from the called server to the bot's tracker.\n\n"
-        + "Command 13: userStats @User || Displays all the stats for the pinged/mentioned user.\n\n"
-        + "Command 14: topStats || Displays all of the top stats for the called server.\n\n"
+        + "Command 1: populate [number] || Creates [number] of questions numbered 1 - [number] with an emoji for letters A-E.\n\n"
         + "```"
     message.channel.send(commandsSummary);
+}
+
+async function helpStats(message){
+
+    let statsMessage = 
+    "Command 1: " + prefix + "myStats\n```Shows you all of your stats.```\n"
+    + "Command 2: " + prefix + "userStats @User\n```Shows you the stats of the mentioned/pinged user.```\n"
+    + "Command 3: " + prefix + "topStats\n```Shows the top stats for the called server.```\n"
+    + "Command 4: " + prefix + "allStats\n```Shows the stats for all users on the called server. NOTE: Can only be called by the members with the ADMINSTRATOR permission.```"
+
+    message.channel.send(statsMessage);
+}
+
+async function generalHelp(message) {
+
+    let helpMessage = "The following commands are broken down into 3 general sections: Games, Stats, Miscellaneous. Enter: \n"
+        + "```" + "1) " + prefix + "helpGames  || For information on how signUp for games, how to ping games, search for a game and more.\n\n"
+        + "2) " + prefix + "helpStats  || For information on how to view server, personal, top stats and more.\n\n"
+        + "3) " + prefix + "helpMiscellaneous  || For information on random commands.\n\n"
+        +"IMPORTANT: Make sure to run " + prefix + "initiliaseUsers || otherwise the other commands will not function properly. This command adds all users from the called server to the bot's tracker.\n\n"
+        + "```";
+
+    message.channel.send(helpMessage);
+}
+
+async function gameHelp(message) {
+
+    let gameMessage =
+        "Command 1: " + prefix + "signUp [game1], [game2], [game3]...\n```Signs you up to be summoned when someone pings any of the [games] in your games list. "
+        + "You can either write the full game title or the associated number.\n\n"
+        + "Example usage: " + prefix + "signUp Counter-Strike: Global Offensive, 212, Minecraft...\n\nWill add three games to your gamesList.```\n"
+
+        + "Command 2: " + prefix + "myGames\n```Show you your games list, if anyone pings a game on your games list, you will get notified.```\n"
+
+        + "Command 3: " + prefix + "removeGame [game] \n```Removes [game] from your game list.\n\n"
+        + "Example usage: " + prefix + "removeGame 2 |OR| " + prefix + "removeGame Counter-Strike: Global Offensive\n\nWill remove the game specified by the number "
+        + "(which as to correspond to a game in your gamesList) or search your gamesList for the title of the game you wish to remove.```\n"
+
+        + "Command 4: " + prefix + "exclude [true/false] \n```Sets whether you wish to be notified when someone pings a game to play. If set to 'true', you will be excluded from all pings "
+        + "and vice versa.\nExample usage: " + prefix + "exclude true |OR| " + prefix + "exclude false```\n"
+
+        + "Command 5: " + prefix + "search [game1], [game2].... \n```Searches all the complete game list for the speicified games you wish to find. You can search for as many games as desired, seperated by a comma.\n"
+        + "Example usage: " + prefix + "search Counter, Overwatch, League```\n"
+
+        + "Command 6: " + prefix + "ping [game] \n```Pings and DM's every member from the called server who have [game] in their games list and do not have the exclude status enabled.\n"
+        + "Example usage: " + prefix + "ping Counter-Global: Offensive```";
+
+    message.channel.send(gameMessage);
 }
 
 async function getStats(member) {
@@ -603,15 +655,13 @@ function mention(id) {
     return "<@" + id + ">"
 }
 
-
-function directMessage(message, memberID, game){
+function directMessage(message, memberID, game) {
 
     message.guild.members.cache.get(memberID).user.send(message.member.displayName + " has summoned you for " + game + " in "
-     + message.guild.name + "!");
+        + message.guild.name + "!");
 }
 
 async function pingUsers(message, game) {
-
 
     if (!isNaN(game)) {
 
@@ -865,3 +915,6 @@ setInterval(minuteCount, 60 * 1000);
 //View users signed up for a game
 //add a purge my game list
 //backup DB?
+//Add exclude from pings and DM's
+//coin flipper
+//game decider
