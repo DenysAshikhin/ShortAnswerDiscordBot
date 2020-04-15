@@ -92,7 +92,7 @@ connectDB.once('open', async function () {
 
                 let messageArray = message.content.split(' ');
                 let command = messageArray[0];
-                command = command.substr(prefix.length);
+                command = command.substr(prefix.length).toUpperCase();
 
                 let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
@@ -109,12 +109,12 @@ connectDB.once('open', async function () {
                 //     return;
                 // }
 
-                if (command.startsWith("initialiseUsers")) {
+                if (command.startsWith("initialiseUsers".toUpperCase())) {
 
                     initialiseUsers(message);
                     message.channel.send("The server's users are now tracked!");
                 }//Need to test the one below
-                else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command.startsWith("delete")) {
+                else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command.startsWith("delete".toUpperCase())) {
 
                     let amount = 0;
                     console.log(params);
@@ -134,7 +134,7 @@ connectDB.once('open', async function () {
                         });
                     }
                 }
-                else if (command.startsWith("populate")) {
+                else if (command.startsWith("populate".toUpperCase())) {
 
                     for (i = 1; i <= params[0]; i++) {
 
@@ -147,50 +147,50 @@ connectDB.once('open', async function () {
                     message.delete();
                     // graphs();
                 }
-                else if (command.startsWith("signUp")) {
+                else if (command.startsWith("signUp".toUpperCase())) {
 
                     await updateGames(message, params);
                 }
-                else if (command.startsWith("search")) {
+                else if (command.startsWith("search".toUpperCase())) {
                     search(message, params);
                 }
-                else if (command.startsWith("myGames")) {
+                else if (command.startsWith("myGames".toUpperCase())) {
                     personalGames(message);
                 }
-                else if (command.startsWith("ping")) {
+                else if (command.startsWith("ping".toUpperCase())) {
                     pingUsers(message, params[0].trim());
                 }
-                else if (command.startsWith("removeGame")) {
+                else if (command.startsWith("removeGame".toUpperCase())) {
                     removeGame(message, params);
                 }
-                else if (command.startsWith("exclude")) {
+                else if (command.startsWith("exclude".toUpperCase())) {
                     if (params[0].length != undefined && params[0].length == 0)
                         message.channel.send("You must enter either true or false: " + prefix + "exclude true/false");
                     else
                         exclude(message, params[0].toUpperCase());
                 }
-                else if (command.startsWith("myStats")) {
+                else if (command.startsWith("myStats".toUpperCase())) {
                     personalStats(message);
                 }
-                else if (command.startsWith("allStats") && message.member.hasPermission("ADMINISTRATOR")) {
+                else if (command.startsWith("allStats".toUpperCase()) && message.member.hasPermission("ADMINISTRATOR")) {
                     guildStats(message);
                 }
-                else if (command == ("help")) {
+                else if (command == ("help".toUpperCase())) {
                     generalHelp(message);
                 }
-                else if (command.startsWith("userStats")) {
+                else if (command.startsWith("userStats".toUpperCase())) {
                     specificStats(message, params);
                 }
-                else if (command.startsWith("topStats")) {
+                else if (command.startsWith("topStats".toUpperCase())) {
                     topStats(message);
                 }
-                else if (command.startsWith("helpGames")) {
+                else if (command.startsWith("helpGames".toUpperCase())) {
                     gameHelp(message);
                 }
-                else if(command.startsWith("helpStats")){
+                else if(command.startsWith("helpStats".toUpperCase())){
                     helpStats(message);
                 }
-                else if(command.startsWith("helpMiscellaneous")){
+                else if(command.startsWith("helpMiscellaneous".toUpperCase())){
                     helpMiscellaneous(message);
                 }
                 updateMessage(message);
@@ -369,16 +369,6 @@ async function helpMiscellaneous(message){
     "Command 1: " + prefix + "delete [number]\n``` Deletes the last [number] of messages if you have the 'manage messages' permission.```\n"
     + "Command 2: " + prefix + "populate [number]\n```Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.```\n"
     message.channel.send(help);
-}
-
-async function listCommands(message) {
-
-    let commandsSummary = 
-
-        + "Command 11: delete [number] || Deletes the last [number] of messages if you have the 'manage messages' permission.\n\n"
-        + "Command 1: populate [number] || Creates [number] of questions numbered 1 - [number] with an emoji for letters A-E.\n\n"
-        + "```"
-    message.channel.send(commandsSummary);
 }
 
 async function helpStats(message){
