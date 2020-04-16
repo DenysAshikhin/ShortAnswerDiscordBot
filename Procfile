@@ -1,1 +1,1 @@
-worker: node short-answer.js
+rker: node short-answer.js
