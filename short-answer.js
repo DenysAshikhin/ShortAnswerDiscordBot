@@ -967,14 +967,23 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
+//Add at least a skip and stop functionality for music bot
+//Add exclude from pings and DM's
+
+//Show Kieran
+
+//coin flipper
+//game decider
+//Do the two above before kiran if possible
+
 
 //View users signed up for a game
 //add a purge my game list
-//coin flipper
-//game decider
-//Add exclude from pings and DM's
+
+
 //make remove game array - it is but broken
 //backup DB?
+//Add a 'summoner' top stat - most pings
 
 
 
