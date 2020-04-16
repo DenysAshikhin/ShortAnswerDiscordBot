@@ -14,6 +14,7 @@
     "fuse.js": "^5.1.0",
     "mongodb": "^3.5.5",
     "mongoose": "^5.9.7",
+    "node-opus": "^0.3.3",
     "nodemon": "^2.0.3",
     "ytdl-core": "^2.1.0"
   }

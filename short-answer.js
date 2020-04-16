@@ -883,7 +883,7 @@ async function play(message, serverQueue) {
     const args = message.content.split(" ");
  
     const voiceChannel = message.member.voice.channel;
-    console.log(message.member.voice.channel);
+
     if(!voiceChannel) return message.reply("You must be in a voice channel!");
     const permission = voiceChannel.permissionsFor(message.client.user);
     if(!permission.has('CONNECT') || !permission.has("SPEAK")) {
@@ -933,7 +933,7 @@ function playSong(guild, song) {
         return;
     }
  
-    const dispatcher = serverQueue.connection.play(ytdl(song.url))
+    const dispatcher = serverQueue.connection.play(ytdl(song.url, {filter: "audioonly"}))
         .on('end', () => {
             serverQueue.songs.shift();
             playSong(guild, serverQueue.songs[0]);
