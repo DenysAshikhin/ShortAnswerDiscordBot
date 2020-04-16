@@ -3,8 +3,8 @@ const User = require('./User.js');
 const Bot = require('./Bot.js');
 const mongoose = require('mongoose');
 const Fuse = require('fuse.js');
-//const ytdl = require("ytdl-core");
-const ytdl = require('ytdl-core-discord');
+const ytdl = require("ytdl-core");
+//const ytdl = require('ytdl-core-discord');
 
 
 //test
@@ -44,10 +44,6 @@ const options = {
         "name"
     ]
 };
-
-
-
-
 
 const getUsers = async function () {
     try {
@@ -202,6 +198,7 @@ connectDB.once('open', async function () {
                     const serverQueue = queue.get(message.guild.id);
                     play(message, serverQueue);
                 }
+                else if(command.startsWith(""))
                 updateMessage(message);
             }
         }
@@ -931,7 +928,7 @@ async function playSong(guild, song) {
         return;
     }
  
-    const dispatcher = serverQueue.connection.play(await ytdl(song.url), {type: "opus"})
+    const dispatcher = serverQueue.connection.play(ytdl(song.url))
         .on('end', () => {
             serverQueue.songs.shift();
             playSong(guild, serverQueue.songs[0]);
@@ -943,7 +940,7 @@ async function playSong(guild, song) {
 }
 
 
-
+//
 async function graphs() {
 
     let ch = message.channel;
