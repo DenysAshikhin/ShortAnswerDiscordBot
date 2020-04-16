@@ -1,1 +1,1 @@
-web: node short-answer.js
+worker: node short-answer.js

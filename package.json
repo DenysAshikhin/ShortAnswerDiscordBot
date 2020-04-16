@@ -1,15 +1,14 @@
 {
   "name": "short_answer",
   "version": "1.0.0",
-  "description": "",
   "main": "short-answer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node short-answer.js"
-  }, 
-  "engines": { 
-    "node": "12.16.0" 
- },
+  },
+  "engines": {
+    "node": "12.16.0"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -23,5 +22,16 @@
     "nodemon": "^2.0.3",
     "ytdl-core": "^2.1.0",
     "ytdl-core-discord": "^1.2.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thelastspark/ShortAnswerDiscordBot.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/thelastspark/ShortAnswerDiscordBot/issues"
+  },
+  "homepage": "https://github.com/thelastspark/ShortAnswerDiscordBot#readme",
+  "description": ""
 }
