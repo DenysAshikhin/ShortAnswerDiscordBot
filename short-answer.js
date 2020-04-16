@@ -118,7 +118,6 @@ connectDB.once('open', async function () {
                 else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command.startsWith("delete".toUpperCase())) {
 
                     let amount = 0;
-                    console.log(params);
                     if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
                     else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
                     else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
@@ -126,7 +125,6 @@ connectDB.once('open', async function () {
                     else {
 
                         amount = Number(params[0]) + 1;
-                        console.log(params[0]);
                         await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
                             message.channel.bulkDelete(messages).catch(err => {
                                 console.log("Error deleting bulk messages: " + err);
@@ -753,7 +751,6 @@ async function createUser(member) {
     await userModel.save(function (err, user) {
 
         if (err) return console.error(err)
-        console.log('saved ' + user.displayName);
     });
 }
 
@@ -804,8 +801,6 @@ async function updateGames(message, game) {
         }
         else {
             if (gameTitle < games.length && gameTitle >= 0) {
-
-                console.log(games[gameTitle]);
 
                 if (!existingGames.includes(games[gameTitle])) {
                     finalString += games[gameTitle] + "|";
@@ -954,7 +949,6 @@ async function playSong(guild, song) {
     const serverQueue = queue.get(guild.id);
 
     if (!song) {
-        console.log("trying to disconnect");
         serverQueue.voiceChannel.leave();
         queue.delete(guild.id);
         return;
@@ -973,7 +967,6 @@ async function playSong(guild, song) {
         })
         .on('finish', () => {
 
-            console.log('end');
             serverQueue.songs.shift();
             playSong(guild, serverQueue.songs[0]);
         })
