@@ -214,15 +214,10 @@ connectDB.once('open', async function () {
         checkExistance(member);
     });
 
-    // Client.on('presenceUpdate', (oldMember, newMember) => {
+    Client.on('presenceUpdate', (oldMember, newMember) => {
 
-    //     if (newMember.activities[0] != undefined) {
-
-    //         console.log(newMember.activities[0].type);
-    //         console.log(newMember.activities[0].name);
-    //         console.log(newMember.guild.members.cache.get(newMember.userID).user);
-    //     }
-    // });
+        console.log("hopefuly this traffic keeps it awake?");
+    });
 });
 
 
