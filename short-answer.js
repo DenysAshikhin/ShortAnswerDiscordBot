@@ -188,17 +188,33 @@ connectDB.once('open', async function () {
                 else if (command.startsWith("helpGames".toUpperCase())) {
                     gameHelp(message);
                 }
-                else if(command.startsWith("helpStats".toUpperCase())){
+                else if (command.startsWith("helpStats".toUpperCase())) {
                     helpStats(message);
                 }
-                else if(command.startsWith("helpMiscellaneous".toUpperCase())){
+                else if (command.startsWith("helpMiscellaneous".toUpperCase())) {
                     helpMiscellaneous(message);
                 }
-                else if(command.startsWith("play".toUpperCase())){
+                else if (command.startsWith("play".toUpperCase())) {
                     const serverQueue = queue.get(message.guild.id);
                     play(message, serverQueue);
                 }
-                else if(command.startsWith(""))
+                else if (command.startsWith("stop".toUpperCase())) {
+                    queue.get(message.guild.id).voiceChannel.leave();
+                    queue.delete(message.guild.id);
+                }
+                else if (command.startsWith("pause".toUpperCase())) {
+                    queue.get(message.guild.id).dispatcher.pause();
+                }
+                else if (command.startsWith("resume".toUpperCase())) {
+                    queue.get(message.guild.id).dispatcher.resume();
+                }
+                else if (command.startsWith("skip".toUpperCase())) {
+                    queue.get(message.guild.id).songs.shift();
+                    playSong(message.guild, queue.get(message.guild.id).songs[0]);
+                }
+                else if(command.startsWith("helpMusic".toUpperCase())){
+                    helpMusic(message);
+                }
                 updateMessage(message);
             }
         }
@@ -362,23 +378,34 @@ async function search(message, searches) {
     });
 }
 
-async function helpMiscellaneous(message){
+async function helpMiscellaneous(message) {
 
-    let help = 
-    "Command 1: " + prefix + "delete [number]\n``` Deletes the last [number] of messages if you have the 'manage messages' permission.```\n"
-    + "Command 2: " + prefix + "populate [number]\n```Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.```\n"
+    let help =
+        "Command 1: " + prefix + "delete [number]\n``` Deletes the last [number] of messages if you have the 'manage messages' permission.```\n"
+        + "Command 2: " + prefix + "populate [number]\n```Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.```\n"
     message.channel.send(help);
 }
 
-async function helpStats(message){
+async function helpStats(message) {
 
-    let statsMessage = 
-    "Command 1: " + prefix + "myStats\n```Shows you all of your stats.```\n"
-    + "Command 2: " + prefix + "userStats @User\n```Shows you the stats of the mentioned/pinged user.```\n"
-    + "Command 3: " + prefix + "topStats\n```Shows the top stats for the called server.```\n"
-    + "Command 4: " + prefix + "allStats\n```Shows the stats for all users on the called server. NOTE: Can only be called by the members with the ADMINSTRATOR permission.```"
+    let statsMessage =
+        "Command 1: " + prefix + "myStats\n```Shows you all of your stats.```\n"
+        + "Command 2: " + prefix + "userStats @User\n```Shows you the stats of the mentioned/pinged user.```\n"
+        + "Command 3: " + prefix + "topStats\n```Shows the top stats for the called server.```\n"
+        + "Command 4: " + prefix + "allStats\n```Shows the stats for all users on the called server. NOTE: Can only be called by the members with the ADMINSTRATOR permission.```"
 
     message.channel.send(statsMessage);
+}
+
+async function helpMusic(message) {
+
+    let musicMessage =
+        "Command 1: " + prefix + "play [youtube url]\n```Plays the song in the url, if one is already playing, it will be added to the queue.```\n"
+        + "Command 2: " + prefix + "stop\n```Empties the queue and makes the bot leave the voice channel,```\n"
+        + "Command 3: " + prefix + "pause\n```Pauses the current song.```\n"
+        + "Command 4: " + prefix + "resume\n```Resumes playing the current song.```\n"
+        + "Command 5: " + prefix + "skip\n```Skips the current song.```"
+    message.channel.send(musicMessage);
 }
 
 async function generalHelp(message) {
@@ -387,7 +414,8 @@ async function generalHelp(message) {
         + "```" + "1) " + prefix + "helpGames  || For information on how signUp for games, how to ping games, search for a game and more.\n\n"
         + "2) " + prefix + "helpStats  || For information on how to view server, personal, top stats and more.\n\n"
         + "3) " + prefix + "helpMiscellaneous  || For information on random commands.\n\n"
-        +"IMPORTANT: Make sure to run " + prefix + "initiliaseUsers || otherwise the other commands will not function properly. This command adds all users from the called server to the bot's tracker.\n\n"
+        + "4) " + prefix + "helpMusic || For information on playing music.\n\n"
+        + "IMPORTANT: Make sure to run " + prefix + "initiliaseUsers || otherwise the other commands will not function properly. This command adds all users from the called server to the bot's tracker.\n\n"
         + "```";
 
     message.channel.send(helpMessage);
@@ -876,22 +904,22 @@ async function reactAnswers(message) {
 
 async function play(message, serverQueue) {
     const args = message.content.split(" ");
- 
+
     const voiceChannel = message.member.voice.channel;
 
-    if(!voiceChannel) return message.reply("You must be in a voice channel!");
+    if (!voiceChannel) return message.reply("You must be in a voice channel!");
     const permission = voiceChannel.permissionsFor(message.client.user);
-    if(!permission.has('CONNECT') || !permission.has("SPEAK")) {
+    if (!permission.has('CONNECT') || !permission.has("SPEAK")) {
         return message.channel.send("I need permission to join and speak in your voice channel!")
     }
- 
+
     const songInfo = await ytdl.getInfo(args[1]);
     const song = {
         title: songInfo.title,
         url: songInfo.video_url,
     };
- 
-    if(!serverQueue) {
+
+    if (!serverQueue) {
         const queueConstruct = {
             textChannel: message.channel,
             voiceChannel: voiceChannel,
@@ -899,12 +927,13 @@ async function play(message, serverQueue) {
             songs: [],
             volume: 5,
             playing: true,
+            dispatcher: null
         };
         queue.set(message.guild.id, queueConstruct);
- 
+
         queueConstruct.songs.push(song);
- 
-        try{
+
+        try {
             var connection = await voiceChannel.join();
             queueConstruct.connection = connection;
             playSong(message.guild, queueConstruct.songs[0]);
@@ -918,25 +947,37 @@ async function play(message, serverQueue) {
         return message.channel.send(`${song.title} has been added to the queue!`);
     }
 }
- 
+
 async function playSong(guild, song) {
     const serverQueue = queue.get(guild.id);
- 
-    if(!song) {
+
+    if (!song) {
+        console.log("trying to disconnect");
         serverQueue.voiceChannel.leave();
         queue.delete(guild.id);
         return;
     }
- 
-    const dispatcher = serverQueue.connection.play(ytdl(song.url))
+
+    const Dispatcher = await serverQueue.connection.play(ytdl(song.url,
+        {
+            filter: "audioonly",
+            highWaterMark: 1 << 25
+        }))
         .on('end', () => {
-            serverQueue.songs.shift();
-            playSong(guild, serverQueue.songs[0]);
+
         })
         .on('error', error => {
             console.log(error);
         })
-    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+        .on('finish', () => {
+
+            console.log('end');
+            serverQueue.songs.shift();
+            playSong(guild, serverQueue.songs[0]);
+        })
+
+    Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+    serverQueue.dispatcher = Dispatcher;
 }
 
 
