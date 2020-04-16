@@ -3,6 +3,7 @@ const User = require('./User.js');
 const Bot = require('./Bot.js');
 const mongoose = require('mongoose');
 const Fuse = require('fuse.js');
+const ytdl = require("ytdl-core");
 
 const fs = require('fs');
 const gameJSON = require('./gameslist.json')
@@ -22,6 +23,7 @@ mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
 
 const games = new Array();
+var queue = new Map();
 
 
 const options = {
@@ -193,6 +195,10 @@ connectDB.once('open', async function () {
                 else if(command.startsWith("helpMiscellaneous".toUpperCase())){
                     helpMiscellaneous(message);
                 }
+                else if(command.startsWith("play".toUpperCase())){
+                    const serverQueue = queue.get(message.guild.id);
+                    play(message, serverQueue);
+                }
                 updateMessage(message);
             }
         }
@@ -326,8 +332,6 @@ async function search(message, searches) {
         message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "gamesList counter");
         return;
     }
-
-    console.log("searches: " + searches);
 
     searches.forEach(query => {
 
@@ -873,6 +877,75 @@ async function reactAnswers(message) {
     await message.react("🇫");
 }
 
+
+
+async function play(message, serverQueue) {
+    const args = message.content.split(" ");
+ 
+    const voiceChannel = message.member.voice.channel;
+    console.log(message.member.voice.channel);
+    if(!voiceChannel) return message.reply("You must be in a voice channel!");
+    const permission = voiceChannel.permissionsFor(message.client.user);
+    if(!permission.has('CONNECT') || !permission.has("SPEAK")) {
+        return message.channel.send("I need permission to join and speak in your voice channel!")
+    }
+ 
+    const songInfo = await ytdl.getInfo(args[1]);
+    const song = {
+        title: songInfo.title,
+        url: songInfo.video_url,
+    };
+ 
+    if(!serverQueue) {
+        const queueConstruct = {
+            textChannel: message.channel,
+            voiceChannel: voiceChannel,
+            connection: null,
+            songs: [],
+            volume: 5,
+            playing: true,
+        };
+        queue.set(message.guild.id, queueConstruct);
+ 
+        queueConstruct.songs.push(song);
+ 
+        try{
+            var connection = await voiceChannel.join();
+            queueConstruct.connection = connection;
+            playSong(message.guild, queueConstruct.songs[0]);
+        } catch (err) {
+            console.log(err);
+            queue.delete(message.guild.id)
+            return message.channel.send("There was an error playing! " + err);
+        }
+    } else {
+        serverQueue.songs.push(song);
+        return message.channel.send(`${song.title} has been added to the queue!`);
+    }
+}
+ 
+function playSong(guild, song) {
+    const serverQueue = queue.get(guild.id);
+ 
+    if(!song) {
+        serverQueue.voiceChannel.leave();
+        queue.delete(guild.id);
+        return;
+    }
+ 
+    const dispatcher = serverQueue.connection.play(ytdl(song.url))
+        .on('end', () => {
+            serverQueue.songs.shift();
+            playSong(guild, serverQueue.songs[0]);
+        })
+        .on('error', error => {
+            console.log(error);
+        })
+    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+}
+
+
+
 async function graphs() {
 
     let ch = message.channel;
@@ -895,16 +968,19 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
-//make remove game array - it is but broken
 
-//ping by number
-//make commands not case senstive
-//seal idan easter eggs
-//if someone is playing stuff, send a suggestion to sign up for it
-//make a channel solely to explain bot usage
+
+
 //View users signed up for a game
 //add a purge my game list
-//backup DB?
-//Add exclude from pings and DM's
 //coin flipper
 //game decider
+//Add exclude from pings and DM's
+//make remove game array - it is but broken
+//backup DB?
+
+
+
+
+//seal idan easter eggs
+//ping by number - if there is enough demand for it
