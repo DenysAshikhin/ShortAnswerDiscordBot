@@ -410,7 +410,7 @@ async function helpMusic(message) {
 
 async function generalHelp(message) {
 
-    let helpMessage = "The following commands are broken down into 3 general sections: Games, Stats, Miscellaneous. Enter: \n"
+    let helpMessage = "The following commands are broken down into 4 general sections: Games, Stats, Miscellaneous, and Music. Enter: \n"
         + "```" + "1) " + prefix + "helpGames  || For information on how signUp for games, how to ping games, search for a game and more.\n\n"
         + "2) " + prefix + "helpStats  || For information on how to view server, personal, top stats and more.\n\n"
         + "3) " + prefix + "helpMiscellaneous  || For information on random commands.\n\n"
@@ -1003,10 +1003,7 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-//Add at least a skip and stop functionality for music bot
 //Add exclude from pings and DM's
-
-//Show Kieran
 
 //coin flipper
 //game decider
@@ -1023,6 +1020,6 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-
+//add streamer stats
 //seal idan easter eggs
 //ping by number - if there is enough demand for it
