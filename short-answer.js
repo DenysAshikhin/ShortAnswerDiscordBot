@@ -276,7 +276,7 @@ async function topStats(message) {
     let MIA;
     for (let i = 0; i < allUsers.length; i++) {
 
-        user = allUsers[i];
+        let user = allUsers[i];
         if (user.guilds.split("|").includes(guild.id)) {
 
             let index = user.guilds.split("|").indexOf(guild.id);
