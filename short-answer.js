@@ -787,6 +787,8 @@ async function updateGames(message, game) {
 
     game.forEach(async gameTitle => {
 
+        gameTitle = gameTitle.trim();
+
         if (isNaN(gameTitle)) {
 
             gameTitle = gameTitle.trim();
