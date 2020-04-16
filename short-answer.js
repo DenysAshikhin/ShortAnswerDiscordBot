@@ -3,7 +3,10 @@ const User = require('./User.js');
 const Bot = require('./Bot.js');
 const mongoose = require('mongoose');
 const Fuse = require('fuse.js');
-const ytdl = require("ytdl-core");
+//const ytdl = require("ytdl-core");
+const ytdl = require('ytdl-core-discord');
+
+
 //test
 const fs = require('fs');
 const gameJSON = require('./gameslist.json')
@@ -924,7 +927,7 @@ async function play(message, serverQueue) {
     }
 }
  
-function playSong(guild, song) {
+async function playSong(guild, song) {
     const serverQueue = queue.get(guild.id);
  
     if(!song) {
@@ -933,7 +936,7 @@ function playSong(guild, song) {
         return;
     }
  
-    const dispatcher = serverQueue.connection.play(ytdl(song.url, {filter: "audioonly"}))
+    const dispatcher = serverQueue.connection.play(await ytdl(song.url), {type: "opus"})
         .on('end', () => {
             serverQueue.songs.shift();
             playSong(guild, serverQueue.songs[0]);
