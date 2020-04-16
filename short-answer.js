@@ -958,9 +958,6 @@ async function graphs() {
     }
 }
 
-//create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
-
-
 async function minuteCount() {
     countTalk();
 }
