@@ -997,24 +997,24 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-
+//fix date checking as 0's don't get added necesrily
 //Add exclude from pings and DM's
-
 //coin flipper
 //game decider
-//Do the two above before kiran if possible
-
-
 //View users signed up for a game
 //add a purge my game list
-
-
 //make remove game array - it is but broken
 //backup DB?
 //Add a 'summoner' top stat - most pings
+//change prefix - store it in a guild model, or make a field for users - prob a user specific one
+//roll command - for however many sided die
+//ping-pong command
+//create a json of commands for fuzzy search of commands - lmao
+//when pinging an invalid game - suggest the first match along with the number
 
 
-
+//Twitch notification/signup when a streamer goes live
+//https://dev.twitch.tv/docs/api/reference/#get-streams
 //add streamer stats
 //seal idan easter eggs
 //ping by number - if there is enough demand for it
