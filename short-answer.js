@@ -277,17 +277,19 @@ function findFurthestDate(date1, date2) {
 
 async function topStats(message) {
     //create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
+    console.log("WTF");
     let allUsers = await getUsers();
     let guild = message.guild;
     let silentType;
     let loudMouth;
     let ghost;
     let MIA;
+    let user = null;
     for (let i = 0; i < allUsers.length; i++) {
 
-        let user = allUsers[i];
-        if (user.guilds.split("|").includes(guild.id)) {
-
+        
+        if (allUsers[i].guilds.split("|").includes(guild.id)) {
+            user = allUsers[i];
             let index = user.guilds.split("|").indexOf(guild.id);
 
             if (silentType == undefined)
