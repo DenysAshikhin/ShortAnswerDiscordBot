@@ -502,11 +502,8 @@ async function countTalk() {
 
                 channel.members.forEach(async member => {
 
-                    console.log("MEMBER: " + member);
-                    console.log("user:" + user)
-
+                    
                     let user = await findUser({ id: member.id });
-                    console.log("user:" + user)
                     let guilds = user.guilds.split("|");
                     let index = guilds.indexOf(guild.id);
 
@@ -870,6 +867,10 @@ async function checkExistance(member) {
             addGuild(member, tempUser)
             return true;
         }
+    }
+    else{
+        console.log("The user doesnt exist.");
+        createUser(member);
     }
     return false;
 }
