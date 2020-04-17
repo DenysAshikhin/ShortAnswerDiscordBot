@@ -904,8 +904,6 @@ async function reactAnswers(message) {
     await message.react("🇫");
 }
 
-
-
 async function play(message, serverQueue) {
     const args = message.content.split(" ");
 
