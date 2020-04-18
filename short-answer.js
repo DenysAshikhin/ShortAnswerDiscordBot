@@ -277,7 +277,6 @@ function findFurthestDate(date1, date2) {
 
 async function topStats(message) {
     //create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
-    console.log("WTF");
     let allUsers = await getUsers();
     let guild = message.guild;
     let silentType;
