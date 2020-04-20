@@ -405,7 +405,7 @@ async function study(message, searches) {
 
 
     let options1 = {
-        isCaseSensitive: true,
+        isCaseSensitive: false,
         findAllMatches: true,
         includeMatches: false,
         includeScore: false,
