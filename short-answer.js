@@ -10,7 +10,10 @@ const ytdl = require("ytdl-core");
 //test
 const fs = require('fs');
 const gameJSON = require('./gameslist.json')
-const studyJSON = require('./medstudy.json');
+//const studyJSON = require('./medstudy.json');
+const studyJSON = require('./ouda.json');  
+
+
 
 const prefix = "sa!";
 const uri = 'mongodb+srv://shortAnswer:shortAnswer@cluster0-x2hks.mongodb.net/test?retryWrites=true&w=majority';
@@ -430,9 +433,8 @@ async function study(message, searches) {
             //console.log(studyArray)
             let fuse = new Fuse(studyArray, options1);
 
-            let result = fuse.search(query);//
 
-            //console.log(result);
+            let result = fuse.search(query);
         
             result.forEach(overall => {
 
@@ -445,20 +447,9 @@ async function study(message, searches) {
 
                 result1.forEach(final => {
 
-                    message.channel.send(final.refIndex + ") " + final.item + "\n");
+                    message.channel.send(final.item + "\n");
                 })
-
-                // overall.item.slides.forEach(element =>{
-                //     //console.log(element);
-                //     if(element.toUpperCase().includes(query.toUpperCase())){
-                //         console.log("FOUND: " + element);
-                //         message.channel.send("FOUND: " + element);
-                //     }
-                // })
             })
-
-
-
 
             finalArray.push(finalList);
 
@@ -1096,6 +1087,7 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //fix date checking as 0's don't get added necesrily
+//or fix top by changing get date function
 //Add exclude from pings and DM's
 //coin flipper
 //game decider

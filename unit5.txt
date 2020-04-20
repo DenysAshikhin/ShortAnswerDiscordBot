@@ -1,0 +1,3146 @@
+Unit 5: Network Security Foundations
+5.1
+
+Models for Network Security
+
+5.2
+
+Information Security Principles
+
+5.2
+
+Simple Security Protocols
+
+5.3
+
+Authentication and TCP
+
+5.4
+
+Secure Socket Layer (SSL/TLS)
+
+5.5
+
+IP Security protocol (IPsec)
+
+5.6
+
+802.11 Wireless LAN Security
+Reading: Chapters 31 and 32, Textbook – Forouzan
+
+Unit 5 - 2
+
+5.1 Models for Network Security
+
+Unit 5 - 3
+
+Network Security Model 1
+Trusted
+party
+
+Trusted third party
+e.g., key distributer
+
+Information Channel
+
+Security related
+transformation
+
+Message
+
+Security related
+transformation
+
+Secure
+Message
+
+Bob
+Secure
+Message
+
+Message
+
+Alice
+
+Secret
+Information
+
+Secret
+Information
+
+Trudy
+
+Model 1: Information being transferred from one party to another over an insecure
+communications channel, in the presence of possible opponents.
+Unit 5 - 4
+
+Network Security Model 1
+Using this model requires us to:
+1. Design a suitable algorithm for the security transformation
+2. Generate the secret information (session keys) used by the algorithm
+3. Develop methods to distribute and share the secret information
+4. Specify a protocol enabling the principals to use the transformation
+and secret information for a security services
+such as authentication, confidentiality, integrity, etc.
+
+Unit 5 - 5
+
+Network Security Model 2
+
+Trudy
+• Human (e.g., hacker)
+• Software (e.g., virus, worm)
+
+Access Channel
+
+Alice
+Gatekeeper
+function
+
+• Computer resources
+(e.g., CPU, memory, I/O)
+• Data
+• Processes
+• Software
+
+Model 2: is concerned with controlled access to information or
+resources on a computer system, in the presence of possible
+opponents.
+
+Unit 5 - 6
+
+Network Security Model 2
+Using this model requires us to:
+Select appropriate gatekeeper functions to identify users
+Implement security controls to ensure only authorised users access
+designated information or resources
+
+Unit 5 - 7
+
+Protocols Design
+Protocols can be very subtle
+Innocuous change can make a significant difference in a protocol
+Security protocols are very subtle
+Several well-known security protocols have serious flaws
+Including IPSec, GSM and WEP
+And even if the protocol itself is not flawed, a particular
+implementation can be
+It is difficult to get protocols right…
+… therefore
+
+Unit 5 - 8
+
+Protocols Design
+We need more understanding of the protocols in terms of:
+what does the protocol really achieve?
+does the protocol need more assumptions than another one?
+does the protocol do anything unnecessary that could be left out
+without weakening it?
+e.g., does the protocol encrypt something that could be sent in
+clear?
+
+Let us now address the fundamental issues involved in the network
+security protocols.
+
+Unit 5 - 9
+
+5.2 Information Security Principles
+
+Unit 5 - 10
+
+The Importance of Information Protection
+Information is an important asset, isn’t it?
+The more information you have at your command, the better you can
+adapt to the world around you.
+In business, information is often one of the most important assets a
+company can possess.
+Information differentiates companies and provides leverage that helps
+one company become more successful than another.
+
+Unit 5 - 11
+
+What is Cryptography?
+It’s all about controlling
+access to information
+Access to learning information
+Access to manipulate
+information
+
+Unit 5 - 12
+
+Access to Information
+Alice, Bob and Trudy.
+Alice and Bob are
+communicating
+Alice wants Bob
+to learn a message,
+“without Trudy learning it”
+
+Alice
+
+Alice can send out
+a bit string (the message) on the channel.
+Bob and Trudy both get it
+
+Bob
+
+Trudy
+
+Unit 5 - 13
+
+Controlling Access to Information
+Three algorithms
+Key Generation: What Alice and Bob
+do for creating the shared
+secret key (a bit string)
+Encryption: What Alice does with
+the message and the key to
+obtain a “ciphertext”
+
+Alice
+key
+
+Decryption: What Bob does with
+the ciphertext and the key to get
+the message (the “plaintext”)
+out of it
+
+Bob
+key
+
+Trudy
+
+All of these are computations
+What are the attributes of these computations? (later..)
+
+Unit 5 - 14
+
+Crypto – terms and definitions
+Cryptology ⎯ The art and science of making and breaking “secret
+codes”
+Cryptography ⎯ making “secret codes”
+Cryptanalysis ⎯ breaking “secret codes”
+Crypto ⎯ all of the above (and more), the precise meaning should
+be clear from the context.
+
+Unit 5 - 15
+
+How to Speak Crypto
+A cipher or cryptosystem is used to encrypt the plaintext
+The result of encryption is ciphertext
+We decrypt ciphertext to recover plaintext
+
+A key is used to configure a cryptosystem
+A symmetric key cryptosystem uses the same key to encrypt as to
+decrypt
+
+A public key cryptosystem (AKA asymmetric key cryptosystem) uses
+a public key to encrypt and a private key to decrypt (sign)
+
+Unit 5 - 16
+
+General idea of a symmetric-key cipher
+
+Alice
+
+Bob
+
+Unit 5 - 17
+
+General idea of public-key cryptosystem
+
+Bob
+
+Alice
+
+Unit 5 - 18
+
+Digital signature process
+
+Bob
+
+Alice
+
+(M, S)
+
+Unit 5 - 19
+
+Feasible Computation
+In analyzing complexity of algorithms: we rate the computational
+complexity grows with input size
+e.g. Can do sorting in O(n log n)
+
+Only the rough rate considered.
+The exact time depends on the technology
+
+“Polynomial time” (O(n), O(n2), O(n3), ...) considered feasible
+
+Unit 5 - 20
+
+Infeasible Computation
+“Super-Polynomial time” considered infeasible
+For example: O(2n), O(2√n)
+i.e., as n grows, quickly becomes
+“infeasibly large”
+
+Can we make breaking
+security infeasible for Trudy?
+What is n (that can grow)?
+Message size?
+(We need security even
+if sending only one bit!)
+
+Unit 5 - 21
+
+Crypto
+Basic assumption
+The system is completely known to the attacker
+Only the key is secret
+Also known as Kerckhoffs’ Principle
+Crypto algorithms are not secret
+Why do we make this assumption?
+Experience has shown that secret algorithms are weak when
+exposed
+Secret algorithms never remain secret
+Better to find weaknesses before hand
+
+Unit 5 - 22
+
+Symmetric Key Crypto Notations
+P = plaintext block
+C = ciphertext block
+Encrypt P with key K to get ciphertext C
+
+C = E(P , K)
+Decrypt C with key K to get plaintext P
+
+P = D(C, K)
+Note that
+
+P = D(E(P , K), K) and C = E (D(C, K), K)
+
+Unit 5 - 23
+
+Public Key Cypto Notations
+Sign message M with Alice’s private key:
+[M]Alice
+Encrypt message M with Alice’s public key:
+{M}Alice
+Then
+{[M]Alice}Alice = M
+
+[{M}Alice]Alice = M
+
+Unit 5 - 24
+
+5.2 Simple Security Protocols
+
+Unit 5 - 25
+
+Secure Entry to NSA
+Employees are given a badge that they must wear at all times
+when they are in the secure facility.
+To enter the building:
+
+1.
+
+Insert badge into reader
+
+2.
+
+Enter PIN
+
+3.
+
+Correct PIN?
+Yes? Enter
+No? Get shot by security guard
+
+Unit 5 - 26
+
+ATM Machine Protocol
+When you withdraw money from an ATM machine, the protocol is
+virtually identical to the secure entry protocol of the NSA
+
+1.
+
+Insert ATM card
+
+2.
+
+Enter PIN
+
+3.
+
+Correct PIN?
+Yes? Conduct your transaction(s)
+No? Machine eats your card
+
+Unit 5 - 27
+
+Identify Friend or Foe (IFF)
+The military has a need for many specialized security protocols. One
+such class of protocols is used to identify friend or foe, or IFF.
+Example:
+Consider the protocol that was used by the South African Air
+Force, or SAAF, when fighting in Angola.
+SAAF were based in Namibia, and they were fighting soldiers
+stationed in Angola, who were flying Soviet MiG aircraft.
+
+Russian
+MIG
+
+Angola
+Unit 5 - 28
+
+Identify Friend or Foe (IFF)
+1. When the SAAF radar detected an aircraft approaching, a random
+number, or challenge, N was sent to the aircraft.
+2. All SAAF aircraft knew a key K that they used to encrypt the
+challenge, E(N,K), which was then sent back to the radar station.
+
+2. E(N,K)
+
+SAAF
+Fighter
+1. N
+
+Namibia
+Unit 5 - 29
+
+MIG in the Middle
+3. N
+SAAF
+fighter
+
+4. E(N,K)
+
+Angola
+
+2. N
+5. E(N,K)
+Russian
+MiG
+
+6. E(N,K)
+1. N
+
+Namibia
+
+Unit 5 - 30
+
+Authentication Protocols
+
+Unit 5 - 31
+
+Authentication
+Alice must prove her identity to Bob
+Alice and Bob can be humans or computers
+May also require Bob to prove he’s Bob (mutual authentication)
+May also need to establish a session key
+May have other requirements, such as
+
+Use only public keys
+Use only symmetric keys
+Use only a hash function
+
+Unit 5 - 32
+
+Authentication
+Authentication on a stand-alone computer is relatively simple
+Main concern is an attack on authentication software
+
+Authentication over a network is much more complex
+Attacker can passively observe messages
+Attacker can replay messages
+
+Active attacks may be possible (insert, delete, change messages)
+
+Unit 5 - 33
+
+Simple Authentication
+“I’m Alice”
+Prove it
+
+My password is “frank”
+Alice
+
+Bob
+
+Simple and may be OK for standalone system
+But inefficient and insecure for networked system
+Subject to a replay attack (next 2 slides)
+Bob must know Alice’s password
+
+Unit 5 - 34
+
+Authentication Attack
+“I’m Alice”
+Prove it
+
+My password is “frank”
+Bob
+
+Alice
+
+Trudy
+
+Unit 5 - 35
+
+Authentication Attack
+“I’m Alice”
+Prove it
+
+My password is “frank”
+Trudy
+
+Bob
+
+This is a replay attack
+How can we prevent a replay?
+
+Unit 5 - 36
+
+Simple Authentication
+
+I’m Alice, My password is “frank”
+
+Alice
+
+Bob
+
+More efficient…
+But same problem as previous version
+
+Unit 5 - 37
+
+Better Authentication
+“I’m Alice”
+Prove it
+
+h(Alice’s password)
+Alice
+
+Bob
+
+Better since it hides Alice’s password
+From both Bob and attackers
+But still subject to replay
+
+Unit 5 - 38
+
+Challenge-Response
+To prevent replay, challenge-response can be used
+Suppose Bob wants to authenticate Alice
+Challenge sent from Bob to Alice
+
+Only Alice can provide the correct response
+Challenge chosen so that replay is not possible
+How to accomplish this?
+
+Password is something only Alice should know…
+For freshness, a “number used once” (or nonce)
+
+Unit 5 - 39
+
+Challenge-Response
+“I’m Alice”
+Nonce
+
+h(Alice’s password, Nonce)
+Alice
+
+Bob
+
+Nonce is the challenge
+
+The hash is the response
+Nonce prevents replay, insures freshness
+Password is something Alice knows
+
+Note that Bob must know Alice’s password
+Unit 5 - 40
+
+Challenge-Response
+“I’m Alice”
+Nonce
+
+Alice
+
+Something that could only be
+from Alice (and Bob can verify)
+
+Bob
+
+What can we use to achieve this?
+Hashed pwd works, crypto might be better
+
+Unit 5 - 41
+
+Challenge-Response
+“I’m Alice”
+Nonce
+
+Alice
+
+Something that could only be
+from Alice (and Bob can verify)
+
+Bob
+
+Unit 5 - 42
+
+Symmetric Key Notation
+Encrypt plaintext P with key K
+C = E(P,K)
+Decrypt ciphertext C with key K
+P = D(C,K)
+Here, we are concerned with attacks on protocols, not directly on
+the crypto
+We assume that crypto algorithm is secure
+
+Unit 5 - 43
+
+Symmetric Key Authentication
+Alice and Bob share symmetric key KAB
+Key KAB known only to Alice and Bob
+Authenticate by proving knowledge of shared symmetric key
+
+How to accomplish this?
+Must not reveal key
+Must not allow replay attack
+
+Unit 5 - 44
+
+Challenge-Response
+
+“I’m Alice”
+
+Nonce
+Alice
+
+Something that could only be
+
+from Alice (and Bob can verify)
+
+Bob
+
+Let us consider Symmetric Key
+
+Unit 5 - 45
+
+Authentication with Symmetric Key
+
+“I’m Alice”
+R
+Alice, KAB
+
+E(R,KAB)
+
+Bob, KAB
+
+Secure method for Bob to authenticate Alice
+Alice does not authenticate Bob
+Can we achieve mutual authentication?
+
+Unit 5 - 46
+
+Mutual Authentication?
+
+“I’m Alice”, R
+E(R,KAB)
+Alice
+
+E(R,KAB)
+
+Bob
+
+What’s wrong with this protocol?
+“Alice” could be Trudy (or anybody else)!
+
+Unit 5 - 47
+
+Mutual Authentication
+Since we have a secure one-way authentication protocol…
+The obvious thing to do is to use the protocol twice
+Once for Bob to authenticate Alice
+
+Once for Alice to authenticate Bob
+This has to work…
+
+Unit 5 - 48
+
+Mutual Authentication
+
+“I’m Alice”, RA
+RB, E(RA,KAB)
+Alice
+
+E(RB,KAB)
+
+Bob
+
+This provides mutual authentication…
+…or does it? Do you still remember the MiG-in-the-Middle attack
+
+Unit 5 - 49
+
+Mutual Authentication Attack
+1. “I’m Alice”, RA
+2. RB, E(RA,KAB)
+
+Bob
+
+Trudy
+
+3. “I’m Alice”, RB
+4. RC, E(RB,KAB)
+
+Trudy
+
+Bob
+Unit 5 - 50
+
+Mutual Authentication
+Our one-way authentication protocol not secure for mutual
+authentication
+Protocols are subtle!
+The “obvious” thing may not be secure
+Also, if assumptions or environment changes, protocol may
+not work
+
+This is a common source of security failure
+For example, Internet protocols
+
+Unit 5 - 51
+
+Symmetric Key Mutual Authentication
+“I’m Alice”, RA
+RB, E(“Bob”,RA,KAB)
+E(“Alice”,RB,KAB)
+Alice
+
+Bob
+
+Do these “insignificant” changes help?
+Yes!
+
+Unit 5 - 52
+
+Challenge-Response
+
+“I’m Alice”
+
+Nonce
+Alice
+
+Something that could only be
+
+from Alice (and Bob can verify)
+
+Bob
+
+Let us consider Public Key
+
+Unit 5 - 53
+
+Public Key Notation
+Encrypt M with Alice’s public key: {M}Alice
+Sign M with Alice’s private key: [M]Alice
+Then
+[{M}Alice ]Alice = M
+{[M]Alice }Alice = M
+
+Anybody can do public key operations
+
+Only Alice can use her private key (sign)
+
+Unit 5 - 54
+
+Public Key Authentication
+“I’m Alice”
+{R}Alice
+R
+Alice
+
+Bob
+
+Is this secure?
+Trudy can get Alice to decrypt anything!
+Must have two key pairs
+
+Unit 5 - 55
+
+Public Key Authentication
+“I’m Alice”
+R
+
+[R]Alice
+Alice
+
+Bob
+
+Is this secure?
+Trudy can get Alice to sign anything!
+Must have two key pairs
+
+Unit 5 - 56
+
+Note on Public Keys
+Never use the same key pair for encryption and signing
+One key pair for encryption/decryption
+A different key pair for signing/verifying signatures
+
+Unit 5 - 57
+
+Session Key
+In addition to authentication, a session key is often required
+One symmetric key is used per session
+Can we authenticate and establish a shared symmetric key?
+
+In some cases, we may also require perfect forward secrecy
+(PFS)
+Discussed later…
+
+Unit 5 - 58
+
+Authentication & Session Key
+Encrypt only
+
+“I’m Alice”
+{R,K}Alice
+{R +1,K}Bob
+Alice
+
+Bob
+
+Is this secure?
+OK for key, but no mutual authentication
+
+Unit 5 - 59
+
+Authentication & Session Key
+Sign only
+
+“I’m Alice” , R
+[R,K]Bob
+Alice
+
+[R +1,K]Alice
+
+Bob
+
+Is this secure?
+Mutual authentication but key is not secret!
+
+Unit 5 - 60
+
+Authentication & Session Key
+Sign and Encrypt
+
+“I’m Alice” , R
+{[R,K]Bob}Alice
+{[R +1,K]Alice}Bob
+Alice
+
+Bob
+
+Is this secure?
+Seems to be OK
+Mutual authentication and session key!
+
+Unit 5 - 61
+
+Authentication & Session Key
+Encrypt and Sign
+
+“I’m Alice” , R
+[{R,K}Alice]Bob
+[{R +1,K}Bob]Alice
+Alice
+
+Bob
+
+Is this secure?
+Seems to be OK
+Anyone can see {R,K}Alice and {R +1,K}Bob
+
+Unit 5 - 62
+
+Perfect Forward Secrecy
+The concern…
+Alice encrypts message with shared key KAB and sends
+ciphertext to Bob
+Trudy records ciphertext and later attacks Alice’s (or Bob’s)
+computer to find KAB
+Then Trudy decrypts recorded messages
+Perfect forward secrecy (PFS): Trudy cannot later decrypt recorded
+ciphertext
+Even if Trudy gets key KAB or other secret(s)
+Is PFS possible?
+
+Unit 5 - 63
+
+Perfect Forward Secrecy
+Suppose Alice and Bob share key KAB
+For perfect forward secrecy, Alice and Bob cannot use KAB to
+encrypt
+Instead they must use a session key KS and forget it after it’s used
+Problem: How can Alice and Bob agree on session key KS and
+ensure PFS?
+
+Unit 5 - 64
+
+Diffie-Hellman
+Invented by Whitfield Diffie and Martin Hellman
+A “key exchange” algorithm
+Used to establish a shared symmetric key
+Not for encrypting or signing
+Security rests on difficulty of discrete logarithm problem:
+given g, p, and (gk mod p)
+find k
+
+The discrete log problem is very difficult to solve
+
+Unit 5 - 65
+
+Diffie-Hellman
+Let p be prime, let g be a generator
+
+For any x  {1,2,…,p-1} there is n such that
+
+x = gn mod p
+The process: (g and p are public)
+
+Alice selects secret value a
+Bob selects secret value b
+Alice sends ga mod p to Bob
+Bob sends gb mod p to Alice
+Both compute shared secret gab mod p
+Shared secret can be used as symmetric key
+
+Unit 5 - 66
+
+Diffie-Hellman - key exchange
+Public: g and p
+Secret: Alice’s exponent a, Bob’s exponent b
+
+ga mod p
+gb mod p
+Alice, a
+
+Bob, b
+
+(ga)b = gab mod p
+Alice computes (gb) a = gba = gab mod p
+Both could use K = gab mod p as symmetric key
+Bob computes
+
+Unit 5 - 67
+
+Diffie-Hellman
+Suppose that Bob and Alice use gab mod p as a symmetric key
+Trudy can see ga mod p and gb mod p
+Note ga gb mod p = ga+b mod p  gab mod p
+
+If Trudy can find a or b, the system is broken
+If Trudy can solve discrete log problem, then she can find a or b
+
+Unit 5 - 68
+
+Diffie-Hellman - Example 1
+If Alice and Bob agree on the values:
+p = 113 g = 23
+then Alice selects the secret value 4 and sends Bob the value
+234 mod 113 = 53
+
+While Bob selects the secret value 11 and sends Alice the value
+2311 mod 113 = 27
+They both calculate the common key:
+
+Bob
+5311 mod 113 = 2
+
+Alice
+274 mod 113 = 2
+
+Unit 5 - 69
+
+Example 2
+If Alice and Bob agree on the values:
+p = 76825670157115949022871
+g = 129633
+then Alice selects the secret value 1567
+and Bob selects his secret value 3001
+So Alice sends 3748860625118221776574 to Bob and
+Bob sends 34126923917580261813405 to Alice.
+
+They both calculate the common key:
+32347879715377627749156
+
+Unit 5 - 70
+
+Diffie-Hellman - MiM attack
+Subject to man-in-the-middle (MiM) attack
+
+Alice, a
+
+ga mod p
+
+gt mod p
+
+gt mod p
+
+gb mod p
+Trudy, t
+
+Bob, b
+
+Trudy shares secret gat mod p with Alice
+Trudy shares secret gbt mod p with Bob
+
+Alice and Bob don’t know Trudy exists!
+Unit 5 - 71
+
+Diffie-Hellman
+How to prevent MiM attack?
+Encrypt DH exchange with symmetric key
+Encrypt DH exchange with public key
+Sign DH values with private key
+
+You MUST be aware of MiM attack on Diffie-Hellman
+
+Unit 5 - 72
+
+Perfect Forward Secrecy
+Can use Diffie-Hellman for PFS
+Recall Diffie-Hellman: public g and p
+
+ga mod p
+gb mod p
+
+Alice, a
+
+Bob, b
+
+But Diffie-Hellman is subject to MiM
+How to get PFS and prevent MiM?
+
+Unit 5 - 73
+
+Perfect Forward Secrecy
+E(ga mod p, KAB)
+E(gb mod p, KAB)
+Alice, a
+
+Bob, b
+
+Session key KS = gab mod p
+Alice forgets a, Bob forgets b
+Ephemeral Diffie-Hellman
+Not even Alice and Bob can later recover KS
+Other ways to do PFS?
+
+Unit 5 - 74
+
+Mutual Authentication, Session Key
+and PFS
+“I’m Alice”, RA
+RB, [{RA, gb mod p}Alice]Bob
+[{RB, ga mod p}Bob]Alice
+Alice
+
+Bob
+
+Session key is K = gab mod p
+Alice forgets a and Bob forgets b
+If Trudy later gets Bob’s and Alice’s secrets, she cannot
+recover session key K
+
+Unit 5 - 75
+
+Timestamps
+A timestamp T is the current time
+Timestamps used in many security protocols (Kerberos, for
+example)
+Timestamps reduce number of messages
+Like a nonce that both sides know in advance
+Clocks never exactly the same, so must allow for clock skew ⎯ risk
+of replay
+
+How much clock skew is enough?
+
+Unit 5 - 76
+
+Public Key Authentication with Timestamp T
+Sign and Encrypt
+
+“I’m Alice”, {[T,K]Alice}Bob
+{[T +1,K]Bob}Alice
+Alice
+
+Bob
+
+Is this secure?
+Seems to be OK
+
+Unit 5 - 77
+
+Public Key Authentication with Timestamp T
+Encrypt and Sign
+
+“I’m Alice”, [{T,K}Bob]Alice
+[{T +1,K}Alice]Bob
+
+Alice
+
+Bob
+
+Is this secure?
+Trudy can use Alice’s public key to find
+{T,K}Bob so what…
+
+Unit 5 - 78
+
+Public Key Authentication with Timestamp T
+Encrypt and Sign
+
+“I’m Trudy”, [{T,K}Bob]Trudy
+[{T +1,K}Trudy]Bob
+Trudy
+
+Bob
+
+Trudy obtains Alice-Bob session key K
+Note: Trudy must act within clock skew
+
+Unit 5 - 79
+
+Public Key Authentication
+Sign and encrypt with nonce…
+Secure
+
+Encrypt and sign with nonce…
+Secure
+
+Sign and encrypt with timestamp…
+Secure
+
+Encrypt and sign with timestamp…
+Insecure
+
+Protocols can be subtle!
+
+Unit 5 - 80
+
+Public Key Authentication with Timestamp T
+(Secure) Encrypt and Sign
+
+“I’m Alice”, [{T,K}Bob]Alice
+[{T +1}Alice]Bob
+Alice
+
+Bob
+
+Is this “encrypt and sign” secure?
+Yes, seems to be
+Does “sign and encrypt” also work here?
+
+Unit 5 - 81
+
+Mutual Authentication, with Public Key
+Sign and encrypt with nonce…
+Secure
+
+Encrypt and sign with nonce…
+Secure
+
+Sign and encrypt with timestamp…
+Secure
+
+Encrypt and sign with timestamp…
+Secure
+
+Unit 5 - 82
+
+5.3 Authentication and TCP
+
+Unit 5 - 83
+
+TCP-based Authentication
+TCP not intended for use as an authentication protocol
+
+But IP address in TCP connection often used for authentication
+One mode of IPSec uses IP address for authentication
+This can cause problems
+
+Unit 5 - 84
+
+TCP 3-way Handshake
+SYN, SEQ a
+SYN-ACK a+1, SEQ b
+
+ACK b+1, data
+
+Alice
+
+Bob
+
+Recall the TCP three way handshake
+Initial SEQ numbers, SEQ a and SEQ b
+Supposed to be random
+
+If not…
+
+Unit 5 - 85
+
+TCP Authentication Attack
+
+Bob
+
+Trudy
+
+5.
+5.
+
+5.
+5.
+
+Alice
+
+Unit 5 - 86
+
+TCP Authentication Attack
+Trudy cannot see what Bob sends, but she can send packets to Bob,
+while posing as Alice
+Trudy must prevent Alice from receiving Bob’s packets (or else
+connection will terminate)
+If password (or other authentication) required, this attack fails
+If TCP connection is relied on for authentication, then attack can
+succeed
+Bad idea to rely on TCP for authentication
+
+Unit 5 - 87
+
+Best Authentication Protocol?
+What is best, depends on many factors…
+The sensitivity of the application
+The delay that is tolerable
+
+The cost (computation) that is tolerable
+What crypto is supported
+Public key, symmetric key, hash functions
+
+Is mutual authentication required?
+Is a session key required?
+Is PFS a concern?, etc.
+Unit 5 - 88
+
+5.4 Secure Socket Layer (SSL/TLS)
+
+Unit 5 - 89
+
+Socket layer
+“Socket layer” lives
+between application and
+transport layers
+SSL usually lies between
+HTTP and TCP
+
+Socket
+“layer”
+
+application
+
+User
+
+transport
+
+OS
+
+network
+link
+
+NIC
+
+physical
+
+Unit 5 - 90
+
+What is SSL?
+SSL (and IEEE standard known as TLS) is the protocol used for most
+secure transactions over the Internet
+For example, if you want to buy a book at amazon.com…
+You want to be sure you are dealing with Amazon
+(authentication)
+Your credit card information must be protected in transit
+(confidentiality and/or integrity)
+
+As long as you have money, Amazon doesn’t care who you are
+(authentication need not be mutual)
+
+Unit 5 - 91
+
+Simple SSL-like Protocol
+I’d like to talk to you securely
+Here’s my certificate
+
+{KAB}Bob
+Alice
+
+protected HTTP
+
+Bob
+
+Is Alice sure she’s talking to Bob?
+Is Bob sure he’s talking to Alice?
+
+Unit 5 - 92
+
+Simplified SSL Protocol
+Can we talk?, cipher list, RA
+certificate, cipher, RB
+{S}Bob, E(h(msgs,CLNT,K),K)
+Alice
+
+h(msgs,SRVR,K)
+Data protected with key K
+
+Bob
+
+S is pre-master secret
+K = h(S,RA,RB)
+msgs = all previous messages
+CLNT and SRVR are string constants
+
+Unit 5 - 93
+
+Simplified SSL Protocol
+1.
+
+Alice informs Bob that she would like to establish an SSL connection, and
+she passes a list of ciphers that she supports, along with a nonce RA.
+
+2.
+
+Bob responds with his certificate, he selects one of the ciphers from the
+ciphers list that Alice sent in message one, and he sends a nonce RB.
+
+3.
+
+Alice sends the S that she generated, along with a hash that is encrypted
+with the key K. In this hash, “msgs” includes all previous messages and
+CLNT is a literal string. The hash is used to verify that the previous
+messages have been received correctly
+
+4.
+
+Bob responds with a similar hash. Alice can thereby verify that Bob
+received the messages correctly, and, more importantly, she can
+authenticate Bob, since only Bob could have decrypted S, which is
+required to generate the key K.
+
+Unit 5 - 94
+
+SSL Keys
+6 “keys” derived from K = hash(S,RA,RB)
+2 encryption keys: 1 for sending and 1 for receiving data
+2 integrity keys: 1 for sending and 1 for receiving data
+2 IVs: 1 for sending and 1 for receiving data
+
+Q: Why different keys in each direction?
+
+A: may help to prevent certain types of replay attacks.
+
+Unit 5 - 95
+
+SSL Authentication
+Alice authenticates Bob, not vice-versa
+How does client authenticate server?
+Why does server not authenticate client?
+
+Mutual authentication is possible: Bob sends certificate request in
+message 2
+This requires client to have certificate
+
+If server wants to authenticate client, server could instead
+require (encrypted) password
+
+Unit 5 - 96
+
+Simplified SSL Protocol
+
+Can we talk?, cipher list, RA
+certificate, cipher, RB
+{S}Bob, E(h(msgs,CLNT,K),K)
+h(msgs,SRVR,K)
+Alice
+client
+
+Data protected with key K
+
+Bob
+server
+
+Unit 5 - 97
+
+SSL MiM Attack
+
+Alice
+
+RA
+certificateT, RB
+{S1}Trudy,E(X1,K1)
+h(Y1,K1)
+E(data,K1)
+
+Trudy
+
+RA
+certificateB, RB
+{S2}Bob,E(X2,K2)
+h(Y2,K2)
+E(data,K2)
+
+Bob
+
+Q: What prevents this MiM attack?
+A: Bob’s certificate must be signed by a certificate authority
+(such as Verisign)
+What does Web browser do if signature not valid?
+What does user do if signature is not valid?
+
+Unit 5 - 98
+
+SSL Sessions vs Connections
+SSL session is established as shown on previous slides
+SSL designed for use with HTTP 1.0
+HTTP 1.0 usually opens multiple simultaneous (parallel) connections
+SSL session establishment is costly
+Due to public key operations
+SSL has an efficient protocol for opening new connections given an
+existing session
+
+Unit 5 - 99
+
+SSL Connection
+session-ID, cipher list, RA
+
+session-ID, cipher, RB,
+h(msgs,SRVR,K)
+h(msgs,CLNT,K)
+Alice
+
+Protected data
+
+Bob
+
+Assuming SSL session exists
+So S is already known to Alice and Bob
+Both sides must remember session-ID
+Again, K = h(S,RA,RB)
+
+No public key operations! (relies on known S)
+Unit 5 - 100
+
+SSL vs IPSec
+IPSec ⎯ will be given in next slides
+Lives at the network layer (part of the OS)
+Has encryption, integrity, authentication, etc.
+Is overly complex (including serious flaws)
+
+SSL (and IEEE standard known as TLS)
+
+Lives at socket layer (part of user space)
+Has encryption, integrity, authentication, etc.
+Has a simpler specification
+
+Unit 5 - 101
+
+SSL vs IPSec
+IPSec implementation
+Requires changes to OS, but no changes to applications
+SSL implementation
+Requires changes to applications, but no changes to OS
+
+SSL built into Web application early on (Netscape)
+IPSec used in VPN “virtual private network” applications (secure tunnel)
+Reluctance to put more research and build more applications for SSL
+
+Reluctance to use IPSec due to complexity and interoperability issues
+Result? Internet less secure than it should be!
+
+Unit 5 - 102
+
+5.5 IP Security protocol (IPsec)
+
+Unit 5 - 103
+
+IPSec and SSL
+IPSec lives at the
+network layer
+IPSec is transparent
+to applications
+
+SSL
+
+IPSec
+
+application
+
+User
+
+transport
+
+OS
+
+network
+link
+
+NIC
+
+physical
+
+Unit 5 - 104
+
+IPSec and Complexity
+IPSec is a complex protocol
+Over-engineered
+Lots of generally useless extra features
+Flawed
+
+Some serious security flaws
+Interoperability is serious challenge
+Defeats the purpose of having a standard!
+
+Complex
+Did I mention, it’s complex?
+
+Unit 5 - 105
+
+IKE and ESP/AH
+Two parts to IPSec
+IKE: Internet Key Exchange
+Mutual authentication
+Establish shared symmetric key
+Two “phases” ⎯ like SSL session/connection
+ESP/AH
+
+ESP: Encapsulating Security Payload ⎯ for encryption and/or
+integrity of IP packets
+AH: Authentication Header ⎯ integrity only
+
+Unit 5 - 106
+
+IKE
+
+Unit 5 - 107
+
+IKE
+IKE has 2 phases
+Phase 1 ⎯ IKE security association (SA)
+Phase 2 ⎯ IPSec security association
+
+Phase 1 is comparable to SSL session
+Phase 2 is comparable to SSL connection
+
+Not an obvious need for two phases in IKE
+If multiple Phase 2’s do not occur, then it is more expensive to have
+two phases!
+
+Unit 5 - 108
+
+IKE Phase 1
+Four different “key” options
+Public key encryption (original version)
+Public key encryption (improved version)
+Public key signature
+Symmetric key
+For each of these, two different “modes”
+Main mode
+
+Aggressive mode
+There are 8 versions of IKE Phase 1!
+Evidence that IPSec is over-engineered?
+
+Unit 5 - 109
+
+IKE Phase 1
+We’ll discuss 6 of 8 phase 1 variants
+Public key signatures (main and aggressive modes)
+Symmetric key (main and aggressive modes)
+Public key encryption (main and aggressive)
+Why public key encryption and public key signatures?
+Always know your own private key
+
+May not (initially) know other side’s public key
+
+Unit 5 - 110
+
+IKE Phase 1
+Uses ephemeral Diffie-Hellman to establish session key
+Achieves perfect forward secrecy (PFS)
+Let a be Alice’s Diffie-Hellman exponent
+Let b be Bob’s Diffie-Hellman exponent
+Let g be generator and p prime
+Recall p and g are public
+
+Unit 5 - 111
+
+IKE Phase 1: Digital Signature (Main Mode)
+IC, CP
+IC,RC, CS
+IC,RC, ga mod p, RA
+IC,RC, gb mod p, RB
+Alice
+
+IC,RC, E(“Alice”, proofA, K)
+IC,RC, E(“Bob”, proofB, K)
+
+Bob
+
+CP = crypto proposed, CS = crypto selected
+IC = initiator “cookie”, RC = responder “cookie”
+K = h(IC,RC,gab mod p,RA,RB)
+SKEYID = h(RA, RB, gab mod p)
+proofA = [h(SKEYID,ga mod p, gb mod p,IC,RC,CP,“Alice”)]Alice
+
+Unit 5 - 112
+
+IKE Phase 1: Digital Signature (Main
+Mode)
+In the first message Alice provides information on the ciphers that she
+supports along with a “cookie” .
+In message two, Bob selects from Alice’s crypto proposal and sends the
+cookies.
+The third message includes a nonce and Alice’s Diffie-Hellman value.
+
+Bob responds similarly in message four, providing a nonce and his DiffieHellman value.
+In the final two messages, Alice and Bob authenticate each other using
+digital signatures.
+
+A passive attacker cannot recognize Alice or Bob’s identity, so this protocol
+provides anonymity.
+In the aggressive mode version of digital signatures, there is no attempt to
+hide the identities of Alice or Bob.
+
+Unit 5 - 113
+
+IKE Phase 1: Public Key Signature (Aggressive Mode)
+
+IC, “Alice”, ga mod p, RA, CP
+IC,RC, “Bob”, RB,
+gb mod p, CS, proofB
+
+Alice
+
+IC,RC, proofA
+
+Bob
+
+Main difference from main mode
+Not trying to protect identities
+Cannot negotiate g or p
+
+Unit 5 - 114
+
+Main vs Aggressive Modes
+For public key signature authentication
+Passive attacker knows identities of Alice and Bob in
+aggressive mode
+
+Active attacker can determine Alice’s and Bob’s identity in
+main mode
+
+Unit 5 - 115
+
+IC, CP
+IC,RC, CS
+IC,RC, ga mod p, RA
+IC,RC, gb mod p, RB
+Alice
+
+IC,RC, E(“Alice”, proofA, K)
+IC,RC, E(“Bob”, proofB, K)
+
+Bob
+
+CP = crypto proposed, CS = crypto selected
+IC = initiator “cookie”, RC = responder “cookie”
+K = h(IC,RC,gab mod p,RA,RB)
+SKEYID = h(RA, RB, gab mod p)
+proofA = [h(SKEYID,ga,gb,IC,RC,CP,“Alice”)]Alice
+Unit 5 - 116
+
+IKE Phase 1: Symmetric Key (Main Mode)
+IC, CP
+IC,RC, CS
+IC,RC, ga mod p, RA
+
+Alice
+
+IC,RC, gb mod p, RB
+IC,RC, E(“Alice”, proofA, K)
+IC,RC, E(“Bob”, proofB, K)
+
+Bob
+
+Same as signature mode except
+KAB = symmetric key shared in advance
+K = h(IC,RC,gab mod p,RA,RB,KAB)
+SKEYID = h(K, gab mod p)
+proofA = h(SKEYID ,ga mod p ,gb mod p,IC,RC,CP,“Alice”)
+Unit 5 - 117
+
+Problems with Symmetric Key (Main Mode)
+Here is the Catch!
+Alice sends her ID in message 5
+Alice’s ID encrypted with K
+
+To find K Bob must know KAB
+To get KAB Bob must know he’s talking to Alice!
+Result: Alice’s ID must be IP address!
+
+Useless mode for the “road warrior”
+Why go to all of the trouble of trying to hide identities in 6
+message protocol?
+
+Unit 5 - 118
+
+IKE Phase 1: Symmetric Key (Aggressive Mode)
+IC, “Alice”, ga mod p, RA, CP
+IC,RC, “Bob”, RB,
+gb mod p, CS, proofB
+Alice
+
+IC,RC, proofA
+
+Bob
+
+Same format as digital signature aggressive mode
+Not trying to hide identities…
+As a result, does not have problems of main mode
+But does not (pretend to) hide identities
+
+Unit 5 - 119
+
+IKE Phase 1: Public Key Encryption (Main Mode)
+IC, CP
+IC,RC, CS
+IC,RC, ga mod p, {RA}Bob, {“Alice”}Bob
+IC,RC, gb mod p, {RB}Alice, {“Bob”}Alice
+
+Alice
+
+IC,RC, E(proofA, K)
+IC,RC, E(proofB, K)
+
+Bob
+
+CP = crypto proposed, CS = crypto selected
+IC = initiator “cookie”, RC = responder “cookie”
+K = h(IC,RC,gab mod p,RA,RB)
+SKEYID = h(RA, RB, gab mod p)
+proofA = h(SKEYID,ga,gb,IC,RC,CP,“Alice”)
+
+Unit 5 - 120
+
+IKE Phase 1: Public Key Encryption
+(Aggressive Mode)
+IC, CP, ga mod p,
+{“Alice”}Bob, {RA}Bob
+IC,RC, CS, gb mod p,
+{“Bob”}Alice, {RB}Alice, proofB
+Alice
+
+IC,RC, proofA
+
+Bob
+
+K, proofA, proofB computed as in main mode
+Note that identities are hidden
+The only aggressive mode to hide identities
+Then why have main mode?
+Unit 5 - 121
+
+Public Key Encryption Issue?
+Public key encryption, aggressive mode
+Suppose Trudy generates
+Exponents a and b
+Nonces RA and RB
+Trudy can compute “valid” keys and proofs: gab mod p, K,
+SKEYID, proofA and proofB
+Also true of main mode
+
+Unit 5 - 122
+
+Public Key Encryption Issue?
+IC, CP, ga mod p,
+{“Alice”}Bob, {RA}Bob
+IC,RC, CS, gb mod p,
+{“Bob”}Alice, {RB}Alice, proofB
+Trudy
+as Alice
+
+IC,RC, proofA
+
+Trudy
+as Bob
+
+Trudy can create exchange that appears to be between Alice
+and Bob
+Appears valid to any observer, including Alice and Bob!
+
+Unit 5 - 123
+
+Plausible Deniability
+Trudy can create “conversation” that appears to be between
+Alice and Bob
+Appears valid, even to Alice and Bob!
+A security failure?
+In this mode of IPSec, it is a feature
+Plausible deniability: Alice and Bob can deny that any
+conversation took place!
+In some cases it might be a security failure
+If Alice makes a purchase from Bob, she could later
+repudiate it (unless she had signed)
+
+Unit 5 - 124
+
+IKE Phase 1 Cookies
+Cookies (or “anti-clogging tokens”)
+provide a weak form of source address identification for both parties
+supposed to make denial of service more difficult
+
+No relation to Web cookies
+To reduce DoS, Bob wants to remain stateless as long as possible
+But Bob must remember CP from message 1 (required for proof of
+identity in message 6)
+
+Bob must keep state from 1st message on!
+These cookies offer little DoS protection!
+
+Unit 5 - 125
+
+IKE Phase 1 Summary
+Result of IKE phase 1 is
+Mutual authentication
+Shared symmetric key
+IKE Security Association (SA)
+But phase 1 is expensive (in public key and/or main mode cases)
+Developers of IKE thought it would be used for lots of things ⎯ not
+just IPSec
+Partly explains over-engineering…
+
+Unit 5 - 126
+
+IKE Phase 2
+Phase 1 establishes IKE SA
+Phase 2 establishes IPSec SA
+Comparison to SSL
+SSL session is comparable to IKE Phase 1
+SSL connections are like IKE Phase 2
+IKE could be used for lots of things
+
+But in practice, it’s not!
+
+Unit 5 - 127
+
+IKE Phase 2
+IC,RC,CP,E(hash1,SA,RA,K)
+IC,RC,CS,E(hash2,SA,RB,K)
+
+Alice
+
+IC,RC,E(hash3,K)
+
+Bob
+
+Key K, IC, RC and SA known from Phase 1
+Proposal CP includes ESP and/or AH
+Hashes 1,2,3 depend on SKEYID, SA, RA and RB
+Keys derived from h(SKEYID,RA,RB,junk), junk is public
+Recall SKEYID depends on phase 1 key method
+Optional PFS (ephemeral Diffie-Hellman exchange)
+
+Unit 5 - 128
+
+IPSec
+After IKE Phase 1, we have an IKE SA
+After IKE Phase 2, we have an IPSec SA
+Both sides have a shared symmetric key
+Now what?
+We want to protect IP datagrams
+But what is an IP datagram?
+
+From the perspective of IPSec…
+
+Unit 5 - 129
+
+IP Review
+IP datagram is of the form
+
+IP header
+
+data
+
+Where IP header is
+
+Unit 5 - 130
+
+IP and TCP
+Consider HTTP traffic (over TCP)
+IP encapsulates TCP
+TCP encapsulates HTTP
+
+IP header
+
+data
+
+IP header
+
+TCP hdr
+
+HTTP hdr
+
+app data
+
+IP data includes TCP header, etc.
+
+Unit 5 - 131
+
+IPSec Transport Mode
+IPSec Transport Mode
+IP header data
+
+IP header ESP/AH
+
+data
+
+Transport mode designed for host-to-host
+
+Transport mode is efficient
+Adds minimal amount of extra header
+The original header remains intact
+
+Passive attacker can see who is talking
+Unit 5 - 132
+
+IPSec: Host-to-Host
+IPSec transport mode
+
+Note that there may be firewalls in between ⎯ is that a problem?
+
+Unit 5 - 133
+
+IPSec Tunnel Mode
+IPSec Tunnel Mode
+IP header data
+new IP hdr
+
+ESP/AH
+
+IP header data
+
+Tunnel mode for firewall to firewall traffic
+
+Original IP packet encapsulated in IPSec
+Original IP header not visible to attacker
+New header from firewall to firewall
+
+Attacker does not know which hosts are talking
+Unit 5 - 134
+
+IPSec: Firewall-to-Firewall
+IPSec tunnel mode
+
+Local networks unprotected
+So, is there any advantage here?
+
+Unit 5 - 135
+
+Comparison of IPSec Modes
+Transport Mode
+Host-to-host
+
+Transport Mode
+IP header data
+
+IP header ESP/AH
+
+Tunnel Mode
+Firewall-to-firewall
+data
+
+Tunnel Mode
+IP header data
+new IP hdr
+
+ESP/AH
+
+Transport mode not
+necessary
+Transport mode more
+efficient
+
+IP header data
+Unit 5 - 136
+
+Transport Mode and Tunnel Mode
+Independent of whether ESP or AH is used, IPSec can use either
+transport mode or
+tunnel mode.
+
+In transport mode the new ESP/AH header is sandwiched between
+the IP header and the data.
+In tunnel mode the entire IP packet is encapsulated in a new IP
+packet.
+
+Unit 5 - 137
+
+AH vs ESP
+AH: Authentication Header
+Integrity only (no confidentiality)
+Integrity-protect everything beyond IP header and some
+fields of header (why not all fields?)
+ESP: Encapsulating Security Payload
+Integrity and confidentiality both required
+Protects everything beyond IP header
+Integrity only by using NULL encryption
+
+Unit 5 - 138
+
+ESP’s NULL Encryption
+According to RFC 2410
+NULL encryption “is a block cipher the origins of which appear to
+be lost in antiquity”
+“Despite rumors”, there is no evidence that NSA “suppressed
+publication of this algorithm”
+Evidence suggests it was developed in Roman times as
+exportable version of Caesar’s cipher
+Can make use of keys of varying length
+No IV is required
+Null(P,K) = P for any P and any key K
+Security people have a strange sense of humor!
+
+Unit 5 - 139
+
+Why Does AH Exist? (1)
+Cannot encrypt IP header
+Routers must look at the IP header
+IP addresses, TTL, etc.
+IP header exists to route packets!
+AH protects immutable fields in IP header
+Cannot integrity protect all header fields
+
+TTL, for example, must change
+ESP does not protect IP header at all
+
+Unit 5 - 140
+
+Why Does AH Exist? (2)
+ESP encrypts everything beyond the IP header (if non-null
+encryption)
+If ESP encrypted, firewall cannot look at TCP header (e.g., port
+numbers)
+
+Why not use ESP with null encryption?
+Firewall sees ESP header, but does not know whether null
+encryption is used
+
+Unit 5 - 141
+
+Why Does AH Exist? (3)
+The real reason why AH exists
+At one IETF meeting “someone from Microsoft gave an impassioned
+speech about how AH was useless…”
+
+“…everyone in the room looked around and said `Hmm. He’s right, and
+we hate AH also, but if it annoys Microsoft let’s leave it in since we hate
+Microsoft more than we hate AH.”
+
+Unit 5 - 142
+
+IPSec Security
+What kind of protection?
+Confidentiality?
+Integrity?
+Both?
+What to protect?
+Data?
+
+Header?
+Both?
+ESP/AH do some combinations of these
+
+Unit 5 - 143
+
+5.6 802.11 Wireless LAN Security
+
+Unit 5 - 144
+
+802.11 Wireless LAN Security
+Wireless traffic can be monitored by any radio in range, and need not be
+physically connected.
+The original 802.11 specification had security features
+Wired Equivalent Privacy (WEP) algorithm
+but found this contained major weaknesses
+802.11i task group developed capabilities to address WLAN security issues
+Wi-Fi Alliance Wi-Fi Protected Access (WPA)
+Final 802.11i Robust Security Network (RSN)
+
+Unit 5 - 145
+
+802.11i RSN - Goals
+Replace WEP by protocol that properly uses encryption
+Add data authenticity and integrity
+Add proper authentication
+
+Manufacture “fresh” keys for every session
+Tie keys to the authentication
+
+Unit 5 - 146
+
+802.11i RSN Services and Protocols
+MAC-level data are
+encrypted, along with a
+message integrity code
+that ensures that the data
+have not been altered
+
+Services
+
+Robust Security Network (RSN)
+
+Access
+Control
+
+Authentication and
+Key generation
+
+Protocol
+
+Enforces the use of the
+authentication function,
+routes the messages
+properly, and facilitates key
+exchange
+
+IEEE 802.1x
+Port-based
+access
+control
+
+Extensible
+Authentication
+Protocol (EAP)
+
+A protocol is used to define an
+exchange between a user and an
+AS that provides mutual
+authentication and generates
+temporary keys
+
+Confidentiality and
+Integrity
+
+TKIP
+
+CCMP
+
+TKIP = Temporal Key Integrity Protocol
+CCMP = Counter Mode with CBC
+MAC Protocol
+
+Unit 5 - 147
+
+802.11i RSN Cryptographic Algorithms
+
+Algorithm
+
+Services
+
+Robust Security Network (RSN)
+
+Confidentiality
+
+TKIP
+(RC4)
+
+CCMP
+(AES)
+
+Integrity and Authentication
+
+HMACSHA-1
+
+HMACMD5
+
+TKIP
+
+(Michael
+MIC)
+
+CCM
+(AES CBC
+MAC)
+
+Key
+Generation
+
+HMACSHA-1
+
+Unit 5 - 148
+
+802.11i Phases of Operation
+1.
+
+2.
+3.
+
+4.
+5.
+
+IEEE 802.11i RSN can be broken down into five distinct phases of:
+Discovery: an STA and an AP are involved in this phase.
+An STA and an AP recognize each other
+Agree on set of security capabilities
+Establish an association for future communication using these security
+capabilities
+Authentication: an STA, an AP and the AS are involved in this phase.
+An STA and AS mutually authenticate each other
+Key Management: an STA, an AP and the AS are involved in this phase as well.
+Cryptographic keys will be generated by the AS to be moved to AP and then
+pushed to the STA.
+Protected data transfer: Frames are exchanged between the STA and the other STA
+(end station) through the AP. security is not provided end-to-end.
+Connection termination: The AP and STA exchange frames to turn down the secure
+connection.
+
+Unit 5 - 149
+
+802.11i Phases of Operation
+Security
+capabilities
+discovery
+
+STA <-> AS
+mutual
+authentication
+
+802.1X key
+management
+
+RADIUS-based
+key distribution
+
+STA <-> AP
+encrypted
+channel. Not
+end-to-end
+protection
+
+Unit 5 - 150
+
+Digging deeper - Discovery phase
+An STA and an AP recognize each other and agree on a set of security capabilities to
+be used after the association.
+These security capabilities include:
+Confidentiality and integrity protocols for protecting unicast traffic (only between
+STA and AP. Only AP specifies the protecting multicast traffic),
+Authentication method,
+Cryptography key management approach.
+The specification of a protocol, along with the chosen key length (if variable) is known
+as a cipher suite.
+The options for the confidentiality and integrity cipher suite are:
+WEP, (for backward compatibility), TKIP, CCMP, vendor-specific methods.
+The options for the authentication and key management (AKM) suite are:
+IEEE 802.1X, pre-shared key PSK, vendor-specific methods).
+
+Unit 5 - 151
+
+Digging deeper - Discovery phase
+Probe Request
+Probe Response + RSN IE (AP supports CCMP
+Mcast, CCMP Ucast, 802.1X Auth)
+
+STA
+802.11 Open System Auth
+
+AP
+
+802.11 Open Auth (success)
+Association Req + RSN IE (STA requests
+CCMP Mcast, CCMP Ucast, 802.1X Auth)
+Association Response (success)
+
+Three MPDU (frame) exchanges:
+1. Network and security capability discovery, through passive or active scanning. AP
+advertises its RSN Information Element (RSN IE)
+2. Open system authentication to maintain a backward computability with legacy 802.11
+devices (STA or AP) to perform simple exchange identities.
+
+3. Association, to agree and confirm the chosen cipher suites between STA and AP
+
+Unit 5 - 152
+
+Discovery phase – Summary
+At the end of discovery
+STA knows
+The alleged SSID (AP) of the network
+The alleged authentication and cipher suites of the network
+The AP knows which of its authentication and cipher suites the STA
+allegedly chose
+A STA and an AP have established an 802.11 channel
+The associated STA and AP are ready to authenticate
+
+Unit 5 - 153
+
+Digging deeper - Authentication phase
+Goals
+Establish a mutually authenticated session between STA and AS
+Establish a session key shared by AS and STA
+Session  key is fresh
+Mutually authenticated  bound only to AS and STA
+Tied back to authorization decision
+Defend against eavesdropping, man-in-the-middle attacks, forgeries,
+replay, dictionary attacks against either party.
+Identity protection not a goal
+Can’t hide the MAC address
+
+Unit 5 - 154
+
+Digging deeper - Authentication phase
+IEEE 802.11i makes use of another standard that was designed to provide access
+control functions for LANs.
+The standard is IEEE 802.1X, Port-Based Network Access Control.
+Defined in IEEE STD 802.1X-2001
+Runs over all 802 LANs
+Allow/deny port filtering rules
+Many parts of how 802.1x works are within other standards such as
+EAP (Extensible Authentication Protocol) , more later,
+and RADIUS (Remote Authentication Dial-In User Service) .
+The 802.1x standard is just a mechanism that denies all traffic except EAP packets
+from accessing the network
+RADIUS protocol is used to create an encrypted tunnel between the AP and the AS
+(aka RADIUS server), more later.
+IEEE 802.1X uses the terms supplicant, authenticator, that are correspond to the
+wireless station and the AP.
+
+Unit 5 - 155
+
+Digging deeper - Authentication phase
+STA
+
+AP
+
+STA 802.1X blocks port for
+data traffic
+
+AS
+
+AP 802.1X blocks port for data
+traffic
+
+the AP controlled
+port is still blocked
+to data traffic
+
+802.1X/EAP-Request Identity
+802.1X/EAP-Response Identity
+(EAP type specific)
+RADIUS Access Request/Identity
+EAP type specific mutual authentication
+
+Derive Pairwise Master Key (PMK)
+
+Derive Pairwise Master Key (PMK)
+RADIUS Accept (with PMK)
+
+802.1X/EAP-SUCCESS
+
+802.1X
+
+RADIUS
+Unit 5 - 156
+
+Digging deeper – (EAP)
+Extensive Authentication Protocol (EAP) is an authentication framework (defined in
+RFC 3748 )
+EAP provides a transport for keying material and parameters generated by EAP
+methods.
+EAP relies on “concrete” methods plugged into it for authentication
+E.g., EAP-TLS, EAP-TTLS, EAP-MD5, etc.
+EAP only defines message formats. Each protocol that uses EAP defines a way
+to encapsulate EAP messages within that protocol's messages.
+E.g., the encapsulation of EAP over IEEE 802 is defined in IEEE 802.1X and
+known as "EAP over LANs" or EAPOL
+RADIUS protocols can also encapsulate EAP messages. They are often used by
+Network Access Server (NAS) devices to forward EAP packets between Access
+Point and these Authentication Servers.
+EAP frame is made up of five main fields: code, identifier, length, type, and data.
+(see next slide)
+
+Unit 5 - 157
+
+Digging deeper – (EAP)
+
+1 → EAP Request
+2 → EAP Response
+3 → Success Indicator
+4 → Failure Indicator
+
+To match responses
+with requests. Must
+be changed on each
+Request packet.
+
+Identifies the structure
+of an EAP packet.
+E.g., 13 → EAP-TLS
+
+EAP message
+Code
+
+Identifier
+
+1 Byte
+
+1 Byte
+
+The length of the
+EAP packet
+
+Length
+2 Bytes
+
+Type
+1 Byte
+
+Data
+Variable Length
+
+Here, a user would provide
+the authentication portion
+
+Unit 5 - 158
+
+Digging deeper – RADIUS
+The RADIUS protocol specifications are currently defined in RFC 2865 and
+RFC 2866.
+RADIUS is a client/server protocol that runs in the application layer,
+using UDP as transport.
+The protocol works by creating an encrypted tunnel between the network
+device and the RADIUS server.
+This tunnel is used for sending all the Authentication Authorization
+Accounting (AAA) information.
+To start this encrypted tunnel, a phrase or password called the shared
+secret between the AP and AS is needed.
+Once the shared secret is correctly set up, secure communication can
+take place.
+
+Unit 5 - 159
+
+Digging deeper – RADIUS
+1 → Access-Request.
+2 → Access-Accept
+3 → Access-Reject
+4 → Access-Challenge
+
+RADIUS packet formats
+Code
+
+Identifier
+
+1 Byte
+
+1 Byte
+
+Length
+2 Bytes
+
+Authenticator
+16 Byte
+
+RADIUS has only four types of packets for authentication and there are other packet
+types for accounting. However, we only focus on the authentication packets.
+1. Access-Request. This packet allows the RADIUS sequence to take place.
+2. Access-Accept. This packet informs the RADIUS client that the authentication
+provided to it was correct.
+3. Access-Reject. This packet informs the RADIUS client that the authentication
+provided to it was incorrect.
+4. Access-Challenge. This packet is used to challenge a RADIUS client for its
+authentication credentials.
+
+Unit 5 - 160
+
+Digging deeper – EAP-TLS
+EAP-TLS is not part of 802.11i; neither is any other specific authentication
+method
+But EAP-TLS is the de facto 802.11i authentication method
+Can meet all 802.11i requirements
+Other widely deployed methods do not
+
+EAP-TLS = TLS Handshake over EAP
+EAP-TLS defined by RFC 2716
+TLS defined by RFC 2246
+Always requires provisioning AS certificate on the STA
+
+Mutual authentication requires provisioning STA certificates
+
+Unit 5 - 161
+
+Digging deeper – EAP-TLS
+Remember, EAP frame is made up of five main fields: code, identifier, length, type,
+and data.
+Always 13
+
+EAP message
+Code
+
+Identifier
+
+1 Byte
+
+1 Byte
+
+Length
+
+Type
+
+2 Bytes
+
+Flags
+
+1 Byte
+
+TLS Message Length
+
+1 Byte
+
+L = Length included
+M = More fragments
+S = EAP-TLS start*
+R = Reserved
+
+L
+0
+
+M S
+1
+
+2
+
+4 Bytes
+
+R
+3
+
+R R
+4
+
+5
+
+6
+
+Data
+Variable Length
+
+TLS Data . . .
+Variable Length
+
+R R
+7
+
+8
+
+* The start bit is exist only when Code =1 (EAP request). For all other codes it is R
+
+Unit 5 - 162
+
+Example –EAP-TLS (1)
+STA
+
+AP
+
+AP-RADIUS Key
+
+AS
+
+802.1X/EAP-Request Identity
+802.1X/EAP-Response Identity
+
+RADIUS_Access_Request/EAPResponse Identity
+
+802.1X/EAP-request
+EAP type = TLS
+TLS start bit set
+
+RADIUS_access_challenge
+EAP type = TLS
+
+802.1X/EAP-response
+EAP type = TLS
+TLS client_hello
+
+RADIUS_Access_Request/EAPResponse EAP type = TLS
+TLS client_hello
+
+802.1X/EAP-response
+EAP type = TLS
+TLS server_hello, TLS
+certificate, TLS server key
+exchange, TLS certificate
+request, TLS server_hello_done
+
+RADIUS_access_challenge
+EAP type = TLS
+
+Client’s TLS
+version, sessionId,
+random no, cipher
+suites supported.
+TLS version,
+sessionId,
+another
+random no,
+cipher suites
+
+MasterKey = TLS-PRF(PreMasterKey, “master secret” || random1 || random2)
+Unit 5 - 163
+
+Example – EAP-TLS (2)
+STA
+
+AP
+
+802.1X/EAP response
+EAP type = TLS
+TLS certificate, TLS client key exchange,
+TLS certificate verify, TLS change cipher
+spec, TLS finished
+802.1X/EAP response
+EAP type = TLS
+TLS change_cipher_spec, TLS finished
+802.1X/EAP response
+EAP type = TLS
+
+AP-RADIUS Key
+
+AS
+
+RADIUS Access Request/EAPResponse EAP type = TLS
+
+RADIUS access challenge
+EAP type = TLS
+
+RADIUS Access Request/EAPResponse EAP type = TLS
+
+PMK = TLS-PRF(MasterKey, “client EAP encryption” || random1 || random2)
+
+802.1X/EAP Success
+
+RADIUS Access Accept
+EAP type = TLS, PMK
+
+Unit 5 - 164
+
+Authentication Summary
+At the end of authentication phase
+
+The AS and STA have established a session if concrete EAP method
+does
+The AS and STA possess a mutually authenticated Master Key if
+concrete EAP method does
+
+Master Key represents decision to grant access based on
+authentication
+STA and AS have derived PMK
+PMK is an authorization token to enforce access control decision
+
+AS has distributed PMK to an AP (hopefully, to the STA’s AP)
+
+Unit 5 - 165
+
+802.1X Key Management
+802.11i data protocols fail without “fresh” keys
+
+Want to use 802.1X framework
+Original 802.1X key management hopelessly broken, so redesigned by
+802.11i
+New model:
+
+Derive a Pairwise Master Key (PMK)
+AP and STA use PMK to derive Pairwise Transient Key (PTK)
+Use PTK to protect the link
+
+Unit 5 - 166
+
+Pairwise Key Hierarchy
+A pre-shared key (PSK) is a secret key shared by the AP and a STA
+OR
+MasterKey = TLS-PRF(PreMasterKey, “master secret” || random1 || random2)
+
+PMK = TLS-PRF(MasterKey, “client EAP encryption” || random1 || random2)
+
+Pairwise Transient Key (PTK) = EAPoL-PRF(PMK, AP Nonce || STA Nonce
+|| AP MACAddr || STA MAC Addr)
+
+Key Confirmation Key
+(KCK) – PTK bits 0–127
+
+Key Encryption Key (KEK) –
+PTK bits 128–255
+
+Temporal Key – PTK bits 256–n
+128 bits (CCMP) , 256 bits (TKIP)
+
+Unit 5 - 167
+
+Key Management Overview
+
+STA
+
+AP
+
+AS
+
+Step 1: Use RADIUS to push PMK from AS to AP
+
+Step 2: Use PMK and 4-Way Handshake to
+derive, bind, and verify PTK
+Step 3: Use Group Key Handshake to send GTK
+from AP to STA
+
+Unit 5 - 168
+
+Step 2: 4-Way Handshake
+STA
+
+AP
+
+PMK
+
+PMK
+
+Pick Random ANonce
+
+EAPoL-Key(Reply Required, Unicast, ANonce)
+Pick Random SNonce, Derive PTK = EAPoL-PRF(PMK,
+ANonce | SNonce | AP MAC Addr | STA MAC Addr)
+EAPoL-Key(Unicast, SNonce, MIC, STA RSN IE)
+Derive PTK
+EAPoL-Key(Reply Required, Install PTK, Unicast,
+ANonce, MIC, AP RSN IE)
+EAPoL-Key(Unicast, MIC)
+Install TK
+
+used to secure data traffic
+
+Install TK
+
+Unit 5 - 169
+
+Step3: Group Key Handshake
+STA
+
+AP
+
+PTK
+
+PTK
+Pick Random GNonce, Pick Random GTK
+Encrypt GTK with KEK
+
+EAPoL-Key(GNonce, MIC, GTK)
+Decrypt GTK
+EAPoL-Key(Group ACK, MIC)
+unblocked data traffic
+
+unblocked data traffic
+
+Unit 5 - 170
+
+What is EAPoL?
+Extensive Authentication Protocol over Local Area Network (EAPOL) is part
+of EAP, but it is outlined inside the 802.1x standard.
+This is because the 802.1x standard allows certain EAP message types
+to pass through an AP to the STA.
+This traffic (the EAP message ) is outlined with five frame types.
+This means that only these five frame types are allowed to pass
+through an AP to a STA.
+
+Unit 5 - 171
+
+What is EAPoL?
+EAPOL frame format
+PAE
+Ethertype
+
+Protocol
+version
+
+Packet
+type
+
+Packet
+Body length
+
+2 Bytes
+
+1 Byte
+
+1 Byte
+
+2 Bytes
+
+= 0x88E8
+for EAPoL
+
+1.
+2.
+3.
+4.
+5.
+
+EAP-Packet
+EAPOL-Start
+EAPOL-Logoff
+EAPOL-Key
+EAPOL-ASF-Alert
+
+0000 0000
+0000 0001
+0000 0010
+0000 0011
+0000 0100
+
+Packet
+body
+
+Descriptor
+Type
+1 Byte
+
+Descriptor
+Body
+Variable Length
+
+EAPOL-Packet: used to identify the packet as an EAP packet.
+EAPOL-Start: used to begin an EAP conversation or an 802.1x authentication.
+EAPOL-Logoff: used to end an EAP conversation or an 802.1x authentication.
+EAPOL-Key: used to exchange keying information between the AP and the STA.
+EAPOL-Encapsulated-ASF-Alert: used to carry SNMP trap information out a non-802.1x
+authenticated port.
+Unit 5 - 172
+
+One Last Detail
+IEEE 802.11i uses a pseudorandom function (PRF) in many places.
+For example, it is used to generate nonces, to expand pairwise keys, and to
+generate the GTK.
+The PRF is built on the use of HMAC-SHA-1.
+Recall that HMAC-SHA-1 takes a message (block of data)
+and a key of length at least 160 bits and produces a 160-bit
+hash value.
+The IEEE 802.11i PRF takes four parameters
+(a secret key K, an application specific text string A,
+some data specific to each case B, and the desired
+number of pseudorandom bits Len) as input,
+and produces the desired number of random bits.
+HMAC algorithm is run once, producing a 160-bit hash value.
+If more bits are required, HMAC is run again with the same
+inputs, except that i is incremented each time,
+until the necessary number of bits is generated.
+
+Unit 5 - 173
+
+Key Management Summary
+4-Way Handshake
+Establishes a fresh pairwise key bound to STA and AP for this session
+Proves liveness of peers
+Demonstrates there is no man-in-the-middle between PTK holders if
+there was no man-in-the-middle holding the PMK
+Group Key Handshake provisions group key to all STAs
+
+Unit 5 - 174
+
+802.11i Protected Data Transfer Phase
+IEEE 802.11i defines two schemes for protecting 802.11 MPDU data
+message integrity and confidentiality:
+the Temporal Key Integrity Protocol (TKIP), and
+the Counter Mode-CBC MAC Protocol (CCMP).
+
+Temporal Key Integrity Protocol (TKIP)
+TKIP is designed to require only software changes to devices that are
+implemented with the older wireless LAN security approach (i.e., WEP).
+TKIP adds a 64-bit message integrity code (MIC),
+generated by an algorithm, called Michael, to the 802.11 MAC
+frame after the data field.
+TKIP provides data confidentiality by encrypting the MPDU plus MIC
+value using RC4.
+
+Unit 5 - 175
+
+802.11i Protected Data Transfer Phase
+Counter Mode-CBC MAC Protocol (CCMP)
+Intended for newer IEEE 802.11 devices that are equipped with the
+hardware to support this scheme
+Uses the cipher block chaining message authentication code (CBC-MAC)
+with AES for integrity
+Uses the CRT block cipher mode with AES for encryption
+The scheme uses a 48-bit packet number to construct a nonce to
+prevent replay attacks.
+Authenticated Encryption combining Counter mode (CTR) and CBCMAC, using a single key
+Assumes 128 bit block cipher – IEEE 802.11i uses AES
+
+Unit 5 - 176
+
+CCM Mode Overview
+Use CBC-MAC to compute a MIC on the plaintext header, length of the
+plaintext header, and the payload
+Use CTR mode to encrypt the payload
+Counter values 1, 2, 3, …
+Use CTR mode to encrypt the MIC
+Counter value 0
+
+Encrypted
+Header
+
+Payload
+
+MIC
+
+Authenticated
+
+Unit 5 - 177
+
+CCM Properties
+CTR + CBC-MAC (CCM) based on a block cipher
+CCM provides integrity and confidentiality
+A CBC-MAC of the plaintext is appended to the plaintext to form an
+encoded plaintext
+The encoded plaintext is encrypted in CTR mode
+
+CCM is packet oriented
+CCM can leave any number of initial blocks of the plaintext
+unencrypted
+
+Unit 5 - 178
+
+Data Transfer Summary
+WEP
+
+TKIP
+
+CCMP
+
+Cipher
+
+RC4
+
+RC4
+
+AES
+
+Key Size
+
+40 or 104 bits
+
+128 bits
+
+128 bits encryption,
+64 bit auth
+
+Key Life
+
+24-bit IV, wrap
+
+48-bit IV
+
+48-bit IV
+
+Packet Key
+
+Concat.
+
+Mixing Fnc
+
+Not Needed
+
+Integrity (data)
+
+CRC-32
+
+Michael
+
+CCM
+
+Integrity (Header)
+
+None
+
+Michael
+
+CCM
+
+Replay
+
+None
+
+Use IV
+
+Use IV
+
+Key Mgmt.
+
+None
+
+EAP-based
+
+EAP-based
+
+Unit 5 - 179
+
+802.11i RSN - Keys
+Abbreviati
+Name
+on
+PSK
+Pre-Shared Key
+
+Description / Purpose
+Becomes the PMK in pre-shared key environments.
+
+PMK
+
+Pair-wise Master Key
+
+Used with other inputs to derive the PTK.
+
+GMK
+
+Group MasterKey
+
+Used with other inputs to derive the GTK.
+
+PTK
+
+Pair-wise Transient Key
+
+Derived from the PMK. Comprises the EAPOL-KCK, EAPOL-KEK,
+and TK and (for TKIP) the MIC key.
+
+TK
+
+Temporal Key
+
+Used with TKIP or CCMP to provide confidentiality and integrity
+protection for unicast user traffic.
+
+GTK
+
+GroupTemporal Key
+
+MIC Key
+EAPOL-KCK
+
+EAPOL-KEK
+WEP Key
+
+Derived from the GMK. Used to provide confidentiality and
+integrity protection for multicast/broadcast user traffic.
+Message Integrity Code Used by TKIP’s Michael MIC to provide integrity protection of
+Key
+messages.
+EAPOL-Key Confirmation Used to provide integrity protection for key material distributed
+Key
+during the 4-Way Handshake.
+EAPOL-Key Encryption
+Key
+Wired EquivalentPrivacy
+Key
+
+Used to ensure the confidentiality of the GTK and other key
+material in the 4-Way Handshake.
+
+Used with WEP.
+
+Unit 5 - 180
+
+802.11i Phases of Operation
+
+Unit 5 - 181
+
+802.11i RSN Cryptographic Algorithms
+
+Algorithm
+
+Services
+
+Robust Security Network (RSN)
+
+Confidentiality
+
+TKIP
+(RC4)
+
+CCMP
+(AES)
+
+Integrity and Authentication
+
+HMACSHA-1
+
+HMACMD5
+
+TKIP
+
+(Michael
+MIC)
+
+CCM
+(AES CBC
+MAC)
+
+Key
+Generation
+
+HMACSHA-1
+
+Unit 5 - 182
+
+802.11i RSN Services and Protocols
+
+Services
+
+Access
+Control
+
+Authentication and
+Key generation
+
+Protocol
+
+Robust Security Network (RSN)
+
+IEEE 802.1x
+Port-based
+access
+control
+
+Extensible
+Authentication
+Protocol (EAP)
+
+Confidentiality and
+Integrity
+
+TKIP
+
+CCMP
+
+Unit 5 - 183
+
+Whiteboard
+
+
