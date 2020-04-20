@@ -1015,6 +1015,8 @@ setInterval(minuteCount, 60 * 1000);
 //ping-pong command
 //create a json of commands for fuzzy search of commands - lmao
 //when pinging an invalid game - suggest the first match along with the number
+//Make an automated set-up in a person's DM that will walk them through how to add games, search their list,
+//remove a game, set exclude status etc...(maybe be pinged of new features, or meme of the day, of suggested commands...
 
 
 //Twitch notification/signup when a streamer goes live
