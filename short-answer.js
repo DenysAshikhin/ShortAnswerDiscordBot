@@ -412,7 +412,7 @@ async function study(message, searches) {
         useExtendedSearch: false,
         minMatchCharLength: 3,
         shouldSort: true,
-        threshold: 0.5,
+        threshold: 0.6,
         location: 0,
         distance: 100,
         keys: [
