@@ -429,8 +429,7 @@ async function study(message, searches) {
 
             message.channel.send(mention(message.member.id) + "! Here are the result for: " + query + "\n");
             let finalArray = new Array();
-            let finalList = "";//
-            //console.log(studyArray)
+            let finalList = "";
             let fuse = new Fuse(studyArray, options1);
 
 
@@ -440,8 +439,6 @@ async function study(message, searches) {
 
                 let fuse1 = new Fuse(overall.item.slides, options1);
                 let result1 = fuse1.search(query);
-
-                console.log(overall);
 
                 message.channel.send("```" + overall.item.pptName + "```");
 
