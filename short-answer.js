@@ -404,21 +404,7 @@ async function study(message, searches) {
     }
 
 
-    let options1 = {
-        isCaseSensitive: false,
-        findAllMatches: true,
-        includeMatches: false,
-        includeScore: false,
-        useExtendedSearch: false,
-        minMatchCharLength: 3,
-        shouldSort: true,
-        threshold: 0.6,
-        location: 0,
-        distance: 100,
-        keys: [
-            "slides"
-        ]
-    };
+
 
 
     searches.forEach(query => {
@@ -426,6 +412,23 @@ async function study(message, searches) {
         console.log("QUERY: " + query);
 
         if (query.length > 0) {
+
+
+            let options1 = {
+                isCaseSensitive: false,
+                findAllMatches: true,
+                includeMatches: false,
+                includeScore: false,
+                useExtendedSearch: false,
+                minMatchCharLength: query.length/3,
+                shouldSort: true,
+                threshold: 0.75,
+                location: 0,
+                distance: 100,
+                keys: [
+                    "slides"
+                ]
+            };
 
             message.channel.send(mention(message.member.id) + "! Here are the result for: " + query + "\n");
             let finalArray = new Array();
