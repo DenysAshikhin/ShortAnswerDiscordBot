@@ -1,14 +1,22 @@
 [
     {
         "pptName": "Intro to Endodrine System",
-        "Slide3": "Chemical messengers from a gland or pocket of  cells within an organ that regulate the activity of  certain cells or organs.They may act in an autocrine or paracrine  fashion, but most act on more distant cells by  travelling through bloodstream",
-        "Slide4": "Nuerotransmitters As opposed to hormones, neurotransmitters are  synthesized within a pre - synaptic neuron and once  released, travel across a  synapse to act on a post - synaptic cell(often a  neuron); they do not  reach their target cells via  the bloodstream",
-        "Slide5": "Nueroendocrine cells As opposed to hormones, neurotransmitters are  synthesized within a pre - synaptic neuron and once  released, travel across a  synapse to act on a post - synaptic cell(often a  neuron); they do not  reach their target cells via  the bloodstream"
+        "slides": [
+            "|Slide4: Nuerotransmitters As opposed to hormones, neurotransmitters are  ",
+            "slide 33: synthesized within a pre - synaptic neuron and once  released, ",
+            "slide 231: melatonintravel across a  synapse to act on a posto act",
+            "slide 231b: on a posto act on a posto act on a posto act on a posto act on a posto act on a posto act on a posto act on a posto act on a posto act on a post - synaptic cell(often a  neuron); ",
+            "they do not  reach their target cells via  the bloodstream|",
+            "slides 4: Figure of Location of Endocrine Glands Pituitary in the Brain",
+            "Slide5: Figure of Pituitary Gland"
+        ]
     },
     {
         "pptName": "The Hypothalamic Axis",
-        "Slide3": "Pineal Gland.Produces melatonin.",
-        "Slide4": "Figure of Location of Endocrine Glands in the Brain",
-        "Slide5": "Figure of Pituitary Gland"
+        "slides": [
+            "slide 3: Pineal Gland.Produces melatonin.Pituitary",
+            "slides 4: Figure of Location of Endocrine Glands Pituitary in the Brain",
+            "Slide5: Figure of Pituitary Gland"
+        ]
     }
 ]

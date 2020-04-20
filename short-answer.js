@@ -400,28 +400,65 @@ async function study(message, searches) {
         return;
     }
 
+
+    let options1 = {
+        isCaseSensitive: true,
+        findAllMatches: true,
+        includeMatches: false,
+        includeScore: false,
+        useExtendedSearch: false,
+        minMatchCharLength: 3,
+        shouldSort: true,
+        threshold: 0.6,
+        location: 0,
+        distance: 100,
+        keys: [
+            "slides"
+        ]
+    };
+
+
     searches.forEach(query => {
+
+        console.log("QUERY: " + query);
 
         if (query.length > 0) {
 
             message.channel.send(mention(message.member.id) + "! Here are the result for: " + query + "\n");
             let finalArray = new Array();
-            let finalList = "";
-            let fuse = new Fuse(studyArray, options);
+            let finalList = "";//
+            //console.log(studyArray)
+            let fuse = new Fuse(studyArray, options1);
 
-            let result = fuse.search(query);
+            let result = fuse.search(query);//
 
-            for (let i = 0; i < result.length; i++) {
+            //console.log(result);
+        
+            result.forEach(overall => {
 
-                if (finalList.length <= 500) {
+                let fuse1 = new Fuse(overall.item.slides, options1);
+                let result1 = fuse1.search(query);
 
-                    finalList += result[i].refIndex + ") " + result[i].item + "\n";
-                }
-                // if (finalList.length >= 1800) {
-                //     finalArray.push(finalList);
-                //     finalList = "";
-                // }//Commented out because the messages just get too long and the wanted search results would be closer to the top anyways
-            }
+                console.log(overall);
+
+                message.channel.send("```" + overall.item.pptName + "```");
+
+                result1.forEach(final => {
+
+                    message.channel.send(final.refIndex + ") " + final.item + "\n");
+                })
+
+                // overall.item.slides.forEach(element =>{
+                //     //console.log(element);
+                //     if(element.toUpperCase().includes(query.toUpperCase())){
+                //         console.log("FOUND: " + element);
+                //         message.channel.send("FOUND: " + element);
+                //     }
+                // })
+            })
+
+
+
 
             finalArray.push(finalList);
 
