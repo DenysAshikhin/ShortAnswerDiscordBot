@@ -10,6 +10,7 @@ const ytdl = require("ytdl-core");
 //test
 const fs = require('fs');
 const gameJSON = require('./gameslist.json')
+const studyJSON = require('./medstudy.json');
 
 const prefix = "sa!";
 const uri = 'mongodb+srv://shortAnswer:shortAnswer@cluster0-x2hks.mongodb.net/test?retryWrites=true&w=majority';
@@ -27,6 +28,8 @@ const connectDB = mongoose.connection;
 
 const games = new Array();
 var queue = new Map();
+
+const studyArray = new Array();
 
 
 const options = {
@@ -75,6 +78,14 @@ connectDB.once('open', async function () {
         games.push(element.name);
     })
     games.sort();
+
+
+    studyJSON.forEach(element => {
+        
+        studyArray.push(element);
+    })
+    studyArray.sort();
+
 
     Client.on("ready", () => {
 
@@ -212,6 +223,9 @@ connectDB.once('open', async function () {
                 }
                 else if(command.startsWith("helpMusic".toUpperCase())){
                     helpMusic(message);
+                }
+                else if(command.startsWith("study".toUpperCase())){
+                    study(message,params);
                 }
                 updateMessage(message);
             }
@@ -365,6 +379,86 @@ async function search(message, searches) {
                 //     finalList = "";
                 // }//Commented out because the messages just get too long and the wanted search results would be closer to the top anyways
             }
+
+            finalArray.push(finalList);
+
+            for (let i = 0; i < finalArray.length; i++) {
+
+                message.channel.send("```" + finalArray[i] + "```");
+            }
+        }
+
+    });
+}
+
+
+async function study(message, searches) {
+
+    if (searches == undefined || searches == null || searches.length < 1) {
+
+        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "gamesList counter");
+        return;
+    }
+
+
+    let options1 = {
+        isCaseSensitive: true,
+        findAllMatches: true,
+        includeMatches: false,
+        includeScore: false,
+        useExtendedSearch: false,
+        minMatchCharLength: 3,
+        shouldSort: true,
+        threshold: 0.6,
+        location: 0,
+        distance: 100,
+        keys: [
+            "slides"
+        ]
+    };
+
+
+    searches.forEach(query => {
+
+        console.log("QUERY: " + query);
+
+        if (query.length > 0) {
+
+            message.channel.send(mention(message.member.id) + "! Here are the result for: " + query + "\n");
+            let finalArray = new Array();
+            let finalList = "";//
+            //console.log(studyArray)
+            let fuse = new Fuse(studyArray, options1);
+
+            let result = fuse.search(query);//
+
+            //console.log(result);
+        
+            result.forEach(overall => {
+
+                let fuse1 = new Fuse(overall.item.slides, options1);
+                let result1 = fuse1.search(query);
+
+                console.log(overall);
+
+                message.channel.send("```" + overall.item.pptName + "```");
+
+                result1.forEach(final => {
+
+                    message.channel.send(final.refIndex + ") " + final.item + "\n");
+                })
+
+                // overall.item.slides.forEach(element =>{
+                //     //console.log(element);
+                //     if(element.toUpperCase().includes(query.toUpperCase())){
+                //         console.log("FOUND: " + element);
+                //         message.channel.send("FOUND: " + element);
+                //     }
+                // })
+            })
+
+
+
 
             finalArray.push(finalList);
 
