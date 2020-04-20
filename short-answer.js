@@ -420,9 +420,9 @@ async function study(message, searches) {
                 includeMatches: false,
                 includeScore: false,
                 useExtendedSearch: false,
-                minMatchCharLength: query.length/3,
+                minMatchCharLength: query.length/2,
                 shouldSort: true,
-                threshold: 0.75,
+                threshold: 0.7,
                 location: 0,
                 distance: 100,
                 keys: [
