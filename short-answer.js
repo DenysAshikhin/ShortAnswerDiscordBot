@@ -436,7 +436,7 @@ async function study(message, query) {
             if (result.length > 0 && !foundFlag) {
 
                 foundFlag = true;
-                message.channel.send("**Search results for: " + ppt.pptName + "**");
+                message.channel.send("```Search results for: " + ppt.pptName + "```");
             }
             result.forEach(found => {
 
