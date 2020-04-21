@@ -87,7 +87,7 @@ connectDB.once('open', async function () {
 
         studyArray.push(element);
     })
-    studyArray.sort();
+    //studyArray.sort();
 
 
     Client.on("ready", () => {
@@ -395,19 +395,25 @@ async function search(message, searches) {
 }
 
 
-async function study(message, searches) {
+async function study(message, query) {
 
-    if (searches == undefined || searches == null || searches.length < 1) {
+    if (query == undefined || query == null || query.length < 1) {
 
         message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "gamesList counter");
         return;
     }
 
-    searches.forEach(query => {
+    console.log("QUERY: " + query[0]);
 
-        console.log("QUERY: " + query);
 
-        if (query.length > 0) {
+    studyArray.forEach(ppt => {
+
+        let finalResult = new Array();
+        let foundFlag = false;
+
+        ppt.slides.forEach(slide => {
+
+            let slideArray = slide.split(" ");
 
             let options1 = {
                 isCaseSensitive: false,
@@ -415,9 +421,9 @@ async function study(message, searches) {
                 includeMatches: false,
                 includeScore: false,
                 useExtendedSearch: false,
-                minMatchCharLength: query.length / 2,
+                minMatchCharLength: query[0].length / 2,
                 shouldSort: true,
-                threshold: 0.7,
+                threshold: 0.4,
                 location: 0,
                 distance: 100,
                 keys: [
@@ -425,40 +431,33 @@ async function study(message, searches) {
                 ]
             };
 
-            message.channel.send(mention(message.member.id) + "! Here are the result for: " + query + "\n");
-            let finalArray = new Array();
-            let finalList = "";
-            let fuse = new Fuse(studyArray, options1);
+            let fuse = new Fuse(slideArray, options1);
+            let result = fuse.search(query[0]);
+            if (result.length > 0 && !foundFlag) {
 
-            let result = fuse.search(query);
+                foundFlag = true;
+                message.channel.send("**Search results for: " + ppt.pptName + "**");
+            }
+            result.forEach(found => {
 
-            result.forEach(overall => {
+                console.log(found);
+                if(!finalResult.includes(slide)){
 
-                let fuse1 = new Fuse(overall.item.slides, options1);
-                let result1 = fuse1.search(query);
+                    let tempy = slide.split(" ");
+                    //console.log(tempy);
+                    
+                    console.log(tempy[found.refIndex]);
 
-                message.channel.send("```" + overall.item.pptName + "```");
+                    tempy[found.refIndex] = "__**" + tempy[found.refIndex] + "**__"
+                    tempy = tempy.join(" ");
 
-                let numberResults = 10;
-
-                if (result1.length < numberResults)
-                    numberResults = result1.length;
-
-                for (let i = 0; i < numberResults; i++){
-                    message.channel.send(result1[i].item + "\n");
-
+                    finalResult.push(tempy);
+                    message.channel.send("" + tempy + "");
+                    message.channel.send("----------------------");
                 }
             })
-
-            finalArray.push(finalList);
-
-            for (let i = 0; i < finalArray.length; i++) {
-
-                message.channel.send("```" + finalArray[i] + "```");
-            }
-        }
-
-    });
+        })//slide loop
+    });//ppt loop
 }
 
 async function helpMiscellaneous(message) {

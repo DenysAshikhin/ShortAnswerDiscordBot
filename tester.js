@@ -2,13 +2,18 @@ const fs = require('fs');
 const readline = require('readline');
 
 var lineArray = new Array();
-var tempLine = "```";
+var tempLine = "";
+var tempLine1 = "";
+
+var counter = 0;
+
+var previous = 0;
 
 
 
 
 async function processLineByLine() {
-    const fileStream = fs.createReadStream('unit5.txt');
+    const fileStream = fs.createReadStream('L4_Knauer-TDM.txt');
 
     const rl = readline.createInterface({
         input: fileStream,
@@ -19,28 +24,39 @@ async function processLineByLine() {
 
     for await (const line of rl) {
         // Each line in input.txt will be successively available here as `line`.
-        if (line.length > 1) {
 
-            if (line.includes("Unit 5 - ")) {
+        if (line.length >= 1) {
 
-                tempLine += " || " + line + "```";
-                lineArray.push(tempLine);
-                tempLine = "```";
+            if (!isNaN(line)) {
+
+                if(previous == Number(line)){
+                    let tempArray = lineArray[lineArray.length - 1].split(" || ");
+                    tempArray[0] += ".\n" + tempLine;
+                    lineArray[lineArray.length - 1] = tempArray.join(" || ");
+                    previous = Number(line);
+                }
+                else{
+
+                    previous = Number(line);
+                    tempLine += " || SLIDE #: " + line + "";
+                    lineArray.push(tempLine);
+                    tempLine = "";
+                }
             }
             else {
                 tempLine += line;
             }
         }
     }
-    console.log(lineArray);
 
+    console.log("final length: " + lineArray.length);
     let final2 = {
-                    "pptName": "Unit 5",
-                    "slides": lineArray
+        "pptName": "L4-Knauer-TDM",
+        "slides": lineArray
     };
 
-    fs.writeFile("unit5.json", JSON.stringify(final2), function(err, result) {
-        if(err) console.log('error', err);
+    fs.writeFile("L4-Knauer-TDM.json", JSON.stringify(final2), function (err, result) {
+        if (err) console.log('error', err);
     });
 }
 
