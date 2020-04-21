@@ -13,7 +13,7 @@ var previous = 0;
 
 
 async function processLineByLine() {
-    const fileStream = fs.createReadStream('L6_Knauer-Tumor_markers.txt');
+    const fileStream = fs.createReadStream('L4_Knauer-TDM.txt');
 
     const rl = readline.createInterface({
         input: fileStream,
@@ -54,22 +54,22 @@ async function processLineByLine() {
                     tempLine = "";
                 }
                 else {
-                    tempLine += line + "\n";
+                    tempLine += line + " \n ";
                 }
             }
             else {
-                tempLine += line + "\n";
+                tempLine += line + " \n ";
             }
         }
     }
 
     console.log("final length: " + lineArray.length);
     let final2 = {
-        "pptName": "L6_Knauer-Tumor_markets",
+        "pptName": "L4_Knauer-TDM",
         "slides": lineArray
     };
 
-    fs.writeFile("L6_Knauer-Tumor_markets.json", JSON.stringify(final2), function (err, result) {
+    fs.writeFile("L4_Knauer-TDM.json", JSON.stringify(final2), function (err, result) {
         if (err) console.log('error', err);
     });
 }

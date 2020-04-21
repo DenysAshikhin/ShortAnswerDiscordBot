@@ -403,15 +403,19 @@ async function study(message, query) {
         return;
     }
 
-    console.log("QUERY: " + query[0]);
-
+    let finalObject = new Array();
 
     studyArray.forEach(ppt => {
 
-        let finalResult = new Array();
-        let foundFlag = false;
-
         ppt.slides.forEach(slide => {
+
+            let tempObject = {
+                items: [],
+                refIndex: [],
+                originalString: "",
+                deckName: ppt.pptName
+            }
+            let index = finalObject.length;
 
             let slideArray = slide.split(" ");
 
@@ -423,7 +427,7 @@ async function study(message, query) {
                 useExtendedSearch: false,
                 minMatchCharLength: query[0].length / 2,
                 shouldSort: true,
-                threshold: 0.4,
+                threshold: 0.1,
                 location: 0,
                 distance: 100,
                 keys: [
@@ -432,32 +436,69 @@ async function study(message, query) {
             };
 
             let fuse = new Fuse(slideArray, options1);
-            let result = fuse.search(query[0]);
-            if (result.length > 0 && !foundFlag) {
 
-                foundFlag = true;
-                message.channel.send("```Search results for: " + ppt.pptName + "```");
-            }
-            result.forEach(found => {
+            let searchWords = query[0].split(" ");
 
-                console.log(found);
-                if(!finalResult.includes(slide)){
+            searchWords.forEach(searchWord => {
 
-                    let tempy = slide.split(" ");
-                    //console.log(tempy);
-                    
-                    console.log(tempy[found.refIndex]);
+                let result = fuse.search(searchWord);
 
-                    tempy[found.refIndex] = "__**" + tempy[found.refIndex] + "**__"
-                    tempy = tempy.join(" ");
+                result.forEach(found => {
 
-                    finalResult.push(slide);
-                    message.channel.send("" + tempy + "");
-                    message.channel.send("----------------------");
-                }
-            })
+                    if (finalObject[index] == undefined) {
+                        finalObject.push(tempObject);
+                        finalObject[index].items.push(found.item);
+                        finalObject[index].refIndex.push(found.refIndex);
+                        finalObject[index].originalString = slide;
+                    }
+                    else if (!finalObject[index].refIndex.includes(found.refIndex)) {
+
+                        finalObject[index].items.push(found.item);
+                        finalObject[index].refIndex.push(found.refIndex);
+                    }
+                });//result loop
+            });//searchWords loops
         })//slide loop
     });//ppt loop
+
+    let currentSlideDeck = "";
+
+    let searchNumbers = finalObject.length;
+
+    if (query[1] != null)
+        if (Number(query[1]) > 0)
+            searchNumbers = Number(query[1]);
+
+    let minResults = -1;
+
+    if (query[2] != null)
+        minResults = query[2];
+
+
+    finalObject.sort(function (a, b) { return b.items.length - a.items.length });
+
+    for (let i = 0; i < searchNumbers; i++) {
+
+        if (minResults <= finalObject[i].items.length) {
+
+            let tempy = finalObject[i].originalString.split(" ");
+
+            if (currentSlideDeck != finalObject[i].deckName) {
+
+                message.channel.send("```Here the search results from slide deck: " + finalObject[i].deckName + "```\n");
+                currentSlideDeck = finalObject[i].deckName;
+            }
+
+            for (let j = 0; j < finalObject[i].items.length; j++) {
+                tempy[finalObject[i].refIndex[j]] = "__**" + tempy[finalObject[i].refIndex[j]] + "**__"
+            }
+
+            tempy = tempy.join(" ");
+            message.channel.send(tempy)
+            message.channel.send("===========================================");
+        }
+    }
+    message.channel.send("```DONE!```");
 }
 
 async function helpMiscellaneous(message) {
@@ -586,7 +627,7 @@ async function countTalk() {
 
 
                     let user = await findUser({ id: member.id });
-                    if(user == null){
+                    if (user == null) {
                         console.log("found the null user: " + member.displayName);
                         checkExistance(member);
 
