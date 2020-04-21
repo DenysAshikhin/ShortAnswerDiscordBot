@@ -10,8 +10,8 @@ const ytdl = require("ytdl-core");
 //test
 const fs = require('fs');
 const gameJSON = require('./gameslist.json')
-//const studyJSON = require('./medstudy.json');
-const studyJSON = require('./ouda.json');
+const studyJSON = require('./medstudy.json');
+//const studyJSON = require('./ouda.json');
 
 
 
@@ -403,18 +403,11 @@ async function study(message, searches) {
         return;
     }
 
-
-
-
-
     searches.forEach(query => {
 
         console.log("QUERY: " + query);
 
         if (query.length > 0) {
-
-
-
 
             let options1 = {
                 isCaseSensitive: false,
@@ -446,7 +439,7 @@ async function study(message, searches) {
 
                 message.channel.send("```" + overall.item.pptName + "```");
 
-                let numberResults = 3;
+                let numberResults = 10;
 
                 if (result1.length < numberResults)
                     numberResults = result1.length;
