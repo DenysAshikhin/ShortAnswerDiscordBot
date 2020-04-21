@@ -11,7 +11,7 @@ const ytdl = require("ytdl-core");
 const fs = require('fs');
 const gameJSON = require('./gameslist.json')
 //const studyJSON = require('./medstudy.json');
-const studyJSON = require('./ouda.json');  
+const studyJSON = require('./ouda.json');
 
 
 
@@ -84,7 +84,7 @@ connectDB.once('open', async function () {
 
 
     studyJSON.forEach(element => {
-        
+
         studyArray.push(element);
     })
     studyArray.sort();
@@ -224,11 +224,11 @@ connectDB.once('open', async function () {
                     queue.get(message.guild.id).songs.shift();
                     playSong(message.guild, queue.get(message.guild.id).songs[0]);
                 }
-                else if(command.startsWith("helpMusic".toUpperCase())){
+                else if (command.startsWith("helpMusic".toUpperCase())) {
                     helpMusic(message);
                 }
-                else if(command.startsWith("study".toUpperCase())){
-                    study(message,params);
+                else if (command.startsWith("study".toUpperCase())) {
+                    study(message, params);
                 }
                 updateMessage(message);
             }
@@ -244,7 +244,7 @@ connectDB.once('open', async function () {
 
     Client.on('presenceUpdate', (oldMember, newMember) => {
 
-        console.log("hopefuly this traffic keeps it awake?");
+        //console.log("hopefuly this traffic keeps it awake?");
     });
 });
 
@@ -303,7 +303,7 @@ async function topStats(message) {
     let user = null;
     for (let i = 0; i < allUsers.length; i++) {
 
-        
+
         if (allUsers[i].guilds.split("|").includes(guild.id)) {
             user = allUsers[i];
             let index = user.guilds.split("|").indexOf(guild.id);
@@ -414,13 +414,15 @@ async function study(message, searches) {
         if (query.length > 0) {
 
 
+
+
             let options1 = {
                 isCaseSensitive: false,
                 findAllMatches: true,
                 includeMatches: false,
                 includeScore: false,
                 useExtendedSearch: false,
-                minMatchCharLength: query.length/2,
+                minMatchCharLength: query.length / 2,
                 shouldSort: true,
                 threshold: 0.7,
                 location: 0,
@@ -435,9 +437,8 @@ async function study(message, searches) {
             let finalList = "";
             let fuse = new Fuse(studyArray, options1);
 
-
             let result = fuse.search(query);
-        
+
             result.forEach(overall => {
 
                 let fuse1 = new Fuse(overall.item.slides, options1);
@@ -445,10 +446,15 @@ async function study(message, searches) {
 
                 message.channel.send("```" + overall.item.pptName + "```");
 
-                result1.forEach(final => {
+                let numberResults = 3;
 
-                    message.channel.send(final.item + "\n");
-                })
+                if (result1.length < numberResults)
+                    numberResults = result1.length;
+
+                for (let i = 0; i < numberResults; i++){
+                    message.channel.send(result1[i].item + "\n");
+
+                }
             })
 
             finalArray.push(finalList);
@@ -586,7 +592,7 @@ async function countTalk() {
 
                 channel.members.forEach(async member => {
 
-                    
+
                     let user = await findUser({ id: member.id });
                     let guilds = user.guilds.split("|");
                     let index = guilds.indexOf(guild.id);
@@ -952,7 +958,7 @@ async function checkExistance(member) {
             return true;
         }
     }
-    else{
+    else {
         console.log("The user doesnt exist.");
         createUser(member);
     }
