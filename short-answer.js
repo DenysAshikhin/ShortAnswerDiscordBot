@@ -394,7 +394,6 @@ async function search(message, searches) {
     });
 }
 
-
 async function study(message, query) {
 
     if (query == undefined || query == null || query.length < 1) {
@@ -464,22 +463,34 @@ async function study(message, query) {
     let currentSlideDeck = "";
 
     let searchNumbers = finalObject.length;
-
     if (query[1] != null)
         if (Number(query[1]) > 0)
             searchNumbers = Number(query[1]);
 
     let minResults = -1;
-
     if (query[2] != null)
         minResults = query[2];
+
+    let minUniqueResults = -1;
+    if(query[3] != null){
+
+        minUniqueResults = query[3];
+    };
 
 
     finalObject.sort(function (a, b) { return b.items.length - a.items.length });
 
     for (let i = 0; i < searchNumbers; i++) {
 
-        if (minResults <= finalObject[i].items.length) {
+        let uniqueItems = new Array();
+
+        if(minUniqueResults != -1){
+
+            let setty = new Set(finalObject[i].items);
+            uniqueItems = Array.from(setty);
+        }
+
+        if (minResults <= finalObject[i].items.length && minUniqueResults <= uniqueItems.length) {
 
             let tempy = finalObject[i].originalString.split(" ");
 
