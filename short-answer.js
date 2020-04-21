@@ -451,7 +451,7 @@ async function study(message, query) {
                     tempy[found.refIndex] = "__**" + tempy[found.refIndex] + "**__"
                     tempy = tempy.join(" ");
 
-                    finalResult.push(tempy);
+                    finalResult.push(slide);
                     message.channel.send("" + tempy + "");
                     message.channel.send("----------------------");
                 }
@@ -586,6 +586,11 @@ async function countTalk() {
 
 
                     let user = await findUser({ id: member.id });
+                    if(user == null){
+                        console.log("found the null user: " + member.displayName);
+                        checkExistance(member);
+
+                    }
                     let guilds = user.guilds.split("|");
                     let index = guilds.indexOf(guild.id);
 

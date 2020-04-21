@@ -1,0 +1,1030 @@
+Toxicology
+Clinical Biochemistry 3386b
+
+Michael Knauer PhD, FCACB
+michael.knauer@lhsc.on.ca
+1
+
+Learning Objectives for this Section:
+Understand the purpose and clinical context of toxicology.
+Learn the different clinical samples typically tested.
+Learn about the variety of drugs and poisons that are tested
+Understand the screen and confirmation tests and their purposes.
+
+2
+
+Toxicology
+Purpose of Toxicology Testing:
+To detect, identify, and possibly measure, in various biological fluids, drugs and poisons which may or may not be suspected to be present.
+3
+Substance could be illicit or prescribed 
+3
+
+Patients
+Emergency
+Babies and new mothers
+Psychiatric
+Pain Clinic
+Sexual Assault Centre
+Inpatients (ICU)
+
+
+4
+who do we look at for testing?
+- most come from emergency departments where patients come in and you look for drug abuse
+- new mothers and babies sometiems tested for illicit drug use for CAS cases
+- psychiatric for compliance or illicit drug use
+- pain clinics do compliance testing to see if they are compliant with pain medication to renew prescription adn they are taking they are taking it and not supplmenting it with anything
+- sexual assault cases 
+- ICU if they came in from motor vehicle c
+
+4
+
+Analytical Approaches
+
+ Tests for specific drugs/poisons (e.g. drugs of abuse) when clinical  information points directly to them
+
+General analyses for any or all drugs/ poisons when information on the case is limited
+5
+first is direct testing - test  for specific drug
+
+second to see classes of drugs they've been on or broad panel like mass spec to look at 100s 
+5
+
+Interpretation of Analyses Serum/Plasma:
+Specimen of choice to measure drug levels
+Can measure level of intoxication
+Contains parent drugs and some metabolites
+Analysis rather involved because of complex matrix including large amounts of lipid and protein present
+Drugs can be present in low concentration
+6
+main sample type is serum/plasma if you want to measure drug levels in patient
+- can tell you about intoxication or impact of having drug in system
+- more complex matrix and harder to test for because of lots of serum proteins and lipids in the sample
+- requires more sensitive technology like liquid chromatography or mass spec because drugs are often present in low concentrations
+
+6
+
+Interpretation of Analyses - Urine
+Indicates exposure (what drugs taken) but exact timeline of when the compound was ingested
+Cannot measure level of intoxication
+Contains mostly drug metabolites (sometimes parent drug)
+Less complex matrix results in simpler analysis due to very small amounts of lipid and protein present
+7
+the more common sample type is urine - this is because the question is usually 'what did the person take' rather than how much they took
+- doesn't tell you much about amount taken or when they took it (doesn't tell you a lot about intoxication)
+- most cases you only detect drug metabolites
+- it's a simpler matrix - less protein and fat - therefore easier to measure drug of interest
+7
+
+Interpretation of Analyses – Gastric Fluid
+
+relatively infrequently requested
+
+ invasive specimen
+
+no advantage over serum or urine
+8
+another fluid type that could be tested is gastric fluid 
+- this is very rarely tested because so invasive to retreive and not a lot of advantage 
+- e.g. known ingestion or found inconscious with empty pill bottle and it is thought they consumed 100s of pills
+
+8
+
+Interpretation of Analyses  - Hair and Meconium
+These testing matrices are used to determine long term exposure to drugs
+Hair testing can be used to identify a timeline for drug abuse or compliance. (e.g. was this a one-time exposure or has there been chronic exposure)
+Meconium tests are requested in neonates when there is concern regarding long term exposure to drugs in utero.
+Not clinically useful for acute management – TAT is too long – weeks
+Usually only requested by CAS
+
+9
+another sample type is hair and meconium (first stool formed in baby ~ black stool that baby has)
+- both are good matrices for long term exposure to drugs
+- hair testing can be used as a timeline - closer to scalp = more recent drug use
+- meconium testing is done on neonates and often when it is during concern regarding exposure in utero (medications or drug of abuse mom consumed during pregnancy)
+- tests are only done by specialized labs
+
+
+9
+
+Types of Drugs /Poisons
+1. Alcohols (ethanol, methanol, isopropanol and acetone, ethylene glycol)
+2. Drugs of Abuse (cannabinoids, opiates, cocaine, amphetamines, phencyclidine [PCP])
+3. Over-the-counter Drugs (salicylate, acetaminophen, pseudoephedrine, diphenhydramine)
+4. Prescription Drugs (antidepressants, benzodiazepines, barbiturates)
+5. Sexual assault drugs (gammahydroxybutyrate, flunitrazepam, ketamine)
+6. Heavy Metals (Pb, As, Hg)
+10
+2. can be street drugs or pharmaceutical drugs
+
+10
+
+Ethanol
+
+one of the most requested tox tests
+
+automated, fast, convenient
+
+based on alcohol dehydrogenase
+
+specific for ethanol only
+
+
+
+11
+if someone presents to ER with all signs of intoxication but they don't have ethanol
+11
+
+Toxic Volatile Alcohols
+
+Methanol    (windshield washer fluid, gas line antifreeze)
+
+Isopropanol    (rubbing alcohol)
+
+Acetone   (metabolite of isopropanol)
+12
+then you look at toxic volatile alcohols to see if they consumed these instead of ethanol 
+
+
+12
+
+Glycols
+
+Ethylene glycol         (antifreeze)
+
+
+Propylene Glycol     (numerous uses)
+13
+people might try to consume glycols in terms of suicidial intention/alcohol seeking behaviour 
+
+
+
+
+13
+
+Toxic Alcohols
+methanol, isopropanol, and ethylene glycol can only be analysed by gas chromatgraphy (GC)
+
+GC is also used to monitor treatment 
+(ethanol therapy, fomepizole, and/or haemodialysis –methanol, EG
+supportive treatment –  isopropanol/acetone)
+14
+GC can be used to monitor treatment (make sure methabol/ethanol is decreasing)
+
+treatment could be ethanol therapy to protect them from isoporonaol etc.
+- prevent ethanol from breaking  down into toxic metabolite
+
+fomepizole to prevent enzyme from breaking down and forming toxic metabolite
+
+^ most cases its followed up by hemodialysis to get rid of parent alchol and toxic emtabolite 
+
+if overdose found than supportive treatment 
+14
+
+15
+example of GC chromatogram 
+
+top tracing is standards for volatiles - they are all chromatographically seperated from each other and each peak is diff retention time on column
+
+volatile screen - patient sample only has peak correspodning with methanol and internal standard which helps quantify how mcuh tyey consumed
+
+ethanol theraphy - large peak of ethanol because given to prevent methanol from forming toxic metabolite, peak of methanol is smaller
+
+post tretment - individual does not have ethanol or methanol detected
+
+
+15
+
+Serum Osmolality Gap (OGAP)
+
+OGAP  = Osmolality measured - Osmolality calculated
+ 
+		   = Osmolality meas -  (2[Na] + [Glucose] + [Urea]) 
+  
+	          =    -10    to  +10
+
+unexplained (residual)  OGAP   =   OGAP – [Ethanol]
+16
+OGAP is where you look for measured and calculated osmolality
+
+submit sample of serum to laboratory which is measured for it and you also measure it for the main thing that takes it up in normal person (sodium, glucose, and urea) 
+
+use both to calculate OGAP
+
+measured is normally higher than calculated
+
+measured componetnts are 2 times sodium (because sodium and chloride are there, glucose and urea)
+
+ OGAP that is between -10 and +10 is normal OGAP
+
+take the unexplained/residual OGAP - 
+
+16
+
+Unexplained   OGAP
+
+Precision   (i.e. SD)   is  ± 6
+
+Accumulation of measurement error of
+Osmolality
+Na
+Glucose
+Urea
+Ethanol
+17
+precision of the OGAP - S.D could be +/- 6 due to accumulation error
+- small errors in all measurments add up 
+17
+
+Unexplained   OGAP
+An unexplained OGAP >10 mmol/L strongly suggests presence of something in addition to ethanol
+
+An unexplained OGAP ≤10 mmol/L   - not helpful
+
+
+
+18
+18
+
+Serum Osmolality Gap (OGAP)
+Ethylene glycol is toxic at only 3.2 mmol/L 
+
+Methanol is toxic at 8 mmol/L
+
+If unexplained OGAP <=6 mmol/L, we encourage clinical staff to cancel the methanol/isopropanol screen but not a glycol screen
+19
+
+Acetaminophen
+Tylenol
+Other preparations (e.g. Percocet, Robaxacet, combination cold remedies)
+Liver Toxicity is major concern
+> 4 grams per day
+Antidote
+
+20
+antidote - anacytalsitine or NAC - used to protect liver from toxic metabolite produced 
+
+
+20
+
+ The effect of a single oral dose of a drug  on its concentration in serum/ plasma
+21
+when you take a drug, you have absorption phase which peaks then a two phase distribtuion (distribution phase where it goes into tissues/fat and second one is elimination where it goes into bile or urine)
+
+knwoing when you are taking medicaiton from ingestion is important for interpretation of it 
+21
+
+22
+nomogram used in acetominophen overdosing
+
+it starts at 4 hrs after ingestion to 16 hrs
+- window where you are concerned about toxicitiy
+- measure the levels and plot it relating to time and when you think ingestion occured
+- more severe poisoning = more likely they are giving antidote
+earlier testing is done, earlier antidotte given 
+22
+
+Salicylate
+Aspirin
+Other preparations (e.g. Percodan)
+Pepto-Bismol (bismuth subsalicylate)
+Enteric-coated preparations
+Leads to Metabolic Acidosis
+Treatment is to enhance elimination
+Ion traping
+23
+eteric coated is different formulation where it has different coating or release pattern for aspirin
+
+ion trapping - salicylate is ionized and released primarily in urine so you enhance elimnation by taking acidic urine and make it charged to add more base to urine to keep the salicylate negatively charged and keeps them in the urine allowing you to pee them out 
+- uncharged salicylate have abiity to be reabsorbed back into body 
+23
+
+Sexual Assault Drugs
+Sexual assault drugs can include any drug which will reduce inhibitions and/or awareness such as:
+alcohol, cannabis, Ecstasy (MDMA), or benzodiazepines
+The classical application of the term “date rape drug” is to drugs which also induce amnesia of the assault (e.g. Gammahydroxybutyrate [GHB, GBL], flunitrazepam [Rohypnol], ketamine [Special K])
+
+24
+take serum or urine samples from victim and look to see if they were drugged
+
+drugs are used to reduce inhibitions/awareness/memory
+
+
+24
+
+Urine Drug  Testing
+25
+25
+
+How Long are Drugs Detectable in Urine?*
+*Dose and individual dependent
+Drug
+Estimated Window of Detection
+Drug Screen Threshold (Cutoff) Concentration ng/mL (μmol/L)
+ 
+Amphetamines
+1 - 3 days
+1000 (7.41)
+Barbiturates
+short/intermediate acting
+phenobarbital
+ 
+2 - 4 days
+Several weeks
+200 (0.84)
+Benzodiazepines
+1 - 7 days
+200 (0.70)
+Cannabinoids
+4 - 30 days
+50 (0.147)
+Cocaine
+ 
+300 (1.04)
+Opiates (Morphine or Codeine)
+2-3 days
+300 (1.05)
+GHB
+1 day (max)
+10 ug/mL
+26
+this is the first question in urine drug testing
+
+urine is primary choice because it is helpful in determining exposure of drug (not intoxication/effect of drug)
+
+half life gives you window of detection to find out if they consumed drugs
+
+shorter half life = shorter window of detection
+
+earlier you get the urine sample, more likely you will be able to pick up the trace of these
+
+drug screening have different cutt offs for different methadologies
+
+26
+
+Terminology
+
+Screening Test:
+
+initial test which distinguishes a negative result from a presumptive positive
+27
+27
+
+Terminology
+
+Presumptive Positive:
+
+positive screen test result not yet validated by a confirmation  test
+
+28
+in most cases, confirmation test/methodoly is by some type of mass spec method where you have definitive peak/fragmentation pattern compared to standard and you know it was present 
+
+most often come from immunoassay or POC
+28
+
+Terminology
+
+Confirmation Test:
+
+definitive test which conclusively establishes the
+presumptive positive screen result as a true or false
+positive
+
+
+29
+confirm. testing normally done with mass spec method 
+29
+
+Terminology
+
+True Positive: 
+
+   a positive screening test result which has been validated by a positive confirmation test result
+30
+both screening methodology and confirmation test both say drug is there in sample
+30
+
+Terminology
+
+False Positive:
+
+    a presumptive positive screening test result which has been invalidated by a negative confirmation test result
+
+31
+normally due to cross reactivity to some other drug in sample
+31
+
+Toxicology Methods
+
+1.  Screening Methods
+
+2.  Confirmation Methods
+32
+screening methods - rapid, easy to use, present in POC testing by lateral flow strips or core lab
+
+confirmation methods - based on mass spec 
+32
+
+Common Screen Methods Specific screen methods:
+Core Lab or POCT (mostly immunoassays)
+Qual or Quant
+Fast & Cheap (relatively)
+Sensitive screening methods
+False Positives?
+Serum(acetaminophen, salicylate, ethanol)
+Urine
+Drugs of abuse screens (urine)
+Prescription drug screens (mostly urine)
+cannabinoids
+opiates (but NOT oxycodone; poor cross-reactivity)
+amphetamines
+barbiturates (e.g. phenobarbital)
+cocaine
+benzodiazepines (e.g. lorazepam)
+opiates
+serum tricyclic antidepressants (e.g. amitriptyline)
+33
+they can be qualitative (so either present or absent)
+
+quantitative e.g. in core lab where you can know if they are close to threshold, twice the threshold, half of it etc. 
+
+these are fast, quick, short TAT (within an hour or minute)
+
+sensitive - can pick up many drugs
+
+not every drug in a class is equally good at causing a positive (doesn't react quite as well with antibodies)
+
+prone to false positivies because of interferent or other drug in sample which causing a false positive but it is not the class of drug that you want 
+
+it is important to know class (?)
+- 
+33
+
+Significant Cross-reactivity Problems
+
+Amphetamines
+			(pseudoephedrine,  e.g. Sudafed).
+
+Tricyclic antidepressant drugs 
+			(30% false positives)
+
+Cannabinoids
+	              (50% of all neonatal positives can be false)
+34
+cross reactivity causes false positives
+
+amphetamines cross react with psudeoephedrine 
+
+tricyclic antidepressant
+- structure is common to a lot of drugs
+
+cannabinoids 
+
+34
+
+Tricyclic Immunoassay Screen Cross-reactants
+Diphenhydramine
+Phenothiazines
+Carbamazepine
+Cyclobenzaprine
+Hydroxyzine
+Orphenadrine
+Cyproheptadine
+35
+not all of these are highly prescribed or used
+
+carbamazepine - antiepileptic drug
+
+
+35
+
+Causes Of False Positive Immunoassay Drug Screen Results
+[Drug] is close to but below the cutoff conc’n
+
+Presence of interfering substances 
+(usually other drugs)
+36
+due to interfering substance (some other drug)
+
+or drug gets close to cut-off
+- be a little bit higher than cut off but in confirmation testing its not high enough to reach cut off
+- could be due to the fact that parent drug/other drugs in the same class collectively bind and react in immunoassay therefore collectively theyre all greater in cutt off but when looking at them individually they might not meet it 
+36
+
+Confirmation Methods
+
+greater analytical sensitivity than the screen
+
+based on a different chemical principle
+
+HPLC,  GC,  triple quad LCMS,   GC/MS
+37
+measure lower concentrations and definiatively tell compound's presence
+
+method is based on mass spec usually which is a different pricniple than immunoassay
+
+could be done by HPLC or GC but more commonly done by LCMS or GC/MS
+
+
+37
+
+Screen Confirmation
+Positive screen result for drugs of abuse and prescription drugs
+Indeterminate screen result may be close but below the cut-off level,
+False positive screen result due to cross reactivity or interference from other drugs is always possible
+It is not necessary to do confirmations on all samples containing drugs, for example:
+Nicotine (unless insurance testing)
+Caffeine
+Therapeutic drugs for which there are assays available
+Prescribed drugs (known to be taken by patient).
+
+38
+38
+
+Criteria for Confirmation Testing:
+Presumptive positive immunoassay screen result
+Any uncertainty in the identification of a drug in the initial drug screen (e.g. GC/MS or LC/MS/MS)
+Request from patient care giver
+39
+if you need to know the true positive then you need to do a confirmation test
+
+
+39
+
+Criteria for Confirmation Testing:
+Reality check:
+
+In the clinical setting, confirmation testing cannot be done in real time for Emerg. Dept. needs
+
+
+And so many drug screens are ordered by ED.
+   Tox lab confirmation tests cannot keep up anyway
+
+Confirmation testing done on request only.
+
+Absolutely necessary in forensic toxicology testing to determine cause of death with certainty
+
+40
+when determining if to do a confirmation test, do a reality check, figure out if you need it and if it clinically impacts the case
+
+usually by ED, they want to determine what drug the overdose was and that's all they need to know to treat
+- ED though might be acting before the screening result
+ED also orders them for patients admitted to psychiatry - to figure out what the patient came into the ED On 
+
+confirmation testing requires more investment of time and greater TAT therefore no clinical use to ED 
+
+confirmation testing done in certain clinical situations like pain clinics and forensic investigation 
+
+
+40
+
+Toxidromes
+41
+clinically, they are assessing toxidromes (clinical parameters they can measure to assess what potential drug a patient overdosed on)
+- they do this along with screening methodology sent to core lab 
+
+toxidromes - clinically assess respiratory rate, HR, blood pressure, size of pupils, temperature, bowel, sweat and energy
+
+you can clinically classify drug overdose into one of these five categories which can dictate what the treatment should be
+
+all they need from the lab is a screen result to confirm that clinical picture and results match that they are on the right track
+
+anticholinergic - basically fight or flight response by someone
+
+noloxone is therapy for opioid overdose
+
+
+
+41
+
+Part 2 - Toxicology Cases
+42
+
+Case 1:
+A patient with is history of elicit drug use was seen in clinic and is asked to submit a specimen to undergo a urine drug screen to assess for Rx compliance. Their Rx include: Oxycodone, Morphine, Diazepam, Adderall (amphetamine)
+43
+
+Case 1: Drug Screen Results
+Screening Test
+Result
+Ordering Physician Comments
+Amphetamines
+Positive
+Is this consistent with Rx or elicit use?
+Benzodiazepines
+Negative
+Are they compliant with Rx?
+Cannaboids
+Negative
+Cocaine
+Positive
+Suggest elicit drug use
+Opiates
+Positive
+Oxycodone
+Positive
+Testing done in Core laboratory by Homogenous IA (KIMS methodology)
+44
+send screening testing to core laboratory - done with homogenous immunoassay
+
+physicians have to determine if that makes sense with the prescriped drugs
+
+the screen can't tell you if it is prescription or elicit
+
+opiates positive is consistent with prescription of morphine, so is oxycodene
+
+physicians may want to request confirmation testing for the amphatmines or benzos
+
+
+44
+
+45
+example of the GC/MS results for this patient
+
+patient has a positive/peak for cocaine -- so screening for cocaine got confirmed
+
+small peak for diazepam; maybe dose missed or its a low level accounted for by the negative screen but still detected by the more sensitive methodology
+45
+
+MDMA
+MDA
+46
+amphetamines - you can tell them apart by fragmentation pattern
+
+
+46
+
+Methamphetamine
+Amphetamine
+47
+fragmentation pattern slightly different for these
+
+same class of drugs but different fragmentation - screen result would be positive
+this will tell you which one was taken 
+
+47
+
+Case 1: Drug Screen Results
+Screening Test
+Screen Result
+Ordering Physician Comments
+Confirmation Testing
+Amphetamines
+Positive
+Is this consistent with Rx or elicit use?
+Positive for AMP, MethAMP, MDMA and MDA
+Benzodiazepines
+Negative
+Are they compliant with Rx?
+Positive
+Cannaboids
+Negative
+Negative
+Cocaine
+Positive
+Suggest elicit drug use
+Positive
+Opiates
+Positive
+Positive for Hydromorphone
+Oxycodone
+Positive
+Positive
+Testing done in Core laboratory by Homogenous IA (KIMS methodology). 
+Confirmation testing done by GC/MS
+48
+for benzos, confirmation tests show that they are compliant
+
+
+48
+
+Case 2
+A patient is seen in your pain clinic today and undergoes routine urine drug testing.
+Their Rx history includes Codeine (OTC), Nitrazapam, Oxycodone and recently they have had a cold with OTC cough and cold therapy
+49
+routine testing to assess compliance to make sure they are taking pain meds prescribed and not selling it or supplementing it with other things
+
+
+49
+
+Case 2: Drug Screen Results
+Screening Test
+Result
+Ordering Physician Comments
+Amphetamines
+Positive
+Is elicit use?
+Benzodiazepines
+Positive
+Cannaboids
+Negative
+Cocaine
+Negative
+Opiates
+Positive
+Oxycodone
+Positive
+Testing done in Core laboratory by Homogenous IA (KIMS methodology)
+50
+not prescribing amphetamines so you want to know if it is elicit use
+
+benzos, oxycodene consistent with prescription
+
+confirmation testing for amphetamines
+50
+
+51
+GC/MS for this patient
+
+
+
+51
+
+52
+
+Case 2: Drug Screen Results
+Screening Test
+Result
+Ordering Physician Comments
+Confirmation testing
+Amphetamines
+Positive
+Is elicit use?
+Negative (False Positive Screen)
+Benzodiazepines
+Positive
+Positive for Nitrazepam Met
+Cannaboids
+Negative
+Negative
+Cocaine
+Negative
+Negative
+Opiates
+Positive
+Positive for Hydromorphone and Hydrocodone
+Oxycodone
+Positive
+Positive
+Testing done in Core laboratory by Homogenous IA (KIMS methodology)
+Confirmation testing done by GC/MS
+53
+
+Case 3: Parkinson’s or Drug Toxicity? 
+54
+54
+
+Case 3 – ED Presentation
+70y Male
+Presented to ED with a two week history of falls, difficulty ambulating, ataxia, and worsening tremor.
+Concerns in past few months regarding cognition and tremor and recently assessed by neurology for Multisystem Atrophy vs Parkinson’s Disease.
+But symptoms have become significantly worse in the last few days.
+Difficulty ambulating around home
+Denys syncope or other cardiorespertory symptoms
+Daily nausea and vomiting (1 to 2x per day) after meals for the last several weeks and loose bowel movements
+Oral intake has been minimal over the last 2-3 days
+No fever or other infectious symptoms
+
+55
+
+Case 3 – Past Medical History
+20y Hx of bipolar disease with stable lithium dose
+CKD – Baseline Cr 160 mmol/L
+CAD – Grade 3-4 with multiple MIs in past
+Atrial Fibrillation
+Has an Automatic defibrillator inserted (AICD) – 6 years ago
+Ventricular Tachycardia
+Mild Cognitive impairment
+Lung cancer – Left lung lobectomy in 2000
+COPD
+Past smoker and consumes large amounts of nicotine gum
+Tremors, autonomic instability, erectile dysfunction, REM sleep disturbances, head drop
+Parkinsonian Syndrome – currently being worked up by Neurology
+Recently started on Sinemet (carbadopa/levodopa)
+
+56
+Cr - creatinine
+- normal levels
+
+MI - myocardial infarctions
+
+
+56
+
+Case 3 – Medication
+Lithium Carbonate 300mg PO TID
+Levodopa/Carbidopa 100mg/25mg PO TID
+Warfarin 4mg PO OD
+Vit B12 1000mcg PO OD
+Senokot 8.6mg PO qhs
+Venlafaxine SR 150mg PO OD
+Doxepin 50mg PO qhs
+Atorvastatin 40mg PO qhs
+Amiodarone 100mg PO OD
+Quetiapine 50mg PO qhs
+ASA 81mg PO OD
+Bisoprolol 7.5mg PO OD
+Furosemide 40mg PO OD
+Midodrine ?mg PO TID
+57
+he has complicated medical history and large list of medication
+
+
+57
+
+Case 3
+Triage Vitals
+T 36.6, HR 61, BP 97/60, RR 22, O2 Sat 96
+ 
+Physical Exam
+Appears well, no distress, dry mucus membranes JVP 1cm ASA
+CVS: normal 
+Resp: Normal, no wheezes or crackles
+Abd: Soft and Lax, no tenderness or rigidity, + BS
+No edema
+Neruo exam: alert and oriented, no facial asymmetry or slurred speech
+No pronator drift, CN2-12 normal, Power 5/5 all limbs, Reflexes 2+ No asterixis
+LABS
+CBC: WBC 10.5, Hgb 122 L, Neut 9.0 H, Lymph 0.7 L, PLT 213, MCV 96.2 H
+Na 137, K 5.4 H, Cl 104, CO2 26, AG 7
+Ca 2.54, Mg 1.27 H, PO4 1.2
+Alb 44
+AST 17, ALT 9, ALP 116, TBil 8
+CK 46, Lipase 48
+INR 2.61 H
+Urea 11.8 H
+Cre 214 H
+HsTrpT 40 H
+Glu, random 5.2
+
+UDS – Negative
+EtOH - ND
+Toxic Alcohol Screen – ND
+APAP – ND
+Salicylate – ND
+Lithium 2.5 mmol/L (0.4-1.3) C
+58
+appears well and not in distress
+
+basic chemistry panel is unremarkable; little bit high potassium but overall normal results
+- Cr is a little elevated
+
+looking for toxic cause for his symptoms
+
+urine drug test - no ellicit drugs 
+ethanol/alcohol screen - none detected
+aceptominophne (APAP) and serum - not detected 
+
+then someone measured lithium levels - he was prescribed it for his bipolar - it was critically high
+
+
+58
+
+Lithium Toxicity
+Acute – lithium naïve patients who overdose
+Chronic – on maintenance Li therapy with some change – increase dose, reduced kidney function, or new drug-drug interaction
+Acute on chronic – existing burden (from chronic maintenance therapy) and are acutely exposed to a large burden
+
+59
+
+Lithium Pharmacokinetics
+A 
+
+D 
+
+M 
+
+E 
+Complete in 6-8 hrs
+Peak plasma level 0.5-2 hrs
+Peak plasma for delayed release 4-5 hrs
+In total body water, no protein binding
+Delayed intracellular uptake
+CSF and brain uptake delayed by 24 hrs
+None
+Entirely in urine
+Freely filtered in glomerulus, 80% reabsorbed
+T ½ 12-27 hours (delayed in geriatric patients)
+60
+Because of my background I got asked about the role for Dialysis and Whole Bowel irrigation 
+
+A - absorption 
+D - distribution
+M - lithium is an ion therefore not metabolized
+E -excretion; excreted in urine
+60
+
+Case 1 – Lithium Levels
+Collect D/T: 2016/04/07 1955
+Receive D/T: 2016/04/07 2027
+  LITHIUM (TDM)
+    LAST DOSE (LI)
+UNKNOWN~
+    TIME OF LAST DOSE (LI)
+20160407200100~
+    LITHIUM
+C
+2.5
+(0.4-1.3)
+mmol/L
+Collect D/T: 2016/04/08 0715
+Receive D/T: 2016/04/08 1032
+    LITHIUM
+C
+2.1
+(0.4-1.3)
+mmol/L
+Collect D/T: 2016/04/08 1332
+Receive D/T: 2016/04/08 1529
+    LITHIUM
+H
+1.9
+(0.4-1.3)
+mmol/L
+Collect D/T: 2016/04/08 1925
+Receive D/T: 2016/04/08 2031
+    LITHIUM
+H
+1.7
+(0.4-1.3)
+mmol/L
+Collect D/T: 2016/04/09 0724
+Receive D/T: 2016/04/09 0751
+    LITHIUM
+H
+1.4
+(0.4-1.3)
+mmol/L
+Collect D/T: 2016/04/09 1345
+Receive D/T: 2016/04/09 1500
+    LITHIUM
+1.2
+(0.4-1.3)
+mmol/L
+Collect D/T: 2016/04/10 0735
+Receive D/T: 2016/04/10 0814
+    LITHIUM
+0.9
+(0.4-1.3)
+mmol/L
+Collect D/T: 2016/04/11 1440
+Receive D/T: 2016/04/11 1523
+    LITHIUM
+0.6
+(0.4-1.3)
+mmol/L
+Collect D/T: 2016/04/13 0710
+Receive D/T: 2016/04/13 0816
+    LITHIUM
+0.4
+(0.4-1.3)
+mmol/L
+61
+2.5 to 1.2 (2 Days)
+1.2 -0.6 ( 2 Days)
+Lithium halflife is 2 days in this Patient normally ~1 day
+61
+
+Case 3 – Lithium Levels
+62
+2.5 to 1.2 (2 Days)
+1.2 -0.6 ( 2 Days)
+Lithium halflife is 2 days in this Patient normally ~1 day
+
+longer than 24 hrs for a half life for him (first half life)
+
+next half life - almost two days
+
+this patient has a delayed half life and takes about two days per half life 
+62
+
+Case 3 - Conclusion
+After doing a comprehensive laboratory investigation including UDS, toxic alcohol screen and lithium level for TDM. The patient was found to have a critical Lithium level 2.5 mmol/L (RI 0.4 – 1.3) with mild acute on chronic kidney disease Cre 214.
+He was on a stable lithium dose over the last few years and denies any intentional overdose and was taking his lithium as prescribed. Lithium was held until the lithium levels came down to below the reference range 0.4 mmol/L (6 days).
+Recommendation from Nephrology, Clinical Pharmacology, and Poison Centre was to hold the Lithium and give IV fluids, acute dialysis is not indicated to facilitate lithium clearance. 
+Monitor kidney function with frequent volume assessments and watch for lithium induced diabetes insipidus .
+The differential for his presentation would include lithium toxicity versus worsening of his underlying neurological disorder, secondary to decreased oral intake, GI symptoms, and hypovolumeia.
+Patient was referred to Psychiatry for reassessment of Bipolar disorder and lithium dosing
+63
+
+Lithium Toxicity
+Lithium toxicity treatment guidelines for Dialysis: 
+Lithium level >6 mmol/L: any patient
+Lithium level >4 mmol/L: any patient on chronic lithium therapy
+Lithium level between 2.5 and 4 mmol/L: any patient with severe neurologic symptoms, renal insufficiency, or unstable hemodynamically or neurologically
+Lithium level <2.5 mmol/L: hemodialysis indicated only for patients with end-stage renal disease or patients whose lithium levels increase after admission or who fail to reach a lithium level below 1 mmol/L in 30 h
+Ref Dr B. Kapur CSCC List Serv
+64
+
+Lithium Toxicity
+Current clinical practice in the fields of Psychiatry and Geriatric Psychiatry, expert opinion, and the literature, the the upper limit (1.3 mmol/L) was deemed too high for the elderly. 
+Recommended therapeutic interval of 0.4-0.8 mmol/L in patients ≥ 65  years of age.
+Australian and New Zealand Journal of Psychiatry 2011; 45:1026–1032 
+Curr Psychiatry Rep (2011) 13:488–492
+65
+
+Conclusions
+These cases are to illustrate the need for toxicology testing in the compliance and over dose setting
+Important to recognize the differences between screening and confirmation testing 
+66

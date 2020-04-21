@@ -13,7 +13,7 @@ var previous = 0;
 
 
 async function processLineByLine() {
-    const fileStream = fs.createReadStream('L4_Knauer-TDM.txt');
+    const fileStream = fs.createReadStream('L6_Knauer-Tumor_markers.txt');
 
     const rl = readline.createInterface({
         input: fileStream,
@@ -29,33 +29,47 @@ async function processLineByLine() {
 
             if (!isNaN(line)) {
 
-                if(previous == Number(line)){
-                    let tempArray = lineArray[lineArray.length - 1].split(" || ");
-                    tempArray[0] += ".\n" + tempLine;
-                    lineArray[lineArray.length - 1] = tempArray.join(" || ");
+                if (previous == Number(line)) {
+
+                    lineArray[lineArray.length - 1] += tempLine;
+                    tempLine = "";
                     previous = Number(line);
                 }
-                else{
+                else if (((Number(line) - counter) == 1) && previous != Number(line)) {
+
 
                     previous = Number(line);
-                    tempLine += " || SLIDE #: " + line + "";
+                    counter = previous;
+
+                    tempLine += " || SLIDE #: " + previous + "";
                     lineArray.push(tempLine);
+
+                    let tempArray = lineArray[lineArray.length - 1].split(" || ");
+                    let holder = tempArray[1];
+                    tempArray[1] = tempArray[0];
+                    tempArray[0] = holder;
+
+                    lineArray[lineArray.length - 1] = tempArray.join(" || ");
+
                     tempLine = "";
+                }
+                else {
+                    tempLine += line + "\n";
                 }
             }
             else {
-                tempLine += line;
+                tempLine += line + "\n";
             }
         }
     }
 
     console.log("final length: " + lineArray.length);
     let final2 = {
-        "pptName": "L4-Knauer-TDM",
+        "pptName": "L6_Knauer-Tumor_markets",
         "slides": lineArray
     };
 
-    fs.writeFile("L4-Knauer-TDM.json", JSON.stringify(final2), function (err, result) {
+    fs.writeFile("L6_Knauer-Tumor_markets.json", JSON.stringify(final2), function (err, result) {
         if (err) console.log('error', err);
     });
 }
