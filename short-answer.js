@@ -642,7 +642,7 @@ async function countTalk() {
 
                     let user = await findUser({ id: member.id });
                     if (user == null) {
-                        console.log("found the null user: " + member.displayName);
+                        console.log("found the null user: " + member.displayName + " || From: " + guild.name);
                         await checkExistance(member);
 
                     }
