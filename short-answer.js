@@ -1292,6 +1292,20 @@ async function playSong(guild, song) {
 }
 
 
+
+async function graphs() {
+
+    let ch = message.channel;
+    await ch.send("**= = = =**");
+    for (question in questions) {
+
+        await ch.send("**" + question.content + "**")
+        let numReact = question.reactions.length;
+
+    }
+}
+
+
 async function updateAll() {
 
 
@@ -1315,19 +1329,6 @@ async function updateAll() {
     // });//each user loop
 
     //console.log("CALLED UPDATE ALL");
-}
-
-//
-async function graphs() {
-
-    let ch = message.channel;
-    await ch.send("**= = = =**");
-    for (question in questions) {
-
-        await ch.send("**" + question.content + "**")
-        let numReact = question.reactions.length;
-
-    }
 }
 
 async function minuteCount() {
