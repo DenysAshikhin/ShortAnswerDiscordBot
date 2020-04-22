@@ -37,6 +37,12 @@ const UserSchema = new mongoose.Schema({
     },
     guilds: {
         type: String
+    },
+    activeTutorial: {
+        type: Number
+    },
+    tutorialStep: {
+        type: Number
     }
 });
 

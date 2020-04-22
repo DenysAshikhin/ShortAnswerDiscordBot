@@ -96,7 +96,7 @@ connectDB.once('open', async function () {
 
         Client.user.setActivity("sa!help for information");
 
-        //updateAll();
+        updateAll();
     })
 
     let questions = new Array();
@@ -233,7 +233,8 @@ connectDB.once('open', async function () {
                         queue.get(message.guild.id).songs.shift();
                         playSong(message.guild, queue.get(message.guild.id).songs[0]);
                     }
-                } else {
+                } 
+                else {
 
                     if (command == ("myStats".toUpperCase())) {
                         personalDMStats(message);
@@ -1231,15 +1232,15 @@ async function updateAll() {
 
 
 
-    //let users = await getUsers();
+    // let users = await getUsers();
 
-    //users.forEach(async user => {
+    // users.forEach(async user => {
 
     // let changed = await User.findOneAndUpdate({ id: user.id },
     //     {
     //         $set: {
-    //             excludePing: false,
-    //             excludeDM: false
+    //             activeTutorial: -1,
+    //             tutorialStep: -1
     //         }
     //     }, { new: true });
 
@@ -1247,9 +1248,9 @@ async function updateAll() {
     // user.save();
 
 
-    //});//each user loop
+    // });//each user loop
 
-    console.log("CALLED UPDATE ALL");
+    //console.log("CALLED UPDATE ALL");
 }
 
 //
@@ -1273,8 +1274,9 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-//Add a DM exclusive stats page
-
+//DM game setup
+//DM quality of life 
+//Custom, per-user prefix
 
 //coin flipper
 //game decider
