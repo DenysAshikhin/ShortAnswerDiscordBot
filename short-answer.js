@@ -11,17 +11,36 @@ const ytdl = require("ytdl-core");
 const fs = require('fs');
 const gameJSON = require('./gameslist.json')
 const studyJSON = require('./medstudy.json');
-const config = require('./config.json');
+var config = null;
+try {
+    config = require('./config.json');
+}
+catch (err) {
+
+    console.log(err);
+}
+
 const tutorials = require('./tutorials.json');
 //const studyJSON = require('./ouda.json');
 
 console.log()
 
 var prefix = "sa!";
-const uri = process.env.URI || config.uri;
 
+
+
+var uri = "";
 var token = "";
-token = process.env.TOKEN || config.token;
+
+if (config == null){
+    uri = process.env.URI;
+    token = process.env.TOKEN;
+}
+else{
+    uri = config.uri;
+    token = config.token;
+}
+
 
 var Client = new Discord.Client();
 var guild = new Discord.Guild();
