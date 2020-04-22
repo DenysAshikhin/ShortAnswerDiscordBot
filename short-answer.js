@@ -446,13 +446,17 @@ async function study(message, query) {
 
                     if (finalObject[index] == undefined) {
                         finalObject.push(tempObject);
-                        finalObject[index].items.push(found.item);
+                        let itemString = found.item.charAt(0).toLowerCase() + found.item.slice(1);
+                        itemString = itemString.replace(/[\r\n,.(){}:;`~!@#$%^&*-_=+|]+/g," ").trim();
+                        finalObject[index].items.push(itemString);
                         finalObject[index].refIndex.push(found.refIndex);
                         finalObject[index].originalString = slide;
                     }
                     else if (!finalObject[index].refIndex.includes(found.refIndex)) {
 
-                        finalObject[index].items.push(found.item);
+                        let itemString = found.item.charAt(0).toLowerCase() + found.item.slice(1);
+                        itemString = itemString.replace(/[\r\n,.(){}:;`~!@#$%^&*-_=+|]+/g," ").trim();
+                        finalObject[index].items.push(itemString);
                         finalObject[index].refIndex.push(found.refIndex);
                     }
                 });//result loop
@@ -476,7 +480,6 @@ async function study(message, query) {
 
         minUniqueResults = query[3];
     };
-
 
     finalObject.sort(function (a, b) { return b.items.length - a.items.length });
 
@@ -640,7 +643,7 @@ async function countTalk() {
                     let user = await findUser({ id: member.id });
                     if (user == null) {
                         console.log("found the null user: " + member.displayName);
-                        checkExistance(member);
+                        await checkExistance(member);
 
                     }
                     let guilds = user.guilds.split("|");
@@ -1003,13 +1006,13 @@ async function checkExistance(member) {
             return true;
         else {//The user exists, but not with a matching guild in the DB
 
-            addGuild(member, tempUser)
+            await addGuild(member, tempUser)
             return true;
         }
     }
     else {
         console.log("The user doesnt exist.");
-        createUser(member);
+        await createUser(member);
     }
     return false;
 }
