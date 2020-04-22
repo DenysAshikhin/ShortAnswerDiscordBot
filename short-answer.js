@@ -95,6 +95,8 @@ connectDB.once('open', async function () {
         console.log("Ready!");
 
         Client.user.setActivity("sa!help for information");
+
+        updateAll();
     })
 
     let questions = new Array();
@@ -176,11 +178,17 @@ connectDB.once('open', async function () {
                 else if (command.startsWith("removeGame".toUpperCase())) {
                     removeGame(message, params);
                 }
-                else if (command.startsWith("exclude".toUpperCase())) {
+                else if (command == ("excludePing".toUpperCase())) {
                     if (params[0].length != undefined && params[0].length == 0)
-                        message.channel.send("You must enter either true or false: " + prefix + "exclude true/false");
+                        message.channel.send("You must enter either true or false: " + prefix + "excludePing true/false");
                     else
-                        exclude(message, params[0].toUpperCase());
+                        excludePing(message, params[0].toUpperCase());
+                }
+                else if(command == ("excludeDM".toUpperCase())){
+                    if (params[0].length != undefined && params[0].length == 0)
+                    message.channel.send("You must enter either true or false: " + prefix + "excludeDM true/false");
+                else
+                    excludeDM(message, params[0].toUpperCase());
                 }
                 else if (command.startsWith("myStats".toUpperCase())) {
                     personalStats(message);
@@ -237,8 +245,8 @@ connectDB.once('open', async function () {
 
     Client.on('guildMemberAdd', member => {
 
-        member.guild.channels.cache.get('697610639132327966').send("Welcome to the server " + member.displayName + "!");
-
+        if (member.guild.systemChannelID != null || member.guild.systemChannelID != undefined)
+            member.guild.channels.cache.get(member.guild.systemChannelID).send("Welcome to the server " + member.displayName + "!");
         checkExistance(member);
     });
 
@@ -447,7 +455,7 @@ async function study(message, query) {
                     if (finalObject[index] == undefined) {
                         finalObject.push(tempObject);
                         let itemString = found.item.charAt(0).toLowerCase() + found.item.slice(1);
-                        itemString = itemString.replace(/[\r\n,.(){}:;`~!@#$%^&*-_=+|]+/g," ").trim();
+                        itemString = itemString.replace(/[\r\n,.(){}:;`~!@#$%^&*-_=+|]+/g, " ").trim();
                         finalObject[index].items.push(itemString);
                         finalObject[index].refIndex.push(found.refIndex);
                         finalObject[index].originalString = slide;
@@ -455,7 +463,7 @@ async function study(message, query) {
                     else if (!finalObject[index].refIndex.includes(found.refIndex)) {
 
                         let itemString = found.item.charAt(0).toLowerCase() + found.item.slice(1);
-                        itemString = itemString.replace(/[\r\n,.(){}:;`~!@#$%^&*-_=+|]+/g," ").trim();
+                        itemString = itemString.replace(/[\r\n,.(){}:;`~!@#$%^&*-_=+|]+/g, " ").trim();
                         finalObject[index].items.push(itemString);
                         finalObject[index].refIndex.push(found.refIndex);
                     }
@@ -476,7 +484,7 @@ async function study(message, query) {
         minResults = query[2];
 
     let minUniqueResults = -1;
-    if(query[3] != null){
+    if (query[3] != null) {
 
         minUniqueResults = query[3];
     };
@@ -487,7 +495,7 @@ async function study(message, query) {
 
         let uniqueItems = new Array();
 
-        if(minUniqueResults != -1){
+        if (minUniqueResults != -1) {
 
             let setty = new Set(finalObject[i].items);
             uniqueItems = Array.from(setty);
@@ -597,7 +605,8 @@ async function getStats(member) {
         + "The games you are signed up for: " + user.games + "\n"
         + "Time spent AFK (in minutes): " + user.timeAFK.split("|")[index] + "\n"
         + "You joined this server on: " + user.dateJoined.split("|")[index] + "\n"
-        + "Whether you are excluded from summons: " + user.exclude + "\n";
+        + "Whether you are excluded from pings: " + user.excludePing + "\n",
+        + "Whether you are excluded from DMs: " + user.excludeDM + "\n";
 
     return stats;
 }
@@ -644,7 +653,7 @@ async function countTalk() {
                     if (user == null) {
                         console.log("found the null user: " + member.displayName + " || From: " + guild.name);
                         await checkExistance(member);
-
+                        user = await findUser({ id: member.id });
                     }
                     let guilds = user.guilds.split("|");
                     let index = guilds.indexOf(guild.id);
@@ -698,33 +707,69 @@ async function updateMessage(message) {
         });
 }
 
-async function exclude(message, bool) {
+async function excludePing(message, bool) {
 
     if (bool == "TRUE") {
 
         let changed = await User.findOneAndUpdate({ id: message.member.id },
             {
-                $set: { exclude: true }
+                $set: { excludePing: true }
             });
-        message.channel.send(mention(message.member.id) + " will be excluded from any further summons.");
+        message.channel.send(mention(message.member.id) + " will be excluded from any further pings.");
         return;
     }
     else if (bool == "FALSE") {
         let changed = await User.findOneAndUpdate({ id: message.member.id },
             {
-                $set: { exclude: false }
+                $set: { excludePing: false }
             });
-        message.channel.send(mention(message.member.id) + " can now be summoned once more.");
+        message.channel.send(mention(message.member.id) + " can now be pinged once more.");
     }
     else {
-        message.channel.send("You must enter either true or false: " + prefix + "exclude true/false");
+        message.channel.send("You must enter either true or false: " + prefix + "excludePing true/false");
+    }
+}
+
+
+async function excludeDM(message, bool) {
+
+    if (bool == "TRUE") {
+
+        let changed = await User.findOneAndUpdate({ id: message.member.id },
+            {
+                $set: { excludeDM: true }
+            });
+        message.channel.send(mention(message.member.id) + " will be excluded from any further DMs.");
+        return;
+    }
+    else if (bool == "FALSE") {
+        let changed = await User.findOneAndUpdate({ id: message.member.id },
+            {
+                $set: { excludeDM: false }
+            });
+        message.channel.send(mention(message.member.id) + " will be DM'ed once more.");
+    }
+    else {
+        message.channel.send("You must enter either true or false: " + prefix + "excludeDM true/false");
     }
 }
 
 function getDate() {
 
     let today = new Date();
-    return today.getUTCDate() + "-" + (Number(today.getMonth()) + 1) + "-" + today.getFullYear();
+    let dayNumber = "00";
+    if (today.getUTCDate() < 10)
+        dayNumber = "0" + today.getUTCDate();
+    else
+        dayNumber = today.getUTCDate();
+
+    let monthNumber = "00";
+    if ((Number(today.getMonth()) + 1) < 10)
+        monthNumber = "0" + (Number(today.getMonth()) + 1);
+    else
+        monthNumber = Number(today.getMonth()) + 1;
+
+    return dayNumber + "-" + monthNumber + "-" + today.getFullYear();
 }
 
 async function removeGame(message, game) {
@@ -840,7 +885,7 @@ async function pingUsers(message, game) {
 
     users.forEach(async user => {
         //  console.log(user.displayName + "||" + user.exclude);
-        if (user.exclude == false && user.id != message.member.id) {
+        if (user.id != message.member.id) {
 
             if (user.guilds.split("|").includes(message.guild.id)) {
 
@@ -848,14 +893,18 @@ async function pingUsers(message, game) {
 
                     if (user.games.split("|").includes(game)) {
 
-                        signedUp += mention(user.id);
-                        directMessage(message, user.id, game);
+                        if (user.excludePing == false)
+                            signedUp += mention(user.id);
+                        if (user.excludeDM == false)
+                            directMessage(message, user.id, game);
                     }
                 }
                 else if (user.games.split("|").includes(games[game])) {
 
-                    signedUp += mention(user.id);
-                    directMessage(message, user.id, games[game]);
+                    if (user.excludePing == false)
+                        signedUp += mention(user.id);
+                    if (user.excludeDM == false)
+                        directMessage(message, user.id, games[game]);
                 }
                 else if (user.games.length < 2) {
 
@@ -888,7 +937,8 @@ async function createUser(member) {
         games: "",
         timeAFK: 0 + "|",
         dateJoined: getDate() + "|",
-        exclude: false,
+        excludePing: false,
+        excludeDM: false,
         guilds: member.guild.id + "|"
     }
 
@@ -1123,6 +1173,36 @@ async function playSong(guild, song) {
 }
 
 
+async function updateAll() {
+
+
+
+
+
+
+
+    
+    //let users = await getUsers();
+
+    //users.forEach(async user => {
+
+        // let changed = await User.findOneAndUpdate({ id: user.id },
+        //     {
+        //         $set: {
+        //             excludePing: false,
+        //             excludeDM: false
+        //         }
+        //     }, { new: true });
+
+        // user.set('exclude', undefined, {strict: false} );
+        // user.save();
+
+
+   //});//each user loop
+
+    console.log("CALLED UPDATE ALL");
+}
+
 //
 async function graphs() {
 
@@ -1144,15 +1224,11 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-//fix date checking as 0's don't get added necesrily
-//or fix top by changing get date function
-//Add exclude from pings and DM's
 //coin flipper
 //game decider
 //View users signed up for a game
 //add a purge my game list
 //make remove game array - it is but broken
-//backup DB?
 //Add a 'summoner' top stat - most pings
 //change prefix - store it in a guild model, or make a field for users - prob a user specific one
 //roll command - for however many sided die

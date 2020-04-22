@@ -29,7 +29,10 @@ const UserSchema = new mongoose.Schema({
     dateJoined:{
         type: String   
     },
-    exclude:{
+    excludePing:{
+        type: Boolean
+    },
+    excludeDM:{
         type: Boolean
     },
     guilds: {
