@@ -242,7 +242,6 @@ connectDB.once('open', async function () {
                     else {
                         message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
                     }
-
                 }
             }
         }
