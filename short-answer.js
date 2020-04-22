@@ -105,7 +105,7 @@ connectDB.once('open', async function () {
     Client.on("message", async (message) => {
 
         if (message.author.bot) return;
-        
+
         if (message.content.substr(0, prefix.length) == prefix) {
 
             let messageArray = message.content.split(' ');
@@ -117,7 +117,8 @@ connectDB.once('open', async function () {
             if (params[0] == undefined)
                 params[0] = "";
 
-               
+            if (message.channel.type != 'dm')
+                updateMessage(message);
 
             //Commands that work in both servers and DM's
             if (command == ("populate".toUpperCase())) {
@@ -181,7 +182,7 @@ connectDB.once('open', async function () {
             }
             else if (message.channel.type != 'dm') {//Server exclusive commands
 
-                updateMessage(message);
+
                 if (command == ("initialiseUsers".toUpperCase())) {
 
                     initialiseUsers(message);
@@ -234,22 +235,24 @@ connectDB.once('open', async function () {
                 else if (command == ("skip".toUpperCase())) {
                     queue.get(message.guild.id).songs.shift();
                     playSong(message.guild, queue.get(message.guild.id).songs[0]);
+                } else if (command == ("gameTutorial".toUpperCase())) {
+                    message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it me privately :wink:`);
                 }
-            }
+            }//End of server text channel else/if chain
             else {
 
                 if (command == ("myStats".toUpperCase())) {
                     personalDMStats(message);
                 }
-
-
+                else if (command == ("gameTutorial".toUpperCase())) {
+                    firstTimeSetup(message);
+                }
                 else {
                     message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
-                }
+                }//End of DM else/if chain
             }
-        }
-
-    });
+        }//End of checking for correct prefix
+    });//End of Client.on('message')
 
     Client.on('guildMemberAdd', member => {
 
@@ -269,16 +272,45 @@ connectDB.once('open', async function () {
 async function firstTimeSetup(message) {
 
     let steps = [
-        `Greeting!\nYou are getting this message because I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
-        + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type ${prefix}gameTutorial`
-        + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type [${prefix}tutorials false] without the square brackets.`,
-        `if you understand then lets search for a game you play with others!\nDo so by typing [${prefix}search  nameOfGame] without the square brackets.`,
+        `Greetings!\nYou are getting this message because I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
+        + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
+        + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.`,
+        `Awesome, let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`
+        + "```Example(s):\n1) " + prefix + "search Counter Strike\n2) " + prefix + "search Counter Strike, Minecrt```",
         `Now that you see a bunch of results, hopefully the game you wanted is towards the top, along with the associated number.`
-        + ` To add this game to your games list type [${prefix}signUp game#]. You can alternatively signup by pasting the complete name of the game.`,
-        + `You can also sign up for as many games at once you would like by seperating each entry by a comma - you can mix both words and numbers for each entry as such:`
-        + ` **${prefix}signUp Valorant, 2, Risk of Rain 2**\nThis will add the following games to you games list: Valorant, 20XX, and Risk of Rain 2.`
-        + ` Now it's your turn to sign up for more than one game at once, don't worry, I will show you how to remove any game in the following steps.`
+        + ` To add this game to your games list type **${prefix}signUp** *game#*. You can alternatively signup by pasting the complete name of the game.`
+        + "```Example(s):\n1) " + prefix + "signUp 302\n2) " + prefix + "signUp Counter-Strike: Global Offensive```"
+        + ` Please add any valid game to your games list to continue`,
+        `You can also sign up for as many games at once you would like by seperating each entry by a comma - you can mix both words and numbers for each entry as such:`
+        + "```Example(s):\n1) " + prefix + "signUp 2, Counter-Strike: Global Offensive, 24, Minecraft```"
+        + ` Now it's your turn to sign up for more than one game at once, don't worry, I will show you how to remove any or all games in the following steps.`,
+        `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}myGames**`
+        + "```Example(s):\n1) " + prefix + "myGames```",
+        `Now try removing any of the games in your games list by typing **${prefix}removeGame** *game#*. Just a heads up that the GAME# is the number from your games list.`
+        + "```Example(s):\n1) " + prefix + "removeGame 2```",
+        `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}ping** *nameOfGame* and anyone who has this game and the proper excludes`
+        + ` will be notified. NOTE: "nameOfGame" has to be spelled perfectly but it does not have to be in your games list.`
+        + "```Example(s):\n1) " + prefix + "ping Counter-Strike: Global Offensive```"
+        + ` Go ahead, try out the command!`,
+        `Almost done, now some quality of life, when someone pings a game, there will be two notifications for you, an @mention in the text channel it was sent from,`
+        + ` and a direct mention. To disable direct mentions simply type **${prefix}excludeDM** *true/false*, and to disable @mentions simply type`
+        + ` **${prefix}excludePing** *true/false*.`
+        + "```Example(s):\n1) " + prefix + "excludeDM true\n2) " + prefix + "excludePing false```"
+        + `To complete the walkthrough go ahead and try any one of these commands.`,
+        `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
+        + ` **${prefix}suggest** *ny suggestion here* and I'll forward the message to the creator. For a more general help, type **${prefix}help**`
+        + `\nAs a final note, this bot is being rapidly developed with new feautres constantly being added,`
+        + `if you would like to recieve a private message when a new feature is live, type **${prefix}updateMe** *true/false*.`
+        + "```Example(s):\n1) " + prefix + "suggest You should add game XYZ to the games list!\n2) " + prefix + "help\n3) " + prefix + "updateMe true```"
     ]
+
+    message.channel.send(steps[8]);
+
+
+    // steps.forEach(prompt => {
+
+    //     message.channel.send(prompt+"\n===============================================================");
+    // })
 }
 
 async function personalGames(message) {
@@ -393,7 +425,7 @@ async function search(message, searches) {
     if (searches == undefined || searches == null || searches.length < 1) {
 
         message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "gamesList counter");
-        return;
+        return false;
     }
 
     searches.forEach(query => {
@@ -429,7 +461,8 @@ async function search(message, searches) {
             }
         }
 
-    });
+    });//Each query response
+    return true;
 }
 
 async function study(message, query) {
@@ -437,7 +470,7 @@ async function study(message, query) {
     if (query == undefined || query == null || query.length < 1) {
 
         message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "gamesList counter");
-        return;
+        return false;
     }
 
     let finalObject = new Array();
@@ -945,9 +978,9 @@ async function pingUsers(message, game) {
         message.channel.send(game + " is not a valid game, please try again or type " + prefix + "gamesList to view the list of all games.");
         return;
     }
-    else if(message.channel.type == 'dm'){
-        
-        await message.channel.send(mention(message.author.id) + " has summoned " + message.client.user.username + " for some " + game);
+    else if (message.channel.type == 'dm') {
+
+        await message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game);
         await message.channel.send("Unfortunately I cannot play games, why not try the same command inside a server?");
         return;
     }
@@ -1290,7 +1323,7 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
-
+//Add a return for certain function, true/false for success or fail, or a number for how many things were added/deleted
 //DM game setup
 //DM quality of life 
 //Custom, per-user prefix
