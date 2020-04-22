@@ -11,14 +11,18 @@ const ytdl = require("ytdl-core");
 const fs = require('fs');
 const gameJSON = require('./gameslist.json')
 const studyJSON = require('./medstudy.json');
+const config = require('./config.json');
+const tutorials = require('./tutorials.json');
 //const studyJSON = require('./ouda.json');
 
+console.log()
 
-
-const prefix = "sa!";
-const uri = 'mongodb+srv://shortAnswer:shortAnswer@cluster0-x2hks.mongodb.net/test?retryWrites=true&w=majority';
+var prefix = "sa!";
+const uri = process.env.URI || config.uri;
 
 var token = "";
+token = process.env.TOKEN || config.token;
+
 var Client = new Discord.Client();
 var guild = new Discord.Guild();
 
@@ -70,8 +74,6 @@ const findBot = async function (params) {
 }
 connectDB.once('open', async function () {
 
-    token = await findBot({ name: "bot" });
-    token = token.token;
     Client.login(token);
 
     gameJSON.forEach(element => {
@@ -87,7 +89,6 @@ connectDB.once('open', async function () {
 
         studyArray.push(element);
     })
-    //studyArray.sort();
 
 
     Client.on("ready", () => {
@@ -103,149 +104,151 @@ connectDB.once('open', async function () {
 
     Client.on("message", async (message) => {
 
-        if (message.author.id != botID) {
+        if (message.author.bot) return;
+        
+        if (message.content.substr(0, prefix.length) == prefix) {
 
-            if (message.content.substr(0, prefix.length) == prefix) {
+            let messageArray = message.content.split(' ');
+            let command = messageArray[0];
+            command = command.substr(prefix.length).toUpperCase();
 
-                let messageArray = message.content.split(' ');
-                let command = messageArray[0];
-                command = command.substr(prefix.length).toUpperCase();
+            let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
-                let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
+            if (params[0] == undefined)
+                params[0] = "";
 
-                if (params[0] == undefined)
-                    params[0] = "";
+               
 
+            //Commands that work in both servers and DM's
+            if (command == ("populate".toUpperCase())) {
 
-                //Commands that work in both servers and DM's
-                if (command == ("populate".toUpperCase())) {
+                for (i = 1; i <= params[0]; i++) {
 
-                    for (i = 1; i <= params[0]; i++) {
+                    await message.channel.send(i).then(sent => {
 
-                        await message.channel.send(i).then(sent => {
+                        reactAnswers(sent);
+                        questions.push(sent);
+                    });
+                }
+                message.delete();
+                // graphs();
+            }
+            else if (command == ("search".toUpperCase())) {
+                search(message, params);
+            }
+            else if (command == ("signUp".toUpperCase())) {
 
-                            reactAnswers(sent);
-                            questions.push(sent);
+                await updateGames(message, params);
+            }
+            else if (command == ("myGames".toUpperCase())) {
+                personalGames(message);
+            }
+            else if (command == ("removeGame".toUpperCase())) {
+                removeGame(message, params);
+            }
+            else if (command == ("excludePing".toUpperCase())) {
+                if (params[0].length != undefined && params[0].length == 0)
+                    message.channel.send("You must enter either true or false: " + prefix + "excludePing true/false");
+                else
+                    excludePing(message, params[0].toUpperCase());
+            }
+            else if (command == ("excludeDM".toUpperCase())) {
+                if (params[0].length != undefined && params[0].length == 0)
+                    message.channel.send("You must enter either true or false: " + prefix + "excludeDM true/false");
+                else
+                    excludeDM(message, params[0].toUpperCase());
+            }
+            else if (command == ("help".toUpperCase())) {
+                generalHelp(message);
+            }
+            else if (command == ("helpGames".toUpperCase())) {
+                gameHelp(message);
+            }
+            else if (command == ("helpStats".toUpperCase())) {
+                helpStats(message);
+            }
+            else if (command == ("helpMiscellaneous".toUpperCase())) {
+                helpMiscellaneous(message);
+            }
+            else if (command == ("helpMusic".toUpperCase())) {
+                helpMusic(message);
+            }
+            else if (command == ("study".toUpperCase())) {
+                study(message, params);
+            }
+            else if (command == ("ping".toUpperCase())) {
+                pingUsers(message, params[0].trim());
+            }
+            else if (message.channel.type != 'dm') {//Server exclusive commands
+
+                updateMessage(message);
+                if (command == ("initialiseUsers".toUpperCase())) {
+
+                    initialiseUsers(message);
+                    message.channel.send("The server's users are now tracked!");
+                }
+                else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command == ("delete".toUpperCase())) {
+
+                    let amount = 0;
+                    if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                    else {
+
+                        amount = Number(params[0]) + 1;
+                        await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
+                            message.channel.bulkDelete(messages).catch(err => {
+                                console.log("Error deleting bulk messages: " + err);
+                                message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                            });
                         });
                     }
-                    message.delete();
-                    // graphs();
                 }
-                else if (command == ("search".toUpperCase())) {
-                    search(message, params);
+                else if (command == ("myStats".toUpperCase())) {
+                    personalStats(message);
                 }
-                else if (command == ("signUp".toUpperCase())) {
+                else if (command == ("allStats".toUpperCase()) && message.member.hasPermission("ADMINISTRATOR")) {
+                    guildStats(message);
+                }
+                else if (command == ("userStats".toUpperCase())) {
+                    specificStats(message, params);
+                }
+                else if (command == ("topStats".toUpperCase())) {
+                    topStats(message);
+                }
+                else if (command == ("play".toUpperCase())) {
+                    const serverQueue = queue.get(message.guild.id);
+                    play(message, serverQueue);
+                }
+                else if (command == ("stop".toUpperCase())) {
+                    queue.get(message.guild.id).voiceChannel.leave();
+                    queue.delete(message.guild.id);
+                }
+                else if (command == ("pause".toUpperCase())) {
+                    queue.get(message.guild.id).dispatcher.pause();
+                }
+                else if (command == ("resume".toUpperCase())) {
+                    queue.get(message.guild.id).dispatcher.resume();
+                }
+                else if (command == ("skip".toUpperCase())) {
+                    queue.get(message.guild.id).songs.shift();
+                    playSong(message.guild, queue.get(message.guild.id).songs[0]);
+                }
+            }
+            else {
 
-                    await updateGames(message, params);
+                if (command == ("myStats".toUpperCase())) {
+                    personalDMStats(message);
                 }
-                else if (command == ("myGames".toUpperCase())) {
-                    personalGames(message);
-                }
-                else if (command == ("removeGame".toUpperCase())) {
-                    removeGame(message, params);
-                }
-                else if (command == ("excludePing".toUpperCase())) {
-                    if (params[0].length != undefined && params[0].length == 0)
-                        message.channel.send("You must enter either true or false: " + prefix + "excludePing true/false");
-                    else
-                        excludePing(message, params[0].toUpperCase());
-                }
-                else if (command == ("excludeDM".toUpperCase())) {
-                    if (params[0].length != undefined && params[0].length == 0)
-                        message.channel.send("You must enter either true or false: " + prefix + "excludeDM true/false");
-                    else
-                        excludeDM(message, params[0].toUpperCase());
-                }
-                else if (command == ("help".toUpperCase())) {
-                    generalHelp(message);
-                }
-                else if (command == ("helpGames".toUpperCase())) {
-                    gameHelp(message);
-                }
-                else if (command == ("helpStats".toUpperCase())) {
-                    helpStats(message);
-                }
-                else if (command == ("helpMiscellaneous".toUpperCase())) {
-                    helpMiscellaneous(message);
-                }
-                else if (command == ("helpMusic".toUpperCase())) {
-                    helpMusic(message);
-                }
-                else if (command == ("study".toUpperCase())) {
-                    study(message, params);
-                }
-                else if (message.channel.type != 'dm') {//Server exclusive commands
 
-                    updateMessage(message);
-                    if (command == ("initialiseUsers".toUpperCase())) {
 
-                        initialiseUsers(message);
-                        message.channel.send("The server's users are now tracked!");
-                    }
-                    else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command == ("delete".toUpperCase())) {
-
-                        let amount = 0;
-                        if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                        else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                        else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                        else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                        else {
-
-                            amount = Number(params[0]) + 1;
-                            await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
-                                message.channel.bulkDelete(messages).catch(err => {
-                                    console.log("Error deleting bulk messages: " + err);
-                                    message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
-                                });
-                            });
-                        }
-                    }
-                    else if (command == ("myStats".toUpperCase())) {
-                        personalStats(message);
-                    }
-                    else if (command == ("ping".toUpperCase())) {
-                        pingUsers(message, params[0].trim());
-                    }
-                    else if (command == ("allStats".toUpperCase()) && message.member.hasPermission("ADMINISTRATOR")) {
-                        guildStats(message);
-                    }
-                    else if (command == ("userStats".toUpperCase())) {
-                        specificStats(message, params);
-                    }
-                    else if (command == ("topStats".toUpperCase())) {
-                        topStats(message);
-                    }
-                    else if (command == ("play".toUpperCase())) {
-                        const serverQueue = queue.get(message.guild.id);
-                        play(message, serverQueue);
-                    }
-                    else if (command == ("stop".toUpperCase())) {
-                        queue.get(message.guild.id).voiceChannel.leave();
-                        queue.delete(message.guild.id);
-                    }
-                    else if (command == ("pause".toUpperCase())) {
-                        queue.get(message.guild.id).dispatcher.pause();
-                    }
-                    else if (command == ("resume".toUpperCase())) {
-                        queue.get(message.guild.id).dispatcher.resume();
-                    }
-                    else if (command == ("skip".toUpperCase())) {
-                        queue.get(message.guild.id).songs.shift();
-                        playSong(message.guild, queue.get(message.guild.id).songs[0]);
-                    }
-                } 
                 else {
-
-                    if (command == ("myStats".toUpperCase())) {
-                        personalDMStats(message);
-                    }
-
-                    else {
-                        message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
-                    }
+                    message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
                 }
             }
         }
+
     });
 
     Client.on('guildMemberAdd', member => {
@@ -263,9 +266,19 @@ connectDB.once('open', async function () {
 
 
 
-async function firstTimeSetup() {
+async function firstTimeSetup(message) {
 
-
+    let steps = [
+        `Greeting!\nYou are getting this message because I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
+        + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type ${prefix}gameTutorial`
+        + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type [${prefix}tutorials false] without the square brackets.`,
+        `if you understand then lets search for a game you play with others!\nDo so by typing [${prefix}search  nameOfGame] without the square brackets.`,
+        `Now that you see a bunch of results, hopefully the game you wanted is towards the top, along with the associated number.`
+        + ` To add this game to your games list type [${prefix}signUp game#]. You can alternatively signup by pasting the complete name of the game.`,
+        + `You can also sign up for as many games at once you would like by seperating each entry by a comma - you can mix both words and numbers for each entry as such:`
+        + ` **${prefix}signUp Valorant, 2, Risk of Rain 2**\nThis will add the following games to you games list: Valorant, 20XX, and Risk of Rain 2.`
+        + ` Now it's your turn to sign up for more than one game at once, don't worry, I will show you how to remove any game in the following steps.`
+    ]
 }
 
 async function personalGames(message) {
@@ -601,13 +614,16 @@ async function gameHelp(message) {
         + "Example usage: " + prefix + "removeGame 2 |OR| " + prefix + "removeGame Counter-Strike: Global Offensive\n\nWill remove the game specified by the number "
         + "(which as to correspond to a game in your gamesList) or search your gamesList for the title of the game you wish to remove.```\n"
 
-        + "Command 4: " + prefix + "exclude [true/false] \n```Sets whether you wish to be notified when someone pings a game to play. If set to 'true', you will be excluded from all pings "
+        + "Command 4: " + prefix + "excludePing [true/false] \n```Sets whether you wish to be @mentioned when someone pings a game to play. If set to 'true', you will be excluded from all pings "
         + "and vice versa.\nExample usage: " + prefix + "exclude true |OR| " + prefix + "exclude false```\n"
 
-        + "Command 5: " + prefix + "search [game1], [game2].... \n```Searches all the complete game list for the speicified games you wish to find. You can search for as many games as desired, seperated by a comma.\n"
+        + "Command 5: " + prefix + "excludeDM [true/false] \n```Sets whether you wish to receive a direct message when someone pings a game to play. If set to 'true', you will be excluded from all pings "
+        + "and vice versa.\nExample usage: " + prefix + "exclude true |OR| " + prefix + "exclude false```\n"
+
+        + "Command 6: " + prefix + "search [game1], [game2].... \n```Searches all the complete game list for the speicified games you wish to find. You can search for as many games as desired, seperated by a comma.\n"
         + "Example usage: " + prefix + "search Counter, Overwatch, League```\n"
 
-        + "Command 6: " + prefix + "ping [game] \n```Pings and DM's every member from the called server who have [game] in their games list and do not have the exclude status enabled.\n"
+        + "Command 7: " + prefix + "ping [game] \n```Pings and DM's every member from the called server who have [game] in their games list and do not have the exclude status enabled.\n"
         + "Example usage: " + prefix + "ping Counter-Global: Offensive```";
 
     message.channel.send(gameMessage);
@@ -929,6 +945,12 @@ async function pingUsers(message, game) {
         message.channel.send(game + " is not a valid game, please try again or type " + prefix + "gamesList to view the list of all games.");
         return;
     }
+    else if(message.channel.type == 'dm'){
+        
+        await message.channel.send(mention(message.author.id) + " has summoned " + message.client.user.username + " for some " + game);
+        await message.channel.send("Unfortunately I cannot play games, why not try the same command inside a server?");
+        return;
+    }
 
     let users = await getUsers();
     let signedUp = "";
@@ -1228,10 +1250,6 @@ async function updateAll() {
 
 
 
-
-
-
-
     // let users = await getUsers();
 
     // users.forEach(async user => {
@@ -1239,13 +1257,12 @@ async function updateAll() {
     // let changed = await User.findOneAndUpdate({ id: user.id },
     //     {
     //         $set: {
-    //             activeTutorial: -1,
-    //             tutorialStep: -1
+    //             notifyTutorial: true
     //         }
     //     }, { new: true });
 
-    // user.set('exclude', undefined, {strict: false} );
-    // user.save();
+    // // user.set('exclude', undefined, {strict: false} );
+    // // user.save();
 
 
     // });//each user loop

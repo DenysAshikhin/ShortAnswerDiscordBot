@@ -43,6 +43,12 @@ const UserSchema = new mongoose.Schema({
     },
     tutorialStep: {
         type: Number
+    },
+    notifyUpdate: {
+        type: Boolean
+    },
+    notifyTutorial: {
+        type: Boolean
     }
 });
 
