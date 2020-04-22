@@ -23,12 +23,7 @@ catch (err) {
 const tutorials = require('./tutorials.json');
 //const studyJSON = require('./ouda.json');
 
-console.log()
-
 var prefix = "sa!";
-
-
-
 var uri = "";
 var token = "";
 
