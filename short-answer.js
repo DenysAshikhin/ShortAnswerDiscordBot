@@ -96,7 +96,7 @@ connectDB.once('open', async function () {
 
         Client.user.setActivity("sa!help for information");
 
-        updateAll();
+        //updateAll();
     })
 
     let questions = new Array();
@@ -116,40 +116,9 @@ connectDB.once('open', async function () {
                 if (params[0] == undefined)
                     params[0] = "";
 
-                // if (command.startsWith("emptyDB") && (message.author.id == createrID)) {
 
-                //     User.deleteMany({}, function (err, users) {
-
-                //         console.log(err);
-                //         console.log(JSON.stringify(users) + " deleted from DB");
-                //     })
-                //     return;
-                // }
-
-                if (command.startsWith("initialiseUsers".toUpperCase())) {
-
-                    initialiseUsers(message);
-                    message.channel.send("The server's users are now tracked!");
-                }//Need to test the one below
-                else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command.startsWith("delete".toUpperCase())) {
-
-                    let amount = 0;
-                    if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else {
-
-                        amount = Number(params[0]) + 1;
-                        await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
-                            message.channel.bulkDelete(messages).catch(err => {
-                                console.log("Error deleting bulk messages: " + err);
-                                message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
-                            });
-                        });
-                    }
-                }
-                else if (command.startsWith("populate".toUpperCase())) {
+                //Commands that work in both servers and DM's
+                if (command == ("populate".toUpperCase())) {
 
                     for (i = 1; i <= params[0]; i++) {
 
@@ -162,20 +131,17 @@ connectDB.once('open', async function () {
                     message.delete();
                     // graphs();
                 }
-                else if (command.startsWith("signUp".toUpperCase())) {
+                else if (command == ("search".toUpperCase())) {
+                    search(message, params);
+                }
+                else if (command == ("signUp".toUpperCase())) {
 
                     await updateGames(message, params);
                 }
-                else if (command.startsWith("search".toUpperCase())) {
-                    search(message, params);
-                }
-                else if (command.startsWith("myGames".toUpperCase())) {
+                else if (command == ("myGames".toUpperCase())) {
                     personalGames(message);
                 }
-                else if (command.startsWith("ping".toUpperCase())) {
-                    pingUsers(message, params[0].trim());
-                }
-                else if (command.startsWith("removeGame".toUpperCase())) {
+                else if (command == ("removeGame".toUpperCase())) {
                     removeGame(message, params);
                 }
                 else if (command == ("excludePing".toUpperCase())) {
@@ -184,61 +150,100 @@ connectDB.once('open', async function () {
                     else
                         excludePing(message, params[0].toUpperCase());
                 }
-                else if(command == ("excludeDM".toUpperCase())){
+                else if (command == ("excludeDM".toUpperCase())) {
                     if (params[0].length != undefined && params[0].length == 0)
-                    message.channel.send("You must enter either true or false: " + prefix + "excludeDM true/false");
-                else
-                    excludeDM(message, params[0].toUpperCase());
-                }
-                else if (command.startsWith("myStats".toUpperCase())) {
-                    personalStats(message);
-                }
-                else if (command.startsWith("allStats".toUpperCase()) && message.member.hasPermission("ADMINISTRATOR")) {
-                    guildStats(message);
+                        message.channel.send("You must enter either true or false: " + prefix + "excludeDM true/false");
+                    else
+                        excludeDM(message, params[0].toUpperCase());
                 }
                 else if (command == ("help".toUpperCase())) {
                     generalHelp(message);
                 }
-                else if (command.startsWith("userStats".toUpperCase())) {
-                    specificStats(message, params);
-                }
-                else if (command.startsWith("topStats".toUpperCase())) {
-                    topStats(message);
-                }
-                else if (command.startsWith("helpGames".toUpperCase())) {
+                else if (command == ("helpGames".toUpperCase())) {
                     gameHelp(message);
                 }
-                else if (command.startsWith("helpStats".toUpperCase())) {
+                else if (command == ("helpStats".toUpperCase())) {
                     helpStats(message);
                 }
-                else if (command.startsWith("helpMiscellaneous".toUpperCase())) {
+                else if (command == ("helpMiscellaneous".toUpperCase())) {
                     helpMiscellaneous(message);
                 }
-                else if (command.startsWith("play".toUpperCase())) {
-                    const serverQueue = queue.get(message.guild.id);
-                    play(message, serverQueue);
-                }
-                else if (command.startsWith("stop".toUpperCase())) {
-                    queue.get(message.guild.id).voiceChannel.leave();
-                    queue.delete(message.guild.id);
-                }
-                else if (command.startsWith("pause".toUpperCase())) {
-                    queue.get(message.guild.id).dispatcher.pause();
-                }
-                else if (command.startsWith("resume".toUpperCase())) {
-                    queue.get(message.guild.id).dispatcher.resume();
-                }
-                else if (command.startsWith("skip".toUpperCase())) {
-                    queue.get(message.guild.id).songs.shift();
-                    playSong(message.guild, queue.get(message.guild.id).songs[0]);
-                }
-                else if (command.startsWith("helpMusic".toUpperCase())) {
+                else if (command == ("helpMusic".toUpperCase())) {
                     helpMusic(message);
                 }
-                else if (command.startsWith("study".toUpperCase())) {
+                else if (command == ("study".toUpperCase())) {
                     study(message, params);
                 }
-                updateMessage(message);
+                else if (message.channel.type != 'dm') {//Server exclusive commands
+
+                    updateMessage(message);
+                    if (command == ("initialiseUsers".toUpperCase())) {
+
+                        initialiseUsers(message);
+                        message.channel.send("The server's users are now tracked!");
+                    }
+                    else if ((message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) && command == ("delete".toUpperCase())) {
+
+                        let amount = 0;
+                        if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                        else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                        else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                        else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+                        else {
+
+                            amount = Number(params[0]) + 1;
+                            await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
+                                message.channel.bulkDelete(messages).catch(err => {
+                                    console.log("Error deleting bulk messages: " + err);
+                                    message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                                });
+                            });
+                        }
+                    }
+                    else if (command == ("myStats".toUpperCase())) {
+                        personalStats(message);
+                    }
+                    else if (command == ("ping".toUpperCase())) {
+                        pingUsers(message, params[0].trim());
+                    }
+                    else if (command == ("allStats".toUpperCase()) && message.member.hasPermission("ADMINISTRATOR")) {
+                        guildStats(message);
+                    }
+                    else if (command == ("userStats".toUpperCase())) {
+                        specificStats(message, params);
+                    }
+                    else if (command == ("topStats".toUpperCase())) {
+                        topStats(message);
+                    }
+                    else if (command == ("play".toUpperCase())) {
+                        const serverQueue = queue.get(message.guild.id);
+                        play(message, serverQueue);
+                    }
+                    else if (command == ("stop".toUpperCase())) {
+                        queue.get(message.guild.id).voiceChannel.leave();
+                        queue.delete(message.guild.id);
+                    }
+                    else if (command == ("pause".toUpperCase())) {
+                        queue.get(message.guild.id).dispatcher.pause();
+                    }
+                    else if (command == ("resume".toUpperCase())) {
+                        queue.get(message.guild.id).dispatcher.resume();
+                    }
+                    else if (command == ("skip".toUpperCase())) {
+                        queue.get(message.guild.id).songs.shift();
+                        playSong(message.guild, queue.get(message.guild.id).songs[0]);
+                    }
+                } else {
+
+                    if (command == ("myStats".toUpperCase())) {
+                        personalDMStats(message);
+                    }
+
+                    else {
+                        message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
+                    }
+
+                }
             }
         }
     });
@@ -257,9 +262,15 @@ connectDB.once('open', async function () {
 });
 
 
+
+async function firstTimeSetup() {
+
+
+}
+
 async function personalGames(message) {
 
-    let games = await findUser({ id: message.member.id });
+    let games = await findUser({ id: message.author.id });
     games = games.games.split("|");
     let finalList = "";
 
@@ -269,8 +280,12 @@ async function personalGames(message) {
             finalList += i + ") " + games[i] + "\n";
     }
 
+    let display = message.author.username;
+    if (message.member != null)
+        display = message.member.displayName;
+
     if (finalList.length > 2)
-        message.channel.send("```" + message.member.displayName + " here are the games you are signed up for: \n" +
+        message.channel.send("```" + display + " here are the games you are signed up for: \n" +
             finalList + "```");
 
     else
@@ -372,7 +387,9 @@ async function search(message, searches) {
 
         if (query.length > 0) {
 
-            message.channel.send(mention(message.member.id) + "! Here are the result for: " + query + "\n");
+            console.log(query);
+
+            message.channel.send(mention(message.author.id) + "! Here are the result for: " + query + "\n");
             let finalArray = new Array();
             let finalList = "";
             let fuse = new Fuse(games, options);
@@ -430,11 +447,11 @@ async function study(message, query) {
                 isCaseSensitive: false,
                 findAllMatches: true,
                 includeMatches: false,
-                includeScore: false,
+                includeScore: true,
                 useExtendedSearch: false,
                 minMatchCharLength: query[0].length / 2,
                 shouldSort: true,
-                threshold: 0.1,
+                threshold: 0.125,
                 location: 0,
                 distance: 100,
                 keys: [
@@ -443,7 +460,6 @@ async function study(message, query) {
             };
 
             let fuse = new Fuse(slideArray, options1);
-
             let searchWords = query[0].split(" ");
 
             searchWords.forEach(searchWord => {
@@ -489,38 +505,44 @@ async function study(message, query) {
         minUniqueResults = query[3];
     };
 
-    finalObject.sort(function (a, b) { return b.items.length - a.items.length });
+    if (finalObject.length > 0) {
 
-    for (let i = 0; i < searchNumbers; i++) {
+        finalObject.sort(function (a, b) { return b.items.length - a.items.length });
 
-        let uniqueItems = new Array();
+        for (let i = 0; i < searchNumbers; i++) {
 
-        if (minUniqueResults != -1) {
+            let uniqueItems = new Array();
 
-            let setty = new Set(finalObject[i].items);
-            uniqueItems = Array.from(setty);
-        }
+            if (minUniqueResults != -1) {
 
-        if (minResults <= finalObject[i].items.length && minUniqueResults <= uniqueItems.length) {
-
-            let tempy = finalObject[i].originalString.split(" ");
-
-            if (currentSlideDeck != finalObject[i].deckName) {
-
-                message.channel.send("```Here the search results from slide deck: " + finalObject[i].deckName + "```\n");
-                currentSlideDeck = finalObject[i].deckName;
+                let setty = new Set(finalObject[i].items);
+                uniqueItems = Array.from(setty);
             }
 
-            for (let j = 0; j < finalObject[i].items.length; j++) {
-                tempy[finalObject[i].refIndex[j]] = "__**" + tempy[finalObject[i].refIndex[j]] + "**__"
-            }
+            if (minResults <= finalObject[i].items.length && minUniqueResults <= uniqueItems.length) {
 
-            tempy = tempy.join(" ");
-            message.channel.send(tempy)
-            message.channel.send("===========================================");
+                let tempy = finalObject[i].originalString.split(" ");
+
+                if (currentSlideDeck != finalObject[i].deckName) {
+
+                    message.channel.send("```Here the search results from slide deck: " + finalObject[i].deckName + "```\n");
+                    currentSlideDeck = finalObject[i].deckName;
+                }
+
+                for (let j = 0; j < finalObject[i].items.length; j++) {
+                    tempy[finalObject[i].refIndex[j]] = "__**" + tempy[finalObject[i].refIndex[j]] + "**__"
+                }
+
+                tempy = tempy.join(" ");
+                message.channel.send(tempy)
+                message.channel.send("===========================================");
+            }
         }
+        message.channel.send("```DONE!```");
     }
-    message.channel.send("```DONE!```");
+    else {
+        message.channel.send("```Did not find any matches!```");
+    }
 }
 
 async function helpMiscellaneous(message) {
@@ -617,6 +639,36 @@ async function personalStats(message) {
         + (await getStats(message.member)) + "```");
 }
 
+async function personalDMStats(message) {
+
+    let user = await findUser({ id: message.author.id });
+    let guilds = user.guilds.split("|");
+
+    message.channel.send("Here are your general stats:");
+
+    let generalStats = "```"
+        + "The games you are signed up for: " + user.games + "\n"
+        + "Whether you are excluded from pings: " + user.excludePing + "\n"
+        + "Whether you are excluded from DMs: " + user.excludeDM + "```";
+
+    message.channel.send(generalStats);
+
+    for (let i = 0; i < guilds.length; i++) {
+
+        if (guilds[i].length > 2) {
+            let stats = "";
+            message.channel.send("Here are the stats for the server: " + message.client.guilds.cache.get(guilds[i]).name + "")
+            stats = "```Total number of messages sent: " + user.messages.split("|")[i] + "\n"
+                + "Last message sent: " + user.lastMessage.split("|")[i] + "\n"
+                + "Total time spent talking (in minutes): " + user.timeTalked.split("|")[i] + "\n"
+                + "Last time you talked was: " + user.lastTalked.split("|")[i] + "\n"
+                + "Time spent AFK (in minutes): " + user.timeAFK.split("|")[i] + "\n"
+                + "You joined this server on: " + user.dateJoined.split("|")[i] + "```";
+            message.channel.send(stats);
+        }
+    }
+}
+
 async function guildStats(message) {
 
     message.guild.members.cache.forEach(async member => {
@@ -692,7 +744,7 @@ async function countTalk() {
 
 async function updateMessage(message) {
 
-    let user = await findUser({ id: message.member.id });
+    let user = await findUser({ id: message.author.id });
     let messages = user.messages.split("|");
     let lastMessage = user.lastMessage.split("|");
     let guilds = user.guilds.split("|");
@@ -711,43 +763,42 @@ async function excludePing(message, bool) {
 
     if (bool == "TRUE") {
 
-        let changed = await User.findOneAndUpdate({ id: message.member.id },
+        let changed = await User.findOneAndUpdate({ id: message.author.id },
             {
                 $set: { excludePing: true }
             });
-        message.channel.send(mention(message.member.id) + " will be excluded from any further pings.");
+        message.channel.send(mention(message.author.id) + " will be excluded from any further pings.");
         return;
     }
     else if (bool == "FALSE") {
-        let changed = await User.findOneAndUpdate({ id: message.member.id },
+        let changed = await User.findOneAndUpdate({ id: message.author.id },
             {
                 $set: { excludePing: false }
             });
-        message.channel.send(mention(message.member.id) + " can now be pinged once more.");
+        message.channel.send(mention(message.author.id) + " can now be pinged once more.");
     }
     else {
         message.channel.send("You must enter either true or false: " + prefix + "excludePing true/false");
     }
 }
 
-
 async function excludeDM(message, bool) {
 
     if (bool == "TRUE") {
 
-        let changed = await User.findOneAndUpdate({ id: message.member.id },
+        let changed = await User.findOneAndUpdate({ id: message.author.id },
             {
                 $set: { excludeDM: true }
             });
-        message.channel.send(mention(message.member.id) + " will be excluded from any further DMs.");
+        message.channel.send(mention(message.author.id) + " will be excluded from any further DMs.");
         return;
     }
     else if (bool == "FALSE") {
-        let changed = await User.findOneAndUpdate({ id: message.member.id },
+        let changed = await User.findOneAndUpdate({ id: message.author.id },
             {
                 $set: { excludeDM: false }
             });
-        message.channel.send(mention(message.member.id) + " will be DM'ed once more.");
+        message.channel.send(mention(message.author.id) + " will be DM'ed once more.");
     }
     else {
         message.channel.send("You must enter either true or false: " + prefix + "excludeDM true/false");
@@ -774,7 +825,7 @@ function getDate() {
 
 async function removeGame(message, game) {
 
-    let boring = await findUser({ id: message.member.id });
+    let boring = await findUser({ id: message.author.id });
     let gameArr = boring.games.split("|");
     let invalidGames = "";
     let removedGames = "";
@@ -844,7 +895,7 @@ async function removeGame(message, game) {
         message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
     }
 
-    let changed = await User.findOneAndUpdate({ id: message.member.id },
+    let changed = await User.findOneAndUpdate({ id: message.author.id },
         {
             $set: { games: finalGameList }
         });
@@ -967,11 +1018,10 @@ async function addGuild(member, memberDB) {
 
 async function updateGames(message, game) {
 
-    let member = message.member;
     let setty = new Set(game);
     game = Array.from(setty);
     games.sort();
-    let memberDB = await findUser({ id: member.id });
+    let memberDB = await findUser({ id: message.author.id });
     let existingGames = memberDB.games.split("|");
     let finalString = "";
     let alreadyTracked = "";
@@ -1041,7 +1091,7 @@ async function updateGames(message, game) {
         message.channel.send("The following are invalid games: ```" + congrats + "```");
     }
 
-    let changed = await User.findOneAndUpdate({ id: member.id },
+    let changed = await User.findOneAndUpdate({ id: message.author.id },
         {
             $set: { games: memberDB.games + finalString }
         });
@@ -1181,24 +1231,24 @@ async function updateAll() {
 
 
 
-    
+
     //let users = await getUsers();
 
     //users.forEach(async user => {
 
-        // let changed = await User.findOneAndUpdate({ id: user.id },
-        //     {
-        //         $set: {
-        //             excludePing: false,
-        //             excludeDM: false
-        //         }
-        //     }, { new: true });
+    // let changed = await User.findOneAndUpdate({ id: user.id },
+    //     {
+    //         $set: {
+    //             excludePing: false,
+    //             excludeDM: false
+    //         }
+    //     }, { new: true });
 
-        // user.set('exclude', undefined, {strict: false} );
-        // user.save();
+    // user.set('exclude', undefined, {strict: false} );
+    // user.save();
 
 
-   //});//each user loop
+    //});//each user loop
 
     console.log("CALLED UPDATE ALL");
 }
@@ -1224,6 +1274,9 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
+//Add a DM exclusive stats page
+
+
 //coin flipper
 //game decider
 //View users signed up for a game
@@ -1244,3 +1297,16 @@ setInterval(minuteCount, 60 * 1000);
 //add streamer stats
 //seal idan easter eggs
 //ping by number - if there is enough demand for it
+
+
+
+
+                // if (command.startsWith("emptyDB") && (message.author.id == createrID)) {
+
+                //     User.deleteMany({}, function (err, users) {
+
+                //         console.log(err);
+                //         console.log(JSON.stringify(users) + " deleted from DB");
+                //     })
+                //     return;
+                // }
