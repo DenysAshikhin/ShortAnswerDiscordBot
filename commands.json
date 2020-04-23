@@ -1,0 +1,33 @@
+{
+    "commands": [
+        "POPULATE",
+        "SEARCH",
+        "SIGNUP",
+        "MYGAMES",
+        "REMOVEGAME",
+        "EXCLUDEPING",
+        "EXCLUDEDM",
+        "HELP",
+        "HELPGAMES",
+        "HELPSTATS",
+        "HELPMISCELLANEOUS",
+        "HELPMUSIC",
+        "STUDY",
+        "PING",
+        "INITIALISEUSERS",
+        "DELETE",
+        "MYSTATS",
+        "ALLSTATS",
+        "USERSTATS",
+        "TOPSTATS",
+        "PLAY",
+        "STOP",
+        "PAUSE",
+        "RESUME",
+        "SKIP",
+        "GAMETUTORIAL",
+        "SUGGEST",
+        "UPDATEME"
+    ],
+    "information": []
+}

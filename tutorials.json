@@ -1,9 +1,0 @@
-[
-    {
-        "tutorial": "Game Initialisation",
-        "steps": [
-            "Greeting + brief explanation",
-            "if you understand then lets search for a game you play with others!\nDo so by typing `${prefix}`"
-        ]
-    }
-]

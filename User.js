@@ -2,53 +2,65 @@ const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
 
-    displayName:{
+    displayName: {
         type: String
     },
-    id:{
+    id: {
         type: String
     },
-    messages:{
+    messages: {
         type: String
     },
-    lastMessage:{
+    lastMessage: {
         type: String
     },
-    timeTalked:{
+    timeTalked: {
         type: String
     },
-    lastTalked:{
+    lastTalked: {
         type: String
     },
-    games:{
+    games: {
         type: String
     },
-    timeAFK:{
+    timeAFK: {
         type: String
     },
-    dateJoined:{
-        type: String   
+    dateJoined: {
+        type: String
     },
-    excludePing:{
+    excludePing: {
         type: Boolean
     },
-    excludeDM:{
+    excludeDM: {
         type: Boolean
     },
     guilds: {
         type: String
     },
     activeTutorial: {
-        type: Number
+        type: Number,
+        default: -1
     },
     tutorialStep: {
-        type: Number
+        type: Number,
+        default: -1
+    },
+    previousTutorialStep: {
+        type: Number,
+        default: -1
     },
     notifyUpdate: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     notifyTutorial: {
-        type: Boolean
+        type: Boolean,
+        default: true
+    },
+    completedTutorials: {
+        type: [Number],
+        default: []
     }
 });
 
