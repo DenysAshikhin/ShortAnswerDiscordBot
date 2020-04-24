@@ -392,61 +392,54 @@ async function gameTutorial(message, params, command, user) {
                         case 0:
                             if (search(message, params) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
-                                user.save();
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
                             break;
                         case 1:
                             if (await updateGames(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
-                                user.save();
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
                             break;
                         case 2:
                             if (await updateGames(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
-                                user.save();
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
                             break;
                         case 3:
                             if (personalGames(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
-                                user.save();
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
                             break;
                         case 4:
                             if (removeGame(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
-                                user.save();
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
                             break;
                         case 5:
                             if (await pingUsers(message, params) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
-                                user.save();
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
                             break;
                         case 6:
                             if (excludePing(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
-                                user.save();
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
                             break;
                         case 7:
                             if (excludeDM(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
-                                user.save();
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
                             break;
                     }//End of switch
-
+                    console.log("called user.save!");
+                    user.save();
                 }//If the command matched.
             }
         }
@@ -1540,25 +1533,24 @@ setInterval(minuteCount, 60 * 1000);
 
 //When making a DB backup, go over every possible value and check if it exists or not...
 
-//Add pinging second parameter, for time offset, like in 30 mins?
+//add a purge my game list
+//add a view a list of games on the server ppl signed up for (sorted by # number of signed up)
+//View users signed up for a game
+//Add a 'summoner' top stat - most pings
 //DM quality of life 
 //Custom, per-user prefix
 
 //coin flipper
 //game decider
-//View users signed up for a game
-//add a purge my game list
+
+
 //make remove game array - it is but broken
-//Add a 'summoner' top stat - most pings
-//change prefix - store it in a guild model, or make a field for users - prob a user specific one
 //roll command - for however many sided die
 //ping-pong command
 //create a json of commands for fuzzy search of commands - lmao
 //when pinging an invalid game - suggest the first match along with the number
-//Make an automated set-up in a person's DM that will walk them through how to add games, search their list,
-//remove a game, set exclude status etc...(maybe be pinged of new features, or meme of the day, of suggested commands...
 //add a timer
-
+//Add pinging second parameter, for time offset, like in 30 mins?
 
 //Twitch notification/signup when a streamer goes live
 //https://dev.twitch.tv/docs/api/reference/#get-streams
