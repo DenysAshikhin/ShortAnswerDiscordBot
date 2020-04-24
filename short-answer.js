@@ -593,8 +593,6 @@ function search(message, searches) {
         return -1;
     }
 
-    console.log(searches)
-
     let finalArray = new Array();
 
     searches.forEach(query => {
@@ -951,11 +949,13 @@ async function updateMessage(message, user) {
 
 function excludePing(message, user) {
 
-    let bool = message.content.split(" ")[1].toUpperCase().trim();
-    if (bool == undefined) {
+    wtf.split(" AS")[0] = asd
+
+    if (!message.content.split(" ")[1]) {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
         return -1;
     }
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
 
     if (bool == "TRUE") {
 
@@ -977,13 +977,11 @@ function excludePing(message, user) {
 
 function excludeDM(message, user) {
 
-    let bool = message.content.split(" ")[1].toUpperCase().trim();
-
-    if (bool == undefined) {
+    if (!message.content.split(" ")[1]) {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
         return -1;
     }
-
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
 
         user.set('excludeDM', true);
@@ -1004,13 +1002,11 @@ function excludeDM(message, user) {
 
 function setNotifyUpdate(message, user) {
 
-    let bool = message.content.split(" ")[1].toUpperCase().trim();
-
-    if (bool == undefined) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[30] + "** *true/false*");
+    if (!message.content.split(" ")[1]) {
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[27] + "** *true/false*");
         return -1;
     }
-
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
 
         user.set('notifyUpdate', true);
@@ -1024,20 +1020,18 @@ function setNotifyUpdate(message, user) {
         return 0;
     }
     else {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[30] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[27] + "** *true/false*");
         return -1;
     }
 }
 
 function setNotifyTutorials(message, user) {
 
-    let bool = message.content.split(" ")[1].toUpperCase().trim();
-
-    if (bool == undefined) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[31] + "** *true/false*");
+    if (!message.content.split(" ")[1]) {
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[28] + "** *true/false*");
         return -1;
     }
-
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
 
         user.set('notifyTutorial', true);
@@ -1051,7 +1045,7 @@ function setNotifyTutorials(message, user) {
         return 0;
     }
     else {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[31] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[28] + "** *true/false*");
         return -1;
     }
 }
@@ -1085,14 +1079,13 @@ function removeGame(message, game, user) {
     game = Array.from(setty);
     games.sort();
 
-
     //game.forEach(async gameTitle => {
 
     let gameTitle = game[0];
 
     if (isNaN(gameTitle)) {
 
-        gameTitle = gameTitle.toUpperCase();
+        //gameTitle = gameTitle.toUpperCase();
 
         if (gameArr.includes(gameTitle)) {
             removedGames += gameArr.splice(gameArr.indexOf(gameTitle), 1) + "|";
@@ -1529,6 +1522,12 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
+
+//add notifacatioon if you try to remove a game but there are no games to remove
+//add pinging by games
+//you have to sign up for 2 NEW games
+//userstats @mention fix
+//invalid game suggest a couple?
 //Specify if true is disable, or enable
 //Specify that initialiuseusers only once per server
 //fix not specified to follow the example format
@@ -1580,4 +1579,28 @@ setInterval(minuteCount, 60 * 1000);
 
 process.on('uncaughtException', function (err) {
     console.log('Caught exception: ' + err);
+    let d = new Date();
+    fs.writeFile(d.toString() + ".txt", err, function (err, result) {
+        if (err) console.log('error', err);
+    });
 });
+
+process.on('uncaughtException', function (err) {
+    console.log('Caught exception: ' + err);
+    // let d = new Date();
+    // fs.writeFile(d.toString() + ".txt", err, function (err, result) {
+    //     if (err) console.log('error', err);
+    // });
+});
+
+
+
+
+process.on("unhandledRejection", function (err) {
+    console.log('Caught exception: ' + err);
+    // let d = new Date();
+    // fs.writeFile(d.toString() + ".txt", err, function (err, result) {
+    //     if (err) console.log('error', err);
+    // });
+});
+
