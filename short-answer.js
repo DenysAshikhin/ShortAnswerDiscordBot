@@ -264,7 +264,7 @@ connectDB.once('open', async function () {
                     playSong(message.guild, queue.get(message.guild.id).songs[0]);
                 }
                 else if (command == Commands.commands[25]) //gameTutorial
-                    message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it me privately :wink:`);
+                    message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it to me privately :wink:`);
 
             }//End of server text channel else/if chain
             else {
@@ -438,7 +438,6 @@ async function gameTutorial(message, params, command, user) {
                             }
                             break;
                     }//End of switch
-                    console.log("called user.save!");
                     user.save();
                 }//If the command matched.
             }
@@ -1149,7 +1148,6 @@ function removeGame(message, game, user) {
 
     user.set('games', finalGameList);
     let returnString = removedGames.split("|");
-    console.log("AAAAAA: " + returnString);
     if (returnString[0].length > 1)
         return returnString.length - 1;
     else
@@ -1308,7 +1306,7 @@ async function updateGames(message, game, user) {
                 invalidGames += gameTitle + "|";
         }
         else {
-            if (gameTitle < games.length && gameTitle >= 0) {
+            if (gameTitle < games.length && gameTitle >= 0 && games[gameTitle] != undefined) {
 
                 if (!existingGames.includes(games[gameTitle])) {
                     finalString += games[gameTitle] + "|";
@@ -1533,6 +1531,7 @@ setInterval(minuteCount, 60 * 1000);
 
 //When making a DB backup, go over every possible value and check if it exists or not...
 
+//add quit tutorial option
 //add a purge my game list
 //add a view a list of games on the server ppl signed up for (sorted by # number of signed up)
 //View users signed up for a game
