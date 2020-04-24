@@ -129,8 +129,6 @@ connectDB.once('open', async function () {
 
         if (message.author.bot) return;
 
-
-
         let user = await findUser({ id: message.author.id });
         if (!user) {
             await checkExistance(member);
@@ -157,9 +155,6 @@ connectDB.once('open', async function () {
                 return;
             }
 
-            console.log(Commands.commands[27]);
-            console.log(command);
-
             if (user.activeTutorial != -1 && message.channel.type == 'dm') {//Intercepting tutorial commands in DM's
 
                 switch (user.activeTutorial) {
@@ -175,8 +170,6 @@ connectDB.once('open', async function () {
                         break;
                 }
             }
-
-
 
             //Commands that work in both servers and DM's
             if (command == Commands.commands[0]) {
@@ -203,7 +196,7 @@ connectDB.once('open', async function () {
             else if (command == Commands.commands[6]) //excludeDM
                 excludeDM(message, user);
             else if (command == Commands.commands[7]) //help
-                generalHelp(message);
+                generalHelp(message, user);
             else if (command == Commands.commands[8]) //helpGames
                 gameHelp(message);
             else if (command == Commands.commands[9]) //helpStats
@@ -220,6 +213,8 @@ connectDB.once('open', async function () {
                 suggest(message, user)
             else if (command == Commands.commands[27])//notifyUpdate status
                 setNotifyUpdate(message, user)
+            else if (command == Commands.commands[28])//notifyTutorials
+                setNotifyTutorials(message, user);
             else if (message.channel.type != 'dm') {//Server exclusive commands
 
                 if (command == Commands.commands[14]) //initialiseUsers
@@ -303,7 +298,7 @@ connectDB.once('open', async function () {
 
 
 
-function suggest(message, user){
+function suggest(message, user) {
 
 
 }
@@ -800,7 +795,15 @@ function helpMusic(message) {
     message.channel.send(musicMessage);
 }
 
-function generalHelp(message) {
+function generalHelp(message, user) {
+
+    if (!user.completedTutorials.includes(0)) {
+
+        let tutorialPrompt = `I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
+            + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
+            + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.\n\n`
+        message.channel.send(tutorialPrompt);
+    }
 
     let helpMessage = "The following commands are broken down into 4 general sections: Games, Stats, Miscellaneous, and Music. Enter: \n"
         + "```" + "1) " + prefix + "helpGames  || For information on how signUp for games, how to ping games, search for a game and more.\n\n"
@@ -1007,7 +1010,7 @@ function excludeDM(message, user) {
     }
 }
 
-function setNotifyUpdate(message, user){
+function setNotifyUpdate(message, user) {
 
     let bool = message.content.split(" ")[1].toUpperCase().trim();
 
@@ -1030,6 +1033,33 @@ function setNotifyUpdate(message, user){
     }
     else {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[30] + "** *true/false*");
+        return -1;
+    }
+}
+
+function setNotifyUpdate(message, user){
+
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
+
+    if (bool == undefined) {
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[31] + "** *true/false*");
+        return -1;
+    }
+
+    if (bool == "TRUE") {
+
+        user.set('notifyTutorial', true);
+        message.channel.send(mention(message.author.id) + " will be notified of new/incomplete tutorials.");
+        return 1;
+    }
+    else if (bool == "FALSE") {
+
+        user.set('notifyTutorial', false);
+        message.channel.send(mention(message.author.id) + " will be excluded from any new/incomplete tutorials.");
+        return 0;
+    }
+    else {
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[31] + "** *true/false*");
         return -1;
     }
 }
@@ -1465,7 +1495,6 @@ async function playSong(guild, song) {
     serverQueue.dispatcher = Dispatcher;
 }
 
-//
 
 async function graphs() {
 
@@ -1478,7 +1507,6 @@ async function graphs() {
 
     }
 }
-
 
 async function updateAll() {
 
@@ -1529,6 +1557,7 @@ setInterval(minuteCount, 60 * 1000);
 //when pinging an invalid game - suggest the first match along with the number
 //Make an automated set-up in a person's DM that will walk them through how to add games, search their list,
 //remove a game, set exclude status etc...(maybe be pinged of new features, or meme of the day, of suggested commands...
+//add a timer
 
 
 //Twitch notification/signup when a streamer goes live

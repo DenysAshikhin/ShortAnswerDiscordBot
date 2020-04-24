@@ -27,7 +27,8 @@
         "SKIP",
         "GAMETUTORIAL",
         "SUGGEST",
-        "UPDATEME"
+        "UPDATEME",
+        "TUTORIALS"
     ],
     "information": []
 }
