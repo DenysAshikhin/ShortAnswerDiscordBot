@@ -320,7 +320,7 @@ async function gameTutorial(message, params, command, user) {
         + ` To add this game to your games list type **${prefix}` + Commands.commands[2] + `** *game#*. You can alternatively signup by pasting the complete name of the game.`
         + "```Example(s):\n1) " + prefix + Commands.commands[2] + " 302\n2) " + prefix + Commands.commands[2] + " Counter-Strike: Global Offensive```"
         + ` Please add any valid (and new) game to your games list to continue`,
-        `You can also sign up for as many games at once you would like by seperating each entry by a comma - you can mix both words and numbers for each entry as such:`
+        `You can also sign up for as many games at once as you would like by seperating each entry by a comma - you can mix both words and numbers for each entry as such:`
         + "```Example(s):\n1) " + prefix + Commands.commands[2] + " 2, Counter-Strike: Global Offensive, 24, Minecraft```"
         + ` Now it's your turn to sign up for more than one game at once, don't worry, I will show you how to remove any or all games in the following steps.`,
         `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}` + Commands.commands[3] + `**`
@@ -333,7 +333,7 @@ async function gameTutorial(message, params, command, user) {
         + ` will be notified. NOTE: "nameOfGame" has to be spelled perfectly but it does not have to be in your games list.`
         + "```Example(s):\n1) " + prefix + Commands.commands[13] + " Counter-Strike: Global Offensive```"
         + ` Go ahead, try out the command!`,
-        `Almost done, now some quality of life, when someone pings a game, there will be two notifications for you, the first is`
+        `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
         + ` an @mention in the text channel it was sent from. To disable @mentions simply type`
         + ` **${prefix}` + Commands.commands[5] + `** *true/false*.`
         + "```Example(s):\n1) " + prefix + Commands.commands[5] + " false```Your turn!",
@@ -344,7 +344,7 @@ async function gameTutorial(message, params, command, user) {
         `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
         + ` **${prefix}` + Commands.commands[26] + `** *any suggestion here* and I'll forward the message to the creator. For a more general help,`
         + ` type **${prefix}` + Commands.commands[7] + `**`
-        + `\nAs a final note, this bot is being rapidly developed with new feautres constantly being added,`
+        + `\nAs a final note, this bot is being rapidly developed with new features constantly being added,`
         + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + Commands.commands[27] + `** *true/false*.`
         + "```Example(s):\n1) " + prefix + Commands.commands[26] + " You should add game XYZ to the games list!\n2) " + prefix + Commands.commands[7]
         + "\n3) " + prefix + Commands.commands[27] + " true```"
@@ -1029,7 +1029,7 @@ function setNotifyUpdate(message, user) {
     }
 }
 
-function setNotifyTutorials(message, user){
+function setNotifyTutorials(message, user) {
 
     let bool = message.content.split(" ")[1].toUpperCase().trim();
 
@@ -1529,6 +1529,10 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
+//Specify if true is disable, or enable
+//Specify that initialiuseusers only once per server
+//fix not specified to follow the example format
+
 //When making a DB backup, go over every possible value and check if it exists or not...
 
 //add quit tutorial option
@@ -1536,8 +1540,11 @@ setInterval(minuteCount, 60 * 1000);
 //add a view a list of games on the server ppl signed up for (sorted by # number of signed up)
 //View users signed up for a game
 //Add a 'summoner' top stat - most pings
-//DM quality of life 
 //Custom, per-user prefix
+
+
+//DM quality of life 
+
 
 //coin flipper
 //game decider
@@ -1560,12 +1567,17 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-                // if (command.startsWith("emptyDB") && (message.author.id == creatorID)) {
+// if (command.startsWith("emptyDB") && (message.author.id == creatorID)) {
 
-                //     User.deleteMany({}, function (err, users) {
+//     User.deleteMany({}, function (err, users) {
 
-                //         console.log(err);
-                //         console.log(JSON.stringify(users) + " deleted from DB");
-                //     })
-                //     return;
-                // }
+//         console.log(err);
+//         console.log(JSON.stringify(users) + " deleted from DB");
+//     })
+//     return;
+// }
+
+
+process.on('uncaughtException', function (err) {
+    console.log('Caught exception: ' + err);
+});
