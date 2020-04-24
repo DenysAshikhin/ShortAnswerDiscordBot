@@ -157,6 +157,9 @@ connectDB.once('open', async function () {
                 return;
             }
 
+            console.log(Commands.commands[27]);
+            console.log(command);
+
             if (user.activeTutorial != -1 && message.channel.type == 'dm') {//Intercepting tutorial commands in DM's
 
                 switch (user.activeTutorial) {
@@ -172,6 +175,8 @@ connectDB.once('open', async function () {
                         break;
                 }
             }
+
+
 
             //Commands that work in both servers and DM's
             if (command == Commands.commands[0]) {
@@ -211,6 +216,10 @@ connectDB.once('open', async function () {
                 study(message, params);
             else if (command == Commands.commands[13]) //ping
                 pingUsers(message, params);
+            else if (command == Commands.commands[26])//suggest
+                suggest(message, user)
+            else if (command == Commands.commands[27])//notifyUpdate status
+                setNotifyUpdate(message, user)
             else if (message.channel.type != 'dm') {//Server exclusive commands
 
                 if (command == Commands.commands[14]) //initialiseUsers
@@ -290,6 +299,18 @@ connectDB.once('open', async function () {
     });
 });
 
+
+
+
+
+function suggest(message, user){
+
+
+}
+
+
+
+
 // `Greetings!\nYou are getting this message because I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
 // + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
 // + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.`
@@ -322,7 +343,7 @@ async function gameTutorial(message, params, command, user) {
         + ` **${prefix}` + Commands.commands[5] + `** *true/false*.`
         + "```Example(s):\n1) " + prefix + Commands.commands[5] + " false```Your turn!",
         `The second notification is a direct message. To disable direct messages from pings simply type`
-        + ` **${prefix}` + Commands.commands[6] + `** *true/false*.` 
+        + ` **${prefix}` + Commands.commands[6] + `** *true/false*.`
         + "```Example(s):\n1) " + prefix + Commands.commands[6] + " false```"
         + `To complete the walkthrough go ahead and try it out.`,
         `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
@@ -362,7 +383,7 @@ async function gameTutorial(message, params, command, user) {
                     user.set("previousTutorialStep", -1);
                     user.set("tutorialStep", -1);
                     user.set("canSuggest", true);
-                    if(!user.completedTutorials.includes(0))
+                    if (!user.completedTutorials.includes(0))
                         user.completedTutorials.push(0);
                     user.save();
                 }
@@ -430,7 +451,7 @@ async function gameTutorial(message, params, command, user) {
                             }
                             break;
                     }//End of switch
-                    
+
                 }//If the command matched.
             }
         }
@@ -964,7 +985,7 @@ function excludeDM(message, user) {
     let bool = message.content.split(" ")[1].toUpperCase().trim();
 
     if (bool == undefined) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
         return -1;
     }
 
@@ -982,6 +1003,33 @@ function excludeDM(message, user) {
     }
     else {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
+        return -1;
+    }
+}
+
+function setNotifyUpdate(message, user){
+
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
+
+    if (bool == undefined) {
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[30] + "** *true/false*");
+        return -1;
+    }
+
+    if (bool == "TRUE") {
+
+        user.set('notifyUpdate', true);
+        message.channel.send(mention(message.author.id) + " will be notified of new feature releases.");
+        return 1;
+    }
+    else if (bool == "FALSE") {
+
+        user.set('notifyUpdate', false);
+        message.channel.send(mention(message.author.id) + " will be excluded from any new feature releases.");
+        return 0;
+    }
+    else {
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[30] + "** *true/false*");
         return -1;
     }
 }
@@ -1075,7 +1123,7 @@ function removeGame(message, game, user) {
         message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
     }
 
-   
+
     user.set('games', finalGameList);
     let returnString = removedGames.split("|");
     console.log("AAAAAA: " + returnString);
