@@ -1037,7 +1037,7 @@ function setNotifyUpdate(message, user) {
     }
 }
 
-function setNotifyUpdate(message, user){
+function setNotifyTutorials(message, user){
 
     let bool = message.content.split(" ")[1].toUpperCase().trim();
 
