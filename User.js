@@ -52,7 +52,7 @@ const UserSchema = new mongoose.Schema({
     },
     notifyUpdate: {
         type: Boolean,
-        default: false
+        default: true
     },
     notifyTutorial: {
         type: Boolean,
@@ -61,7 +61,12 @@ const UserSchema = new mongoose.Schema({
     completedTutorials: {
         type: [Number],
         default: []
-    }
+    },
+    canSuggest: {
+        type: Boolean,
+        default: false
+    },
+
 });
 
 module.exports = mongoose.model('User', UserSchema);

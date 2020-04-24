@@ -15,22 +15,22 @@ const games = new Array();
 const studyArray = new Array();
 const GameTutorial = {
     expectedCommand: [
-        "SEARCH",
-        "SIGNUP",
-        "SIGNUP",
-        "MYGAMES",
-        "REMOVEGAME",
-        "PING",
-        "EXCLUDEPING",
-        "EXCLUDEDM"
+        Commands.commands[1],//"SEARCH"
+        Commands.commands[2],//"SIGNUP"
+        Commands.commands[2],//"SIGNUP"
+        Commands.commands[3],//"MYGAMES"
+        Commands.commands[4],//"REMOVEGAME"
+        Commands.commands[13],//"PING"
+        Commands.commands[5],//"EXCLUDEPING"
+        Commands.commands[6]//"EXCLUDEDM"
     ],
     expectedOutput: [
         1,
+        1,
+        2,
         0,
         1,
         0,
-        1,
-        1,
         0,
         0
     ]
@@ -129,6 +129,8 @@ connectDB.once('open', async function () {
 
         if (message.author.bot) return;
 
+
+
         let user = await findUser({ id: message.author.id });
         if (!user) {
             await checkExistance(member);
@@ -149,17 +151,20 @@ connectDB.once('open', async function () {
             if (!params[0])
                 params[0] = "";
 
+            if (!Commands.commands.includes(command.toUpperCase())) {
+
+                message.channel.send("**" + command + "** is not a recognized command, please try again");
+                return;
+            }
+
             if (user.activeTutorial != -1 && message.channel.type == 'dm') {//Intercepting tutorial commands in DM's
 
                 switch (user.activeTutorial) {
                     case 0:
 
-                        console.log("COMMAND: " + command);
-                        console.log("EXPECTED COMMAND: " + GameTutorial.expectedCommand[user.tutorialStep]);
                         if (command == GameTutorial.expectedCommand[user.tutorialStep]) {
 
                             gameTutorial(message, params, command, user);
-                            user.save();
                             return;
                         }
                     case 1:
@@ -189,9 +194,9 @@ connectDB.once('open', async function () {
             else if (command == Commands.commands[4]) //removeGame
                 removeGame(message, params, user);
             else if (command == Commands.commands[5]) //excludePing
-                excludePing(message, params, user);
+                excludePing(message, user);
             else if (command == Commands.commands[6]) //excludeDM
-                excludeDM(message, params, user);
+                excludeDM(message, user);
             else if (command == Commands.commands[7]) //help
                 generalHelp(message);
             else if (command == Commands.commands[8]) //helpGames
@@ -205,7 +210,7 @@ connectDB.once('open', async function () {
             else if (command == Commands.commands[12]) //study
                 study(message, params);
             else if (command == Commands.commands[13]) //ping
-                pingUsers(message, params[0].trim());
+                pingUsers(message, params);
             else if (message.channel.type != 'dm') {//Server exclusive commands
 
                 if (command == Commands.commands[14]) //initialiseUsers
@@ -261,9 +266,9 @@ connectDB.once('open', async function () {
             else {
 
                 if (command == Commands.commands[16]) //myStats
-                    personalDMStats(message, user); 
+                    personalDMStats(message, user);
                 else if (command == Commands.commands[25]) //gameTutorial
-                    gameTutorial(message, params, command, user);   
+                    gameTutorial(message, params, command, user);
                 else {
                     message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
                 }//End of DM else/if chain
@@ -290,6 +295,7 @@ connectDB.once('open', async function () {
 // + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.`
 
 async function gameTutorial(message, params, command, user) {
+
     //UPDATE ME AND SUGGEST NEEDS TO BE IMPLEMENTED
     let steps = [
         `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`
@@ -297,13 +303,13 @@ async function gameTutorial(message, params, command, user) {
         `Now that you see a bunch of results, hopefully the game you wanted is towards the top, along with the associated number.`
         + ` To add this game to your games list type **${prefix}` + Commands.commands[2] + `** *game#*. You can alternatively signup by pasting the complete name of the game.`
         + "```Example(s):\n1) " + prefix + Commands.commands[2] + " 302\n2) " + prefix + Commands.commands[2] + " Counter-Strike: Global Offensive```"
-        + ` Please add any valid game to your games list to continue`,
+        + ` Please add any valid (and new) game to your games list to continue`,
         `You can also sign up for as many games at once you would like by seperating each entry by a comma - you can mix both words and numbers for each entry as such:`
         + "```Example(s):\n1) " + prefix + Commands.commands[2] + " 2, Counter-Strike: Global Offensive, 24, Minecraft```"
         + ` Now it's your turn to sign up for more than one game at once, don't worry, I will show you how to remove any or all games in the following steps.`,
         `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}` + Commands.commands[3] + `**`
         + "```Example(s):\n1) " + prefix + Commands.commands[3] + "```",
-        `Now try removing any of the games in your games list by typing **${prefix}` + Commands.commands[4] + ` *game#*.`
+        `Now try removing any of the games in your games list by typing **${prefix}` + Commands.commands[4] + `** *game#*.`
         + ` Just a heads up that the GAME# is the number from your games list.`
         + "```Example(s):\n1) " + prefix + Commands.commands[4] + " 1```",
         `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
@@ -316,65 +322,122 @@ async function gameTutorial(message, params, command, user) {
         + ` **${prefix}` + Commands.commands[5] + `** *true/false*.`
         + "```Example(s):\n1) " + prefix + Commands.commands[5] + " false```Your turn!",
         `The second notification is a direct message. To disable direct messages from pings simply type`
-        + ` **${prefix}` + Commands.commands[6] + `** *true/false*. To complete the walkthrough go ahead and try it out.`,
-        + "```Example(s):\n1) " + prefix + Commands.commands[6] + " false```",
+        + ` **${prefix}` + Commands.commands[6] + `** *true/false*.` 
+        + "```Example(s):\n1) " + prefix + Commands.commands[6] + " false```"
+        + `To complete the walkthrough go ahead and try it out.`,
         `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
         + ` **${prefix}` + Commands.commands[26] + `** *any suggestion here* and I'll forward the message to the creator. For a more general help,`
-        + `type **${prefix}` + Commands.commands[7] + `**`
+        + ` type **${prefix}` + Commands.commands[7] + `**`
         + `\nAs a final note, this bot is being rapidly developed with new feautres constantly being added,`
         + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + Commands.commands[27] + `** *true/false*.`
         + "```Example(s):\n1) " + prefix + Commands.commands[26] + " You should add game XYZ to the games list!\n2) " + prefix + Commands.commands[7]
         + "\n3) " + prefix + Commands.commands[27] + " true```"
     ]
 
-    console.log(user.activeTutorial);
-    console.log(user.tutorialStep);
-    console.log(user.previousTutorialStep);
-    console.log("=============")
-
     if (user.tutorialStep == -1) {
 
-        user.set('activeTutorial', 0);
-        user.set('tutorialPreviousStep', user.tutorialStep + 1);
-        user.set('tutorialStep', user.tutorialStep + 2);
         message.channel.send(steps[0]);
-    }
-    else
+        user.set('activeTutorial', 0);
+        user.set('tutorialStep', 0);
+        user.set('previousTutorialStep', 0);
+    }//
+    else {
         if (user.activeTutorial == 0 || user.activeTutorial == -1) {
 
-            if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
+            if (command == Commands.commands[25]) {
+                message.channel.send(steps[user.tutorialStep]);
+            }
+            else if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
 
                 if (user.tutorialStep != steps.length - 1) {
 
-                    message.channel.send(user.tutorialStep[user.tutorialStep]);
-                    user.set("tutorialPreviousStep", user.tutorialStep + 1);
-                    user.set("tutorialStep", user.tutorialStep + 1);
+                    user.set("previousTutorialStep", user.previousTutorialStep + 1);
+                    user.save();
+                    message.channel.send(steps[user.tutorialStep]);
                 }
-                else {
-
-                    message.channel.send(user.tutorialStep[user.tutorialStep]);
+                else {//Tutorial over!!!!!
+                    //Need to add the recommend and something else commands
+                    message.channel.send(steps[user.tutorialStep]);
                     user.set("activeTutorial", -1);
-                    user.set("tutorialPreviousStep", -1);
+                    user.set("previousTutorialStep", -1);
                     user.set("tutorialStep", -1);
+                    user.set("canSuggest", true);
+                    if(!user.completedTutorials.includes(0))
+                        user.completedTutorials.push(0);
+                    user.save();
                 }
             }
             else {//Test if their response is the correct one.
 
-                /**
-                 *         Commands.commands[1],
-                        Commands.commands[2],
-                        Commands.commands[2],
-                        Commands.commands[3],
-                        Commands.commands[4],
-                        Commands.commands[13],
-                        Commands.commands[5],
-                        Commands.commands[6]
-                 */
+                if (command == GameTutorial.expectedCommand[user.tutorialStep]) {
+
+                    switch (user.tutorialStep) {
+
+                        case 0:
+                            if (search(message, params) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                                user.set('tutorialStep', user.tutorialStep + 1);
+                                user.save();
+                                setTimeout(gameTutorial, 1000, message, params, command, user);
+                            }
+                            break;
+                        case 1:
+                            if (await updateGames(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                                user.set('tutorialStep', user.tutorialStep + 1);
+                                user.save();
+                                setTimeout(gameTutorial, 1000, message, params, command, user);
+                            }
+                            break;
+                        case 2:
+                            if (await updateGames(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                                user.set('tutorialStep', user.tutorialStep + 1);
+                                user.save();
+                                setTimeout(gameTutorial, 1000, message, params, command, user);
+                            }
+                            break;
+                        case 3:
+                            if (personalGames(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                                user.set('tutorialStep', user.tutorialStep + 1);
+                                user.save();
+                                setTimeout(gameTutorial, 1000, message, params, command, user);
+                            }
+                            break;
+                        case 4:
+                            if (removeGame(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                                user.set('tutorialStep', user.tutorialStep + 1);
+                                user.save();
+                                setTimeout(gameTutorial, 1000, message, params, command, user);
+                            }
+                            break;
+                        case 5:
+                            if (await pingUsers(message, params) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                                user.set('tutorialStep', user.tutorialStep + 1);
+                                user.save();
+                                setTimeout(gameTutorial, 1000, message, params, command, user);
+                            }
+                            break;
+                        case 6:
+                            if (excludePing(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                                user.set('tutorialStep', user.tutorialStep + 1);
+                                user.save();
+                                setTimeout(gameTutorial, 1000, message, params, command, user);
+                            }
+                            break;
+                        case 7:
+                            if (excludeDM(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                                user.set('tutorialStep', user.tutorialStep + 1);
+                                user.save();
+                                setTimeout(gameTutorial, 1000, message, params, command, user);
+                            }
+                            break;
+                    }//End of switch
+                    
+                }//If the command matched.
             }
         }
         else {
             message.channel.send(`You are already doing ${tutorial[user.activeTutorial]}, to quit it type **${prefix}quitTutorial**`);
         }
+    }
 }
 
 function personalGames(message, user) {
@@ -392,12 +455,17 @@ function personalGames(message, user) {
     if (message.member != null)
         display = message.member.displayName;
 
-    if (finalList.length > 2)
+    if (finalList.length > 2) {
+
         message.channel.send("```" + display + " here are the games you are signed up for: \n" +
             finalList + "```");
+        return 1;
+    }
 
     else
         message.channel.send("You are not signed up for any games.");
+
+    return 0;
 
 }
 
@@ -506,12 +574,18 @@ async function getStats(member, user) {
 }
 
 function search(message, searches) {
-
     if (searches == undefined || searches == null || searches.length < 1) {
 
-        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "gamesList counter");
+        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + Commands.commands[1] + " counter");
         return -1;
     }
+    if (searches.length == 1 && (searches[0].toUpperCase() == (prefix.toUpperCase() + Commands.commands[1]))) {
+
+        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + Commands.commands[1] + " counter");
+        return -1;
+    }
+
+    console.log(searches)
 
     let finalArray = new Array();
 
@@ -859,25 +933,21 @@ async function updateMessage(message, user) {
     user.set('lastMessage', lastMessage.join("|"));
 }
 
-function excludePing(message, bool, user) {
+function excludePing(message, user) {
 
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == undefined) {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
         return -1;
     }
-    else if (bool[0].length != undefined && bool[0].length == 0) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
-        return -1;
-    }
-    bool[0] = bool[0].toUpperCase().trim();
 
-    if (bool[0] == "TRUE") {
+    if (bool == "TRUE") {
 
         user.set('excludePing', true);
         message.channel.send(mention(message.author.id) + " will be excluded from any further pings.");
         return 1;
     }
-    else if (bool[0] == "FALSE") {
+    else if (bool == "FALSE") {
 
         user.set('excludePing', false);
         message.channel.send(mention(message.author.id) + " can now be pinged once more.");
@@ -889,25 +959,22 @@ function excludePing(message, bool, user) {
     }
 }
 
-function excludeDM(message, bool, user) {
+function excludeDM(message, user) {
+
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
 
     if (bool == undefined) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
         return -1;
     }
-    else if (bool[0].length != undefined && bool[0].length == 0) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
-        return -1;
-    }
-    bool[0] = bool[0].toUpperCase().trim();
 
-    if (bool[0] == "TRUE") {
+    if (bool == "TRUE") {
 
         user.set('excludeDM', true);
         message.channel.send(mention(message.author.id) + " will be excluded from any further DMs.");
         return 1;
     }
-    else if (bool[0] == "FALSE") {
+    else if (bool == "FALSE") {
 
         user.set('excludeDM', false);
         message.channel.send(mention(message.author.id) + " will be DM'ed once more.");
@@ -1008,7 +1075,14 @@ function removeGame(message, game, user) {
         message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
     }
 
+   
     user.set('games', finalGameList);
+    let returnString = removedGames.split("|");
+    console.log("AAAAAA: " + returnString);
+    if (returnString[0].length > 1)
+        return returnString.length - 1;
+    else
+        return 0;
 }
 
 function mention(id) {
@@ -1023,6 +1097,7 @@ function directMessage(message, memberID, game) {
 
 async function pingUsers(message, game) {//Return 0 if it was inside a DM
 
+    game = game[0].trim();
     if (!isNaN(game)) {
 
         if (game < 0 || game >= games.length)
@@ -1209,6 +1284,11 @@ async function updateGames(message, game, user) {
     }
 
     user.set('games', user.games + finalString);
+    let returnString = finalString.split("|");
+    if (returnString[0].length > 1)
+        return returnString.length - 1;
+    else
+        return 0;
 }
 
 async function checkExistance(member) {
@@ -1337,7 +1417,7 @@ async function playSong(guild, song) {
     serverQueue.dispatcher = Dispatcher;
 }
 
-
+//
 
 async function graphs() {
 
@@ -1364,14 +1444,12 @@ async function updateAll() {
     // let changed = await User.findOneAndUpdate({ id: user.id },
     //     {
     //         $set: {
-    //             previousTutorialStep: -1
+    //             canSuggest: false
     //         }
     //     }, { new: true });
 
-    // // user.set('exclude', undefined, {strict: false} );
-    // // user.save();
-
-
+    //  user.set('notifyUpdate', true );
+    //  user.save();
     // });//each user loop
 
     // console.log("CALLED UPDATE ALL");
@@ -1385,10 +1463,8 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //When making a DB backup, go over every possible value and check if it exists or not...
-//Fix user calling a billion times, instead call it once with command/parameter splitting and pass the object. Save at the end as needed.
-//completed tutorials array
-//Add a return for certain function, true/false for success or fail, or a number for how many things were added/deleted
-//DM game setup
+
+//Add pinging second parameter, for time offset, like in 30 mins?
 //DM quality of life 
 //Custom, per-user prefix
 
