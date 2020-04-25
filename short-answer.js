@@ -272,6 +272,9 @@ connectDB.once('open', async function () {
                 }
                 else if (command == Commands.commands[25]) //gameTutorial
                     message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it to me privately :wink:`);
+                else if (command == Commands.commands[32]) {
+                    topGames(message);
+                }
 
 
 
@@ -1217,27 +1220,11 @@ async function gameStats(message, params, user) {
 
 async function topGames(message, params, user) {
 
-    game = game[0].trim();
-    if (!isNaN(game)) {
-        if (game < 0 || game >= user.games.split("|").length) {
-            message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
-            return -1;
-        }
-        game = user.games.split("|")[game];
-    }
-    else if (!games.includes(game)) {
-        message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
-        return -1;
-    }
-    else if (message.channel.type == 'dm') {
-
-        message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game
-            + "\nUnfortunately I cannot play games, why not try the same command inside a server?");
-        return 0;
-    }
 
     let users = await getUsers();
     let gameMap = new Map();
+
+
 
     for (let i = 0; i < users.length; i++) {
 
@@ -1245,18 +1232,28 @@ async function topGames(message, params, user) {
 
         for (let j = 0; j < tempGames.length; j++) {
 
-            if (!gameMap.get(tempGames[j]))
-                gameMap.set(tempGames[j], 1)
-            else
-                gameMap.set(tempGames[j], (gameMap.get(tempGames[j] + 1)));
+            if (tempGames[j].length > 2) {
+                
+                if (!gameMap.get(tempGames[j])) {
+
+                    gameMap.set(tempGames[j], 1)
+                }
+                else {
+                    gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
+                }
+            }
         }
     }
 
-    for(let i = 0; i < gameMap.length; i++){
+    console.log(gameMap.get("osu!"));
+    gameMap = new Map([...gameMap.entries()].sort(function (a, b) {return b[1] - a[1]}));
 
-        message.channel.send(`There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+    console.log(gameMap)
+
+    for (let i = 0; i < gameMap.length; i++) {
+
+        message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
     }
-
 
     return gameMap.length;
 }
