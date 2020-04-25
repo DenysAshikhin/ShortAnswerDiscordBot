@@ -126,9 +126,6 @@ connectDB.once('open', async function () {
     });
 
     Client.on("message", async (message) => {
-
-        if (message.author.bot) return;
-
         let user = await findUser({ id: message.author.id });
         if (!user) {
             await checkExistance(member);
@@ -137,6 +134,8 @@ connectDB.once('open', async function () {
 
         if (message.channel.type != 'dm')
             updateMessage(message, user);
+
+        if (message.author.bot) return;
 
         if (message.content.substr(0, prefix.length) == prefix) {
 
@@ -208,15 +207,23 @@ connectDB.once('open', async function () {
             else if (command == Commands.commands[12]) //study
                 study(message, params);
             else if (command == Commands.commands[13]) //ping
-                pingUsers(message, params);
+                pingUsers(message, params, user);
             else if (command == Commands.commands[26])//suggest
                 suggest(message, user)
             else if (command == Commands.commands[27])//notifyUpdate status
                 setNotifyUpdate(message, user)
             else if (command == Commands.commands[28])//notifyTutorials
                 setNotifyTutorials(message, user);
-            else if (message.channel.type != 'dm') {//Server exclusive commands
+            else if (command == Commands.commands[29])//quiteTutorial
+                quitTutorial(message, user);
+            else if (command == Commands.commands[30])//purgegameslist
+                purgeGamesList(message, user);
+            else if (command == Commands.commands[31])//gameStats
+                gameStats(message, params, user);
 
+
+            else if (message.channel.type != 'dm') {//Server exclusive commands
+                //
                 if (command == Commands.commands[14]) //initialiseUsers
                     initialiseUsers(message);
                 else if (command == Commands.commands[15] && message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) {
@@ -238,7 +245,7 @@ connectDB.once('open', async function () {
                     }
                 }//delete
                 else if (command == Commands.commands[16]) //myStats
-                    personalStats(messageuser);
+                    personalStats(message, user);
                 else if (command == Commands.commands[17] && message.member.hasPermission("ADMINISTRATOR")) //allStats
                     guildStats(message);
                 else if (command == Commands.commands[18]) //userStats
@@ -265,6 +272,8 @@ connectDB.once('open', async function () {
                 }
                 else if (command == Commands.commands[25]) //gameTutorial
                     message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it to me privately :wink:`);
+
+
 
             }//End of server text channel else/if chain
             else {
@@ -303,7 +312,19 @@ function suggest(message, user) {
 
 }
 
+function quitTutorial(message, user) {
 
+    user.set('activeTutorial', -1);
+    user.set('tutorialStep', -1);
+    user.set('previousTutorialStep', -1);
+    message.channel.send("You have quit the previous tutorial and may begin a new one at any point!");
+}
+
+function purgeGamesList(message, user) {
+    user.set('games', "");
+    message.channel.send("You games list has been emptied!");
+    return 1;
+}
 
 
 // `Greetings!\nYou are getting this message because I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
@@ -322,7 +343,7 @@ async function gameTutorial(message, params, command, user) {
         + ` Please add any valid (and new) game to your games list to continue`,
         `You can also sign up for as many games at once as you would like by seperating each entry by a comma - you can mix both words and numbers for each entry as such:`
         + "```Example(s):\n1) " + prefix + Commands.commands[2] + " 2, Counter-Strike: Global Offensive, 24, Minecraft```"
-        + ` Now it's your turn to sign up for more than one game at once, don't worry, I will show you how to remove any or all games in the following steps.`,
+        + ` Now it's your turn to sign up for *at least two new games* at once, don't worry, I will show you how to remove any or all games in the following steps.`,
         `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}` + Commands.commands[3] + `**`
         + "```Example(s):\n1) " + prefix + Commands.commands[3] + "```",
         `Now try removing any of the games in your games list by typing **${prefix}` + Commands.commands[4] + `** *game#*.`
@@ -335,10 +356,10 @@ async function gameTutorial(message, params, command, user) {
         + ` Go ahead, try out the command!`,
         `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
         + ` an @mention in the text channel it was sent from. To disable @mentions simply type`
-        + ` **${prefix}` + Commands.commands[5] + `** *true/false*.`
+        + ` **${prefix}` + Commands.commands[5] + `** *true/false*. *False* = you will be pinged, *True* = you will not be pinged.`
         + "```Example(s):\n1) " + prefix + Commands.commands[5] + " false```Your turn!",
         `The second notification is a direct message. To disable direct messages from pings simply type`
-        + ` **${prefix}` + Commands.commands[6] + `** *true/false*.`
+        + ` **${prefix}` + Commands.commands[6] + `** *true/false*. *False* = you will be DMed, *True* = you will not be DMed.`
         + "```Example(s):\n1) " + prefix + Commands.commands[6] + " false```"
         + `To complete the walkthrough go ahead and try it out.`,
         `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
@@ -420,7 +441,7 @@ async function gameTutorial(message, params, command, user) {
                             }
                             break;
                         case 5:
-                            if (await pingUsers(message, params) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                            if (await pingUsers(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
                                 user.set('tutorialStep', user.tutorialStep + 1);
                                 setTimeout(gameTutorial, 1000, message, params, command, user);
                             }
@@ -575,10 +596,16 @@ async function getStats(member, user) {
         + "The games you are signed up for: " + user.games + "\n"
         + "Time spent AFK (in minutes): " + user.timeAFK.split("|")[index] + "\n"
         + "You joined this server on: " + user.dateJoined.split("|")[index] + "\n"
-        + "Whether you are excluded from pings: " + user.excludePing + "\n",
+        + "Whether you are excluded from pings: " + user.excludePing + "\n"
         + "Whether you are excluded from DMs: " + user.excludeDM + "\n";
 
     return stats;
+}
+
+async function personalStats(message, user) {
+
+    message.channel.send(mention(message.member.id) + " here are your stats: ```"
+        + await getStats(message.member, user) + "```");
 }
 
 function search(message, searches) {
@@ -800,7 +827,8 @@ function generalHelp(message, user) {
         + "2) " + prefix + "helpStats  || For information on how to view server, personal, top stats and more.\n\n"
         + "3) " + prefix + "helpMiscellaneous  || For information on random commands.\n\n"
         + "4) " + prefix + "helpMusic || For information on playing music.\n\n"
-        + "IMPORTANT: Make sure to run " + prefix + "initiliaseUsers || otherwise the other commands will not function properly. This command adds all users from the called server to the bot's tracker.\n\n"
+        + "IMPORTANT: Make sure to run " + prefix + "initiliaseUsers || This only needs to be done once per server, otherwise the other commands will not function properly."
+        + " This command adds all users from the called server to the bot's tracker.\n\n"
         + "```";
 
     message.channel.send(helpMessage);
@@ -832,12 +860,6 @@ function gameHelp(message) {
         + "Example usage: " + prefix + "ping Counter-Global: Offensive```";
 
     message.channel.send(gameMessage);
-}
-
-function personalStats(message, user) {
-
-    message.channel.send(mention(message.member.id) + " here are your stats: ```"
-        + getStats(user) + "```");
 }
 
 function personalDMStats(message, user) {
@@ -1068,83 +1090,90 @@ function getDate() {
     return dayNumber + "-" + monthNumber + "-" + today.getFullYear();
 }
 
+//Check the empty games list
 function removeGame(message, game, user) {
 
-    let gameArr = user.games.split("|");
-    let invalidGames = "";
-    let removedGames = "";
+    if (user.games.length < 2) {
 
-
-    let setty = new Set(game);
-    game = Array.from(setty);
-    games.sort();
-
-    //game.forEach(async gameTitle => {
-
-    let gameTitle = game[0];
-
-    if (isNaN(gameTitle)) {
-
-        //gameTitle = gameTitle.toUpperCase();
-
-        if (gameArr.includes(gameTitle)) {
-            removedGames += gameArr.splice(gameArr.indexOf(gameTitle), 1) + "|";
-        }
-        else
-            invalidGames += gameTitle + "|";
+        message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2])
     }
     else {
-        if (gameTitle < gameArr.length && gameTitle >= 0) {
+        let gameArr = user.games.split("|");
+        let invalidGames = "";
+        let removedGames = "";
 
-            removedGames += gameArr.splice(gameTitle, 1) + "|";
+
+        let setty = new Set(game);
+        game = Array.from(setty);
+        games.sort();
+
+        //game.forEach(async gameTitle => {
+
+        let gameTitle = game[0];
+
+        if (isNaN(gameTitle)) {
+
+            //gameTitle = gameTitle.toUpperCase();
+
+            if (gameArr.includes(gameTitle)) {
+                removedGames += gameArr.splice(gameArr.indexOf(gameTitle), 1) + "|";
+            }
+            else
+                invalidGames += gameTitle + "|";
         }
+        else {
+            if (gameTitle < gameArr.length && gameTitle >= 0) {
+
+                removedGames += gameArr.splice(gameTitle, 1) + "|";
+            }
+            else
+                invalidGames += gameTitle + "|";
+        }
+        //});
+
+        let finalGameList = "";
+        gameArr.sort();
+
+        for (let i = 0; i < gameArr.length; i++) {
+
+            if (gameArr[i].length > 1) {
+
+                finalGameList += gameArr[i] + "|";
+            }
+        }
+
+        if (invalidGames.length > 2) {
+
+            let congrats = "";
+            let tempArr = invalidGames.split("|");
+            tempArr.sort();
+            for (let i = 0; i < tempArr.length; i++) {
+                if (tempArr[i].length > 1)
+                    congrats += i + ") " + tempArr[i] + "\n";
+            }
+            message.channel.send("The following are invalid games: ```" + congrats + "```");
+        }
+
+        if (removedGames.length > 2) {
+
+            let congrats = "";
+            let tempArr = removedGames.split("|");
+            tempArr.sort();
+            for (let i = 0; i < tempArr.length; i++) {
+                if (tempArr[i].length > 1)
+                    congrats += i + ") " + tempArr[i] + "\n";
+            }
+            message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
+        }
+
+
+        user.set('games', finalGameList);
+        let returnString = removedGames.split("|");
+        if (returnString[0].length > 1)
+            return returnString.length - 1;
         else
-            invalidGames += gameTitle + "|";
+            return 0;
     }
-    //});
-
-    let finalGameList = "";
-    gameArr.sort();
-
-    for (let i = 0; i < gameArr.length; i++) {
-
-        if (gameArr[i].length > 1) {
-
-            finalGameList += gameArr[i] + "|";
-        }
-    }
-
-    if (invalidGames.length > 2) {
-
-        let congrats = "";
-        let tempArr = invalidGames.split("|");
-        tempArr.sort();
-        for (let i = 0; i < tempArr.length; i++) {
-            if (tempArr[i].length > 1)
-                congrats += i + ") " + tempArr[i] + "\n";
-        }
-        message.channel.send("The following are invalid games: ```" + congrats + "```");
-    }
-
-    if (removedGames.length > 2) {
-
-        let congrats = "";
-        let tempArr = removedGames.split("|");
-        tempArr.sort();
-        for (let i = 0; i < tempArr.length; i++) {
-            if (tempArr[i].length > 1)
-                congrats += i + ") " + tempArr[i] + "\n";
-        }
-        message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
-    }
-
-
-    user.set('games', finalGameList);
-    let returnString = removedGames.split("|");
-    if (returnString[0].length > 1)
-        return returnString.length - 1;
-    else
-        return 0;
 }
 
 function mention(id) {
@@ -1157,14 +1186,44 @@ function directMessage(message, memberID, game) {
         + message.guild.name + "!");
 }
 
-async function pingUsers(message, game) {//Return 0 if it was inside a DM
+
+async function gameStats(message, params, user) {
+
+    let game = params[0].trim();
+    if (!isNaN(game)) {
+        if (game < 0 || game >= user.games.split("|").length) {
+            message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
+            return -1;
+        }
+        game = user.games.split("|")[game];
+    }
+    else if (!games.includes(game)) {
+        message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
+        return -1;
+    }
+
+    let users = await getUsers();
+    let signedUp = new Array();
+
+    for (let i = 0; i < users.length; i++) {
+
+        if (users[i].games.split("|").includes(game))
+            signedUp.push(users[i]);
+    }
+
+    message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+    return signedUp.length;
+}
+
+async function topGames(message, params, user) {
 
     game = game[0].trim();
     if (!isNaN(game)) {
-
-        if (game < 0 || game >= games.length)
+        if (game < 0 || game >= user.games.split("|").length) {
             message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
-        return -1;
+            return -1;
+        }
+        game = user.games.split("|")[game];
     }
     else if (!games.includes(game)) {
         message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
@@ -1172,8 +1231,54 @@ async function pingUsers(message, game) {//Return 0 if it was inside a DM
     }
     else if (message.channel.type == 'dm') {
 
-        await message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game);
-        await message.channel.send("Unfortunately I cannot play games, why not try the same command inside a server?");
+        message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game
+            + "\nUnfortunately I cannot play games, why not try the same command inside a server?");
+        return 0;
+    }
+
+    let users = await getUsers();
+    let gameMap = new Map();
+
+    for (let i = 0; i < users.length; i++) {
+
+        let tempGames = users[i].games.split("|");
+
+        for (let j = 0; j < tempGames.length; j++) {
+
+            if (!gameMap.get(tempGames[j]))
+                gameMap.set(tempGames[j], 1)
+            else
+                gameMap.set(tempGames[j], (gameMap.get(tempGames[j] + 1)));
+        }
+    }
+
+    for(let i = 0; i < gameMap.length; i++){
+
+        message.channel.send(`There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+    }
+
+
+    return gameMap.length;
+}
+
+async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
+
+    game = game[0].trim();
+    if (!isNaN(game)) {
+        if (game < 0 || game >= user.games.split("|").length) {
+            message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
+            return -1;
+        }
+        game = user.games.split("|")[game];
+    }
+    else if (!games.includes(game)) {
+        message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
+        return -1;
+    }
+    else if (message.channel.type == 'dm') {
+
+        message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game
+            + "\nUnfortunately I cannot play games, why not try the same command inside a server?");
         return 0;
     }
 
@@ -1181,7 +1286,7 @@ async function pingUsers(message, game) {//Return 0 if it was inside a DM
     let signedUp = "";
     let defaulted = "";
 
-    users.forEach(async user => {
+    await users.forEach(async user => {
         //  console.log(user.displayName + "||" + user.exclude);
         if (user.id != message.member.id) {
 
@@ -1199,6 +1304,9 @@ async function pingUsers(message, game) {//Return 0 if it was inside a DM
                 }
                 else if (user.games.split("|").includes(games[game])) {
 
+                    console.log("ACTUALLY");
+                    consol.log(user.excludePing == false)
+                    console.log(user.excludeDM == false)
                     if (user.excludePing == false)
                         signedUp += mention(user.id);
                     if (user.excludeDM == false)
@@ -1223,6 +1331,8 @@ async function pingUsers(message, game) {//Return 0 if it was inside a DM
     //         + " if you wish to never be summoned for games, type sa!exclude, or signUp for at least one game. Type " + prefix + " for more information```");
     // }NOTE ENABLE LATER
 }
+
+
 
 async function createUser(member) {
 
@@ -1252,6 +1362,8 @@ async function createUser(member) {
 
         if (err) return console.error(err)
     });
+
+    return userModel;
 }
 //I was here
 async function addGuild(member, memberDB) {
@@ -1345,7 +1457,7 @@ async function updateGames(message, game, user) {
         message.channel.send("The following are invalid games: ```" + congrats + "```");
     }
 
-    user.set('games', user.games + finalString);
+    user.set('games', (user.games + finalString).split("|").sort().join("|"));
     let returnString = finalString.split("|");
     if (returnString[0].length > 1)
         return returnString.length - 1;
@@ -1353,10 +1465,14 @@ async function updateGames(message, game, user) {
         return 0;
 }
 
+/**
+ * true = Existed in DB
+ * false = didn't exist in DB
+ */
 async function checkExistance(member) {
 
     let tempUser = await findUser({ id: member.id })
-    if (tempUser != null) {
+    if (!tempUser) {
 
         if (tempUser.guilds.split("|").includes(member.guild.id + ""))
             return true;
@@ -1368,9 +1484,9 @@ async function checkExistance(member) {
     }
     else {
         console.log("The user doesnt exist.");
-        await createUser(member);
+        console.log("Created the user: " + (await createUser(member)).displayName);
+        return false;
     }
-    return false;
 }
 
 async function initialiseUsers(message) {
@@ -1479,7 +1595,6 @@ async function playSong(guild, song) {
     serverQueue.dispatcher = Dispatcher;
 }
 
-
 async function graphs() {
 
     let ch = message.channel;
@@ -1494,23 +1609,26 @@ async function graphs() {
 
 async function updateAll() {
 
-
-
-
     // let users = await getUsers();
 
-    // users.forEach(async user => {
+    // // for(let i = 0; i < users.length; i++){
 
-    // let changed = await User.findOneAndUpdate({ id: user.id },
-    //     {
-    //         $set: {
-    //             canSuggest: false
-    //         }
-    //     }, { new: true });
 
-    //  user.set('notifyUpdate', true );
-    //  user.save();
-    // });//each user loop
+    // // // let changed = await User.findOneAndUpdate({ id: user.id },
+    // // //     {
+    // // //         $set: {
+    // // //             canSuggest: false
+    // // //         }
+    // // //     }, { new: true });
+
+    // // //  user.set('notifyUpdate', true );
+    // // //  user.save();
+
+    // // }//for user loop
+
+    // // fs.writeFile(getDate() + ".json", JSON.stringify(users), function (err, result) {
+    // //     if (err) console.log('error', err);
+    // // });
 
     // console.log("CALLED UPDATE ALL");
 }
@@ -1523,26 +1641,29 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-//add notifacatioon if you try to remove a game but there are no games to remove
-//add pinging by games
-//you have to sign up for 2 NEW games
-//userstats @mention fix
+//REMOVE FOREACH LOOPS ANYWHERE POSSIBLE
+
 //invalid game suggest a couple?
-//Specify if true is disable, or enable
-//Specify that initialiuseusers only once per server
-//fix not specified to follow the example format
 
 //When making a DB backup, go over every possible value and check if it exists or not...
 
-//add quit tutorial option
-//add a purge my game list
+
+
 //add a view a list of games on the server ppl signed up for (sorted by # number of signed up)
 //View users signed up for a game
 //Add a 'summoner' top stat - most pings
 //Custom, per-user prefix
 
+//Stop using strings and use arrays proper
+//Make a vote system for the next feature to focus on
 
+
+//Be alerted if a user is found in a voice channel? Stalker lmao
 //DM quality of life 
+
+//for game stats, add a Y/N for seeing a list of all the people signed up for it
+//for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
+//Stats Tutorial
 
 
 //coin flipper
@@ -1564,6 +1685,9 @@ setInterval(minuteCount, 60 * 1000);
 //ping by number - if there is enough demand for it
 
 
+//MEE6 bot - beatiful ui, build in message formatin? embeds or something,
+//if authorised, you can control stuff from the website.
+
 
 
 // if (command.startsWith("emptyDB") && (message.author.id == creatorID)) {
@@ -1577,30 +1701,5 @@ setInterval(minuteCount, 60 * 1000);
 // }
 
 
-process.on('uncaughtException', function (err) {
-    console.log('Caught exception: ' + err);
-    let d = new Date();
-    fs.writeFile(d.toString() + ".txt", err, function (err, result) {
-        if (err) console.log('error', err);
-    });
-});
 
-process.on('uncaughtException', function (err) {
-    console.log('Caught exception: ' + err);
-    // let d = new Date();
-    // fs.writeFile(d.toString() + ".txt", err, function (err, result) {
-    //     if (err) console.log('error', err);
-    // });
-});
-
-
-
-
-process.on("unhandledRejection", function (err) {
-    console.log('Caught exception: ' + err);
-    // let d = new Date();
-    // fs.writeFile(d.toString() + ".txt", err, function (err, result) {
-    //     if (err) console.log('error', err);
-    // });
-});
 

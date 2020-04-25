@@ -28,7 +28,11 @@
         "GAMETUTORIAL",
         "SUGGEST",
         "UPDATEME",
-        "TUTORIALS"
+        "TUTORIALS",
+        "QUITTUTORIAL",
+        "PURGEGAMES",
+        "GAMESTATS",
+        "TOPGAMES"
     ],
     "information": []
 }
