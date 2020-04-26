@@ -1745,8 +1745,6 @@ setInterval(minuteCount, 60 * 1000);
 
 //REMOVE FOREACH LOOPS ANYWHERE POSSIBLE
 //@ a role breaks it, not having a mention breaks it
-//invalid game suggest a couple?
-
 
 //Add a 'summoner' top stat - most pings
 //Custom, per-user prefix
