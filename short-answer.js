@@ -1288,7 +1288,7 @@ async function topGames(message, params) {
         maxResults = params[0];
 
 
-    if(gameMap.length == 0){
+    if (gameMap.length == 0) {
         message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
         return;
     }
@@ -1326,13 +1326,23 @@ async function handleCommandTracker(specificCommand, params) {
 
         for (let i = 0; i < specificCommand.defaults.length; i++) {
 
-            if (specificCommand.defaults[i] == -1)
+            if (specificCommand.defaults[i] == -1) {
                 specificCommand.defaults[i] = specificCommand.choices[Math.floor(params)].item
+            }
         };
         await specificCommand.command.apply(null, specificCommand.defaults);
     }
     else
         return -1;
+}
+
+function specificCommandCreator(command, defaults, choices, user) {
+
+    commandTracker.set(user.id, {
+        command: command,
+        defaults: defaults,
+        choices: choices
+    });
 }
 
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
@@ -1352,11 +1362,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     else if (check.result[0].score != 0) {
 
         message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
-        commandTracker.set(user.id, {
-            command: pingUsers,
-            defaults: [message, -1, user],
-            choices: check.result
-        });
+        specificCommandCreator(pingUsers, [message, -1, user], check.result, user);
         return -1;
     }
     else {
@@ -1460,13 +1466,41 @@ async function addGuild(member, memberDB) {
 
 async function updateGames(message, game, user) {
 
-    let setty = new Set(game);
-    game = Array.from(setty);
+    if (Array.isArray(game)) {
+        let setty = new Set(game);
+        game = Array.from(setty);
+    }
+    else{
+
+        game = [game];
+    }
+
     games.sort();
     let existingGames = user.games;
     let finalGameArray = new Array();
     let alreadyTracked = new Array();
     let invalidGames = new Array();
+
+    if (game.length == 1) {
+
+        let check = checkGame(games, game, user);
+
+        if (check == -1) {
+
+            message.channel.send(game + " is not assigned to any games, please try again.");
+            return -1;
+        }
+        else if (check.result[0].score != 0) {
+
+            message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+            specificCommandCreator(updateGames, [message, -1, user], check.result, user);
+            return -1;
+        }
+        else {
+
+            game[0] = check.result[0].item;
+        }
+    }
 
     for (let i = 0; i < game.length; i++) {
         gameTitle = game[i];
