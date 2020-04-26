@@ -590,11 +590,11 @@ async function topStats(message) {
 
 }
 
-
-//@ a role breaks it, not having a mention breaks it
 async function specificStats(message) {
 
-    if (message.mentions.members.first().id == botID)
+    if (message.mentions.members.size < 1)
+        message.channel.send("You have to @someone properly!");
+    else if (message.mentions.members.first().id == botID)
         message.channel.send("My stats are private!");
     else
         message.channel.send(message.guild.members.cache.get(message.mentions.members.first().id).user.username + ", ```" + message.member.displayName + "``` requested your stats: ```"
@@ -1664,28 +1664,28 @@ async function graphs() {
 
 async function updateAll() {
 
-    // let users = await getUsers();
+    let users = await getUsers();
 
-    // // for(let i = 0; i < users.length; i++){
+    for(let i = 0; i < users.length; i++){
 
 
-    // // // let changed = await User.findOneAndUpdate({ id: user.id },
-    // // //     {
-    // // //         $set: {
-    // // //             canSuggest: false
-    // // //         }
-    // // //     }, { new: true });
+    // let changed = await User.findOneAndUpdate({ id: user.id },
+    //     {
+    //         $set: {
+    //             canSuggest: false
+    //         }
+    //     }, { new: true });
 
-    // // //  user.set('notifyUpdate', true );
-    // // //  user.save();
+    //  user.set('notifyUpdate', true );
+    //  user.save();
 
-    // // }//for user loop
+    }//for user loop
 
-    // // fs.writeFile(getDate() + ".json", JSON.stringify(users), function (err, result) {
-    // //     if (err) console.log('error', err);
-    // // });
+    fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
+        if (err) console.log('error', err);
+    });
 
-    // console.log("CALLED UPDATE ALL");
+    console.log("CALLED UPDATE ALL");
 }
 
 async function minuteCount() {
@@ -1744,7 +1744,6 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //REMOVE FOREACH LOOPS ANYWHERE POSSIBLE
-//@ a role breaks it, not having a mention breaks it
 
 //Add a 'summoner' top stat - most pings
 //Custom, per-user prefix
