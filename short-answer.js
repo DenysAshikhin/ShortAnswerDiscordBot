@@ -65,7 +65,6 @@ try {
     config = require('./config.json');
 }
 catch (err) {
-
     console.log("config.json doesn't exist - probably running on heroku?");
 }
 if (config == null) {
@@ -595,8 +594,11 @@ async function topStats(message) {
 //@ a role breaks it, not having a mention breaks it
 async function specificStats(message) {
 
-    message.channel.send(message.guild.members.cache.get(message.mentions.members.first().id).user.username + ", ```" + message.member.displayName + "``` requested your stats: ```"
-        + (await getStats(message.mentions.members.first())) + "```");
+    if (message.mentions.members.first().id == botID)
+        message.channel.send("My stats are private!");
+    else
+        message.channel.send(message.guild.members.cache.get(message.mentions.members.first().id).user.username + ", ```" + message.member.displayName + "``` requested your stats: ```"
+            + (await getStats(message.mentions.members.first())) + "```");
 }
 
 async function getStats(member, user) {
