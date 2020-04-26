@@ -273,7 +273,7 @@ connectDB.once('open', async function () {
                 else if (command == Commands.commands[25]) //gameTutorial
                     message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it to me privately :wink:`);
                 else if (command == Commands.commands[32]) {
-                    topGames(message);
+                    topGames(message, params);
                 }
 
 
@@ -1093,7 +1093,6 @@ function getDate() {
     return dayNumber + "-" + monthNumber + "-" + today.getFullYear();
 }
 
-//Check the empty games list
 function removeGame(message, game, user) {
 
     if (user.games.length < 2) {
@@ -1189,7 +1188,6 @@ function directMessage(message, memberID, game) {
         + message.guild.name + "!");
 }
 
-
 async function gameStats(message, params, user) {
 
     let game = params[0].trim();
@@ -1220,11 +1218,8 @@ async function gameStats(message, params, user) {
 
 async function topGames(message, params, user) {
 
-
     let users = await getUsers();
     let gameMap = new Map();
-
-
 
     for (let i = 0; i < users.length; i++) {
 
@@ -1233,10 +1228,10 @@ async function topGames(message, params, user) {
         for (let j = 0; j < tempGames.length; j++) {
 
             if (tempGames[j].length > 2) {
-                
+
                 if (!gameMap.get(tempGames[j])) {
 
-                    gameMap.set(tempGames[j], 1)
+                    gameMap.set(tempGames[j], 1);
                 }
                 else {
                     gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
@@ -1245,15 +1240,34 @@ async function topGames(message, params, user) {
         }
     }
 
-    console.log(gameMap.get("osu!"));
-    gameMap = new Map([...gameMap.entries()].sort(function (a, b) {return b[1] - a[1]}));
+    gameMap = [...gameMap.entries()].sort(function (a, b) { return b[1] - a[1] });
 
-    console.log(gameMap)
+    console.log(params[0])
 
-    for (let i = 0; i < gameMap.length; i++) {
+    let maxResults = 5;
+    if (!(isNaN(params[0])))
+        maxResults = params[0];
 
-        message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+
+    if (maxResults > gameMap.length) {
+
+        maxResults = gameMap.length;
+        message.channel.send(`There are only ${maxResults} games people signed up for on ${message.guild.name}`);
     }
+    else{
+        message.channel.send(`You did not specify the number of games to display, as such, I will displaying the top ${maxResults}`
+        + ` games people signed up for on the ${message.guild.name} server:`);
+    }
+
+    let finalList = ``;
+
+    for (let i = 0; i < maxResults; i++) {
+
+        finalList += `${i+1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.\n`;
+        //message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+    }
+
+    message.channel.send("```" + finalList + "```");
 
     return gameMap.length;
 }
@@ -1328,8 +1342,6 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     //         + " if you wish to never be summoned for games, type sa!exclude, or signUp for at least one game. Type " + prefix + " for more information```");
     // }NOTE ENABLE LATER
 }
-
-
 
 async function createUser(member) {
 
@@ -1642,8 +1654,6 @@ setInterval(minuteCount, 60 * 1000);
 
 //invalid game suggest a couple?
 
-//When making a DB backup, go over every possible value and check if it exists or not...
-
 
 
 //add a view a list of games on the server ppl signed up for (sorted by # number of signed up)
@@ -1660,6 +1670,10 @@ setInterval(minuteCount, 60 * 1000);
 
 //for game stats, add a Y/N for seeing a list of all the people signed up for it
 //for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
+
+
+//play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
+
 //Stats Tutorial
 
 
@@ -1697,6 +1711,4 @@ setInterval(minuteCount, 60 * 1000);
 //     return;
 // }
 
-
-
-
+process.on('unhandledRejection', (reason, p) => { console.log(reason) });
