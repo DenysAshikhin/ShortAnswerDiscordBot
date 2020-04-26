@@ -91,29 +91,18 @@ const findUser = async function (params) {
     } catch (err) { console.log(err) }
 }
 
-const findBot = async function (params) {
-    try {
-        return await Bot.findOne(params)
-    } catch (err) { console.log(err) }
-}
-
 connectDB.once('open', async function () {
 
     Client.login(token);
 
-    gameJSON.forEach(element => {
 
-        //console.log(element.name.split(' ').join('_'));
-        //games.push(element.name.split(' ').join('_').toUpperCase());
+    for (let element of gameJSON)
         games.push(element.name);
-    });
     games.sort();
 
-
-    studyJSON.forEach(element => {
-
+    for (let element of studyJSON)
         studyArray.push(element);
-    });
+
 
 
     Client.on("ready", () => {
@@ -643,8 +632,9 @@ function search(message, searches) {
 
     let finalArray = new Array();
 
-    searches.forEach(query => {
+    for (let i = 0; i < searches.length; i++) {
 
+        let query = searchers[i];
         if (query.length > 0) {
 
             message.channel.send(mention(message.author.id) + "! Here are the result for: " + query + "\n");
@@ -670,7 +660,7 @@ function search(message, searches) {
             }
         }
 
-    });//Each query response
+    }//for loop
 
     if (finalArray.length > 0)
         return 1;
@@ -687,10 +677,13 @@ function study(message, query) {
 
     let finalObject = new Array();
 
-    studyArray.forEach(ppt => {
+    for (let i = 0; i < studyArray.length; i++) {
 
-        ppt.slides.forEach(slide => {
+        let ppt = studyArray[i];
 
+        for (let j = 0; j < ppt.slides.length; j++) {
+
+            let slide = ppt.slides[j];
             let tempObject = {
                 items: [],
                 refIndex: [],
@@ -720,11 +713,13 @@ function study(message, query) {
             let fuse = new Fuse(slideArray, options1);
             let searchWords = query[0].split(" ");
 
-            searchWords.forEach(searchWord => {
+            for (let k = 0; k < searchWords.length; k++) {
 
+                let searchWord = searchWords[k];
                 let result = fuse.search(searchWord);
+                for (let l = 0; l < result.length; l++) {
+                    let found = result[l];
 
-                result.forEach(found => {
 
                     if (finalObject[index] == undefined) {
                         finalObject.push(tempObject);
@@ -741,16 +736,16 @@ function study(message, query) {
                         finalObject[index].items.push(itemString);
                         finalObject[index].refIndex.push(found.refIndex);
                     }
-                });//result loop
-            });//searchWords loops
-        })//slide loop
-    });//ppt loop
+                }//result loop
+            }//searchWords loops
+        }//slide loop
+    }//ppt loop
 
     let currentSlideDeck = "";
 
     let searchNumbers = finalObject.length;
     if (query[1] != null)
-        if (Number(query[1]) > 0)
+        if (Number(query[1]) > 0 && Number(query[1]) < searchNumbers)
             searchNumbers = Number(query[1]);
 
     let minResults = -1;
@@ -925,16 +920,23 @@ async function guildStats(message) {
     message.channel.send("```DONE!```");
 }
 
+//TRIPLE CHECK THISSSS
 async function countTalk() {
 
-    Client.guilds.cache.forEach(async guild => {
+    for (let GUILD of Client.guilds.cache) {
 
-        guild.channels.cache.forEach(async channel => {
+        let guild = Client.guilds.cache.get(GUILD[0]);
+        let channels = guild.channels.cache;
+
+        for (let CHANNEL of channels) {
+
+            let channel = CHANNEL[1];
 
             if (channel.type == "voice") {
 
-                channel.members.forEach(async member => {
+                for (let MEMBER of channel.members) {
 
+                    let member = MEMBER[1];
                     let user = await findUser({ id: member.id });
                     if (!user) {
                         console.log("found the null user: " + member.displayName + " || From: " + guild.name);
@@ -971,10 +973,10 @@ async function countTalk() {
                                 //console.log(doc);
                             });
                     }
-                })
+                }
             }
-        })
-    })
+        }
+    }
 }
 
 async function updateMessage(message, user) {
@@ -1128,7 +1130,7 @@ function removeGame(message, game, user) {
         game = Array.from(setty);
         games.sort();
 
-        //game.forEach(async gameTitle => {
+        //game.forEach(async gameTitle => {make it for...of loop!
 
         let gameTitle = game[0];
 
@@ -1308,7 +1310,6 @@ async function handleCommandTracker(specificCommand, params) {
         return -1;
 }
 
-
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     if (message.channel.type == 'dm') {
@@ -1335,11 +1336,13 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     }
     else {
 
+        game = check.result[0].item;
+
         let users = await getUsers();
         let signedUp = "";
         let defaulted = "";
 
-        await users.forEach(async user => {
+        for (let user of users) {
             if (user.id != message.author.id) {
 
                 if (user.guilds.split("|").includes(message.guild.id)) {
@@ -1366,7 +1369,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                     }
                 }
             }
-        });
+        }//Each user for loop
 
         if (signedUp.length > 3)
             message.channel.send(message.member.displayName + " has summoned " + signedUp + " for some " + game);
@@ -1539,11 +1542,12 @@ async function checkExistance(member) {
 
 async function initialiseUsers(message) {
 
-    let members = message.channel.guild.members;
     let newUsers = 0;
     let existingUsers = 0;
 
-    members.cache.forEach(async member => {
+    for (let MEMBER of message.channel.guild.members.cache) {
+
+        let member = MEMBER[1];
 
         if (await (checkExistance(member))) {//User exists with a matching guild in the DB
             existingUsers++;
@@ -1553,7 +1557,7 @@ async function initialiseUsers(message) {
             (await createUser(member));
             newUsers++;
         }
-    });
+    }
     message.channel.send("The server's users are now tracked!");
 }
 
@@ -1664,34 +1668,33 @@ async function graphs() {
 
 async function updateAll() {
 
-    let users = await getUsers();
+    // let users = await getUsers();
 
-    for(let i = 0; i < users.length; i++){
+    // for(let i = 0; i < users.length; i++){
 
 
-    // let changed = await User.findOneAndUpdate({ id: user.id },
-    //     {
-    //         $set: {
-    //             canSuggest: false
-    //         }
-    //     }, { new: true });
+    // // let changed = await User.findOneAndUpdate({ id: user.id },
+    // //     {
+    // //         $set: {
+    // //             canSuggest: false
+    // //         }
+    // //     }, { new: true });
 
-    //  user.set('notifyUpdate', true );
-    //  user.save();
+    // //  user.set('notifyUpdate', true );
+    // //  user.save();
 
-    }//for user loop
+    // }//for user loop
 
-    fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
-        if (err) console.log('error', err);
-    });
+    // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
+    //     if (err) console.log('error', err);
+    // });
 
-    console.log("CALLED UPDATE ALL");
+    // console.log("CALLED UPDATE ALL");
 }
 
 async function minuteCount() {
     countTalk();
 }
-
 
 function checkGame(gameArray, params, user) {
 
@@ -1699,8 +1702,7 @@ function checkGame(gameArray, params, user) {
         if (params < 0 || params >= gameArray.length) {
             return -1;
         }
-
-        params = gameArray[Math.floor(params)];
+        params = user.games.split("|")[Math.floor(params)];
     }
     else if (Array.isArray(params))
         params = params[0].trim();
@@ -1738,12 +1740,8 @@ function checkGame(gameArray, params, user) {
     else return -1
 }
 
-
 setInterval(minuteCount, 60 * 1000);
 
-
-
-//REMOVE FOREACH LOOPS ANYWHERE POSSIBLE
 
 //Add a 'summoner' top stat - most pings
 //Custom, per-user prefix
@@ -1751,18 +1749,15 @@ setInterval(minuteCount, 60 * 1000);
 //Stop using strings and use arrays proper
 //Make a vote system for the next feature to focus on
 
-
 //Be alerted if a user is found in a voice channel? Stalker lmao
 //DM quality of life 
 
 //for game stats, add a Y/N for seeing a list of all the people signed up for it
 //for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
 
-
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
 //Stats Tutorial
-
 
 //coin flipper
 //game decider
