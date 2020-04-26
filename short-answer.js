@@ -55,6 +55,7 @@ const options = {
 //FAT NOTE: (true >= false) is TRUE
 
 var Client = new Discord.Client();
+var commandTracker = new Map();
 var config = null;
 var queue = new Map();
 var prefix = "sa!";
@@ -126,16 +127,20 @@ connectDB.once('open', async function () {
     });
 
     Client.on("message", async (message) => {
+        if (message.author.bot) return;
         let user = await findUser({ id: message.author.id });
-        if (!user) {
-            await checkExistance(member);
+
+        if (!user && message.channel.type != 'dm') {
+            await checkExistance(message.member);
             user = await findUser({ id: member.id });
+        }
+        else if (!user) {
+            message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in and then sending the command again?")
+            return;
         }
 
         if (message.channel.type != 'dm')
             updateMessage(message, user);
-
-        if (message.author.bot) return;
 
         if (message.content.substr(0, prefix.length) == prefix) {
 
@@ -153,6 +158,7 @@ connectDB.once('open', async function () {
                 message.channel.send("**" + command + "** is not a recognized command, please try again");
                 return;
             }
+
 
             if (user.activeTutorial != -1 && message.channel.type == 'dm') {//Intercepting tutorial commands in DM's
 
@@ -257,18 +263,22 @@ connectDB.once('open', async function () {
                     play(message, serverQueue);
                 }
                 else if (command == Commands.commands[21]) {//stop
-                    queue.get(message.guild.id).voiceChannel.leave();
-                    queue.delete(message.guild.id);
+                    if (queue.get(message.guild.id)) {
+                        queue.get(message.guild.id).voiceChannel.leave();
+                        queue.delete(message.guild.id);
+                    }
                 }
                 else if (command == Commands.commands[22]) {//pause
-                    queue.get(message.guild.id).dispatcher.pause();
+                    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.pause(); }
                 }
                 else if (command == Commands.commands[23]) {//resume
-                    queue.get(message.guild.id).dispatcher.resume();
+                    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.resume(); }
                 }
                 else if (command == Commands.commands[24]) {//skip
-                    queue.get(message.guild.id).songs.shift();
-                    playSong(message.guild, queue.get(message.guild.id).songs[0]);
+                    if (queue.get(message.guild.id)) {
+                        queue.get(message.guild.id).songs.shift();
+                        playSong(message.guild, queue.get(message.guild.id).songs[0]);
+                    }
                 }
                 else if (command == Commands.commands[25]) //gameTutorial
                     message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it to me privately :wink:`);
@@ -289,6 +299,13 @@ connectDB.once('open', async function () {
                     message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
                 }//End of DM else/if chain
             }
+        } else {
+            if (commandTracker.get(message.author.id)) {
+                if (await handleCommandTracker(commandTracker.get(message.author.id), message.content) == -1)
+                    message.channel.send("You have entered an invalid response, please try again or specify a different command.");
+                else
+                    commandTracker.delete(message.author.id);
+            }
         }//End of checking for correct prefix
         user.save();
     });//End of Client.on('message')
@@ -305,9 +322,6 @@ connectDB.once('open', async function () {
         //console.log("hopefuly this traffic keeps it awake?");
     });
 });
-
-
-
 
 
 function suggest(message, user) {
@@ -577,6 +591,8 @@ async function topStats(message) {
 
 }
 
+
+//@ a role breaks it, not having a mention breaks it
 async function specificStats(message) {
 
     message.channel.send(message.guild.members.cache.get(message.mentions.members.first().id).user.username + ", ```" + message.member.displayName + "``` requested your stats: ```"
@@ -922,6 +938,7 @@ async function countTalk() {
                         console.log("found the null user: " + member.displayName + " || From: " + guild.name);
                         await checkExistance(member);
                         user = await findUser({ id: member.id });
+                        console.log("AFTER CREATE: " + user);
                     }
                     let guilds = user.guilds.split("|");
                     let index = guilds.indexOf(guild.id);
@@ -1216,7 +1233,7 @@ async function gameStats(message, params, user) {
     return signedUp.length;
 }
 
-async function topGames(message, params, user) {
+async function topGames(message, params) {
 
     let users = await getUsers();
     let gameMap = new Map();
@@ -1242,8 +1259,6 @@ async function topGames(message, params, user) {
 
     gameMap = [...gameMap.entries()].sort(function (a, b) { return b[1] - a[1] });
 
-    console.log(params[0])
-
     let maxResults = 5;
     if (!(isNaN(params[0])))
         maxResults = params[0];
@@ -1254,16 +1269,16 @@ async function topGames(message, params, user) {
         maxResults = gameMap.length;
         message.channel.send(`There are only ${maxResults} games people signed up for on ${message.guild.name}`);
     }
-    else{
+    else {
         message.channel.send(`You did not specify the number of games to display, as such, I will displaying the top ${maxResults}`
-        + ` games people signed up for on the ${message.guild.name} server:`);
+            + ` games people signed up for on the ${message.guild.name} server:`);
     }
 
     let finalList = ``;
 
     for (let i = 0; i < maxResults; i++) {
 
-        finalList += `${i+1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.\n`;
+        finalList += `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.\n`;
         //message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
     }
 
@@ -1272,75 +1287,96 @@ async function topGames(message, params, user) {
     return gameMap.length;
 }
 
+async function handleCommandTracker(specificCommand, params) {
+
+    if (!isNaN(params) && params.length > 0) {
+
+        params = Math.floor(params);
+        if (params >= specificCommand.choices.length || params < 0)
+            return -1;
+
+        for (let i = 0; i < specificCommand.defaults.length; i++) {
+
+            if (specificCommand.defaults[i] == -1)
+                specificCommand.defaults[i] = specificCommand.choices[Math.floor(params)].item
+        };
+        await specificCommand.command.apply(null, specificCommand.defaults);
+    }
+    else
+        return -1;
+}
+
+
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
-    game = game[0].trim();
-    if (!isNaN(game)) {
-        if (game < 0 || game >= user.games.split("|").length) {
-            message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
-            return -1;
-        }
-        game = user.games.split("|")[game];
-    }
-    else if (!games.includes(game)) {
-        message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
-        return -1;
-    }
-    else if (message.channel.type == 'dm') {
-
+    if (message.channel.type == 'dm') {
         message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game
             + "\nUnfortunately I cannot play games, why not try the same command inside a server?");
         return 0;
     }
 
-    let users = await getUsers();
-    let signedUp = "";
-    let defaulted = "";
+    let check = checkGame(games, game, user);
 
-    await users.forEach(async user => {
-        //  console.log(user.displayName + "||" + user.exclude);
-        if (user.id != message.member.id) {
+    if (check == -1) {
 
-            if (user.guilds.split("|").includes(message.guild.id)) {
+        message.channel.send(game + " is not assigned to any games, please try again.");
+    }
+    else if (check.result[0].score != 0) {
 
-                if (isNaN(game)) {
+        message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+        commandTracker.set(user.id, {
+            command: pingUsers,
+            defaults: [message, -1, user],
+            choices: check.result
+        });
+        return -1;
+    }
+    else {
 
-                    if (user.games.split("|").includes(game)) {
+        let users = await getUsers();
+        let signedUp = "";
+        let defaulted = "";
 
+        await users.forEach(async user => {
+            if (user.id != message.author.id) {
+
+                if (user.guilds.split("|").includes(message.guild.id)) {
+
+                    if (isNaN(game)) {
+
+                        if (user.games.split("|").includes(game)) {
+
+                            if (user.excludePing == false)
+                                signedUp += mention(user.id);
+                            if (user.excludeDM == false)
+                                directMessage(message, user.id, game);
+                        }
+                    }
+                    else if (user.games.split("|").includes(games[game])) {
                         if (user.excludePing == false)
                             signedUp += mention(user.id);
                         if (user.excludeDM == false)
-                            directMessage(message, user.id, game);
+                            directMessage(message, user.id, games[game]);
+                    }
+                    else if (user.games.length < 2) {
+
+                        defaulted += mention(user.id);
                     }
                 }
-                else if (user.games.split("|").includes(games[game])) {
-
-                    console.log("ACTUALLY");
-                    consol.log(user.excludePing == false)
-                    console.log(user.excludeDM == false)
-                    if (user.excludePing == false)
-                        signedUp += mention(user.id);
-                    if (user.excludeDM == false)
-                        directMessage(message, user.id, games[game]);
-                }
-                else if (user.games.length < 2) {
-
-                    defaulted += mention(user.id);
-                }
             }
-        }
-    });
+        });
 
-    if (signedUp.length > 3)
-        message.channel.send(message.member.displayName + " has summoned " + signedUp + " for some " + game);
-    else
-        message.channel.send("No one has signed up for " + game + ".");
-    return 1;
-    // if (defaulted.length > 1) {
+        if (signedUp.length > 3)
+            message.channel.send(message.member.displayName + " has summoned " + signedUp + " for some " + game);
+        else
+            message.channel.send("No one has signed up for " + game + ".");
+        return 1;
+        // if (defaulted.length > 1) {
 
-    //     message.channel.send(defaulted + "``` you have yet to exlcude yourself from summons or signUp for a game so have been pinged by default"
-    //         + " if you wish to never be summoned for games, type sa!exclude, or signUp for at least one game. Type " + prefix + " for more information```");
-    // }NOTE ENABLE LATER
+        //     message.channel.send(defaulted + "``` you have yet to exlcude yourself from summons or signUp for a game so have been pinged by default"
+        //         + " if you wish to never be summoned for games, type sa!exclude, or signUp for at least one game. Type " + prefix + " for more information```");
+        // }NOTE ENABLE LATER
+    }
 }
 
 async function createUser(member) {
@@ -1374,7 +1410,7 @@ async function createUser(member) {
 
     return userModel;
 }
-//I was here
+
 async function addGuild(member, memberDB) {
 
     let changed = await User.findOneAndUpdate({ id: member.id },
@@ -1481,7 +1517,8 @@ async function updateGames(message, game, user) {
 async function checkExistance(member) {
 
     let tempUser = await findUser({ id: member.id })
-    if (!tempUser) {
+    console.log("INSIDE OF CHECKEXISTANCE: " + tempUser);
+    if (tempUser) {
 
         if (tempUser.guilds.split("|").includes(member.guild.id + ""))
             return true;
@@ -1539,39 +1576,46 @@ async function play(message, serverQueue) {
         return message.channel.send("I need permission to join and speak in your voice channel!")
     }
 
-    const songInfo = await ytdl.getInfo(args[1]);
-    const song = {
-        title: songInfo.title,
-        url: songInfo.video_url,
-    };
+    const songInfo = await ytdl.getInfo(args[1],
+        async function (err, info) {
+            if (err) message.channel.send("Invalid YouTube URL");
+            else {
+                const song = {
+                    title: info.title,
+                    url: info.video_url,
+                };
 
-    if (!serverQueue) {
-        const queueConstruct = {
-            textChannel: message.channel,
-            voiceChannel: voiceChannel,
-            connection: null,
-            songs: [],
-            volume: 5,
-            playing: true,
-            dispatcher: null
-        };
-        queue.set(message.guild.id, queueConstruct);
+                if (!serverQueue) {
+                    const queueConstruct = {
+                        textChannel: message.channel,
+                        voiceChannel: voiceChannel,
+                        connection: null,
+                        songs: [],
+                        volume: 5,
+                        playing: true,
+                        dispatcher: null
+                    };
+                    queue.set(message.guild.id, queueConstruct);
 
-        queueConstruct.songs.push(song);
+                    queueConstruct.songs.push(song);
 
-        try {
-            var connection = await voiceChannel.join();
-            queueConstruct.connection = connection;
-            playSong(message.guild, queueConstruct.songs[0]);
-        } catch (err) {
-            console.log(err);
-            queue.delete(message.guild.id)
-            return message.channel.send("There was an error playing! " + err);
+                    try {
+                        var connection = await voiceChannel.join();
+                        queueConstruct.connection = connection;
+                        playSong(message.guild, queueConstruct.songs[0]);
+                    } catch (err) {
+                        console.log(err);
+                        queue.delete(message.guild.id)
+                        return message.channel.send("There was an error playing! " + err);
+                    }
+                } else {
+                    serverQueue.songs.push(song);
+                    return message.channel.send(`${song.title} has been added to the queue!`);
+                }
+            }
         }
-    } else {
-        serverQueue.songs.push(song);
-        return message.channel.send(`${song.title} has been added to the queue!`);
-    }
+    );
+
 }
 
 async function playSong(guild, song) {
@@ -1646,18 +1690,62 @@ async function minuteCount() {
     countTalk();
 }
 
+
+function checkGame(gameArray, params, user) {
+
+    if (!isNaN(params)) {
+        if (params < 0 || params >= gameArray.length) {
+            return -1;
+        }
+
+        params = gameArray[Math.floor(params)];
+    }
+    else if (Array.isArray(params))
+        params = params[0].trim();
+    else
+        params = params.trim();
+
+    let finalArray = new Array();
+    let finalList = "";
+    let newOptions = {
+        ...options,
+        findAllMatches: false,
+        includeScore: true,
+    }
+
+    let fuse = new Fuse(gameArray, newOptions);
+    let result = fuse.search(params);
+
+    let maxResults = 5;
+    if (maxResults > result.length)
+        maxResults = result.length;
+
+    for (let i = 0; i < maxResults; i++) {
+
+        finalList += i + ") " + result[i].item + "\n";
+        finalArray.push(result[i]);
+    }
+
+    let completeCheck = {
+        result: finalArray,
+        prettyList: finalList
+    };
+
+    if (finalArray.length > 0)
+        return completeCheck;
+    else return -1
+}
+
+
 setInterval(minuteCount, 60 * 1000);
 
 
 
 //REMOVE FOREACH LOOPS ANYWHERE POSSIBLE
-
+//@ a role breaks it, not having a mention breaks it
 //invalid game suggest a couple?
 
 
-
-//add a view a list of games on the server ppl signed up for (sorted by # number of signed up)
-//View users signed up for a game
 //Add a 'summoner' top stat - most pings
 //Custom, per-user prefix
 
@@ -1699,7 +1787,7 @@ setInterval(minuteCount, 60 * 1000);
 //MEE6 bot - beatiful ui, build in message formatin? embeds or something,
 //if authorised, you can control stuff from the website.
 
-
+//youtube live streams are broken
 
 // if (command.startsWith("emptyDB") && (message.author.id == creatorID)) {
 
