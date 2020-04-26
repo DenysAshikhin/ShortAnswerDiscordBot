@@ -8,6 +8,9 @@ const ytdl = require("ytdl-core");
 const gameJSON = require('./gameslist.json');
 const Commands = require('./commands.json');
 const studyJSON = require('./medstudy.json');
+
+const DATABASE = require('./backups/26-04-2020.json');
+
 const fs = require('fs');
 const creatorID = '99615909085220864';
 const botID = '689315272531902606';
@@ -95,15 +98,12 @@ connectDB.once('open', async function () {
 
     Client.login(token);
 
-
     for (let element of gameJSON)
         games.push(element.name);
     games.sort();
 
     for (let element of studyJSON)
         studyArray.push(element);
-
-
 
     Client.on("ready", () => {
 
@@ -118,9 +118,16 @@ connectDB.once('open', async function () {
         if (message.author.bot) return;
         let user = await findUser({ id: message.author.id });
 
-        if (!user && message.channel.type != 'dm') {
-            await checkExistance(message.member);
-            user = await findUser({ id: member.id });
+        if (message.channel.type != 'dm') {
+
+            if (!user) {//Checking that the user exists in DB
+                await checkExistance(message.member);
+                user = await findUser({ id: message.member.id });
+            }
+            else if (!user.guilds.includes(message.guild.id) && message.channel.type != 'dm') {//Checking that this guild is there for them
+                await checkExistance(message.member);
+                user = await findUser({ id: message.member.id });
+            }
         }
         else if (!user) {
             message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in and then sending the command again?")
@@ -146,7 +153,6 @@ connectDB.once('open', async function () {
                 message.channel.send("**" + command + "** is not a recognized command, please try again");
                 return;
             }
-
 
             if (user.activeTutorial != -1 && message.channel.type == 'dm') {//Intercepting tutorial commands in DM's
 
@@ -218,8 +224,10 @@ connectDB.once('open', async function () {
 
             else if (message.channel.type != 'dm') {//Server exclusive commands
                 //
-                if (command == Commands.commands[14]) //initialiseUsers
+                if (command == Commands.commands[14]) { //initialiseUsers
                     initialiseUsers(message);
+                    return;
+                }
                 else if (command == Commands.commands[15] && message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) {
 
                     let amount = 0;
@@ -295,7 +303,11 @@ connectDB.once('open', async function () {
                     commandTracker.delete(message.author.id);
             }
         }//End of checking for correct prefix
-        user.save();
+        user.save(function (err, product) {
+            if (err) {
+                console.log(err);
+            }
+        });
     });//End of Client.on('message')
 
     Client.on('guildMemberAdd', member => {
@@ -326,7 +338,8 @@ function quitTutorial(message, user) {
 }
 
 function purgeGamesList(message, user) {
-    user.set('games', "");
+    user.set('games', []);
+    user.markModified('games');
     message.channel.send("You games list has been emptied!");
     return 1;
 }
@@ -355,9 +368,9 @@ async function gameTutorial(message, params, command, user) {
         + ` Just a heads up that the GAME# is the number from your games list.`
         + "```Example(s):\n1) " + prefix + Commands.commands[4] + " 1```",
         `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
-        + `** *nameOfGame* and anyone who has this game and the proper excludes`
+        + `** *nameOfGame*/*#ofGame* and anyone who has this game and the proper excludes`
         + ` will be notified. NOTE: "nameOfGame" has to be spelled perfectly but it does not have to be in your games list.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[13] + " Counter-Strike: Global Offensive```"
+        + "```Example(s):\n1) " + prefix + Commands.commands[13] + " Counter-Strike: Global Offensive\n2)" + prefix + Commands.commands[13] + " 0" + "```"
         + ` Go ahead, try out the command!`,
         `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
         + ` an @mention in the text channel it was sent from. To disable @mentions simply type`
@@ -404,8 +417,10 @@ async function gameTutorial(message, params, command, user) {
                     user.set("previousTutorialStep", -1);
                     user.set("tutorialStep", -1);
                     user.set("canSuggest", true);
-                    if (!user.completedTutorials.includes(0))
+                    if (!user.completedTutorials.includes(0)) {
                         user.completedTutorials.push(0);
+                        user.markModified('completedTutorials');
+                    }
                     user.save();
                 }
             }
@@ -476,14 +491,12 @@ async function gameTutorial(message, params, command, user) {
 
 function personalGames(message, user) {
 
-    let games = user.games.split("|");
+    let games = user.games;
     let finalList = "";
 
-    for (let i = 0; i < games.length; i++) {
+    for (let i = 0; i < games.length; i++)
+        finalList += i + ") " + games[i] + "\n";
 
-        if (games[i].length > 1)
-            finalList += i + ") " + games[i] + "\n";
-    }
 
     let display = message.author.username;
     if (message.member != null)
@@ -511,6 +524,7 @@ async function gameSuggestion(member) {//
 function findFurthestDate(date1, date2) {
 
     let lastDate = "";
+
     if ((date1.substr(6).localeCompare(date2.substr(6))) <= 0) {
 
         if ((date1.substr(1, 4).localeCompare(date2.substr(1, 4))) > 0) {
@@ -534,47 +548,66 @@ async function topStats(message) {
     let ghost;
     let MIA;
     let user = null;
+    let silentTypeIndex;
+    let loudMouthIndex;
+    let ghostIndex;
+    let MIAIndex;
     for (let i = 0; i < allUsers.length; i++) {
 
-
-        if (allUsers[i].guilds.split("|").includes(guild.id)) {
+        if (allUsers[i].guilds.includes(guild.id)) {
             user = allUsers[i];
-            let index = user.guilds.split("|").indexOf(guild.id);
+            let userIndex = user.guilds.indexOf(guild.id);
 
-            if (silentType == undefined)
+            if (!silentType) {
                 silentType = user;
-            if (loudMouth == undefined)
+                silentTypeIndex = user.guilds.indexOf(guild.id);
+            }
+            if (!loudMouth) {
                 loudMouth = user;
-            if (ghost == undefined)
+                loudMouthIndex = user.guilds.indexOf(guild.id);
+            }
+            if (!ghost) {
                 ghost = user;
-            if (MIA == undefined)
+                ghostIndex = user.guilds.indexOf(guild.id);
+            }
+            if (!MIA) {
                 MIA = user;
+                MIAIndex = user.guilds.indexOf(guild.id);
+            }
 
-            if (Number(silentType.messages.split("|")[index]) < Number(user.messages.split("|")[index]))
+            if (Number(silentType.messages[silentTypeIndex]) < Number(user.messages[userIndex])) {
                 silentType = user;
+                silentTypeIndex = user.guilds.indexOf(guild.id);
+            }
 
-            if (Number(loudMouth.timeTalked.split("|")[index]) < Number(user.timeTalked.split("|")[index]))
+            if (Number(loudMouth.timeTalked[loudMouthIndex]) < Number(user.timeTalked[userIndex])) {
                 loudMouth = user;
+                loudMouthIndex = user.guilds.indexOf(guild.id);
+            }
 
-            if (Number(ghost.timeAFK.split("|")[index]) < Number(user.timeAFK.split("|")[index]))
+            if (Number(ghost.timeAFK[ghostIndex]) < Number(user.timeAFK[userIndex])) {
                 ghost = user;
+                ghostIndex = user.guilds.indexOf(guild.id);
+            }
 
-            let userDate = findFurthestDate(user.lastMessage, user.lastTalked);
-            let MIADate = findFurthestDate(MIA.lastMessage, MIA.lastTalked);
+            let userDate = findFurthestDate(user.lastMessage[userIndex], user.lastTalked[userIndex]);
+            let MIADate = findFurthestDate(MIA.lastMessage[MIAIndex], MIA.lastTalked[MIAIndex]);
+
 
             if (userDate == findFurthestDate(userDate, MIADate)) {
                 MIA = user;
+                MIAIndex = user.guilds.indexOf(guild.id);
             }
         }
     }
 
-    let index = user.guilds.split("|").indexOf(guild.id);
+    let index = user.guilds.indexOf(guild.id);
 
     message.channel.send("Here are the tops stats for this server: \n```" + "The silent type: " + silentType.displayName + " : "
-        + silentType.messages.split("|")[index] + " messages sent.\n"
-        + "The loud mouth: " + loudMouth.displayName + " : " + loudMouth.timeTalked.split("|")[index] + " minutes spent talking.\n"
-        + "The ghost: " + ghost.displayName + " : " + ghost.timeAFK.split("|")[index] + " minutes spent AFK.\n"
-        + "The MIA: " + MIA.displayName + " : " + findFurthestDate(MIA.lastTalked.split("|")[index], MIA.lastMessage.split("|")[index]) + " last seen date."
+        + silentType.messages[silentTypeIndex] + " messages sent.\n"
+        + "The loud mouth: " + loudMouth.displayName + " : " + loudMouth.timeTalked[loudMouthIndex] + " minutes spent talking.\n"
+        + "The ghost: " + ghost.displayName + " : " + ghost.timeAFK[ghostIndex] + " minutes spent AFK.\n"
+        + "The MIA: " + MIA.displayName + " : " + findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date."
         + "```");
 
 }
@@ -595,17 +628,16 @@ async function getStats(member, user) {
     if (!user)
         user = await findUser({ id: member.id });
 
-    let guilds = user.guilds.split("|");
-    let index = guilds.indexOf(member.guild.id);
+    let index = user.guilds.indexOf(member.guild.id);
     let stats = "";
 
-    stats = "Total number of messages sent: " + user.messages.split("|")[index] + "\n"
-        + "Last message sent: " + user.lastMessage.split("|")[index] + "\n"
-        + "Total time spent talking (in minutes): " + user.timeTalked.split("|")[index] + "\n"
-        + "Last time you talked was: " + user.lastTalked.split("|")[index] + "\n"
+    stats = "Total number of messages sent: " + user.messages[index] + "\n"
+        + "Last message sent: " + user.lastMessage[index] + "\n"
+        + "Total time spent talking (in minutes): " + user.timeTalked[index] + "\n"
+        + "Last time you talked was: " + user.lastTalked[index] + "\n"
         + "The games you are signed up for: " + user.games + "\n"
-        + "Time spent AFK (in minutes): " + user.timeAFK.split("|")[index] + "\n"
-        + "You joined this server on: " + user.dateJoined.split("|")[index] + "\n"
+        + "Time spent AFK (in minutes): " + user.timeAFK[index] + "\n"
+        + "You joined this server on: " + user.dateJoined[index] + "\n"
         + "Whether you are excluded from pings: " + user.excludePing + "\n"
         + "Whether you are excluded from DMs: " + user.excludeDM + "\n";
 
@@ -634,7 +666,7 @@ function search(message, searches) {
 
     for (let i = 0; i < searches.length; i++) {
 
-        let query = searchers[i];
+        let query = searches[i];
         if (query.length > 0) {
 
             message.channel.send(mention(message.author.id) + "! Here are the result for: " + query + "\n");
@@ -880,8 +912,6 @@ function gameHelp(message) {
 
 function personalDMStats(message, user) {
 
-    let guilds = user.guilds.split("|");
-
     message.channel.send("Here are your general stats:");
 
     let generalStats = "```"
@@ -891,17 +921,17 @@ function personalDMStats(message, user) {
 
     message.channel.send(generalStats);
 
-    for (let i = 0; i < guilds.length; i++) {
+    for (let i = 0; i < user.guilds.length; i++) {
 
-        if (guilds[i].length > 2) {
+        if (user.guilds[i].length > 2) {
             let stats = "";
-            message.channel.send("Here are the stats for the server: " + message.client.guilds.cache.get(guilds[i]).name + "")
-            stats = "```Total number of messages sent: " + user.messages.split("|")[i] + "\n"
-                + "Last message sent: " + user.lastMessage.split("|")[i] + "\n"
-                + "Total time spent talking (in minutes): " + user.timeTalked.split("|")[i] + "\n"
-                + "Last time you talked was: " + user.lastTalked.split("|")[i] + "\n"
-                + "Time spent AFK (in minutes): " + user.timeAFK.split("|")[i] + "\n"
-                + "You joined this server on: " + user.dateJoined.split("|")[i] + "```";
+            message.channel.send("Here are the stats for the server: " + message.client.guilds.cache.get(user.guilds[i]).name + "")
+            stats = "```Total number of messages sent: " + user.messages[i] + "\n"
+                + "Last message sent: " + user.lastMessage[i] + "\n"
+                + "Total time spent talking (in minutes): " + user.timeTalked[i] + "\n"
+                + "Last time you talked was: " + user.lastTalked[i] + "\n"
+                + "Time spent AFK (in minutes): " + user.timeAFK[i] + "\n"
+                + "You joined this server on: " + user.dateJoined[i] + "```";
             message.channel.send(stats);
         }
     }
@@ -944,31 +974,31 @@ async function countTalk() {
                         user = await findUser({ id: member.id });
                         console.log("AFTER CREATE: " + user);
                     }
-                    let guilds = user.guilds.split("|");
-                    let index = guilds.indexOf(guild.id);
+
+                    let index = user.guilds.indexOf(guild.id);
 
                     if (channel.id == guild.afkChannelID) {
 
-                        let timeAFK = user.timeAFK.split("|");
-                        timeAFK[index] = (Number(timeAFK[index]) + 1).toString();
+                        let timeAFK = user.timeAFK;
+                        timeAFK[index] += 1;
 
                         User.findOneAndUpdate({ id: member.id },
                             {
-                                $set: { timeAFK: timeAFK.join("|") }
+                                $set: { timeAFK: timeAFK }
                             }, function (err, doc, res) {
                                 //console.log(doc);
                             });
                     } else {
 
-                        let timeTalked = user.timeTalked.split("|");
-                        timeTalked[index] = (Number(timeTalked[index]) + 1).toString();
+                        let timeTalked = user.timeTalked;
+                        timeTalked[index] += 1;
 
-                        let lastTalked = user.lastTalked.split("|");
+                        let lastTalked = user.lastTalked;
                         lastTalked[index] = getDate();
 
                         User.findOneAndUpdate({ id: member.id },
                             {
-                                $set: { timeTalked: timeTalked.join("|"), lastTalked: lastTalked.join("|") }
+                                $set: { timeTalked: timeTalked, lastTalked: lastTalked }
                             }, function (err, doc, res) {
                                 //console.log(doc);
                             });
@@ -979,23 +1009,21 @@ async function countTalk() {
     }
 }
 
-async function updateMessage(message, user) {
+function updateMessage(message, user) {
 
-    let messages = user.messages.split("|");
-    let lastMessage = user.lastMessage.split("|");
-    let guilds = user.guilds.split("|");
-    let index = guilds.indexOf(message.guild.id);
+    if (!user) return;
+    let index = user.guilds.indexOf(message.guild.id);
+    user.messages[index] = user.messages[index] + 1;
+    user.lastMessage[index] = getDate();
 
-    messages[index] = Number(messages[index]) + 1 + "";
-    lastMessage[index] = getDate();
+    user.set('messages', user.messages);
+    user.set('lastMessage', user.lastMessage);
 
-    user.set('messages', messages.join("|"));
-    user.set('lastMessage', lastMessage.join("|"));
+    user.markModified('messages');
+    user.markModified('lastMessage');
 }
 
 function excludePing(message, user) {
-
-    wtf.split(" AS")[0] = asd
 
     if (!message.content.split(" ")[1]) {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
@@ -1116,14 +1144,14 @@ function getDate() {
 
 function removeGame(message, game, user) {
 
-    if (user.games.length < 2) {
+    if (user.games.length < 1) {
 
         message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2])
     }
     else {
-        let gameArr = user.games.split("|");
-        let invalidGames = "";
-        let removedGames = "";
+        let gameArr = user.games;
+        let invalidGames = new Array();
+        let removedGames = new Array();
 
 
         let setty = new Set(game);
@@ -1136,64 +1164,51 @@ function removeGame(message, game, user) {
 
         if (isNaN(gameTitle)) {
 
-            //gameTitle = gameTitle.toUpperCase();
-
             if (gameArr.includes(gameTitle)) {
-                removedGames += gameArr.splice(gameArr.indexOf(gameTitle), 1) + "|";
+                removedGames.push(gameTitle);
+                gameArr.splice(gameArr.indexOf(gameTitle), 1);
             }
             else
-                invalidGames += gameTitle + "|";
+                invalidGames.push(gameTitle);
         }
         else {
+            gameTitle = Math.floor(gameTitle);
             if (gameTitle < gameArr.length && gameTitle >= 0) {
-
-                removedGames += gameArr.splice(gameTitle, 1) + "|";
+                removedGames.push(gameArr[gameTitle]);
+                gameArr.splice(gameTitle, 1)
             }
             else
-                invalidGames += gameTitle + "|";
+                invalidGames.push(gameTitle);
         }
         //});
 
-        let finalGameList = "";
         gameArr.sort();
 
-        for (let i = 0; i < gameArr.length; i++) {
 
-            if (gameArr[i].length > 1) {
-
-                finalGameList += gameArr[i] + "|";
+        if (invalidGames.length > 0) {
+            invalidGames.sort();
+            let congrats = "";
+            for (let i = 0; i < invalidGames.length; i++) {
+                //if (invalidGames[i].length > 1)
+                congrats += i + ") " + invalidGames[i] + "\n";
             }
+            message.channel.send("The following are invalid Games/Numbers: ```" + congrats + "```");
         }
 
-        if (invalidGames.length > 2) {
-
+        if (removedGames.length > 0) {
+            removedGames.sort();
             let congrats = "";
-            let tempArr = invalidGames.split("|");
-            tempArr.sort();
-            for (let i = 0; i < tempArr.length; i++) {
-                if (tempArr[i].length > 1)
-                    congrats += i + ") " + tempArr[i] + "\n";
-            }
-            message.channel.send("The following are invalid games: ```" + congrats + "```");
-        }
-
-        if (removedGames.length > 2) {
-
-            let congrats = "";
-            let tempArr = removedGames.split("|");
-            tempArr.sort();
-            for (let i = 0; i < tempArr.length; i++) {
-                if (tempArr[i].length > 1)
-                    congrats += i + ") " + tempArr[i] + "\n";
+            for (let i = 0; i < removedGames.length; i++) {
+                //if (tempArr[i].length > 1)
+                congrats += i + ") " + removedGames[i] + "\n";
             }
             message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
         }
 
-
-        user.set('games', finalGameList);
-        let returnString = removedGames.split("|");
-        if (returnString[0].length > 1)
-            return returnString.length - 1;
+        user.markModified('games');
+        user.set('games', gameArr);
+        if (removedGames.length > 0)
+            return removedGames.length;
         else
             return 0;
     }
@@ -1213,11 +1228,11 @@ async function gameStats(message, params, user) {
 
     let game = params[0].trim();
     if (!isNaN(game)) {
-        if (game < 0 || game >= user.games.split("|").length) {
+        if (game < 0 || game >= user.games.length) {
             message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
             return -1;
         }
-        game = user.games.split("|")[game];
+        game = user.games[game];
     }
     else if (!games.includes(game)) {
         message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
@@ -1229,11 +1244,14 @@ async function gameStats(message, params, user) {
 
     for (let i = 0; i < users.length; i++) {
 
-        if (users[i].games.split("|").includes(game))
+        if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
             signedUp.push(users[i]);
     }
 
-    message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+    if (signedUp.length > 0)
+        message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+    else
+        message.channel.send(`There are ${signedUp.length} users signed up for ${game}.`);
     return signedUp.length;
 }
 
@@ -1244,18 +1262,20 @@ async function topGames(message, params) {
 
     for (let i = 0; i < users.length; i++) {
 
-        let tempGames = users[i].games.split("|");
+        if (users[i].guilds.includes(message.guild.id)) {
+            let tempGames = users[i].games;
 
-        for (let j = 0; j < tempGames.length; j++) {
+            for (let j = 0; j < tempGames.length; j++) {
 
-            if (tempGames[j].length > 2) {
+                if (tempGames[j].length > 2) {
 
-                if (!gameMap.get(tempGames[j])) {
+                    if (!gameMap.get(tempGames[j])) {
 
-                    gameMap.set(tempGames[j], 1);
-                }
-                else {
-                    gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
+                        gameMap.set(tempGames[j], 1);
+                    }
+                    else {
+                        gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
+                    }
                 }
             }
         }
@@ -1268,7 +1288,12 @@ async function topGames(message, params) {
         maxResults = params[0];
 
 
-    if (maxResults > gameMap.length) {
+    if(gameMap.length == 0){
+        message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
+        return;
+    }
+
+    else if (maxResults > gameMap.length && maxResults) {
 
         maxResults = gameMap.length;
         message.channel.send(`There are only ${maxResults} games people signed up for on ${message.guild.name}`);
@@ -1345,11 +1370,11 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         for (let user of users) {
             if (user.id != message.author.id) {
 
-                if (user.guilds.split("|").includes(message.guild.id)) {
+                if (user.guilds.includes(message.guild.id)) {
 
                     if (isNaN(game)) {
 
-                        if (user.games.split("|").includes(game)) {
+                        if (user.games.includes(game)) {
 
                             if (user.excludePing == false)
                                 signedUp += mention(user.id);
@@ -1357,7 +1382,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                                 directMessage(message, user.id, game);
                         }
                     }
-                    else if (user.games.split("|").includes(games[game])) {
+                    else if (user.games.includes(games[game])) {
                         if (user.excludePing == false)
                             signedUp += mention(user.id);
                         if (user.excludeDM == false)
@@ -1389,16 +1414,16 @@ async function createUser(member) {
     let newUser = {
         displayName: member.displayName,
         id: member.id,
-        messages: 0 + "|",
-        lastMessage: "0-0-0|",
-        timeTalked: 0 + "|",
-        lastTalked: "0-0-0|",
-        games: "",
-        timeAFK: 0 + "|",
-        dateJoined: getDate() + "|",
+        messages: [0],
+        lastMessage: ["0-0-0"],
+        timeTalked: [0],
+        lastTalked: ["0-0-0"],
+        games: [],
+        timeAFK: [0],
+        dateJoined: [getDate()],
         excludePing: false,
         excludeDM: false,
-        guilds: member.guild.id + "|",
+        guilds: [member.guild.id],
         activeTutorial: -1,
         tutorialStep: -1,
         previousTutorialStep: -1,
@@ -1408,28 +1433,29 @@ async function createUser(member) {
     }
 
     let userModel = new User(newUser);
-    await userModel.save(function (err, user) {
-
-        if (err) return console.error(err)
-    });
-
+    await userModel.save();
     return userModel;
 }
 
 async function addGuild(member, memberDB) {
 
-    let changed = await User.findOneAndUpdate({ id: member.id },
-        {
-            $set: {
-                messages: memberDB.messages + 0 + "|",
-                lastMessage: memberDB.lastMessage + "0-0-0|",
-                timeTalked: memberDB.timeTalked + 0 + "|",
-                lastTalked: memberDB.lastTalked + "0-0-0|",
-                timeAFK: memberDB.timeAFK + 0 + "|",
-                dateJoined: memberDB.dateJoined + getDate() + "|",
-                guilds: memberDB.guilds + member.guild.id + "|"
-            }
-        });
+    memberDB.guilds.push(member.guild.id);
+    memberDB.messages.push(0);
+    memberDB.lastMessage.push("0-0-0");
+    memberDB.timeTalked.push(0);
+    memberDB.lastTalked.push("0-0-0");
+    memberDB.timeAFK.push(0);
+    memberDB.dateJoined.push(getDate());
+
+    memberDB.set("guilds", memberDB.guilds)
+    memberDB.set("messages", memberDB.messages)
+    memberDB.set("lastMessage", memberDB.lastMessage)
+    memberDB.set("timeTalked", memberDB.timeTalked)
+    memberDB.set("lastTalked", memberDB.lastTalked)
+    memberDB.set("timeAFK", memberDB.timeAFK)
+    memberDB.set("dateJoined", memberDB.dateJoined)
+    memberDB.set("dateJoined", memberDB.dateJoined)
+    memberDB.save();
 }
 
 async function updateGames(message, game, user) {
@@ -1437,10 +1463,10 @@ async function updateGames(message, game, user) {
     let setty = new Set(game);
     game = Array.from(setty);
     games.sort();
-    let existingGames = user.games.split("|");
-    let finalString = "";
-    let alreadyTracked = "";
-    let invalidGames = "";
+    let existingGames = user.games;
+    let finalGameArray = new Array();
+    let alreadyTracked = new Array();
+    let invalidGames = new Array();
 
     for (let i = 0; i < game.length; i++) {
         gameTitle = game[i];
@@ -1452,65 +1478,67 @@ async function updateGames(message, game, user) {
             gameTitle = gameTitle.trim();
 
             if (games.includes(gameTitle)) {
-                if (!existingGames.includes(gameTitle))
-                    finalString += gameTitle + "|";
-                else
-                    alreadyTracked += gameTitle + "|"
-            }
-            else
-                invalidGames += gameTitle + "|";
-        }
-        else {
-            if (gameTitle < games.length && gameTitle >= 0 && games[gameTitle] != undefined) {
-
-                if (!existingGames.includes(games[gameTitle])) {
-                    finalString += games[gameTitle] + "|";
+                if (!existingGames.includes(gameTitle)) {
+                    finalGameArray.push(gameTitle);
+                    user.games.push(games[gameTitle]);
                 }
                 else
-                    alreadyTracked += games[gameTitle] + "|"
+                    alreadyTracked.push(gameTitle);
             }
             else
-                invalidGames += games[gameTitle] + "|";
+                invalidGames.push(gameTitle);
+        }
+        else {
+            gameTitle = Math.floor(gameTitle);
+            if (gameTitle < games.length && gameTitle >= 0) {
+
+                if (!existingGames.includes(games[gameTitle])) {
+                    finalGameArray.push(games[gameTitle]);
+                    user.games.push(games[gameTitle]);
+                }
+                else
+                    alreadyTracked.push(games[gameTitle]);
+            }
+            else
+                invalidGames.push(games[gameTitle]);
         }
     }
 
-    if (finalString.length > 2) {
+    if (finalGameArray.length > 0) {
 
+        finalGameArray.sort();
         let congrats = "";
-        let tempArr = finalString.split("|");
-        for (let i = 0; i < tempArr.length; i++) {
-            if (tempArr[i].length > 1)
-                congrats += i + ") " + tempArr[i] + "\n";
+        for (let i = 0; i < finalGameArray.length; i++) {
+            //if (tempArr[i].length > 1)
+            congrats += i + ") " + finalGameArray[i] + "\n";
         }
         message.channel.send("Succesfuly signed up for: ```" + congrats + "```");
     }
 
-    if (alreadyTracked.length > 2) {
-
+    if (alreadyTracked.length > 0) {
+        alreadyTracked.sort();
         let congrats = "";
-        let tempArr = alreadyTracked.split("|");
-        for (let i = 0; i < tempArr.length; i++) {
-            if (tempArr[i].length > 1)
-                congrats += i + ") " + tempArr[i] + "\n";
+        for (let i = 0; i < alreadyTracked.length; i++) {
+            //if (tempArr[i].length > 1)
+            congrats += i + ") " + alreadyTracked[i] + "\n";
         }
         message.channel.send("The following games are already tracked for you: ```" + congrats + "```");
     }
 
-    if (invalidGames.length > 2) {
-
+    if (invalidGames.length > 0) {
+        invalidGames.sort();
         let congrats = "";
-        let tempArr = invalidGames.split("|");
-        for (let i = 0; i < tempArr.length; i++) {
-            if (tempArr[i].length > 1)
-                congrats += i + ") " + tempArr[i] + "\n";
+        for (let i = 0; i < invalidGames.length; i++) {
+            //if (teminvalidGamespArr[i].length > 1)
+            congrats += i + ") " + invalidGames[i] + "\n";
         }
         message.channel.send("The following are invalid games: ```" + congrats + "```");
     }
 
-    user.set('games', (user.games + finalString).split("|").sort().join("|"));
-    let returnString = finalString.split("|");
-    if (returnString[0].length > 1)
-        return returnString.length - 1;
+    //user.set('games', user.games);
+    user.markModified('games');
+    if (finalGameArray.length > 0)
+        return finalGameArray.length;
     else
         return 0;
 }
@@ -1522,10 +1550,9 @@ async function updateGames(message, game, user) {
 async function checkExistance(member) {
 
     let tempUser = await findUser({ id: member.id })
-    console.log("INSIDE OF CHECKEXISTANCE: " + tempUser);
     if (tempUser) {
 
-        if (tempUser.guilds.split("|").includes(member.guild.id + ""))
+        if (tempUser.guilds.includes(member.guild.id))
             return true;
         else {//The user exists, but not with a matching guild in the DB
 
@@ -1535,7 +1562,7 @@ async function checkExistance(member) {
     }
     else {
         console.log("The user doesnt exist.");
-        console.log("Created the user: " + (await createUser(member)).displayName);
+        let createdUser = await createUser(member);
         return false;
     }
 }
@@ -1670,18 +1697,19 @@ async function updateAll() {
 
     // let users = await getUsers();
 
-    // for(let i = 0; i < users.length; i++){
+    // for (let user of users) {
 
 
-    // // let changed = await User.findOneAndUpdate({ id: user.id },
-    // //     {
-    // //         $set: {
-    // //             canSuggest: false
-    // //         }
-    // //     }, { new: true });
+    //     //console.log(user);
 
-    // //  user.set('notifyUpdate', true );
-    // //  user.save();
+    //     let messageArray = user.messages[0].split("|").filter(element => element.length > 0);
+    //     console.log(messageArray);
+
+
+    //     let tempGuilds = user.guilds;
+    //     tempGuilds.filter(element => element.length > 2);
+    //     user.set('guilds', tempGuilds);
+    //     user.save()
 
     // }//for user loop
 
@@ -1689,7 +1717,8 @@ async function updateAll() {
     //     if (err) console.log('error', err);
     // });
 
-    // console.log("CALLED UPDATE ALL");
+
+    //console.log("CALLED UPDATE ALL");
 }
 
 async function minuteCount() {
@@ -1702,7 +1731,7 @@ function checkGame(gameArray, params, user) {
         if (params < 0 || params >= gameArray.length) {
             return -1;
         }
-        params = user.games.split("|")[Math.floor(params)];
+        params = user.games[Math.floor(params)];
     }
     else if (Array.isArray(params))
         params = params[0].trim();
@@ -1744,6 +1773,7 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //Add a 'summoner' top stat - most pings
+//Add a kicked status
 //Custom, per-user prefix
 
 //Stop using strings and use arrays proper

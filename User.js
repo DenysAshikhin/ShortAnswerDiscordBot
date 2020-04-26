@@ -9,25 +9,25 @@ const UserSchema = new mongoose.Schema({
         type: String
     },
     messages: {
-        type: String
+        type: []
     },
     lastMessage: {
-        type: String
+        type: []
     },
     timeTalked: {
-        type: String
+        type: []
     },
     lastTalked: {
-        type: String
+        type: []
     },
     games: {
-        type: String
+        type: []
     },
     timeAFK: {
-        type: String
+        type: []
     },
     dateJoined: {
-        type: String
+        type: []
     },
     excludePing: {
         type: Boolean
@@ -36,7 +36,7 @@ const UserSchema = new mongoose.Schema({
         type: Boolean
     },
     guilds: {
-        type: String
+        type: []
     },
     activeTutorial: {
         type: Number,
