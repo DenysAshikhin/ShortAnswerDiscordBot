@@ -1864,9 +1864,7 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-//see if replacing the big calls in remove and signup can be 
-//fixed by making updatemessages not call .save() untill the previous functions got their awaits done??
-
+//Stick to mongoose findoneandupdate from now on...
 
 
 
