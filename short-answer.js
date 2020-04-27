@@ -27,6 +27,16 @@ const GameTutorial = {
         Commands.commands[5],//"EXCLUDEPING"
         Commands.commands[6]//"EXCLUDEDM"
     ],
+    specificCommand: [
+        search,
+        updateGames,
+        updateGames,
+        personalGames,
+        removeGame,
+        pingUsers,
+        excludePing,
+        excludeDM
+    ],
     expectedOutput: [
         1,
         1,
@@ -58,6 +68,7 @@ const options = {
 //FAT NOTE: (true >= false) is TRUE
 
 var Client = new Discord.Client();
+var commandMap = new Map();
 var commandTracker = new Map();
 var config = null;
 var queue = new Map();
@@ -94,9 +105,49 @@ const findUser = async function (params) {
     } catch (err) { console.log(err) }
 }
 
+function populateCommandMap() {
+
+    commandMap.set(Commands.commands[0], populate)
+    commandMap.set(Commands.commands[1], search)
+    commandMap.set(Commands.commands[2], updateGames)
+    commandMap.set(Commands.commands[3], personalGames)
+    commandMap.set(Commands.commands[4], removeGame)
+    commandMap.set(Commands.commands[5], excludePing)
+    commandMap.set(Commands.commands[6], excludeDM)
+    commandMap.set(Commands.commands[7], generalHelp)
+    commandMap.set(Commands.commands[8], gameHelp)
+    commandMap.set(Commands.commands[9], helpStats)
+    commandMap.set(Commands.commands[10], helpMiscellaneous)
+    commandMap.set(Commands.commands[11], helpMusic)
+    commandMap.set(Commands.commands[12], study)
+    commandMap.set(Commands.commands[13], pingUsers)
+    commandMap.set(Commands.commands[14], initialiseUsers)
+    commandMap.set(Commands.commands[15], Delete)
+    commandMap.set(Commands.commands[16], personalStats)
+    commandMap.set(Commands.commands[17], guildStats)
+    commandMap.set(Commands.commands[18], specificStats)
+    commandMap.set(Commands.commands[19], topStats)
+    commandMap.set(Commands.commands[20], play)
+    commandMap.set(Commands.commands[21], stop)
+    commandMap.set(Commands.commands[22], pause)
+    commandMap.set(Commands.commands[23], resume)
+    commandMap.set(Commands.commands[24], skip)
+    commandMap.set(Commands.commands[25], gameTutorial)
+    commandMap.set(Commands.commands[26], suggest)
+    commandMap.set(Commands.commands[27], setNotifyUpdate)
+    commandMap.set(Commands.commands[28], setNotifyTutorials)
+    commandMap.set(Commands.commands[29], quitTutorial)
+    commandMap.set(Commands.commands[30], purgeGamesList)
+    commandMap.set(Commands.commands[31], gameStats)
+    commandMap.set(Commands.commands[31], topGames)
+}
+
 connectDB.once('open', async function () {
 
     Client.login(token);
+
+    updateAll()
+    populateCommandMap();
 
     for (let element of gameJSON)
         games.push(element.name);
@@ -114,6 +165,7 @@ connectDB.once('open', async function () {
 
     Client.on("message", async (message) => {
         if (message.author.bot) return;
+
         let user = await findUser({ id: message.author.id });
 
         if (message.channel.type != 'dm') {
@@ -133,12 +185,11 @@ connectDB.once('open', async function () {
         }
 
         if (message.channel.type != 'dm')
-            await updateMessage(message, user);
+            updateMessage(message, user);
 
         if (message.content.substr(0, prefix.length) == prefix) {
 
-            let messageArray = message.content.split(' ');
-            let command = messageArray[0];
+            let command = message.content.split(' ')[0];
             command = command.substr(prefix.length).toUpperCase();
 
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
@@ -149,51 +200,31 @@ connectDB.once('open', async function () {
             if (!Commands.commands.includes(command.toUpperCase())) {
 
                 message.channel.send("**" + command + "** is not a recognized command, please try again");
+                await commandMatcher(message, command, params, user);
                 return;
             }
 
-            if (user.activeTutorial != -1 && message.channel.type == 'dm') {//Intercepting tutorial commands in DM's
-
-                switch (user.activeTutorial) {
-                    case 0:
-
-                        if (command == GameTutorial.expectedCommand[user.tutorialStep]) {
-
-                            gameTutorial(message, params, command, user);
-                            return;
-                        }
-                    case 1:
-
-                        break;
-                }
-            }
+            if (await tutorialHandler(message, commandMap.get(command), params, user))
+                return;
 
             //Commands that work in both servers and DM's
             if (command == Commands.commands[0]) {
-
-                for (i = 1; i <= params[0]; i++) {
-
-                    await message.channel.send(i).then(sent => {
-
-                        reactAnswers(sent);
-                    });
-                }
-                message.delete();
+                populate(message, params);
             }//populate
             else if (command == Commands.commands[1]) //search
                 search(message, params);
             else if (command == Commands.commands[2]) //signup
-                await updateGames(message, params, user);
+                updateGames(message, params, user);
             else if (command == Commands.commands[3])//mygames
-                personalGames(message, user);
+                personalGames(message, params, user);
             else if (command == Commands.commands[4]) //removeGame
                 removeGame(message, params, user);
             else if (command == Commands.commands[5]) //excludePing
-                excludePing(message, user);
+                excludePing(message, params, user);
             else if (command == Commands.commands[6]) //excludeDM
-                excludeDM(message, user);
+                excludeDM(message, params, user);
             else if (command == Commands.commands[7]) //help
-                generalHelp(message, user);
+                generalHelp(message, params, user);
             else if (command == Commands.commands[8]) //helpGames
                 gameHelp(message);
             else if (command == Commands.commands[9]) //helpStats
@@ -206,16 +237,18 @@ connectDB.once('open', async function () {
                 study(message, params);
             else if (command == Commands.commands[13]) //ping
                 pingUsers(message, params, user);
+            else if (command == Commands.commands[16]) //myStats
+                personalStats(message, params, user);
             else if (command == Commands.commands[26])//suggest
-                suggest(message, user)
+                suggest(message, params, user)
             else if (command == Commands.commands[27])//notifyUpdate status
-                setNotifyUpdate(message, user)
+                setNotifyUpdate(message, params, user)
             else if (command == Commands.commands[28])//notifyTutorials
-                setNotifyTutorials(message, user);
+                setNotifyTutorials(message, params, user);
             else if (command == Commands.commands[29])//quiteTutorial
-                quitTutorial(message, user);
+                quitTutorial(message, params, user);
             else if (command == Commands.commands[30])//purgegameslist
-                purgeGamesList(message, user);
+                purgeGamesList(message, params, user);
             else if (command == Commands.commands[31])//gameStats
                 gameStats(message, params, user);
 
@@ -226,26 +259,9 @@ connectDB.once('open', async function () {
                     initialiseUsers(message);
                     return;
                 }
-                else if (command == Commands.commands[15] && message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false })) {
+                else if (command == Commands.commands[15] && message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false }))
+                    Delete(message, params);//delete
 
-                    let amount = 0;
-                    if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-                    else {
-
-                        amount = Number(params[0]) + 1;
-                        await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
-                            message.channel.bulkDelete(messages).catch(err => {
-                                console.log("Error deleting bulk messages: " + err);
-                                message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
-                            });
-                        });
-                    }
-                }//delete
-                else if (command == Commands.commands[16]) //myStats
-                    personalStats(message, user);
                 else if (command == Commands.commands[17] && message.member.hasPermission("ADMINISTRATOR")) //allStats
                     guildStats(message);
                 else if (command == Commands.commands[18]) //userStats
@@ -253,52 +269,43 @@ connectDB.once('open', async function () {
                 else if (command == Commands.commands[19]) //topStats
                     topStats(message);
                 else if (command == Commands.commands[20]) {//play
-                    const serverQueue = queue.get(message.guild.id);
-                    play(message, serverQueue);
+                    play(message);
                 }
                 else if (command == Commands.commands[21]) {//stop
-                    if (queue.get(message.guild.id)) {
-                        queue.get(message.guild.id).voiceChannel.leave();
-                        queue.delete(message.guild.id);
-                    }
+                    stop(message);
                 }
                 else if (command == Commands.commands[22]) {//pause
-                    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.pause(); }
+                    pause(message)
                 }
                 else if (command == Commands.commands[23]) {//resume
-                    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.resume(); }
+                    resume(message)
                 }
                 else if (command == Commands.commands[24]) {//skip
-                    if (queue.get(message.guild.id)) {
-                        queue.get(message.guild.id).songs.shift();
-                        playSong(message.guild, queue.get(message.guild.id).songs[0]);
-                    }
+                    skip(message)
                 }
                 else if (command == Commands.commands[25]) //gameTutorial
                     message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it to me privately :wink:`);
                 else if (command == Commands.commands[32]) {
                     topGames(message, params);
                 }
-
-
-
             }//End of server text channel else/if chain
             else {
 
-                if (command == Commands.commands[16]) //myStats
-                    personalDMStats(message, user);
-                else if (command == Commands.commands[25]) //gameTutorial
-                    gameTutorial(message, params, command, user);
+                if (command == Commands.commands[25]) //gameTutorial
+                    gameTutorial(message, params, command);
                 else {
                     message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
                 }//End of DM else/if chain
             }
         } else {
             if (commandTracker.get(message.author.id)) {
-                if (await handleCommandTracker(commandTracker.get(message.author.id), message.content) == -1)
+                let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user);
+                if (result == -1) {
                     message.channel.send("You have entered an invalid response, please try again or specify a different command.");
-                else
+                }
+                else if (result == 1) {
                     commandTracker.delete(message.author.id);
+                }
             }
         }//End of checking for correct prefix
         //console.log("PRESAVE: " + user)
@@ -319,34 +326,187 @@ connectDB.once('open', async function () {
 });
 
 
-function suggest(message, user) {
+async function commandMatcher(message, command, params, user) {
 
+    let check = await checkCommands(command);
+
+    if (check == -1) {
+        message.channel.send(`${command} did not resemble any command I know of, try again?`);
+        return -1;
+    }
+    else if (check.result[0].score != 0) {
+
+        message.channel.send(`${command} is not a valid command, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+        specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
+        return -1;
+    }
+    else {
+
+        commandMap.get(check.result[0].item).call(null, message, params, user)
+    }
+}
+
+async function checkCommands(params, user) {
+
+    if (!isNaN(params)) {
+        return -1;
+    }
+    else if (Array.isArray(params)) {
+        params = params[0].trim();
+    }
+    else {
+        params = params.trim();
+    }
+
+    let finalArray = new Array();
+    let finalList = "";
+    let newOptions = {
+        ...options,
+        minMatchCharLength: params.length / 2,
+        findAllMatches: false,
+        includeScore: true,
+    }
+    //
+    let fuse = new Fuse(Commands.commands, newOptions);
+    let result = fuse.search(params);
+    let maxResults = 5;
+    if (maxResults > result.length)
+        maxResults = result.length;
+
+    for (let i = 0; i < maxResults; i++) {
+
+        finalList += i + ") " + result[i].item + "\n";
+        finalArray.push(result[i]);
+    }
+
+    let completeCheck = {
+        result: finalArray,
+        prettyList: finalList
+    };
+
+    if (finalArray.length > 0)
+        return completeCheck;
+    else return -1
+}
+
+async function play(message) {
+    const serverQueue = queue.get(message.guild.id);
+    play(message, serverQueue);
+}
+
+async function pause(message) {
+    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.pause(); }
+}
+
+async function skip() {
+
+    if (queue.get(message.guild.id)) {
+        queue.get(message.guild.id).songs.shift();
+        playSong(message.guild, queue.get(message.guild.id).songs[0]);
+    }
+}
+
+async function stop(message) {
+
+    if (queue.get(message.guild.id)) {
+        queue.get(message.guild.id).voiceChannel.leave();
+        queue.delete(message.guild.id);
+    }
+}
+
+async function resume(message) {
+
+    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.resume(); }
+}
+
+async function Delete(message, params) {
+
+    let amount = 0;
+    if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+    else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+    else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+    else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
+    else {
+
+        amount = Number(params[0]) + 1;
+        await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
+            message.channel.bulkDelete(messages).catch(err => {
+                console.log("Error deleting bulk messages: " + err);
+                message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+            });
+        });
+    }
+}
+
+async function populate(message, params) {
+    for (i = 1; i <= params[0]; i++) {
+
+        await message.channel.send(i).then(sent => {
+
+            reactAnswers(sent);
+        });
+    }
+    message.delete();
+}
+
+function suggest(message, params, user) {
 
 }
 
-function quitTutorial(message, user) {
+function quitTutorial(message, params, user) {
 
-    user.set('activeTutorial', -1);
-    user.set('tutorialStep', -1);
-    user.set('previousTutorialStep', -1);
-    user.save();
+    User.findOneAndUpdate({ id: user.id },
+        {
+            $set: {
+
+                activeTutorial: -1,
+                tutorialStep: -1,
+                previousTutorialStep: -1
+            }
+        }, function (err, doc, res) {
+            if (err) console.trace(err)
+            if (res) console.trace(res)
+        });
     message.channel.send("You have quit the previous tutorial and may begin a new one at any point!");
 }
 
-async function purgeGamesList(message, user) {
-    user.set('games', []);
-    user.markModified('games');
-    await user.save();
+function purgeGamesList(message, params, user) {
+
+    User.findOneAndUpdate({ id: user.id },
+        {
+            $set: {
+                games: []
+            }
+        }, function (err, doc, res) {
+            //console.log(doc);
+        });
     message.channel.send("You games list has been emptied!");
     return 1;
 }
 
+async function tutorialHandler(message, command, params, user) {
+
+    if (user.activeTutorial != -1 && message.channel.type == 'dm') {//Intercepting tutorial commands in DM's
+        switch (user.activeTutorial) {
+            case 0:
+
+                if (command == GameTutorial.specificCommand[user.tutorialStep]) {
+                    gameTutorial(message, params, command);
+                    return true;
+                }
+            case 1:
+
+                break;
+        }
+    }
+    return false;
+}
 
 // `Greetings!\nYou are getting this message because I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
 // + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
 // + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.`
 
-async function gameTutorial(message, params, command, user) {
+async function gameTutorial(message, params, command) {
 
     //UPDATE ME AND SUGGEST NEEDS TO BE IMPLEMENTED
     let steps = [
@@ -367,7 +527,7 @@ async function gameTutorial(message, params, command, user) {
         `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
         + `** *nameOfGame*/*#ofGame* and anyone who has this game and the proper excludes`
         + ` will be notified. NOTE: "nameOfGame" has to be spelled perfectly but it does not have to be in your games list.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[13] + " Counter-Strike: Global Offensive\n2)" + prefix + Commands.commands[13] + " 0" + "```"
+        + "```Example(s):\n1) " + prefix + Commands.commands[13] + " Counter-Strike: Global Offensive\n2) " + prefix + Commands.commands[13] + " 0" + "```"
         + ` Go ahead, try out the command!`,
         `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
         + ` an @mention in the text channel it was sent from. To disable @mentions simply type`
@@ -386,99 +546,66 @@ async function gameTutorial(message, params, command, user) {
         + "\n3) " + prefix + Commands.commands[27] + " true```"
     ]
 
+    let user = await findUser({ id: message.author.id });
+
     if (user.tutorialStep == -1) {
 
         message.channel.send(steps[0]);
-        user.set('activeTutorial', 0);
-        user.set('tutorialStep', 0);
-        user.set('previousTutorialStep', 0);
-        await user.save();
+        await User.findOneAndUpdate({ id: user.id },
+            {
+                $set: {
+                    activeTutorial: 0,
+                    tutorialStep: 0,
+                    previousTutorialStep: 0
+                }
+            }, function (err, doc, res) { });
     }//
     else {
         if (user.activeTutorial == 0 || user.activeTutorial == -1) {
 
-            if (command == Commands.commands[25]) {
+            if (command == Commands.commands[25])
                 message.channel.send(steps[user.tutorialStep]);
-            }
             else if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
 
                 if (user.tutorialStep != steps.length - 1) {
 
-                    user.set("previousTutorialStep", user.previousTutorialStep + 1);
-                    await user.save();
                     message.channel.send(steps[user.tutorialStep]);
+
+                    await User.findOneAndUpdate({ id: user.id },
+                        {
+                            $set: {
+                                previousTutorialStep: user.previousTutorialStep + 1,
+                            }
+                        }, function (err, doc, res) { });
                 }
                 else {//Tutorial over!!!!!
                     //Need to add the recommend and something else commands
                     message.channel.send(steps[user.tutorialStep]);
-                    user.set("activeTutorial", -1);
-                    user.set("previousTutorialStep", -1);
-                    user.set("tutorialStep", -1);
-                    user.set("canSuggest", true);
                     if (!user.completedTutorials.includes(0)) {
                         user.completedTutorials.push(0);
-                        user.markModified('completedTutorials');
                     }
-                    await user.save();
+                    await User.findOneAndUpdate({ id: user.id },
+                        {
+                            $set: {
+                                activeTutorial: -1,
+                                previousTutorialStep: -1,
+                                tutorialStep: -1,
+                                canSuggest: true,
+                                completedTutorials: user.completedTutorials
+
+                            }
+                        }, function (err, doc, res) { });
                 }
             }
             else {//Test if their response is the correct one.
 
-                if (command == GameTutorial.expectedCommand[user.tutorialStep]) {
+                if (command == GameTutorial.specificCommand[user.tutorialStep]) {
 
-                    switch (user.tutorialStep) {
-
-                        case 0:
-                            if (search(message, params) >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                                user.set('tutorialStep', user.tutorialStep + 1);
-                                setTimeout(gameTutorial, 1000, message, params, command, user);
-                            }
-                            break;
-                        case 1:
-                            if (await updateGames(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                                user.set('tutorialStep', user.tutorialStep + 1);
-                                setTimeout(gameTutorial, 1000, message, params, command, user);
-                            }
-                            break;
-                        case 2:
-                            if (await updateGames(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                                user.set('tutorialStep', user.tutorialStep + 1);
-                                setTimeout(gameTutorial, 1000, message, params, command, user);
-                            }
-                            break;
-                        case 3:
-                            if (personalGames(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                                user.set('tutorialStep', user.tutorialStep + 1);
-                                setTimeout(gameTutorial, 1000, message, params, command, user);
-                            }
-                            break;
-                        case 4:
-                            if (removeGame(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                                user.set('tutorialStep', user.tutorialStep + 1);
-                                setTimeout(gameTutorial, 1000, message, params, command, user);
-                            }
-                            break;
-                        case 5:
-                            if (await pingUsers(message, params, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                                user.set('tutorialStep', user.tutorialStep + 1);
-                                setTimeout(gameTutorial, 1000, message, params, command, user);
-                            }
-                            break;
-                        case 6:
-                            if (excludePing(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                                user.set('tutorialStep', user.tutorialStep + 1);
-                                setTimeout(gameTutorial, 1000, message, params, command, user);
-                            }
-                            break;
-                        case 7:
-                            if (excludeDM(message, user) >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                                user.set('tutorialStep', user.tutorialStep + 1);
-                                setTimeout(gameTutorial, 1000, message, params, command, user);
-                            }
-                            break;
-                    }//End of switch
-                    user.save();
-                }//If the command matched.
+                    if ((await GameTutorial.specificCommand[user.tutorialStep].call(null, message, params, user)) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                        User.findOneAndUpdate({ id: user.id }, { $set: { tutorialStep: user.tutorialStep + 1 } }, function (err, doc, res) { });
+                        setTimeout(gameTutorial, 1000, message, params, command);
+                    }
+                }
             }
         }
         else {
@@ -487,8 +614,10 @@ async function gameTutorial(message, params, command, user) {
     }
 }
 
-function personalGames(message, user) {
+async function personalGames(message, params, user) {
 
+    if (!user.games)
+        user = await findUser({ id: message.author.id })
     let games = user.games;
     let finalList = "";
 
@@ -642,13 +771,40 @@ async function getStats(member, user) {
     return stats;
 }
 
-async function personalStats(message, user) {
+async function personalStats(message, params, user) {
 
-    message.channel.send(mention(message.member.id) + " here are your stats: ```"
-        + await getStats(message.member, user) + "```");
+    if (message.channel.type != 'dm')
+        message.channel.send(mention(message.member.id) + " here are your stats: ```"
+            + await getStats(message.member, user) + "```");
+    else {
+        message.channel.send("Here are your general stats:");
+
+        let generalStats = "```"
+            + "The games you are signed up for: " + user.games + "\n"
+            + "Whether you are excluded from pings: " + user.excludePing + "\n"
+            + "Whether you are excluded from DMs: " + user.excludeDM + "```";
+
+        message.channel.send(generalStats);
+
+        for (let i = 0; i < user.guilds.length; i++) {
+
+            if (user.guilds[i].length > 2) {
+                let stats = "";
+                message.channel.send("Here are the stats for the server: " + message.client.guilds.cache.get(user.guilds[i]).name + "")
+                stats = "```Total number of messages sent: " + user.messages[i] + "\n"
+                    + "Last message sent: " + user.lastMessage[i] + "\n"
+                    + "Total time spent talking (in minutes): " + user.timeTalked[i] + "\n"
+                    + "Last time you talked was: " + user.lastTalked[i] + "\n"
+                    + "Time spent AFK (in minutes): " + user.timeAFK[i] + "\n"
+                    + "You joined this server on: " + user.dateJoined[i] + "```";
+                message.channel.send(stats);
+            }
+        }
+    }
 }
 
 function search(message, searches) {
+
     if (searches == undefined || searches == null || searches.length < 1) {
 
         message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + Commands.commands[1] + " counter");
@@ -836,7 +992,7 @@ function helpMiscellaneous(message) {
     message.channel.send(help);
 }
 
-function helpStats(message) {
+function helpStats(message, params, user) {
 
     let statsMessage =
         "Command 1: " + prefix + "myStats\n```Shows you all of your stats.```\n"
@@ -847,7 +1003,7 @@ function helpStats(message) {
     message.channel.send(statsMessage);
 }
 
-function helpMusic(message) {
+function helpMusic(message, params, user) {
 
     let musicMessage =
         "Command 1: " + prefix + "play [youtube url]\n```Plays the song in the url, if one is already playing, it will be added to the queue.```\n"
@@ -858,7 +1014,7 @@ function helpMusic(message) {
     message.channel.send(musicMessage);
 }
 
-function generalHelp(message, user) {
+function generalHelp(message, params, user) {
 
     if (!user.completedTutorials.includes(0)) {
 
@@ -880,7 +1036,7 @@ function generalHelp(message, user) {
     message.channel.send(helpMessage);
 }
 
-function gameHelp(message) {
+function gameHelp(message, params, user) {
 
     let gameMessage =
         "Command 1: " + prefix + "signUp [game1], [game2], [game3]...\n```Signs you up to be summoned when someone pings any of the [games] in your games list. "
@@ -908,34 +1064,7 @@ function gameHelp(message) {
     message.channel.send(gameMessage);
 }
 
-function personalDMStats(message, user) {
-
-    message.channel.send("Here are your general stats:");
-
-    let generalStats = "```"
-        + "The games you are signed up for: " + user.games + "\n"
-        + "Whether you are excluded from pings: " + user.excludePing + "\n"
-        + "Whether you are excluded from DMs: " + user.excludeDM + "```";
-
-    message.channel.send(generalStats);
-
-    for (let i = 0; i < user.guilds.length; i++) {
-
-        if (user.guilds[i].length > 2) {
-            let stats = "";
-            message.channel.send("Here are the stats for the server: " + message.client.guilds.cache.get(user.guilds[i]).name + "")
-            stats = "```Total number of messages sent: " + user.messages[i] + "\n"
-                + "Last message sent: " + user.lastMessage[i] + "\n"
-                + "Total time spent talking (in minutes): " + user.timeTalked[i] + "\n"
-                + "Last time you talked was: " + user.lastTalked[i] + "\n"
-                + "Time spent AFK (in minutes): " + user.timeAFK[i] + "\n"
-                + "You joined this server on: " + user.dateJoined[i] + "```";
-            message.channel.send(stats);
-        }
-    }
-}
-
-async function guildStats(message) {
+async function guildStats(message, params, user) {
 
     let memberArray = message.guild.members.cache.array();
 
@@ -1007,23 +1136,29 @@ async function countTalk() {
     }
 }
 
-async function updateMessage(message, user) {
+function updateMessage(message, user) {
 
     if (!user) return;
     let index = user.guilds.indexOf(message.guild.id);
     user.messages[index] = user.messages[index] + 1;
     user.lastMessage[index] = getDate();
 
-    user.set('messages', user.messages);
-    user.set('lastMessage', user.lastMessage);
+    console.log(`${user.displayName} is now at ${user.messages[index]} messages`);
 
-    user.markModified('messages');
-    user.markModified('lastMessage');
+    User.findOneAndUpdate({ id: user.id },
+        {
+            $set: {
 
-    await user.save();
+                messages: user.messages,
+                lastMessage: user.lastMessage,
+            }
+        }, function (err, doc, res) {
+            if (err) console.trace(err)
+            if (res) console.trace(res)
+        });
 }
 
-function excludePing(message, user) {
+function excludePing(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
@@ -1033,13 +1168,13 @@ function excludePing(message, user) {
 
     if (bool == "TRUE") {
 
-        user.set('excludePing', true);
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludePing: true } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " will be excluded from any further pings.");
         return 1;
     }
     else if (bool == "FALSE") {
 
-        user.set('excludePing', false);
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludePing: true } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " can now be pinged once more.");
         return 0;
     }
@@ -1049,7 +1184,7 @@ function excludePing(message, user) {
     }
 }
 
-function excludeDM(message, user) {
+function excludeDM(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
@@ -1057,14 +1192,13 @@ function excludeDM(message, user) {
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
-
-        user.set('excludeDM', true);
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: true } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " will be excluded from any further DMs.");
         return 1;
     }
     else if (bool == "FALSE") {
 
-        user.set('excludeDM', false);
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { DM: false } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " will be DM'ed once more.");
         return 0;
     }
@@ -1074,7 +1208,7 @@ function excludeDM(message, user) {
     }
 }
 
-function setNotifyUpdate(message, user) {
+function setNotifyUpdate(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[27] + "** *true/false*");
@@ -1083,13 +1217,13 @@ function setNotifyUpdate(message, user) {
     let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
 
-        user.set('notifyUpdate', true);
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyUpdate: true } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " will be notified of new feature releases.");
         return 1;
     }
     else if (bool == "FALSE") {
 
-        user.set('notifyUpdate', false);
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyUpdate: false } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " will be excluded from any new feature releases.");
         return 0;
     }
@@ -1099,7 +1233,7 @@ function setNotifyUpdate(message, user) {
     }
 }
 
-function setNotifyTutorials(message, user) {
+function setNotifyTutorials(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
         message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[28] + "** *true/false*");
@@ -1108,13 +1242,13 @@ function setNotifyTutorials(message, user) {
     let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
 
-        user.set('notifyTutorial', true);
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyTutorial: true } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " will be notified of new/incomplete tutorials.");
         return 1;
     }
     else if (bool == "FALSE") {
 
-        user.set('notifyTutorial', false);
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyTutorial: false } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " will be excluded from any new/incomplete tutorials.");
         return 0;
     }
@@ -1238,7 +1372,7 @@ function removeGame(message, game, user) {
         gameArr.sort();
         User.findOneAndUpdate({ id: user.id },
             {
-                $set: { games: gameArr}
+                $set: { games: gameArr }
             }, function (err, doc, res) {
                 //console.log(doc);
             });
@@ -1352,8 +1486,10 @@ async function topGames(message, params) {
     return gameMap.length;
 }
 
-async function handleCommandTracker(specificCommand, params) {
+//-1 invalid input, 0 don't delete (passed to command matcher), need it next time, 1 handled, delete
+async function handleCommandTracker(specificCommand, message, user) {
 
+    let params = message.content;
     if (!isNaN(params) && params.length > 0) {
 
         params = Math.floor(params);
@@ -1364,9 +1500,18 @@ async function handleCommandTracker(specificCommand, params) {
 
             if (specificCommand.defaults[i] == -1) {
                 specificCommand.defaults[i] = specificCommand.choices[Math.floor(params)].item
+
+                if (await tutorialHandler(message, specificCommand.command, specificCommand.choices[Math.floor(params)].item, user)) {
+                    return 1;
+                }
+
             }
         };
         await specificCommand.command.apply(null, specificCommand.defaults);
+        if (specificCommand.command == commandMatcher)
+            return 0;
+        else
+            return 1;
     }
     else
         return -1;
@@ -1499,8 +1644,6 @@ async function addGuild(member, memberDB) {
     memberDB.set("dateJoined", memberDB.dateJoined)
     memberDB.save();
 }
-
-
 
 /**
  * true = Existed in DB
@@ -1655,39 +1798,55 @@ async function graphs() {
 async function updateAll() {
 
     // let users = await getUsers();
+    // let nameArray = new Array();
 
     // for (let user of users) {
 
+    //     if (!nameArray.includes(user.displayName))
+    //         nameArray.push(user.displayName)
+    //     else
+    //         console.log("DUPIcLATE: " + user.displayName)
 
-    //     //console.log(user);
 
-    //     let messageArray = user.messages[0].split("|").filter(element => element.length > 0);
-    //     console.log(messageArray);
+    //     // let messageArray = element.messages.split("|").filter(element => element.length > 0);
+    //     // let lastMessageArray = element.lastMessage.split("|").filter(element => element.length > 0);
+    //     // let timeTalkedeArray = element.timeTalked.split("|").filter(element => element.length > 0);
+    //     // let lastTalkedArray = element.lastTalked.split("|").filter(element => element.length > 0);
+    //     // let gamesArray = element.games.split("|").filter(element => element.length > 0);
+    //     // let timeAFKArray = element.timeAFK.split("|").filter(element => element.length > 0);
+    //     // let dateJoinedArray = element.dateJoined.split("|").filter(element => element.length > 0);
+    //     // let guildsArray = element.guilds.split("|").filter(element => element.length > 0);
 
+    //     // await User.findOneAndUpdate({ id: element.id },
+    //     //     {
+    //     //         $set: { games: gamesArray,
+    //     //                 messages: messageArray,
+    //     //                 lastMessage: lastMessageArray,
+    //     //                 timeTalked: timeTalkedeArray,
+    //     //                 lastTalked: lastTalkedArray,
+    //     //                 timeAFK: timeAFKArray,
+    //     //                 dateJoined: dateJoinedArray,
+    //     //                 guilds: guildsArray
 
-    //     let tempGuilds = user.guilds;
-    //     tempGuilds.filter(element => element.length > 2);
-    //     user.set('guilds', tempGuilds);
-    //     user.save()
+    //     //         }
+    //     //     });
+
 
     // }//for user loop
 
-    // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
-    //     if (err) console.log('error', err);
-    // });
+    // // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
+    // //     if (err) console.log('error', err);
+    // // });
 
 
-    //console.log("CALLED UPDATE ALL");
+    // console.log("CALLED UPDATE ALL");
 }
 
 async function minuteCount() {
     countTalk();
 }
 
-
-
 async function updateGames(message, game, user) {
-
 
     if (Array.isArray(game)) {
         let setty = new Set(game);
@@ -1716,7 +1875,6 @@ async function updateGames(message, game, user) {
         else if (check.result[0].score != 0) {
 
             message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
-            console.log("creating user: " + user)
             specificCommandCreator(updateGames, [message, -1, user], check.result, user);
             return -1;
         }
@@ -1790,14 +1948,14 @@ async function updateGames(message, game, user) {
         }
         message.channel.send("The following are invalid games: ```" + congrats + "```");
     }
- 
-    if(user.games)
+
+    if (user.games)
         finalGameArray = finalGameArray.concat(user.games).filter(v => (v));//removing nulls or undefined
 
     finalGameArray.sort();
     User.findOneAndUpdate({ id: user.id },
         {
-            $set: { games: finalGameArray}
+            $set: { games: finalGameArray }
         }, function (err, doc, res) {
             //console.log(doc);
         });
@@ -1807,8 +1965,6 @@ async function updateGames(message, game, user) {
         return 0;
 }
 
-
-
 function checkGame(gameArray, params, user) {
 
     if (!isNaN(params)) {
@@ -1816,22 +1972,19 @@ function checkGame(gameArray, params, user) {
             return -1;
         }
         params = gameArray[Math.floor(params)];
-        console.log(1)
     }
     else if (Array.isArray(params)) {
         params = params[0].trim();
-        console.log(2)
     }
     else {
         params = params.trim();
-        console.log(3)
     }
 
     let finalArray = new Array();
     let finalList = "";
     let newOptions = {
         ...options,
-        minMatchCharLength: params.length/2,
+        minMatchCharLength: params.length / 2,
         findAllMatches: false,
         includeScore: true,
     }
@@ -1862,16 +2015,11 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-//Stick to mongoose findoneandupdate from now on...
-//fix idan and william stats
-
-
-
 //Add a 'summoner' top stat - most pings
 //Add a kicked status
 //Custom, per-user prefix
 
-//Stop using strings and use arrays proper
+
 //Make a vote system for the next feature to focus on
 
 //Be alerted if a user is found in a voice channel? Stalker lmao
@@ -1891,10 +2039,8 @@ setInterval(minuteCount, 60 * 1000);
 //make remove game array - it is but broken
 //roll command - for however many sided die
 //ping-pong command
-//create a json of commands for fuzzy search of commands - lmao
-//when pinging an invalid game - suggest the first match along with the number
 //add a timer
-//Add pinging second parameter, for time offset, like in 30 mins?
+
 
 //Twitch notification/signup when a streamer goes live
 //https://dev.twitch.tv/docs/api/reference/#get-streams
