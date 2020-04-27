@@ -1863,6 +1863,13 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
+
+//see if replacing the big calls in remove and signup can be 
+//fixed by making updatemessages not call .save() untill the previous functions got their awaits done??
+
+
+
+
 //Add a 'summoner' top stat - most pings
 //Add a kicked status
 //Custom, per-user prefix
