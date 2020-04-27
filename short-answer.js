@@ -135,7 +135,7 @@ connectDB.once('open', async function () {
         }
 
         if (message.channel.type != 'dm')
-            updateMessage(message, user);
+            await updateMessage(message, user);
 
         if (message.content.substr(0, prefix.length) == prefix) {
 
@@ -303,11 +303,8 @@ connectDB.once('open', async function () {
                     commandTracker.delete(message.author.id);
             }
         }//End of checking for correct prefix
-        user.save(function (err, product) {
-            if (err) {
-                console.log(err);
-            }
-        });
+        //console.log("PRESAVE: " + user)
+        //user.save({ validateBeforeSave: false });
     });//End of Client.on('message')
 
     Client.on('guildMemberAdd', member => {
@@ -320,7 +317,7 @@ connectDB.once('open', async function () {
     Client.on('presenceUpdate', (oldMember, newMember) => {
 
         //console.log("hopefuly this traffic keeps it awake?");
-    });
+    });//
 });
 
 
@@ -334,12 +331,14 @@ function quitTutorial(message, user) {
     user.set('activeTutorial', -1);
     user.set('tutorialStep', -1);
     user.set('previousTutorialStep', -1);
+    user.save();
     message.channel.send("You have quit the previous tutorial and may begin a new one at any point!");
 }
 
-function purgeGamesList(message, user) {
+async function purgeGamesList(message, user) {
     user.set('games', []);
     user.markModified('games');
+    await user.save();
     message.channel.send("You games list has been emptied!");
     return 1;
 }
@@ -395,6 +394,7 @@ async function gameTutorial(message, params, command, user) {
         user.set('activeTutorial', 0);
         user.set('tutorialStep', 0);
         user.set('previousTutorialStep', 0);
+        await user.save();
     }//
     else {
         if (user.activeTutorial == 0 || user.activeTutorial == -1) {
@@ -407,7 +407,7 @@ async function gameTutorial(message, params, command, user) {
                 if (user.tutorialStep != steps.length - 1) {
 
                     user.set("previousTutorialStep", user.previousTutorialStep + 1);
-                    user.save();
+                    await user.save();
                     message.channel.send(steps[user.tutorialStep]);
                 }
                 else {//Tutorial over!!!!!
@@ -421,7 +421,7 @@ async function gameTutorial(message, params, command, user) {
                         user.completedTutorials.push(0);
                         user.markModified('completedTutorials');
                     }
-                    user.save();
+                    await user.save();
                 }
             }
             else {//Test if their response is the correct one.
@@ -1009,7 +1009,7 @@ async function countTalk() {
     }
 }
 
-function updateMessage(message, user) {
+async function updateMessage(message, user) {
 
     if (!user) return;
     let index = user.guilds.indexOf(message.guild.id);
@@ -1021,6 +1021,8 @@ function updateMessage(message, user) {
 
     user.markModified('messages');
     user.markModified('lastMessage');
+
+    await user.save();
 }
 
 function excludePing(message, user) {
@@ -1146,17 +1148,46 @@ function removeGame(message, game, user) {
 
     if (user.games.length < 1) {
 
-        message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2])
+        message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2]);
+        return;
     }
     else {
+
+        if (Array.isArray(game)) {
+            let setty = new Set(game);
+            game = Array.from(setty);
+        }
+        else {
+
+            game = [game];
+        }
+
         let gameArr = user.games;
         let invalidGames = new Array();
         let removedGames = new Array();
 
-
-        let setty = new Set(game);
-        game = Array.from(setty);
         games.sort();
+
+        if (game.length == 1) {
+
+            let check = checkGame(user.games, game, user);
+
+            if (check == -1) {
+
+                message.channel.send(game + " is not assigned to any games, please try again.");
+                return -1;
+            }
+            else if (check.result[0].score != 0) {
+
+                message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+                specificCommandCreator(removeGame, [message, -1, user], check.result, user);
+                return -1;
+            }
+            else {
+
+                game[0] = check.result[0].item;
+            }
+        }
 
         //game.forEach(async gameTitle => {make it for...of loop!
 
@@ -1205,8 +1236,15 @@ function removeGame(message, game, user) {
             message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
         }
 
-        user.markModified('games');
-        user.set('games', gameArr);
+
+        gameArr.sort();
+        User.findOneAndUpdate({ id: user.id },
+            {
+                $set: { games: gameArr}
+            }, function (err, doc, res) {
+                //console.log(doc);
+            });
+
         if (removedGames.length > 0)
             return removedGames.length;
         else
@@ -1464,118 +1502,7 @@ async function addGuild(member, memberDB) {
     memberDB.save();
 }
 
-async function updateGames(message, game, user) {
 
-    if (Array.isArray(game)) {
-        let setty = new Set(game);
-        game = Array.from(setty);
-    }
-    else{
-
-        game = [game];
-    }
-
-    games.sort();
-    let existingGames = user.games;
-    let finalGameArray = new Array();
-    let alreadyTracked = new Array();
-    let invalidGames = new Array();
-
-    if (game.length == 1) {
-
-        let check = checkGame(games, game, user);
-
-        if (check == -1) {
-
-            message.channel.send(game + " is not assigned to any games, please try again.");
-            return -1;
-        }
-        else if (check.result[0].score != 0) {
-
-            message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
-            specificCommandCreator(updateGames, [message, -1, user], check.result, user);
-            return -1;
-        }
-        else {
-
-            game[0] = check.result[0].item;
-        }
-    }
-
-    for (let i = 0; i < game.length; i++) {
-        gameTitle = game[i];
-
-        gameTitle = gameTitle.trim();
-
-        if (isNaN(gameTitle)) {
-
-            gameTitle = gameTitle.trim();
-
-            if (games.includes(gameTitle)) {
-                if (!existingGames.includes(gameTitle)) {
-                    finalGameArray.push(gameTitle);
-                    user.games.push(games[gameTitle]);
-                }
-                else
-                    alreadyTracked.push(gameTitle);
-            }
-            else
-                invalidGames.push(gameTitle);
-        }
-        else {
-            gameTitle = Math.floor(gameTitle);
-            if (gameTitle < games.length && gameTitle >= 0) {
-
-                if (!existingGames.includes(games[gameTitle])) {
-                    finalGameArray.push(games[gameTitle]);
-                    user.games.push(games[gameTitle]);
-                }
-                else
-                    alreadyTracked.push(games[gameTitle]);
-            }
-            else
-                invalidGames.push(games[gameTitle]);
-        }
-    }
-
-    if (finalGameArray.length > 0) {
-
-        finalGameArray.sort();
-        let congrats = "";
-        for (let i = 0; i < finalGameArray.length; i++) {
-            //if (tempArr[i].length > 1)
-            congrats += i + ") " + finalGameArray[i] + "\n";
-        }
-        message.channel.send("Succesfuly signed up for: ```" + congrats + "```");
-    }
-
-    if (alreadyTracked.length > 0) {
-        alreadyTracked.sort();
-        let congrats = "";
-        for (let i = 0; i < alreadyTracked.length; i++) {
-            //if (tempArr[i].length > 1)
-            congrats += i + ") " + alreadyTracked[i] + "\n";
-        }
-        message.channel.send("The following games are already tracked for you: ```" + congrats + "```");
-    }
-
-    if (invalidGames.length > 0) {
-        invalidGames.sort();
-        let congrats = "";
-        for (let i = 0; i < invalidGames.length; i++) {
-            //if (teminvalidGamespArr[i].length > 1)
-            congrats += i + ") " + invalidGames[i] + "\n";
-        }
-        message.channel.send("The following are invalid games: ```" + congrats + "```");
-    }
-
-    //user.set('games', user.games);
-    user.markModified('games');
-    if (finalGameArray.length > 0)
-        return finalGameArray.length;
-    else
-        return 0;
-}
 
 /**
  * true = Existed in DB
@@ -1759,30 +1686,160 @@ async function minuteCount() {
     countTalk();
 }
 
+
+
+async function updateGames(message, game, user) {
+
+
+    if (Array.isArray(game)) {
+        let setty = new Set(game);
+        game = Array.from(setty);
+    }
+    else {
+
+        game = [game];
+    }
+
+    games.sort();
+    let existingGames = user.games;
+    let finalGameArray = new Array();
+    let alreadyTracked = new Array();
+    let invalidGames = new Array();
+
+    if (game.length == 1) {
+
+        let check = checkGame(games, game, user);
+
+        if (check == -1) {
+
+            message.channel.send(game + " is not assigned to any games, please try again.");
+            return -1;
+        }
+        else if (check.result[0].score != 0) {
+
+            message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+            console.log("creating user: " + user)
+            specificCommandCreator(updateGames, [message, -1, user], check.result, user);
+            return -1;
+        }
+        else {
+
+            game[0] = check.result[0].item;
+        }
+    }
+
+    for (let i = 0; i < game.length; i++) {
+        gameTitle = game[i];
+
+        gameTitle = gameTitle.trim();
+
+        if (isNaN(gameTitle)) {
+
+            gameTitle = gameTitle.trim();
+
+            if (games.includes(gameTitle)) {
+                if (!existingGames.includes(gameTitle)) {
+                    finalGameArray.push(gameTitle);
+                }
+                else
+                    alreadyTracked.push(gameTitle);
+            }
+            else
+                invalidGames.push(gameTitle);
+        }
+        else {
+            gameTitle = Math.floor(gameTitle);
+            if (gameTitle < games.length && gameTitle >= 0) {
+
+                if (!existingGames.includes(games[gameTitle])) {
+                    finalGameArray.push(games[gameTitle]);
+                }
+                else
+                    alreadyTracked.push(games[gameTitle]);
+            }
+            else
+                invalidGames.push(games[gameTitle]);
+        }
+    }
+
+    if (finalGameArray.length > 0) {
+
+        finalGameArray.sort();
+        let congrats = "";
+        for (let i = 0; i < finalGameArray.length; i++) {
+            //if (tempArr[i].length > 1)
+            congrats += i + ") " + finalGameArray[i] + "\n";
+        }
+        message.channel.send("Succesfuly signed up for: ```" + congrats + "```");
+    }
+
+    if (alreadyTracked.length > 0) {
+        alreadyTracked.sort();
+        let congrats = "";
+        for (let i = 0; i < alreadyTracked.length; i++) {
+            //if (tempArr[i].length > 1)
+            congrats += i + ") " + alreadyTracked[i] + "\n";
+        }
+        message.channel.send("The following games are already tracked for you: ```" + congrats + "```");
+    }
+
+    if (invalidGames.length > 0) {
+        invalidGames.sort();
+        let congrats = "";
+        for (let i = 0; i < invalidGames.length; i++) {
+            //if (teminvalidGamespArr[i].length > 1)
+            congrats += i + ") " + invalidGames[i] + "\n";
+        }
+        message.channel.send("The following are invalid games: ```" + congrats + "```");
+    }
+ 
+    if(user.games)
+        finalGameArray = finalGameArray.concat(user.games).filter(v => (v));//removing nulls or undefined
+
+    finalGameArray.sort();
+    User.findOneAndUpdate({ id: user.id },
+        {
+            $set: { games: finalGameArray}
+        }, function (err, doc, res) {
+            //console.log(doc);
+        });
+    if (finalGameArray.length > 0)
+        return finalGameArray.length;
+    else
+        return 0;
+}
+
+
+
 function checkGame(gameArray, params, user) {
 
     if (!isNaN(params)) {
         if (params < 0 || params >= gameArray.length) {
             return -1;
         }
-        params = user.games[Math.floor(params)];
+        params = gameArray[Math.floor(params)];
+        console.log(1)
     }
-    else if (Array.isArray(params))
+    else if (Array.isArray(params)) {
         params = params[0].trim();
-    else
+        console.log(2)
+    }
+    else {
         params = params.trim();
+        console.log(3)
+    }
 
     let finalArray = new Array();
     let finalList = "";
     let newOptions = {
         ...options,
+        minMatchCharLength: params.length/2,
         findAllMatches: false,
         includeScore: true,
     }
-
+    //
     let fuse = new Fuse(gameArray, newOptions);
     let result = fuse.search(params);
-
     let maxResults = 5;
     if (maxResults > result.length)
         maxResults = result.length;
