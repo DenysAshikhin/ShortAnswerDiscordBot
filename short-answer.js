@@ -110,8 +110,6 @@ connectDB.once('open', async function () {
         console.log("Ready!");
 
         Client.user.setActivity("sa!help for information");
-
-        updateAll();
     });
 
     Client.on("message", async (message) => {
@@ -1865,6 +1863,7 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //Stick to mongoose findoneandupdate from now on...
+//fix idan and william stats
 
 
 
