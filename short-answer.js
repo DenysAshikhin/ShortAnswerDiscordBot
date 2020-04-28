@@ -139,7 +139,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[29], quitTutorial)
     commandMap.set(Commands.commands[30], purgeGamesList)
     commandMap.set(Commands.commands[31], gameStats)
-    commandMap.set(Commands.commands[31], topGames)
+    commandMap.set(Commands.commands[32], topGames)
 }
 
 connectDB.once('open', async function () {
@@ -304,6 +304,7 @@ connectDB.once('open', async function () {
                     message.channel.send("You have entered an invalid response, please try again or specify a different command.");
                 }
                 else if (result == 1) {
+                    console.log("DELETED!");
                     commandTracker.delete(message.author.id);
                 }
             }
@@ -343,14 +344,14 @@ async function commandMatcher(message, command, params, user) {
         return -1;
     }
     else if (check.result[0].score != 0) {
-
         message.channel.send(`${command} is not a valid command, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
         specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
         return -1;
     }
     else {
-
-        commandMap.get(check.result[0].item).call(null, message, params, user)
+        if (await tutorialHandler(message, commandMap.get(check.result[0].item), params, user) == false)
+            await commandMap.get(check.result[0].item).call(null, message, params, user);
+        return 1;
     }
 }
 
@@ -1436,98 +1437,111 @@ function directMessage(message, memberID, game) {
 
 async function gameStats(message, params, user) {
 
-    let game = params[0].trim();
-    if (!isNaN(game)) {
-        if (game < 0 || game >= user.games.length) {
-            message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
+    if (message.channel.type != 'dm') {
+        let game = params[0].trim();
+        if (!isNaN(game)) {
+            if (game < 0 || game >= user.games.length) {
+                message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
+                return -1;
+            }
+            game = user.games[game];
+        }
+        else if (!games.includes(game)) {
+            message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
             return -1;
         }
-        game = user.games[game];
+
+        let users = await getUsers();
+        let signedUp = new Array();
+
+        for (let i = 0; i < users.length; i++) {
+
+            if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
+                if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
+                    signedUp.push(users[i]);
+                }
+        }
+
+        if (signedUp.length > 0)
+            message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+        else
+            message.channel.send(`There are ${signedUp.length} users signed up for ${game}.`);
+        return signedUp.length;
     }
-    else if (!games.includes(game)) {
-        message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
+    else{
+        message.channel.send(`*${Commands.commands[31]}* is only valid from inside a server text channel!`);
         return -1;
     }
-
-    let users = await getUsers();
-    let signedUp = new Array();
-
-    for (let i = 0; i < users.length; i++) {
-
-        if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
-            if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
-                signedUp.push(users[i]);
-            }
-    }
-
-    if (signedUp.length > 0)
-        message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
-    else
-        message.channel.send(`There are ${signedUp.length} users signed up for ${game}.`);
-    return signedUp.length;
 }
 
 async function topGames(message, params) {
 
-    let users = await getUsers();
-    let gameMap = new Map();
+    if (message.channel.type != 'dm') {
+        let users = await getUsers();
+        let gameMap = new Map();
 
-    for (let i = 0; i < users.length; i++) {
+        for (let i = 0; i < users.length; i++) {
 
-        if (users[i].guilds.includes(message.guild.id)) {
+            if (users[i].guilds.includes(message.guild.id)) {
 
-            if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
-                let tempGames = users[i].games;
+                if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
+                    let tempGames = users[i].games;
 
-                for (let j = 0; j < tempGames.length; j++) {
+                    for (let j = 0; j < tempGames.length; j++) {
 
-                    if (tempGames[j].length > 2) {
+                        if (tempGames[j].length > 2) {
 
-                        if (!gameMap.get(tempGames[j])) {
+                            if (!gameMap.get(tempGames[j])) {
 
-                            gameMap.set(tempGames[j], 1);
-                        }
-                        else {
-                            gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
+                                gameMap.set(tempGames[j], 1);
+                            }
+                            else {
+                                gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    gameMap = [...gameMap.entries()].sort(function (a, b) { return b[1] - a[1] });
+        gameMap = [...gameMap.entries()].sort(function (a, b) { return b[1] - a[1] });
 
-    let maxResults = 5;
-    if (!(isNaN(params[0])))
-        maxResults = params[0];
+        let maxResults = 5;
+        if (!(isNaN(params[0])))
+            maxResults = params[0];
 
-    if (gameMap.length == 0) {
-        message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
-        return;
-    }
+        if (gameMap.length == 0) {
+            message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
+            return;
+        }
 
-    else if (maxResults > gameMap.length && maxResults) {
+        else if (maxResults > gameMap.length && maxResults) {
 
-        maxResults = gameMap.length;
-        message.channel.send(`There are only ${maxResults} games people signed up for on ${message.guild.name}`);
+            maxResults = gameMap.length;
+            message.channel.send(`There are only ${maxResults} games people signed up for on ${message.guild.name}`);
+        }
+        else {
+            message.channel.send(`You did not specify the number of games to display, as such, I will display the top ${maxResults}`
+                + ` games people signed up for on the ${message.guild.name} server:`);
+        }
+
+        let finalList = ``;
+
+        for (let i = 0; i < maxResults; i++) {
+
+            finalList += `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.\n`;
+            //message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+        }
+
+        message.channel.send("```" + finalList + "```");
+
+        return gameMap.length;
     }
     else {
-        message.channel.send(`You did not specify the number of games to display, as such, I will display the top ${maxResults}`
-            + ` games people signed up for on the ${message.guild.name} server:`);
+
+        message.channel.send(`*${Commands.commands[32]}* is only valid from inside a server text channel!`);
+        return -1;
     }
-
-    let finalList = ``;
-
-    for (let i = 0; i < maxResults; i++) {
-
-        finalList += `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.\n`;
-        //message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
-    }
-
-    message.channel.send("```" + finalList + "```");
-
-    return gameMap.length;
 }
 
 //-1 invalid input, 0 don't delete (passed to command matcher), need it next time, 1 handled, delete
@@ -1548,7 +1562,6 @@ async function handleCommandTracker(specificCommand, message, user) {
                 if (await tutorialHandler(message, specificCommand.command, specificCommand.choices[Math.floor(params)].item, user)) {
                     return 1;
                 }
-
             }
         };
         await specificCommand.command.apply(null, specificCommand.defaults);
@@ -1921,7 +1934,6 @@ async function updateGames(message, game, user) {
         game = Array.from(setty);
     }
     else {
-
         game = [game];
     }
 
@@ -2017,6 +2029,7 @@ async function updateGames(message, game, user) {
         message.channel.send("The following are invalid games: ```" + congrats + "```");
     }
 
+    let length = finalGameArray.length;
     if (user.games)
         finalGameArray = finalGameArray.concat(user.games).filter(v => (v));//removing nulls or undefined
 
@@ -2027,8 +2040,9 @@ async function updateGames(message, game, user) {
         }, function (err, doc, res) {
             //console.log(doc);
         });
-    if (finalGameArray.length > 0)
-        return finalGameArray.length;
+
+    if (length > 0)
+        return length;
     else
         return 0;
 }
@@ -2085,6 +2099,13 @@ setInterval(minuteCount, 60 * 1000);
 //sign up doesnt get routed to the tutorial from command matcher
 //Custom, per-user/per-guild and guild-default prefix
 //suggestion for gamesstats!
+
+
+/**
+ * sa!mgames
+ * 2
+ * breaks
+ */
 
 
 //Be alerted if a user is found in a voice channel? Stalker lmao
