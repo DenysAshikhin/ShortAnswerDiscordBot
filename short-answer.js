@@ -105,6 +105,12 @@ const findUser = async function (params) {
     } catch (err) { console.log(err) }
 }
 
+const findGuild = async function (params) {
+    try {
+        return await Guild.findOne(params)
+    } catch (err) { console.log(err) }
+}
+
 function populateCommandMap() {
 
     commandMap.set(Commands.commands[0], populate)
@@ -144,7 +150,7 @@ function populateCommandMap() {
 
 connectDB.once('open', async function () {
 
-    Client.login(token);
+    await Client.login(token);
 
     updateAll()
     populateCommandMap();
@@ -315,23 +321,37 @@ connectDB.once('open', async function () {
 
     Client.on('guildMemberAdd', member => {
 
-        if (member.guild.systemChannelID)
+        if (member.id == botID) {
+            console.log("bot joined server!");
+        }
+        else if (member.guild.systemChannelID)
             member.guild.channels.cache.get(member.guild.systemChannelID).send("Welcome to the server " + member.displayName + "!");
         checkExistance(member);
     });
 
     Client.on('guildMemberRemove', async member => {
 
-        let user = await findUser({ id: member.id });
-        let index = user.guilds.indexOf(member.guild.id);
-        user.kicked[index] = true;
-        User.findOneAndUpdate({ id: member.id }, { $set: { kicked: user.kicked } }, function (err, doc, res) { });
+        if (member.id == botID) {
+            console.log("bot left server!");
+        }
+        else {
+            let user = await findUser({ id: member.id });
+            let index = user.guilds.indexOf(member.guild.id);
+            user.kicked[index] = true;
+            User.findOneAndUpdate({ id: member.id }, { $set: { kicked: user.kicked } }, function (err, doc, res) { });
+        }
     });
 
     Client.on('presenceUpdate', (oldMember, newMember) => {
 
         //console.log("hopefuly this traffic keeps it awake?");
     });//
+
+    Client.on("guildCreate", async guild => {
+        
+        let searchedGuild = await findGuild({id: guild.id});
+        if(!searchedGuild) createGuild(guild);
+    })
 });
 
 
@@ -1438,7 +1458,7 @@ function directMessage(message, memberID, game) {
 async function gameStats(message, params, user) {
 
     if (message.channel.type != 'dm') {
-        let game = Array.isArray(params) ? params[0].trim(): params;
+        let game = Array.isArray(params) ? params[0].trim() : params;
         let check = checkGame(games, params, user);
 
         if (check == -1) {
@@ -1714,6 +1734,19 @@ async function addGuild(member, memberDB) {
     memberDB.save();
 }
 
+async function createGuild(guild) {
+
+    let newGuild = {
+        id: guild.id,
+        prefix: "sa!",
+        name: guild.name
+    }
+
+    let guildModel = new Guild(newGuild);
+    await guildModel.save();
+    return guildModel;
+}
+
 /**
  * true = Existed in DB
  * false = didn't exist in DB
@@ -1870,6 +1903,8 @@ async function graphs() {
 }
 
 async function updateAll() {
+
+
 
     // let users = await getUsers();
     // let nameArray = new Array();
@@ -2102,7 +2137,6 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //Custom, per-user/per-guild and guild-default prefix
-//suggestion for gamesstats!
 
 
 //Be alerted if a user is found in a voice channel? Stalker lmao
