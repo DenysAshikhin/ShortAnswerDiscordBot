@@ -66,7 +66,14 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-
+    summoner: {
+        type:[Number],
+        default:[]
+    },
+    kicked: {
+        type: [Boolean],
+        default:[]
+    }
 });
 
 module.exports = mongoose.model('User', UserSchema);

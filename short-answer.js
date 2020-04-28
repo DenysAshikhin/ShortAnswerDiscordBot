@@ -314,9 +314,17 @@ connectDB.once('open', async function () {
 
     Client.on('guildMemberAdd', member => {
 
-        if (member.guild.systemChannelID != null || member.guild.systemChannelID != undefined)
+        if (member.guild.systemChannelID)
             member.guild.channels.cache.get(member.guild.systemChannelID).send("Welcome to the server " + member.displayName + "!");
         checkExistance(member);
+    });
+
+    Client.on('guildMemberRemove', async member => {
+
+        let user = await findUser({ id: member.id });
+        let index = user.guilds.indexOf(member.guild.id);
+        user.kicked[index] = true;
+        User.findOneAndUpdate({ id: member.id }, { $set: { kicked: user.kicked } }, function (err, doc, res) { });
     });
 
     Client.on('presenceUpdate', (oldMember, newMember) => {
@@ -671,59 +679,78 @@ async function topStats(message) {
     let allUsers = await getUsers();
     let guild = message.guild;
     let silentType;
-    let loudMouth;
-    let ghost;
-    let MIA;
-    let user = null;
     let silentTypeIndex;
+
+    let loudMouth;
     let loudMouthIndex;
+
+    let ghost;
     let ghostIndex;
+
+    let MIA;
     let MIAIndex;
+
+    let summoner;
+    let summonerIndex;
+
+    let user = null;
+
     for (let i = 0; i < allUsers.length; i++) {
 
         if (allUsers[i].guilds.includes(guild.id)) {
             user = allUsers[i];
             let userIndex = user.guilds.indexOf(guild.id);
 
-            if (!silentType) {
-                silentType = user;
-                silentTypeIndex = user.guilds.indexOf(guild.id);
-            }
-            if (!loudMouth) {
-                loudMouth = user;
-                loudMouthIndex = user.guilds.indexOf(guild.id);
-            }
-            if (!ghost) {
-                ghost = user;
-                ghostIndex = user.guilds.indexOf(guild.id);
-            }
-            if (!MIA) {
-                MIA = user;
-                MIAIndex = user.guilds.indexOf(guild.id);
-            }
+            if (!user.kicked[userIndex]) {
+                if (!silentType) {
+                    silentType = user;
+                    silentTypeIndex = user.guilds.indexOf(guild.id);
+                }
+                if (!loudMouth) {
+                    loudMouth = user;
+                    loudMouthIndex = user.guilds.indexOf(guild.id);
+                }
+                if (!ghost) {
+                    ghost = user;
+                    ghostIndex = user.guilds.indexOf(guild.id);
+                }
+                if (!MIA) {
+                    MIA = user;
+                    MIAIndex = user.guilds.indexOf(guild.id);
+                }
+                if (!summoner) {
+                    summoner = user;
+                    summonerIndex = user.guilds.indexOf(guild.id);
+                }
 
-            if (Number(silentType.messages[silentTypeIndex]) < Number(user.messages[userIndex])) {
-                silentType = user;
-                silentTypeIndex = user.guilds.indexOf(guild.id);
-            }
+                if (Number(silentType.messages[silentTypeIndex]) < Number(user.messages[userIndex])) {
+                    silentType = user;
+                    silentTypeIndex = userIndex;
+                }
 
-            if (Number(loudMouth.timeTalked[loudMouthIndex]) < Number(user.timeTalked[userIndex])) {
-                loudMouth = user;
-                loudMouthIndex = user.guilds.indexOf(guild.id);
-            }
+                if (Number(loudMouth.timeTalked[loudMouthIndex]) < Number(user.timeTalked[userIndex])) {
+                    loudMouth = user;
+                    loudMouthIndex = userIndex;
+                }
 
-            if (Number(ghost.timeAFK[ghostIndex]) < Number(user.timeAFK[userIndex])) {
-                ghost = user;
-                ghostIndex = user.guilds.indexOf(guild.id);
-            }
+                if (Number(ghost.timeAFK[ghostIndex]) < Number(user.timeAFK[userIndex])) {
+                    ghost = user;
+                    ghostIndex = userIndex;
+                }
 
-            let userDate = findFurthestDate(user.lastMessage[userIndex], user.lastTalked[userIndex]);
-            let MIADate = findFurthestDate(MIA.lastMessage[MIAIndex], MIA.lastTalked[MIAIndex]);
+                if (summoner.summoner[summonerIndex] < user.summoner[userIndex]) {
+                    summoner = user;
+                    summonerIndex = userIndex;
+                }
+
+                let userDate = findFurthestDate(user.lastMessage[userIndex], user.lastTalked[userIndex]);
+                let MIADate = findFurthestDate(MIA.lastMessage[MIAIndex], MIA.lastTalked[MIAIndex]);
 
 
-            if (userDate == findFurthestDate(userDate, MIADate)) {
-                MIA = user;
-                MIAIndex = user.guilds.indexOf(guild.id);
+                if (userDate == findFurthestDate(userDate, MIADate)) {
+                    MIA = user;
+                    MIAIndex = userIndex;
+                }
             }
         }
     }
@@ -734,7 +761,8 @@ async function topStats(message) {
         + silentType.messages[silentTypeIndex] + " messages sent.\n"
         + "The loud mouth: " + loudMouth.displayName + " : " + loudMouth.timeTalked[loudMouthIndex] + " minutes spent talking.\n"
         + "The ghost: " + ghost.displayName + " : " + ghost.timeAFK[ghostIndex] + " minutes spent AFK.\n"
-        + "The MIA: " + MIA.displayName + " : " + findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date."
+        + "The MIA: " + MIA.displayName + " : " + findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date.\n"
+        + `The summoner: ${summoner.displayName} : ${summoner.summoner[summonerIndex]} summon rituals completed.`
         + "```");
 
 }
@@ -756,26 +784,35 @@ async function getStats(member, user) {
         user = await findUser({ id: member.id });
 
     let index = user.guilds.indexOf(member.guild.id);
-    let stats = "";
 
-    stats = "Total number of messages sent: " + user.messages[index] + "\n"
-        + "Last message sent: " + user.lastMessage[index] + "\n"
-        + "Total time spent talking (in minutes): " + user.timeTalked[index] + "\n"
-        + "Last time you talked was: " + user.lastTalked[index] + "\n"
-        + "The games you are signed up for: " + user.games + "\n"
-        + "Time spent AFK (in minutes): " + user.timeAFK[index] + "\n"
-        + "You joined this server on: " + user.dateJoined[index] + "\n"
-        + "Whether you are excluded from pings: " + user.excludePing + "\n"
-        + "Whether you are excluded from DMs: " + user.excludeDM + "\n";
+    if (!user.kicked[index]) {
+        let stats = "";
 
-    return stats;
+        stats = "Total number of messages sent: " + user.messages[index] + "\n"
+            + "Last message sent: " + user.lastMessage[index] + "\n"
+            + "Total time spent talking (in minutes): " + user.timeTalked[index] + "\n"
+            + "Last time you talked was: " + user.lastTalked[index] + "\n"
+            + "The games you are signed up for: " + user.games + "\n"
+            + "Time spent AFK (in minutes): " + user.timeAFK[index] + "\n"
+            + "You joined this server on: " + user.dateJoined[index] + "\n"
+            + "Whether you are excluded from pings: " + user.excludePing + "\n"
+            + "Whether you are excluded from DMs: " + user.excludeDM + "\n";
+
+        return stats;
+    } {
+        return -1;
+    }
 }
 
 async function personalStats(message, params, user) {
 
-    if (message.channel.type != 'dm')
-        message.channel.send(mention(message.member.id) + " here are your stats: ```"
-            + await getStats(message.member, user) + "```");
+    if (message.channel.type != 'dm') {
+        let statResult = await getStats(message.member, user);
+        if (!user.kicked[user.guilds.indexOf(message.guild.id)]) {
+            message.channel.send(mention(message.member.id) + " here are your stats: ```"
+                + statResult + "```");
+        }
+    }
     else {
         message.channel.send("Here are your general stats:");
 
@@ -788,7 +825,7 @@ async function personalStats(message, params, user) {
 
         for (let i = 0; i < user.guilds.length; i++) {
 
-            if (user.guilds[i].length > 2) {
+            if (!user.kicked[i]) {
                 let stats = "";
                 message.channel.send("Here are the stats for the server: " + message.client.guilds.cache.get(user.guilds[i]).name + "")
                 stats = "```Total number of messages sent: " + user.messages[i] + "\n"
@@ -1070,8 +1107,11 @@ async function guildStats(message, params, user) {
 
     for (let i = 0; i < memberArray.length; i++) {
 
-        await message.channel.send("Here are the stats for " + memberArray[i].displayName + ": ```"
-            + (await getStats(memberArray[i])) + "```");
+        let specificStats = await getStats(memberArray[i])
+        if (specificStats != -1) {
+            await message.channel.send("Here are the stats for " + memberArray[i].displayName + ": ```"
+                + specificStats + "```");
+        }
     }
 
     message.channel.send("```DONE!```");
@@ -1415,7 +1455,9 @@ async function gameStats(message, params, user) {
     for (let i = 0; i < users.length; i++) {
 
         if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
-            signedUp.push(users[i]);
+            if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
+                signedUp.push(users[i]);
+            }
     }
 
     if (signedUp.length > 0)
@@ -1433,18 +1475,21 @@ async function topGames(message, params) {
     for (let i = 0; i < users.length; i++) {
 
         if (users[i].guilds.includes(message.guild.id)) {
-            let tempGames = users[i].games;
 
-            for (let j = 0; j < tempGames.length; j++) {
+            if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
+                let tempGames = users[i].games;
 
-                if (tempGames[j].length > 2) {
+                for (let j = 0; j < tempGames.length; j++) {
 
-                    if (!gameMap.get(tempGames[j])) {
+                    if (tempGames[j].length > 2) {
 
-                        gameMap.set(tempGames[j], 1);
-                    }
-                    else {
-                        gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
+                        if (!gameMap.get(tempGames[j])) {
+
+                            gameMap.set(tempGames[j], 1);
+                        }
+                        else {
+                            gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
+                        }
                     }
                 }
             }
@@ -1457,7 +1502,6 @@ async function topGames(message, params) {
     if (!(isNaN(params[0])))
         maxResults = params[0];
 
-
     if (gameMap.length == 0) {
         message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
         return;
@@ -1469,7 +1513,7 @@ async function topGames(message, params) {
         message.channel.send(`There are only ${maxResults} games people signed up for on ${message.guild.name}`);
     }
     else {
-        message.channel.send(`You did not specify the number of games to display, as such, I will displaying the top ${maxResults}`
+        message.channel.send(`You did not specify the number of games to display, as such, I will display the top ${maxResults}`
             + ` games people signed up for on the ${message.guild.name} server:`);
     }
 
@@ -1559,25 +1603,27 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
                 if (user.guilds.includes(message.guild.id)) {
 
-                    if (isNaN(game)) {
+                    if (!user.kicked[user.guilds.indexOf(message.guild.id)]) {
+                        if (isNaN(game)) {
 
-                        if (user.games.includes(game)) {
+                            if (user.games.includes(game)) {
 
+                                if (user.excludePing == false)
+                                    signedUp += mention(user.id);
+                                if (user.excludeDM == false)
+                                    directMessage(message, user.id, game);
+                            }
+                        }
+                        else if (user.games.includes(games[game])) {
                             if (user.excludePing == false)
                                 signedUp += mention(user.id);
                             if (user.excludeDM == false)
-                                directMessage(message, user.id, game);
+                                directMessage(message, user.id, games[game]);
                         }
-                    }
-                    else if (user.games.includes(games[game])) {
-                        if (user.excludePing == false)
-                            signedUp += mention(user.id);
-                        if (user.excludeDM == false)
-                            directMessage(message, user.id, games[game]);
-                    }
-                    else if (user.games.length < 2) {
+                        else if (user.games.length < 2) {
 
-                        defaulted += mention(user.id);
+                            defaulted += mention(user.id);
+                        }
                     }
                 }
             }
@@ -1587,6 +1633,9 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             message.channel.send(message.member.displayName + " has summoned " + signedUp + " for some " + game);
         else
             message.channel.send("No one has signed up for " + game + ".");
+        let index = user.guilds.indexOf(message.guild.id);
+        user.summoner[index] += 1;
+        User.findOneAndUpdate({ id: user.id }, { $set: { summoner: user.summoner } }, function (err, doc, res) { });
         return 1;
         // if (defaulted.length > 1) {
 
@@ -1616,7 +1665,8 @@ async function createUser(member) {
         previousTutorialStep: -1,
         notifyUpdate: false,
         notifyTutorial: true,
-        completedTutorials: []
+        completedTutorials: [],
+        kicked: [false]
     }
 
     let userModel = new User(newUser);
@@ -1633,6 +1683,7 @@ async function addGuild(member, memberDB) {
     memberDB.lastTalked.push("0-0-0");
     memberDB.timeAFK.push(0);
     memberDB.dateJoined.push(getDate());
+    memberDB.kicked.push(false);
 
     memberDB.set("guilds", memberDB.guilds)
     memberDB.set("messages", memberDB.messages)
@@ -1642,6 +1693,7 @@ async function addGuild(member, memberDB) {
     memberDB.set("timeAFK", memberDB.timeAFK)
     memberDB.set("dateJoined", memberDB.dateJoined)
     memberDB.set("dateJoined", memberDB.dateJoined)
+    memberDB.set("kicked", memberDB.kicked)
     memberDB.save();
 }
 
@@ -1654,8 +1706,13 @@ async function checkExistance(member) {
     let tempUser = await findUser({ id: member.id })
     if (tempUser) {
 
-        if (tempUser.guilds.includes(member.guild.id))
+        if (tempUser.guilds.includes(member.guild.id)) {
+
+            let index = tempUser.guilds.indexOf(member.guild.id);
+            tempUser.kicked[index] = false;
+            User.findOneAndUpdate({ id: tempUser.id }, { $set: { kicked: tempUser.kicked } }, function (err, doc, res) { });
             return true;
+        }
         else {//The user exists, but not with a matching guild in the DB
 
             await addGuild(member, tempUser)
@@ -1664,7 +1721,7 @@ async function checkExistance(member) {
     }
     else {
         console.log("The user doesnt exist.");
-        let createdUser = await createUser(member);
+        await createUser(member);
         return false;
     }
 }
@@ -1802,10 +1859,10 @@ async function updateAll() {
 
     // for (let user of users) {
 
-    //     if (!nameArray.includes(user.displayName))
-    //         nameArray.push(user.displayName)
-    //     else
-    //         console.log("DUPIcLATE: " + user.displayName)
+    //     // if (!nameArray.includes(user.displayName))
+    //     //     nameArray.push(user.displayName)
+    //     // else
+    //     //     console.log("DUPIcLATE: " + user.displayName)
 
 
     //     // let messageArray = element.messages.split("|").filter(element => element.length > 0);
@@ -1831,12 +1888,23 @@ async function updateAll() {
     //     //         }
     //     //     });
 
+    //     let tempArr = [];
+
+    //     for(let i = 0; i < user.guilds.length; i++){
+
+    //         tempArr.push(false);
+    //     }
+
+
+    //     await User.findOneAndUpdate({id: user.id}, {$set: {kicked: tempArr}}, function(err, doc, res){});
+
+
 
     // }//for user loop
 
-    // // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
-    // //     if (err) console.log('error', err);
-    // // });
+    // // // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
+    // // //     if (err) console.log('error', err);
+    // // // });
 
 
     // console.log("CALLED UPDATE ALL");
@@ -2014,13 +2082,11 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-
-//Add a 'summoner' top stat - most pings
 //Add a kicked status
-//Custom, per-user prefix
+//Custom, per-user/per-guild and guild-default prefix
+//suggestion for gamesstats!
 
 
-//Make a vote system for the next feature to focus on
 
 //Be alerted if a user is found in a voice channel? Stalker lmao
 //DM quality of life 
@@ -2035,12 +2101,14 @@ setInterval(minuteCount, 60 * 1000);
 //coin flipper
 //game decider
 
+//look into start typing in message documentation to make it feel more alive?
 
 //make remove game array - it is but broken
 //roll command - for however many sided die
 //ping-pong command
 //add a timer
 
+//Make a vote system for the next feature to focus on
 
 //Twitch notification/signup when a streamer goes live
 //https://dev.twitch.tv/docs/api/reference/#get-streams
