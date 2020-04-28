@@ -2082,7 +2082,7 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-//Add a kicked status
+
 //Custom, per-user/per-guild and guild-default prefix
 //suggestion for gamesstats!
 
