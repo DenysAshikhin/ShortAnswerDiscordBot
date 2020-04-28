@@ -73,7 +73,8 @@ var commandMap = new Map();
 var commandTracker = new Map();
 var config = null;
 var queue = new Map();
-var prefix = "sa!";
+var defaultPrefix = "sa!";
+var prefix;
 var uri = "";
 var token = "";
 try {
@@ -138,21 +139,32 @@ connectDB.once('open', async function () {
 
         let user = await findUser({ id: message.author.id });
 
+
         if (message.channel.type != 'dm') {
 
+            let guild = await findGuild({ id: message.guild.id });
             if (!user || !user.guilds.includes(message.guild.id)) {//Checking that the user exists in DB and they have a valid guild
                 await checkExistance(message.member);
                 user = await findUser({ id: message.member.id });
             }
             updateMessage(message, user);
-            console.log(`${user.prefix[user.guilds.indexOf(message.guild.id)]}    WOAH`);
+
+            let index = user.guilds.indexOf(message.guild.id);
+            if (user.prefix[index] != "-1") prefix = user.prefix[index];
+            else if (guild.prefix != "-1") prefix = guild.prefix;
+            else prefix = defaultPrefix;
+
         }
         else if (!user) {//Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
             message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in and then sending the command again?")
             return;
         }
-        console.log(`${user.defaultPrefix}    :THINKING:`);
-        
+        else {
+            if (user.defaultPrefix != "-1") prefix = user.defaultPrefix;
+            else prefix = defaultPrefix;
+        }
+
+        console.log(`FINAL PREFIX: ${prefix}`);
         if (message.content.substr(0, prefix.length) == prefix) {
 
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
@@ -164,18 +176,7 @@ connectDB.once('open', async function () {
             commandMatcher(message, command, params, user);
             return;
         } else {//Command tracker stuff
-            if (commandTracker.get(message.author.id)) {
-
-                if (message.content == -1) return commandTracker.delete(message.author.id);
-
-                let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user);
-                if (result == -1) {
-                    message.channel.send("You have entered an invalid response, please try again or specify a different command. Or **-1** to quit.");
-                }
-                else if (result == 1) {
-                    commandTracker.delete(message.author.id);
-                }
-            }
+            triggerCommandHandler(message, user);
         }
     });
 
@@ -216,7 +217,6 @@ connectDB.once('open', async function () {
     })
 });
 
-
 function populateCommandMap() {
 
     commandMap.set(Commands.commands[0], populate)
@@ -256,18 +256,19 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[34], setDefaultPrefix)
 }
 
-
 function setGuildPrefix(message, params, user) {
+
+    console.log("WE TRIED: " + params)
 
     if (params == message.content) {
         message.channel.send("You have to provde an actual prefix!");
         return -1;
     }
+    if (Array.isArray(params))
+        params = params[0];
 
     let index = user.guilds.indexOf(message.guild.id);
-
     user.prefix[index] = params;
-    console.log(`New prefixxx: ${user.prefix}`)
 
     message.channel.send(`Your new prefix for this server is: "${params}"`);
 
@@ -280,6 +281,28 @@ function setDefaultPrefix(message, params, user) {
     if (params == message.content) {
         message.channel.send("You have to provde an actual prefix!");
         return -1;
+    }
+    if (Array.isArray(params))
+        params = params[0];
+
+    message.channel.send(`Your new prefix for this server is: "${params}"`);
+
+    User.findOneAndUpdate({ id: user.id }, { $set: { defaultPrefix: params } }, function (err, doc, res) { });
+    return 1;
+}
+
+async function triggerCommandHandler(message, user) {
+
+    if (commandTracker.get(message.author.id)) {
+
+        if (message.content == -1) return commandTracker.delete(message.author.id);
+
+        let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user);
+
+        if (result == 1) {
+            console.log("CALLED DELETE")
+            commandTracker.delete(message.author.id);
+        }
     }
 }
 
@@ -297,10 +320,53 @@ async function commandMatcher(message, command, params, user) {
         return -1;
     }
     else {
-        if (await tutorialHandler(message, commandMap.get(check.result[0].item), params, user) == false)
-            await commandMap.get(check.result[0].item).call(null, message, params, user);
-        return 1;
+        specificCommandCreator(commandMap.get(check.result[0].item), [message, params, user], null, user);
+        console.log("RECURSIVE Trigger")
+        return await triggerCommandHandler(message, user);
     }
+}
+
+//-1 invalid input, 0 don't delete (passed to command matcher) - need it next time, 1 handled, delete
+async function handleCommandTracker(specificCommand, message, user) {
+
+    let params = message.content;
+    console.log("HANDLING COMMANDS: " + specificCommand.command)
+    console.log(specificCommand.defaults)
+    console.log(!isNaN(params), params.length > 0)
+    console.log(params);
+    if (!isNaN(params) && params.length > 0) {
+        console.log("PASSED FIRST IF")
+        params = Math.floor(params);
+        if (params >= specificCommand.choices.length || params < 0)
+            return -1;
+
+        for (let i = 0; i < specificCommand.defaults.length; i++) {
+
+            if (specificCommand.defaults[i] == -1)
+                specificCommand.defaults[i] = specificCommand.choices[Math.floor(params)].item
+        }
+        console.log(2)
+        if (await tutorialHandler(message, specificCommand.command, specificCommand.choices[Math.floor(params)].item, user))
+            return 1;
+        console.log(3)
+        await specificCommand.command.apply(null, specificCommand.defaults);
+        //console.log(4 + ":: " + specificCommand.defaults);
+        if (specificCommand.command == commandMatcher)
+            return 0;
+        else
+            return 1;
+    }
+    else
+        return -1;
+}
+
+function specificCommandCreator(command, defaults, choices, user) {
+
+    commandTracker.set(user.id, {
+        command: command,
+        defaults: defaults,
+        choices: choices
+    });
 }
 
 async function checkCommands(params, user) {
@@ -1482,45 +1548,6 @@ async function topGames(message, params) {
     }
 }
 
-//-1 invalid input, 0 don't delete (passed to command matcher), need it next time, 1 handled, delete
-async function handleCommandTracker(specificCommand, message, user) {
-
-    let params = message.content;
-    if (!isNaN(params) && params.length > 0) {
-
-        params = Math.floor(params);
-        if (params >= specificCommand.choices.length || params < 0)
-            return -1;
-
-        for (let i = 0; i < specificCommand.defaults.length; i++) {
-
-            if (specificCommand.defaults[i] == -1) {
-                specificCommand.defaults[i] = specificCommand.choices[Math.floor(params)].item
-
-                if (await tutorialHandler(message, specificCommand.command, specificCommand.choices[Math.floor(params)].item, user)) {
-                    return 1;
-                }
-            }
-        };
-        await specificCommand.command.apply(null, specificCommand.defaults);
-        if (specificCommand.command == commandMatcher)
-            return 0;
-        else
-            return 1;
-    }
-    else
-        return -1;
-}
-
-function specificCommandCreator(command, defaults, choices, user) {
-
-    commandTracker.set(user.id, {
-        command: command,
-        defaults: defaults,
-        choices: choices
-    });
-}
-
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     if (message.channel.type == 'dm') {
@@ -1621,7 +1648,10 @@ async function createUser(member) {
         notifyUpdate: false,
         notifyTutorial: true,
         completedTutorials: [],
-        kicked: [false]
+        summoner: [0],
+        kicked: [false],
+        prefix: ["-1"],
+        defaultPrefix: "-1"
     }
 
     let userModel = new User(newUser);
@@ -1638,7 +1668,9 @@ async function addGuild(member, memberDB) {
     memberDB.lastTalked.push("0-0-0");
     memberDB.timeAFK.push(0);
     memberDB.dateJoined.push(getDate());
+    memberDB.summoner.push(0);
     memberDB.kicked.push(false);
+    memberDB.prefix.push("-1");
 
     memberDB.set("guilds", memberDB.guilds)
     memberDB.set("messages", memberDB.messages)
@@ -1647,8 +1679,9 @@ async function addGuild(member, memberDB) {
     memberDB.set("lastTalked", memberDB.lastTalked)
     memberDB.set("timeAFK", memberDB.timeAFK)
     memberDB.set("dateJoined", memberDB.dateJoined)
-    memberDB.set("dateJoined", memberDB.dateJoined)
+    memberDB.set("summoner", memberDB.summoner)
     memberDB.set("kicked", memberDB.kicked)
+    memberDB.set("prefix", memberDB.prefix)
     memberDB.save();
 }
 
@@ -1656,7 +1689,7 @@ async function createGuild(guild) {
 
     let newGuild = {
         id: guild.id,
-        prefix: "sa!",
+        prefix: "-1",
         name: guild.name
     }
 
@@ -1889,11 +1922,11 @@ async function updateAll() {
 
     //     for(let i = 0; i < user.guilds.length; i++){
 
-    //         tempArr.push("sa!");
+    //         tempArr.push("-1");
     //     }
 
 
-    //     await User.findOneAndUpdate({id: user.id}, {$set: {prefix: tempArr}}, function(err, doc, res){});
+    //     await User.findOneAndUpdate({id: user.id}, {$set: {prefix: tempArr}, defaultPrefix: "-1"}, function(err, doc, res){});
 
     // }//for user loop
 

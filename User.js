@@ -80,7 +80,7 @@ const UserSchema = new mongoose.Schema({
     },
     defaultPrefix: {
         type: String,
-        default: "sa!"
+        default: "-1"
     }
 });
 
