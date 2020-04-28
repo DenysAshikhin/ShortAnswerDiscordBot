@@ -1438,37 +1438,41 @@ function directMessage(message, memberID, game) {
 async function gameStats(message, params, user) {
 
     if (message.channel.type != 'dm') {
-        let game = params[0].trim();
-        if (!isNaN(game)) {
-            if (game < 0 || game >= user.games.length) {
-                message.channel.send(game + " is not assigned to any games, please try again or type " + prefix + "search to view the list of all games.");
-                return -1;
-            }
-            game = user.games[game];
-        }
-        else if (!games.includes(game)) {
-            message.channel.send(game + " is not a valid game, please try again or type " + prefix + "search to view the list of all games.");
+        let game = Array.isArray(params) ? params[0].trim(): params;
+        let check = checkGame(games, params, user);
+
+        if (check == -1) {
+
+            message.channel.send(game + " is not assigned to any games, please try again.");
             return -1;
         }
+        else if (check.result[0].score != 0) {
 
-        let users = await getUsers();
-        let signedUp = new Array();
-
-        for (let i = 0; i < users.length; i++) {
-
-            if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
-                if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
-                    signedUp.push(users[i]);
-                }
+            message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+            specificCommandCreator(gameStats, [message, -1, user], check.result, user);
+            return -1;
         }
+        else {
 
-        if (signedUp.length > 0)
-            message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
-        else
-            message.channel.send(`There are ${signedUp.length} users signed up for ${game}.`);
-        return signedUp.length;
+            let users = await getUsers();
+            let signedUp = new Array();
+
+            for (let i = 0; i < users.length; i++) {
+
+                if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
+                    if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
+                        signedUp.push(users[i]);
+                    }
+            }
+
+            if (signedUp.length > 0)
+                message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+            else
+                message.channel.send(`There are ${signedUp.length} users signed up for ${game}.`);
+            return signedUp.length;
+        }
     }
-    else{
+    else {
         message.channel.send(`*${Commands.commands[31]}* is only valid from inside a server text channel!`);
         return -1;
     }
@@ -2096,16 +2100,9 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-//sign up doesnt get routed to the tutorial from command matcher
+
 //Custom, per-user/per-guild and guild-default prefix
 //suggestion for gamesstats!
-
-
-/**
- * sa!mgames
- * 2
- * breaks
- */
 
 
 //Be alerted if a user is found in a voice channel? Stalker lmao
