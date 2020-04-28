@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const User = require('./User.js');
 const Bot = require('./Bot.js');
+const Guild = require('./Guild.js')
 const mongoose = require('mongoose');
 const Fuse = require('fuse.js');
 const ytdl = require("ytdl-core");
@@ -8,7 +9,6 @@ const ytdl = require("ytdl-core");
 const gameJSON = require('./gameslist.json');
 const Commands = require('./commands.json');
 const studyJSON = require('./medstudy.json');
-
 const DATABASE = require('./backups/26-04-2020.json');
 
 const fs = require('fs');
@@ -2082,10 +2082,9 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-
+//sign up doesnt get routed to the tutorial from command matcher
 //Custom, per-user/per-guild and guild-default prefix
 //suggestion for gamesstats!
-
 
 
 //Be alerted if a user is found in a voice channel? Stalker lmao
@@ -2121,15 +2120,5 @@ setInterval(minuteCount, 60 * 1000);
 //if authorised, you can control stuff from the website.
 
 //youtube live streams are broken
-
-// if (command.startsWith("emptyDB") && (message.author.id == creatorID)) {
-
-//     User.deleteMany({}, function (err, users) {
-
-//         console.log(err);
-//         console.log(JSON.stringify(users) + " deleted from DB");
-//     })
-//     return;
-// }
 
 process.on('unhandledRejection', (reason, p) => { console.log(reason) });
