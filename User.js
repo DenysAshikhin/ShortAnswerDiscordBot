@@ -73,6 +73,14 @@ const UserSchema = new mongoose.Schema({
     kicked: {
         type: [Boolean],
         default:[]
+    },
+    prefix: {
+        type: [String],
+        default: []
+    },
+    defaultPrefix: {
+        type: String,
+        default: "sa!"
     }
 });
 

@@ -32,7 +32,9 @@
         "QUITTUTORIAL",
         "PURGEGAMES",
         "GAMESTATS",
-        "TOPGAMES"
+        "TOPGAMES",
+        "SETGUILDPREFIX",
+        "SETDEFAULTPREFIX"
     ],
     "information": []
 }

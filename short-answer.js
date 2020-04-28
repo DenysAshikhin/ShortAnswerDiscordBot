@@ -14,6 +14,7 @@ const DATABASE = require('./backups/26-04-2020.json');
 const fs = require('fs');
 const creatorID = '99615909085220864';
 const botID = '689315272531902606';
+const guildID = '97354142502092800';
 const games = new Array();
 const studyArray = new Array();
 const GameTutorial = {
@@ -111,6 +112,111 @@ const findGuild = async function (params) {
     } catch (err) { console.log(err) }
 }
 
+connectDB.once('open', async function () {
+
+    await Client.login(token);
+
+    updateAll()
+    populateCommandMap();
+
+    for (let element of gameJSON)
+        games.push(element.name);
+    games.sort();
+
+    for (let element of studyJSON)
+        studyArray.push(element);
+
+    Client.on("ready", () => {
+
+        console.log("Ready!");
+
+        Client.user.setActivity("sa!help for information");
+    });
+
+    Client.on("message", async (message) => {
+        if (message.author.bot) return;
+
+        let user = await findUser({ id: message.author.id });
+
+        if (message.channel.type != 'dm') {
+
+            if (!user || !user.guilds.includes(message.guild.id)) {//Checking that the user exists in DB and they have a valid guild
+                await checkExistance(message.member);
+                user = await findUser({ id: message.member.id });
+            }
+            updateMessage(message, user);
+            console.log(`${user.prefix[user.guilds.indexOf(message.guild.id)]}    WOAH`);
+        }
+        else if (!user) {//Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
+            message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in and then sending the command again?")
+            return;
+        }
+        console.log(`${user.defaultPrefix}    :THINKING:`);
+        
+        if (message.content.substr(0, prefix.length) == prefix) {
+
+            let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
+            let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
+
+            if (!params[0])
+                params[0] = "";
+
+            commandMatcher(message, command, params, user);
+            return;
+        } else {//Command tracker stuff
+            if (commandTracker.get(message.author.id)) {
+
+                if (message.content == -1) return commandTracker.delete(message.author.id);
+
+                let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user);
+                if (result == -1) {
+                    message.channel.send("You have entered an invalid response, please try again or specify a different command. Or **-1** to quit.");
+                }
+                else if (result == 1) {
+                    commandTracker.delete(message.author.id);
+                }
+            }
+        }
+    });
+
+    Client.on('guildMemberAdd', member => {
+
+        if (member.id == botID) {
+            console.log("bot joined server!");
+        }
+        else if (member.guild.systemChannelID)
+            member.guild.channels.cache.get(member.guild.systemChannelID).send("Welcome to the server " + member.displayName + "!");
+        checkExistance(member);
+    });
+
+    Client.on('guildMemberRemove', async member => {
+
+        if (member.id != botID) {
+            let user = await findUser({ id: member.id });
+            let index = user.guilds.indexOf(member.guild.id);
+            user.kicked[index] = true;
+            User.findOneAndUpdate({ id: member.id }, { $set: { kicked: user.kicked } }, function (err, doc, res) { });
+        }
+    });
+
+    Client.on('presenceUpdate', (oldMember, newMember) => {
+
+        //console.log("hopefuly this traffic keeps it awake?");
+    });//
+
+    Client.on("guildCreate", async guild => {
+
+        let searchedGuild = await findGuild({ id: guild.id });
+        if (!searchedGuild) createGuild(guild);
+    })
+
+    Client.on("guildDelete", async guild => {
+
+        console.log(`Bot has been kicked from ${guild.name}`);
+    })
+});
+
+
 function populateCommandMap() {
 
     commandMap.set(Commands.commands[0], populate)
@@ -146,214 +252,36 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[30], purgeGamesList)
     commandMap.set(Commands.commands[31], gameStats)
     commandMap.set(Commands.commands[32], topGames)
+    commandMap.set(Commands.commands[33], setGuildPrefix)
+    commandMap.set(Commands.commands[34], setDefaultPrefix)
 }
 
-connectDB.once('open', async function () {
 
-    await Client.login(token);
+function setGuildPrefix(message, params, user) {
 
-    updateAll()
-    populateCommandMap();
+    if (params == message.content) {
+        message.channel.send("You have to provde an actual prefix!");
+        return -1;
+    }
 
-    for (let element of gameJSON)
-        games.push(element.name);
-    games.sort();
+    let index = user.guilds.indexOf(message.guild.id);
 
-    for (let element of studyJSON)
-        studyArray.push(element);
+    user.prefix[index] = params;
+    console.log(`New prefixxx: ${user.prefix}`)
 
-    Client.on("ready", () => {
+    message.channel.send(`Your new prefix for this server is: "${params}"`);
 
-        console.log("Ready!");
+    User.findOneAndUpdate({ id: user.id }, { $set: { prefix: user.prefix } }, function (err, doc, res) { });
+    return 1;
+}
 
-        Client.user.setActivity("sa!help for information");
-    });
+function setDefaultPrefix(message, params, user) {
 
-    Client.on("message", async (message) => {
-        if (message.author.bot) return;
-
-        let user = await findUser({ id: message.author.id });
-
-        if (message.channel.type != 'dm') {
-
-            if (!user) {//Checking that the user exists in DB
-                await checkExistance(message.member);
-                user = await findUser({ id: message.member.id });
-            }
-            else if (!user.guilds.includes(message.guild.id) && message.channel.type != 'dm') {//Checking that this guild is there for them
-                await checkExistance(message.member);
-                user = await findUser({ id: message.member.id });
-            }
-        }
-        else if (!user) {
-            message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in and then sending the command again?")
-            return;
-        }
-
-        if (message.channel.type != 'dm')
-            updateMessage(message, user);
-
-        if (message.content.substr(0, prefix.length) == prefix) {
-
-            let command = message.content.split(' ')[0];
-            command = command.substr(prefix.length).toUpperCase();
-
-            let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
-
-            if (!params[0])
-                params[0] = "";
-
-            if (!Commands.commands.includes(command.toUpperCase())) {
-
-                message.channel.send("**" + command + "** is not a recognized command, please try again");
-                await commandMatcher(message, command, params, user);
-                return;
-            }
-
-            if (await tutorialHandler(message, commandMap.get(command), params, user))
-                return;
-
-            //Commands that work in both servers and DM's
-            if (command == Commands.commands[0]) {
-                populate(message, params);
-            }//populate
-            else if (command == Commands.commands[1]) //search
-                search(message, params);
-            else if (command == Commands.commands[2]) //signup
-                updateGames(message, params, user);
-            else if (command == Commands.commands[3])//mygames
-                personalGames(message, params, user);
-            else if (command == Commands.commands[4]) //removeGame
-                removeGame(message, params, user);
-            else if (command == Commands.commands[5]) //excludePing
-                excludePing(message, params, user);
-            else if (command == Commands.commands[6]) //excludeDM
-                excludeDM(message, params, user);
-            else if (command == Commands.commands[7]) //help
-                generalHelp(message, params, user);
-            else if (command == Commands.commands[8]) //helpGames
-                gameHelp(message);
-            else if (command == Commands.commands[9]) //helpStats
-                helpStats(message);
-            else if (command == Commands.commands[10]) //helpMiscellaneous
-                helpMiscellaneous(message);
-            else if (command == Commands.commands[11]) //study//helpMusic
-                helpMusic(message);
-            else if (command == Commands.commands[12]) //study
-                study(message, params);
-            else if (command == Commands.commands[13]) //ping
-                pingUsers(message, params, user);
-            else if (command == Commands.commands[16]) //myStats
-                personalStats(message, params, user);
-            else if (command == Commands.commands[26])//suggest
-                suggest(message, params, user)
-            else if (command == Commands.commands[27])//notifyUpdate status
-                setNotifyUpdate(message, params, user)
-            else if (command == Commands.commands[28])//notifyTutorials
-                setNotifyTutorials(message, params, user);
-            else if (command == Commands.commands[29])//quiteTutorial
-                quitTutorial(message, params, user);
-            else if (command == Commands.commands[30])//purgegameslist
-                purgeGamesList(message, params, user);
-            else if (command == Commands.commands[31])//gameStats
-                gameStats(message, params, user);
-
-
-            else if (message.channel.type != 'dm') {//Server exclusive commands
-                //
-                if (command == Commands.commands[14]) { //initialiseUsers
-                    initialiseUsers(message);
-                    return;
-                }
-                else if (command == Commands.commands[15] && message.member.hasPermission("MANAGE_MESSAGES", { checkAdmin: false, checkOwner: false }))
-                    Delete(message, params);//delete
-
-                else if (command == Commands.commands[17] && message.member.hasPermission("ADMINISTRATOR")) //allStats
-                    guildStats(message);
-                else if (command == Commands.commands[18]) //userStats
-                    specificStats(message, params);
-                else if (command == Commands.commands[19]) //topStats
-                    topStats(message);
-                else if (command == Commands.commands[20]) {//play
-                    play(message);
-                }
-                else if (command == Commands.commands[21]) {//stop
-                    stop(message);
-                }
-                else if (command == Commands.commands[22]) {//pause
-                    pause(message)
-                }
-                else if (command == Commands.commands[23]) {//resume
-                    resume(message)
-                }
-                else if (command == Commands.commands[24]) {//skip
-                    skip(message)
-                }
-                else if (command == Commands.commands[25]) //gameTutorial
-                    message.channel.send(`${prefix}gameTutorial is a DM exclusive command, try sending it to me privately :wink:`);
-                else if (command == Commands.commands[32]) {
-                    topGames(message, params);
-                }
-            }//End of server text channel else/if chain
-            else {
-
-                if (command == Commands.commands[25]) //gameTutorial
-                    gameTutorial(message, params, command);
-                else {
-                    message.channel.send("The command: " + prefix + command + " is exclusive to server text channels. Please try the command in a server that I am present in!");
-                }//End of DM else/if chain
-            }
-        } else {
-            if (commandTracker.get(message.author.id)) {
-                let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user);
-                if (result == -1) {
-                    message.channel.send("You have entered an invalid response, please try again or specify a different command.");
-                }
-                else if (result == 1) {
-                    console.log("DELETED!");
-                    commandTracker.delete(message.author.id);
-                }
-            }
-        }//End of checking for correct prefix
-        //console.log("PRESAVE: " + user)
-        //user.save({ validateBeforeSave: false });
-    });//End of Client.on('message')
-
-    Client.on('guildMemberAdd', member => {
-
-        if (member.id == botID) {
-            console.log("bot joined server!");
-        }
-        else if (member.guild.systemChannelID)
-            member.guild.channels.cache.get(member.guild.systemChannelID).send("Welcome to the server " + member.displayName + "!");
-        checkExistance(member);
-    });
-
-    Client.on('guildMemberRemove', async member => {
-
-        if (member.id == botID) {
-            console.log("bot left server!");
-        }
-        else {
-            let user = await findUser({ id: member.id });
-            let index = user.guilds.indexOf(member.guild.id);
-            user.kicked[index] = true;
-            User.findOneAndUpdate({ id: member.id }, { $set: { kicked: user.kicked } }, function (err, doc, res) { });
-        }
-    });
-
-    Client.on('presenceUpdate', (oldMember, newMember) => {
-
-        //console.log("hopefuly this traffic keeps it awake?");
-    });//
-
-    Client.on("guildCreate", async guild => {
-        
-        let searchedGuild = await findGuild({id: guild.id});
-        if(!searchedGuild) createGuild(guild);
-    })
-});
-
+    if (params == message.content) {
+        message.channel.send("You have to provde an actual prefix!");
+        return -1;
+    }
+}
 
 async function commandMatcher(message, command, params, user) {
 
@@ -364,7 +292,7 @@ async function commandMatcher(message, command, params, user) {
         return -1;
     }
     else if (check.result[0].score != 0) {
-        message.channel.send(`${command} is not a valid command, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+        message.channel.send(`${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:` + "```" + check.prettyList + "```");
         specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
         return -1;
     }
@@ -418,37 +346,13 @@ async function checkCommands(params, user) {
     else return -1
 }
 
-async function play(message) {
-    const serverQueue = queue.get(message.guild.id);
-    play(message, serverQueue);
-}
-
-async function pause(message) {
-    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.pause(); }
-}
-
-async function skip() {
-
-    if (queue.get(message.guild.id)) {
-        queue.get(message.guild.id).songs.shift();
-        playSong(message.guild, queue.get(message.guild.id).songs[0]);
-    }
-}
-
-async function stop(message) {
-
-    if (queue.get(message.guild.id)) {
-        queue.get(message.guild.id).voiceChannel.leave();
-        queue.delete(message.guild.id);
-    }
-}
-
-async function resume(message) {
-
-    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.resume(); }
-}
-
 async function Delete(message, params) {
+
+    if (message.channel.type == 'dm') return -1;
+
+    if (!message.channel.permissionsFor(message.member).has("MANAGE_MESSAGES"))
+        return message.channel.send("You do not have the required permissions to delete messages!")
+
 
     let amount = 0;
     if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
@@ -480,6 +384,10 @@ async function populate(message, params) {
 
 function suggest(message, params, user) {
 
+    if (params == message.content) {
+        return message.channel.send("You have to provide an actual suggestion!");
+    }
+    Client.guilds.cache.get(guildID).members.cache.get(creatorID).user.send(`${user.displayName} is suggesting: ${params}`);
 }
 
 function quitTutorial(message, params, user) {
@@ -697,6 +605,7 @@ function findFurthestDate(date1, date2) {
 
 async function topStats(message) {
     //create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
+    if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
     let allUsers = await getUsers();
     let guild = message.guild;
     let silentType;
@@ -789,7 +698,7 @@ async function topStats(message) {
 }
 
 async function specificStats(message) {
-
+    if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
     if (message.mentions.members.size < 1)
         message.channel.send("You have to @someone properly!");
     else if (message.mentions.members.first().id == botID)
@@ -1123,6 +1032,11 @@ function gameHelp(message, params, user) {
 }
 
 async function guildStats(message, params, user) {
+
+    if (message.channel.type == 'dm') return -1;
+
+    if (!message.channel.permissionsFor(message.member).has("ADMINISTRATOR"))
+        return message.channel.send("You do not have the administrator permission to view all member stats!")
 
     let memberArray = message.guild.members.cache.array();
 
@@ -1499,7 +1413,7 @@ async function gameStats(message, params, user) {
 }
 
 async function topGames(message, params) {
-
+    if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
     if (message.channel.type != 'dm') {
         let users = await getUsers();
         let gameMap = new Map();
@@ -1613,6 +1527,10 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game
             + "\nUnfortunately I cannot play games, why not try the same command inside a server?");
         return 0;
+    }
+    else if (message.content == game) {
+        message.channel.send("You have to provide an actual game to ping!");
+        return -1;
     }
 
     let check = checkGame(games, game, user);
@@ -1777,7 +1695,7 @@ async function checkExistance(member) {
 }
 
 async function initialiseUsers(message) {
-
+    if (message.channel.type == 'dm') return -1;
     let newUsers = 0;
     let existingUsers = 0;
 
@@ -1807,7 +1725,36 @@ async function reactAnswers(message) {
     await message.react("🇫");
 }
 
-async function play(message, serverQueue) {
+async function pause(message) {
+    if (message.channel.type != 'dm') return
+    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.pause(); }
+}
+
+async function skip(message) {
+
+    if (message.channel.type != 'dm') return;
+    if (queue.get(message.guild.id)) {
+        queue.get(message.guild.id).songs.shift();
+        playSong(message.guild, queue.get(message.guild.id).songs[0]);
+    }
+}
+
+async function stop(message) {
+    if (message.channel.type != 'dm') return
+    if (queue.get(message.guild.id)) {
+        queue.get(message.guild.id).voiceChannel.leave();
+        queue.delete(message.guild.id);
+    }
+}
+
+async function resume(message) {
+    if (message.channel.type != 'dm') return
+    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.resume(); }
+}
+
+async function play(message) {
+
+    const serverQueue = queue.get(message.guild.id);
     const args = message.content.split(" ");
 
     const voiceChannel = message.member.voice.channel;
@@ -1826,8 +1773,9 @@ async function play(message, serverQueue) {
                     title: info.title,
                     url: info.video_url,
                 };
-
+                console.log(serverQueue)
                 if (!serverQueue) {
+                    console.log(`server que is empty`)
                     const queueConstruct = {
                         textChannel: message.channel,
                         voiceChannel: voiceChannel,
@@ -1857,7 +1805,6 @@ async function play(message, serverQueue) {
             }
         }
     );
-
 }
 
 async function playSong(guild, song) {
@@ -1904,8 +1851,6 @@ async function graphs() {
 
 async function updateAll() {
 
-
-
     // let users = await getUsers();
     // let nameArray = new Array();
 
@@ -1944,13 +1889,11 @@ async function updateAll() {
 
     //     for(let i = 0; i < user.guilds.length; i++){
 
-    //         tempArr.push(false);
+    //         tempArr.push("sa!");
     //     }
 
 
-    //     await User.findOneAndUpdate({id: user.id}, {$set: {kicked: tempArr}}, function(err, doc, res){});
-
-
+    //     await User.findOneAndUpdate({id: user.id}, {$set: {prefix: tempArr}}, function(err, doc, res){});
 
     // }//for user loop
 
