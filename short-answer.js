@@ -65,6 +65,7 @@ const options = {
     ]
 };
 
+const maintenance = false;
 
 //FAT NOTE: (true >= false) is TRUE
 
@@ -139,7 +140,6 @@ connectDB.once('open', async function () {
 
         let user = await findUser({ id: message.author.id });
 
-
         if (message.channel.type != 'dm') {
 
             let guild = await findGuild({ id: message.guild.id });
@@ -165,9 +165,9 @@ connectDB.once('open', async function () {
             else prefix = defaultPrefix;
         }
 
-        console.log(`FINAL PREFIX: ${prefix}`);
         if (message.content.substr(0, prefix.length) == prefix) {
 
+            if (maintenance) message.channel.send("Just a heads up that I'm being developed in real time and certain actions may be bugged!");
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
@@ -278,7 +278,12 @@ function setServerPrefix(message, params, user) {
 
 function setDefaultServerPrefix(message, params, user) {
 
-    if(message.channel.type == 'dm') return message.channel.send("You can only set the default server prefix from inside a server text channel");
+    if (message.channel.type == 'dm') return message.channel.send("You can only set the default server prefix from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("You do not have the required permissions to set the default prefix for the server")
+
+
     if (params == message.content) {
         message.channel.send("You have to provde an actual prefix!");
         return -1;
@@ -294,7 +299,6 @@ function setDefaultServerPrefix(message, params, user) {
     Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { prefix: params } }, function (err, doc, res) { });
     return 1;
 }
-
 
 function setDefaultPrefix(message, params, user) {
 
@@ -348,24 +352,25 @@ async function commandMatcher(message, command, params, user) {
 async function handleCommandTracker(specificCommand, message, user, skipSearch) {
 
     let params = message.content;
+    let tutorialResult;
     if (!skipSearch) {
         if (!isNaN(params) && params.length > 0) {
             params = Math.floor(params);
             if (params >= specificCommand.choices.length || params < 0)
                 return -1;
 
-            for (let i = 0; i < specificCommand.defaults.length; i++) {
+            specificCommand.defaults[1] = specificCommand.choices[Math.floor(params)].item
 
-                if (specificCommand.defaults[i] == -1)
-                    specificCommand.defaults[i] = specificCommand.choices[Math.floor(params)].item
-            }
-            if (await tutorialHandler(message, specificCommand.command, specificCommand.choices[Math.floor(params)].item, user))
-                return 1;
+            tutorialResult = await tutorialHandler(specificCommand.defaults[0], specificCommand.command, specificCommand.defaults[1], user);
+            if (tutorialResult != -22)
+                return tutorialResult;
         }
     }
     else {
-        if (await tutorialHandler(message, specificCommand.command, params, user))
-            return 1;
+
+        tutorialResult = await tutorialHandler(specificCommand.defaults[0], specificCommand.command, specificCommand.defaults[1], user);
+        if (tutorialResult != -22)
+            return tutorialResult;
     }
 
     let finishy = await specificCommand.command.apply(null, specificCommand.defaults);
@@ -373,7 +378,6 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
     if (finishy == -11 || finishy == 0)
         return 0;
     else {
-        console.log("BOTTOM ELSE?")
         return 1;
     }
 }
@@ -504,23 +508,23 @@ function purgeGamesList(message, params, user) {
     message.channel.send("You games list has been emptied!");
     return 1;
 }
-
+//-22 meaning no matching tutorial was found
 async function tutorialHandler(message, command, params, user) {
 
-    if (user.activeTutorial != -1 && message.channel.type == 'dm') {//Intercepting tutorial commands in DM's
-        switch (user.activeTutorial) {
-            case 0:
+    console.log(`Tutorial handler param: ${params}`)
 
-                if (command == GameTutorial.specificCommand[user.tutorialStep]) {
-                    gameTutorial(message, params, command);
-                    return true;
-                }
-            case 1:
+    switch (user.activeTutorial) {
+        case 0:
+            if (command == GameTutorial.specificCommand[user.tutorialStep] || command == gameTutorial) {
 
-                break;
-        }
+                return await gameTutorial(message, params, command);
+            }
+        case 1:
+
+            break;
     }
-    return false;
+
+    return -22;
 }
 
 // `Greetings!\nYou are getting this message because I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
@@ -529,7 +533,6 @@ async function tutorialHandler(message, command, params, user) {
 
 async function gameTutorial(message, params, command) {
 
-    //UPDATE ME AND SUGGEST NEEDS TO BE IMPLEMENTED
     let steps = [
         `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`
         + "```Example(s):\n1) " + prefix + Commands.commands[1] + " Counter Strike\n2) " + prefix + Commands.commands[1] + " Counter Strike, Minecrt```",
@@ -580,12 +583,16 @@ async function gameTutorial(message, params, command) {
                     previousTutorialStep: 0
                 }
             }, function (err, doc, res) { });
+        return 1;
     }//
     else {
         if (user.activeTutorial == 0 || user.activeTutorial == -1) {
 
-            if (command == Commands.commands[25])
+            if (command == commandMap.get(Commands.commands[25])) {
+
                 message.channel.send(steps[user.tutorialStep]);
+                return 1;
+            }
             else if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
 
                 if (user.tutorialStep != steps.length - 1) {
@@ -598,6 +605,7 @@ async function gameTutorial(message, params, command) {
                                 previousTutorialStep: user.previousTutorialStep + 1,
                             }
                         }, function (err, doc, res) { });
+                    return 1;
                 }
                 else {//Tutorial over!!!!!
                     //Need to add the recommend and something else commands
@@ -616,21 +624,27 @@ async function gameTutorial(message, params, command) {
 
                             }
                         }, function (err, doc, res) { });
+                    return 1;
                 }
             }
             else {//Test if their response is the correct one.
 
                 if (command == GameTutorial.specificCommand[user.tutorialStep]) {
-
-                    if ((await GameTutorial.specificCommand[user.tutorialStep].call(null, message, params, user)) >= GameTutorial.expectedOutput[user.tutorialStep]) {
+                    console.log("cOmmands maaaatched")
+                    let result = await GameTutorial.specificCommand[user.tutorialStep].call(null, message, params, user);
+                    if (result >= GameTutorial.expectedOutput[user.tutorialStep]) {
                         User.findOneAndUpdate({ id: user.id }, { $set: { tutorialStep: user.tutorialStep + 1 } }, function (err, doc, res) { });
                         setTimeout(gameTutorial, 1000, message, params, command);
                     }
+                    return result;
                 }
+                else
+                    return false;
             }
         }
         else {
             message.channel.send(`You are already doing ${tutorial[user.activeTutorial]}, to quit it type **${prefix}quitTutorial**`);
+            return 1;
         }
     }
 }
@@ -1201,8 +1215,6 @@ function updateMessage(message, user) {
     let index = user.guilds.indexOf(message.guild.id);
     user.messages[index] = user.messages[index] + 1;
     user.lastMessage[index] = getDate();
-
-    console.log(`${user.displayName} is now at ${user.messages[index]} messages`);
 
     User.findOneAndUpdate({ id: user.id },
         {
@@ -1777,13 +1789,13 @@ async function reactAnswers(message) {
 }
 
 async function pause(message) {
-    if (message.channel.type != 'dm') return
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.pause(); }
 }
 
 async function skip(message) {
 
-    if (message.channel.type != 'dm') return;
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) {
         queue.get(message.guild.id).songs.shift();
         playSong(message.guild, queue.get(message.guild.id).songs[0]);
@@ -1791,7 +1803,7 @@ async function skip(message) {
 }
 
 async function stop(message) {
-    if (message.channel.type != 'dm') return
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) {
         queue.get(message.guild.id).voiceChannel.leave();
         queue.delete(message.guild.id);
@@ -1799,12 +1811,13 @@ async function stop(message) {
 }
 
 async function resume(message) {
-    if (message.channel.type != 'dm') return
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.resume(); }
 }
 
 async function play(message) {
 
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     const serverQueue = queue.get(message.guild.id);
     const args = message.content.split(" ");
 
@@ -2076,10 +2089,7 @@ async function updateGames(message, game, user) {
             //console.log(doc);
         });
 
-    if (length > 0)
-        return length;
-    else
-        return 0;
+    return length;
 }
 
 function checkGame(gameArray, params, user) {
@@ -2151,6 +2161,7 @@ setInterval(minuteCount, 60 * 1000);
 //roll command - for however many sided die
 //ping-pong command
 //add a timer
+//shake user # of times
 
 //Then make a tutorial for the above commands...
 
