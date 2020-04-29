@@ -65,6 +65,55 @@ const options = {
     ]
 };
 
+var embed = {
+    "title": "title ~~(did you know you can have markdown here too?)~~",
+    "description": "this supports [named links](https://discordapp.com) on top of the previously shown subset of markdown. ```\nyes, even code blocks```",
+    "url": "https://discordapp.com",
+    "color": 14837504,
+    "timestamp": "2020-04-29T20:37:33.555Z",
+    "footer": {
+        "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png",
+        "text": "footer text"
+    },
+    "thumbnail": {
+        "url": "https://cdn.discordapp.com/embed/avatars/0.png"
+    },
+    "image": {
+        "url": "https://cdn.discordapp.com/embed/avatars/0.png"
+    },
+    "author": {
+        "name": "author name",
+        "url": "https://discordapp.com",
+        "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
+    },
+    "fields": [
+        {
+            "name": "🤔",
+            "value": "some of these properties have certain limits..."
+        },
+        {
+            "name": "😱",
+            "value": "try exceeding some of them!"
+        },
+        {
+            "name": "🙄",
+            "value": "an informative error should show up, and this view will remain as-is until all issues are fixed"
+        },
+        {
+            "name": "<:thonkang:219069250692841473>",
+            "value": "these last two",
+            "inline": true
+        },
+        {
+            "name": "<:thonkang:219069250692841473>",
+            "value": "are inline fields",
+            "inline": true
+        }
+    ]
+};
+
+
+
 const maintenance = false;
 
 //FAT NOTE: (true >= false) is TRUE
@@ -137,6 +186,31 @@ connectDB.once('open', async function () {
 
     Client.on("message", async (message) => {
         if (message.author.bot) return;
+
+
+        ///////
+        // {
+        //     const embed = new Discord.MessageEmbed()
+        //         // Set the title of the field
+        //         .setTitle('A slick little embed')
+        //         // Set the color of the embed
+        //         .setColor(0xff0000)
+        //         // Set the main content of the embed
+        //         .setDescription('Hello, this is a slick embed!');
+        //     // Send the embed to the same channel as the message
+        //     message.channel.send(embed);
+        // }
+        ////
+
+
+        let time = new Date();
+        embed.timestamp = time;
+        embed.image = "";
+        embed.footer.text = "";
+        
+
+        message.channel.send({ embed })
+
 
         let user = await findUser({ id: message.author.id });
 
