@@ -152,6 +152,7 @@ connectDB.once('open', async function () {
             let index = user.guilds.indexOf(message.guild.id);
             if (user.prefix[index] != "-1") prefix = user.prefix[index];
             else if (guild.prefix != "-1") prefix = guild.prefix;
+            else if (user.defaultPrefix != "-1") prefix = user.defaultPrefix;
             else prefix = defaultPrefix;
 
         }
@@ -176,7 +177,7 @@ connectDB.once('open', async function () {
             commandMatcher(message, command, params, user);
             return;
         } else {//Command tracker stuff
-            triggerCommandHandler(message, user);
+            triggerCommandHandler(message, user, false);
         }
     });
 
@@ -252,13 +253,12 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[30], purgeGamesList)
     commandMap.set(Commands.commands[31], gameStats)
     commandMap.set(Commands.commands[32], topGames)
-    commandMap.set(Commands.commands[33], setGuildPrefix)
+    commandMap.set(Commands.commands[33], setServerPrefix)
     commandMap.set(Commands.commands[34], setDefaultPrefix)
+    commandMap.set(Commands.commands[35], setDefaultServerPrefix)
 }
 
-function setGuildPrefix(message, params, user) {
-
-    console.log("WE TRIED: " + params)
+function setServerPrefix(message, params, user) {
 
     if (params == message.content) {
         message.channel.send("You have to provde an actual prefix!");
@@ -276,6 +276,26 @@ function setGuildPrefix(message, params, user) {
     return 1;
 }
 
+function setDefaultServerPrefix(message, params, user) {
+
+    if(message.channel.type == 'dm') return message.channel.send("You can only set the default server prefix from inside a server text channel");
+    if (params == message.content) {
+        message.channel.send("You have to provde an actual prefix!");
+        return -1;
+    }
+    if (Array.isArray(params))
+        params = params[0];
+
+    let index = user.guilds.indexOf(message.guild.id);
+    user.prefix[index] = params;
+
+    message.channel.send(`This server's default prefix is: "${params}"`);
+
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { prefix: params } }, function (err, doc, res) { });
+    return 1;
+}
+
+
 function setDefaultPrefix(message, params, user) {
 
     if (params == message.content) {
@@ -285,24 +305,23 @@ function setDefaultPrefix(message, params, user) {
     if (Array.isArray(params))
         params = params[0];
 
-    message.channel.send(`Your new prefix for this server is: "${params}"`);
+    message.channel.send(`Your new base (default) prefix is: "${params}"`);
 
     User.findOneAndUpdate({ id: user.id }, { $set: { defaultPrefix: params } }, function (err, doc, res) { });
     return 1;
 }
 
-async function triggerCommandHandler(message, user) {
+async function triggerCommandHandler(message, user, skipSearch) {
 
     if (commandTracker.get(message.author.id)) {
 
         if (message.content == -1) return commandTracker.delete(message.author.id);
 
-        let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user);
-
+        let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user, skipSearch);
         if (result == 1) {
-            console.log("CALLED DELETE")
             commandTracker.delete(message.author.id);
         }
+        return result;
     }
 }
 
@@ -317,47 +336,46 @@ async function commandMatcher(message, command, params, user) {
     else if (check.result[0].score != 0) {
         message.channel.send(`${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:` + "```" + check.prettyList + "```");
         specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
-        return -1;
+        return -11;
     }
     else {
         specificCommandCreator(commandMap.get(check.result[0].item), [message, params, user], null, user);
-        console.log("RECURSIVE Trigger")
-        return await triggerCommandHandler(message, user);
+        return await triggerCommandHandler(message, user, true);
     }
 }
 
 //-1 invalid input, 0 don't delete (passed to command matcher) - need it next time, 1 handled, delete
-async function handleCommandTracker(specificCommand, message, user) {
+async function handleCommandTracker(specificCommand, message, user, skipSearch) {
 
     let params = message.content;
-    console.log("HANDLING COMMANDS: " + specificCommand.command)
-    console.log(specificCommand.defaults)
-    console.log(!isNaN(params), params.length > 0)
-    console.log(params);
-    if (!isNaN(params) && params.length > 0) {
-        console.log("PASSED FIRST IF")
-        params = Math.floor(params);
-        if (params >= specificCommand.choices.length || params < 0)
-            return -1;
+    if (!skipSearch) {
+        if (!isNaN(params) && params.length > 0) {
+            params = Math.floor(params);
+            if (params >= specificCommand.choices.length || params < 0)
+                return -1;
 
-        for (let i = 0; i < specificCommand.defaults.length; i++) {
+            for (let i = 0; i < specificCommand.defaults.length; i++) {
 
-            if (specificCommand.defaults[i] == -1)
-                specificCommand.defaults[i] = specificCommand.choices[Math.floor(params)].item
+                if (specificCommand.defaults[i] == -1)
+                    specificCommand.defaults[i] = specificCommand.choices[Math.floor(params)].item
+            }
+            if (await tutorialHandler(message, specificCommand.command, specificCommand.choices[Math.floor(params)].item, user))
+                return 1;
         }
-        console.log(2)
-        if (await tutorialHandler(message, specificCommand.command, specificCommand.choices[Math.floor(params)].item, user))
-            return 1;
-        console.log(3)
-        await specificCommand.command.apply(null, specificCommand.defaults);
-        //console.log(4 + ":: " + specificCommand.defaults);
-        if (specificCommand.command == commandMatcher)
-            return 0;
-        else
+    }
+    else {
+        if (await tutorialHandler(message, specificCommand.command, params, user))
             return 1;
     }
-    else
-        return -1;
+
+    let finishy = await specificCommand.command.apply(null, specificCommand.defaults);
+
+    if (finishy == -11 || finishy == 0)
+        return 0;
+    else {
+        console.log("BOTTOM ELSE?")
+        return 1;
+    }
 }
 
 function specificCommandCreator(command, defaults, choices, user) {
@@ -1354,7 +1372,7 @@ function removeGame(message, game, user) {
 
                 message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
                 specificCommandCreator(removeGame, [message, -1, user], check.result, user);
-                return -1;
+                return -11;
             }
             else {
 
@@ -1450,7 +1468,7 @@ async function gameStats(message, params, user) {
 
             message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
             specificCommandCreator(gameStats, [message, -1, user], check.result, user);
-            return -1;
+            return -11;
         }
         else {
 
@@ -1570,7 +1588,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
         message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
         specificCommandCreator(pingUsers, [message, -1, user], check.result, user);
-        return -1;
+        return -11;
     }
     else {
 
@@ -1944,6 +1962,8 @@ async function minuteCount() {
 
 async function updateGames(message, game, user) {
 
+    console.log(`game: ${game}`);
+
     if (Array.isArray(game)) {
         let setty = new Set(game);
         game = Array.from(setty);
@@ -1971,7 +1991,7 @@ async function updateGames(message, game, user) {
 
             message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
             specificCommandCreator(updateGames, [message, -1, user], check.result, user);
-            return -1;
+            return -11;
         }
         else {
 
@@ -2110,43 +2130,50 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
+//set up automated help/explanation text
 
 
-//Custom, per-user/per-guild and guild-default prefix
+//DM quality of life (for now its just prefixes?) - prefix tutorial
+//for game stats, add a Y/N for seeing a list of all the people signed up for it
+
+
+//for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
+//if they dont, they can always start it by saying prefixADVANCEDGAMETUTORIAL - which is a seperate tutorial all together. If they want to do it to type that command
 
 
 //Be alerted if a user is found in a voice channel? Stalker lmao
-//DM quality of life 
-
-//for game stats, add a Y/N for seeing a list of all the people signed up for it
-//for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
-
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
 //Stats Tutorial
 
 //coin flipper
 //game decider
-
-//look into start typing in message documentation to make it feel more alive?
-
-//make remove game array - it is but broken
 //roll command - for however many sided die
 //ping-pong command
 //add a timer
 
-//Make a vote system for the next feature to focus on
+//Then make a tutorial for the above commands...
+
+
+//look into start typing in message documentation to make it feel more alive?
+
+//make remove game array - it is but broken - ez fix, mark all the spots with -1, then splice out all of them
+
+
+
+//Make the youtube player complete (at least youtube)
+//youtube live streams are broken 
+
 
 //Twitch notification/signup when a streamer goes live
 //https://dev.twitch.tv/docs/api/reference/#get-streams
 //add streamer stats
-//seal idan easter eggs
-//ping by number - if there is enough demand for it
 
 
+
+//Make a vote system for the next feature to focus on
 //MEE6 bot - beatiful ui, build in message formatin? embeds or something,
 //if authorised, you can control stuff from the website.
 
-//youtube live streams are broken
-
+//seal idan easter eggs
 process.on('unhandledRejection', (reason, p) => { console.log(reason) });

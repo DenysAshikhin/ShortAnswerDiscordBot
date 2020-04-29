@@ -33,8 +33,9 @@
         "PURGEGAMES",
         "GAMESTATS",
         "TOPGAMES",
-        "SETGUILDPREFIX",
-        "SETDEFAULTPREFIX"
+        "SETSERVERPREFIX",
+        "SETDEFAULTPREFIX",
+        "SETDEFAULTSERVERPREFIX"
     ],
     "information": []
 }
