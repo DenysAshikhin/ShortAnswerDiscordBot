@@ -283,7 +283,11 @@ connectDB.once('open', async function () {
 
             commandMatcher(message, command, params, user);
             return;
-        } else {//Command tracker stuff
+        }
+        else if (message.content.trim() ==  (defaultPrefix + "help")) {
+            message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
+        }
+        else {//Command tracker stuff
             triggerCommandHandler(message, user, false);
         }
     });
@@ -451,7 +455,7 @@ async function commandMatcher(message, command, params, user) {
         for (let i = 0; i < check.result.length; i++) {
 
             //fieldArray.push({ name: check.result[i].item, value: i, inline: false })
-            fieldArray.push({name: `${i} - ` + check.result[i].item, value: "** **", inline: false })
+            fieldArray.push({ name: `${i} - ` + check.result[i].item, value: "** **", inline: false })
         }
 
         const newEmbed = {
@@ -661,7 +665,7 @@ function createTutorialEmbed(tutorialStep) {
     let index = Commands.commands.indexOf(GameTutorial.expectedCommand[tutorialStep]);
     let fieldArray = new Array();
 
-    if(index != -1){
+    if (index != -1) {
         for (let i = 0; i < Commands.example[index].length; i++) {
 
             fieldArray.push({
@@ -669,8 +673,8 @@ function createTutorialEmbed(tutorialStep) {
                 value: prefix + Commands.example[index][i].substring(3)
             })
         }
-    }else{
-        
+    } else {
+
     }
 
     let newEmbed = {
