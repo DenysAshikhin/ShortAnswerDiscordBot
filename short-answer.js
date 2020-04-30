@@ -957,6 +957,7 @@ async function topStats(message) {
 
     let statsEmbed = {
         ...embed,
+        date: new Date(),
         title: embed.title + ` - Top Stats for ${message.guild.name}!`,
         thumbnail: { url: message.guild.iconURL() },
         fields: [
@@ -999,6 +1000,7 @@ async function getStats(member, user) {
 
         statsEmbed = {
             ...embed,
+            date: new Date(),
             title: embed.title,
             fields: [
                 { name: "Total number of messages sent: ", value: user.messages[index], inline: false },
@@ -1032,6 +1034,7 @@ async function personalStats(message, params, user) {
         message.channel.send({
             embed: {
                 ...embed,
+                date: new Date(),
                 title: embed.title,
                 description: ` ${message.author.username} Here Are Your General Stats!`,
                 thumbnail: { url: message.author.avatarURL() },
@@ -1050,6 +1053,7 @@ async function personalStats(message, params, user) {
 
                 statsEmbed = {
                     ...embed,
+                    date: new Date(),
                     title: embed.title,
                     description: `Here Are Your Stats For ${message.client.guilds.cache.get(user.guilds[i]).name} Server!`,
                     thumbnail: { url: message.client.guilds.cache.get(user.guilds[i]).iconURL() },
@@ -1082,39 +1086,43 @@ function search(message, searches) {
         return -1;
     }
 
-    let finalArray = new Array();
+    let foundOne = false;
+    let gameEmbed = {
+        ...embed
+    }
 
     for (let i = 0; i < searches.length; i++) {
 
         let query = searches[i];
         if (query.length > 0) {
 
-            message.channel.send(mention(message.author.id) + "! Here are the result for: " + query + "\n");
-            finalArray = new Array();
-            let finalList = "";
-            let fuse = new Fuse(games, options);
 
+            gameEmbed = {
+                ...embed,
+                date: new Date(),
+                description: `Here are the results for: ${query}`
+            }
+
+            let fuse = new Fuse(games, options);
             let result = fuse.search(query);
 
-            for (let i = 0; i < result.length; i++) {
 
-                if (finalList.length <= 500) {
+            let maxResults = 25 < result.length ? 25 : result.length;
 
-                    finalList += result[i].refIndex + ") " + result[i].item + "\n";
-                }
+            for (let i = 0; i < maxResults; i++) {
+
+                gameEmbed.fields.push({ value: "** **", name: result[i].refIndex + ") " + result[i].item });
+                foundOne = true;
             }
-
-            finalArray.push(finalList);
-
-            for (let i = 0; i < finalArray.length; i++) {
-
-                message.channel.send("```" + finalArray[i] + "```");
-            }
+            if (result.length < 1)
+                message.channel.send(`No matching games were found for: ${query}`)
+            else
+                message.channel.send({ embed: gameEmbed })
         }
 
     }//for loop
 
-    if (finalArray.length > 0)
+    if (foundOne)
         return 1;
     return 0;
 }
