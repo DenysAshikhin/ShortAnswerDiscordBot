@@ -81,7 +81,7 @@
     "example": [
         ["1) populate 3"],
         ["1) search Counter", "2) search Counter, minerfct, tr@ve"],
-        ["1) signUp 3", "2) signUp Minecraft, Counter-Strike: Global Offensive", "3) Minecraft, 321, 33, Counter-Strike: Global Offensive"],
+        ["1) signUp 3", "2) signUp Minecraft, Counter-Strike: Global Offensive", "3) signUp Minecraft, 321, 33, Counter-Strike: Global Offensive"],
         ["1) myGames"],
         ["1) removeGame 2", "2) removeGame Valorant"],
         ["1) excludePing true", "2) excludePing false"],

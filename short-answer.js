@@ -47,7 +47,8 @@ const GameTutorial = {
         0,
         0,
         0
-    ]
+    ],
+    steps: []
 };
 const options = {
     isCaseSensitive: true,
@@ -214,7 +215,7 @@ function newStuff() {
                         break;
                 }
                 console.log(`${Commands.subsection[i]}`)
-                
+
             }
         }
     }
@@ -449,13 +450,9 @@ async function commandMatcher(message, command, params, user) {
 
         for (let i = 0; i < check.result.length; i++) {
 
-
-            fieldArray.push({ name: check.result[i].item, value: i, inline: true })
-            console.log("WTF: ")
-            console.log(fieldArray[i])
+            //fieldArray.push({ name: check.result[i].item, value: i, inline: false })
+            fieldArray.push({name: `${i} - ` + check.result[i].item, value: "** **", inline: false })
         }
-
-        console.log(check.result)
 
         const newEmbed = {
             ...embed,
@@ -658,61 +655,23 @@ async function tutorialHandler(message, command, params, user) {
 // + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
 // + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.`
 
-async function gameTutorial(message, params, command) {
+function createTutorialEmbed(tutorialStep) {
 
-    let steps = [
-        `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`,
-
-        `Now that you see a bunch of results, hopefully the game you wanted is towards the top, along with the associated number.`
-        + ` Please add any valid (and new) game to your games list to continue`,
-
-        `You can also sign up for as many games at once as you would like by seperating each entry by a comma - you can mix both words and numbers.`
-        + ` Try signing up for **at least two new games** at once.`,
-
-        `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}` + Commands.commands[3] + `**`
-        + "```Example(s):\n1) " + prefix + Commands.commands[3] + "```",
-
-        `Now try removing any of the games in your games list by typing **${prefix}` + Commands.commands[4] + `** *game#*.`
-        + ` Just a heads up that the GAME# is the number from your games list.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[4] + " 1```",
-
-        `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
-        + `** *nameOfGame*/*#ofGame* and anyone who has this game and the proper excludes`
-        + ` will be notified. NOTE: "nameOfGame" has to be spelled perfectly but it does not have to be in your games list.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[13] + " Counter-Strike: Global Offensive\n2) " + prefix + Commands.commands[13] + " 0" + "```"
-        + ` Go ahead, try out the command!`,
-
-        `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
-        + ` an @mention in the text channel it was sent from. To disable @mentions simply type`
-        + ` **${prefix}` + Commands.commands[5] + `** *true/false*. *False* = you will be pinged, *True* = you will not be pinged.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[5] + " false```Your turn!",
-
-        `The second notification is a direct message. To disable direct messages from pings simply type`
-        + ` **${prefix}` + Commands.commands[6] + `** *true/false*. *False* = you will be DMed, *True* = you will not be DMed.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[6] + " false```"
-        + `To complete the walkthrough go ahead and try it out.`,
-
-        `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
-        + ` **${prefix}` + Commands.commands[26] + `** *any suggestion here* and I'll forward the message to the creator. For a more general help,`
-        + ` type **${prefix}` + Commands.commands[7] + `**`
-        + `\nAs a final note, this bot is being rapidly developed with new features constantly being added,`
-        + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + Commands.commands[27] + `** *true/false*.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[26] + " You should add game XYZ to the games list!\n2) " + prefix + Commands.commands[7]
-        + "\n3) " + prefix + Commands.commands[27] + " true```"
-    ]
-
-
-    let user = await findUser({ id: message.author.id });
-
-    let prompt = steps[user.tutorialStep].substring(0, steps[user.tutorialStep].indexOf("```"));
-    let examples = steps[user.tutorialStep].substring(steps[user.tutorialStep].indexOf("```"), steps[user.tutorialStep]).split("\n");
+    let prompt = GameTutorial.steps[tutorialStep];
+    let index = Commands.commands.indexOf(GameTutorial.expectedCommand[tutorialStep]);
     let fieldArray = new Array();
 
-    for (let i = 1; i < examples.length; i++) {
-        console.log(examples[i])
+    if(index != -1){
+        for (let i = 0; i < Commands.example[index].length; i++) {
+
+            fieldArray.push({
+                name: `Example ${i + 1})`,
+                value: prefix + Commands.example[index][i].substring(3)
+            })
+        }
+    }else{
+        
     }
-
-
 
     let newEmbed = {
         ...embed,
@@ -722,11 +681,48 @@ async function gameTutorial(message, params, command) {
         fields: fieldArray
     }
 
+    return newEmbed;
+}
+
+async function gameTutorial(message, params, command) {
+
+    let user = await findUser({ id: message.author.id });
+
+    GameTutorial.steps = [
+        `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`,
+
+        `Now that you see a bunch of results, hopefully the game you wanted is towards the top, along with the associated number.`
+        + ` Please add any valid (and new) game to your games list to continue`,
+
+        `You can also sign up for as many games at once as you would like by seperating each entry by a comma - you can mix both words and numbers.`
+        + ` Try signing up for **at least two new games** at once.`,
+
+        `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}` + Commands.commands[3] + `**`,
+
+        `Now try removing any of the games in your games list by typing **${prefix}` + Commands.commands[4] + `** *game#*.`
+        + ` Just a heads up that the GAME# is the number from your games list.`,
+
+        `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
+        + `** *nameOfGame*/*#ofGame* and anyone who has this game and the proper excludes will be notified.`,
+
+        `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
+        + ` an @mention in the text channel it was sent from. To disable @mentions simply type`
+        + ` **${prefix}` + Commands.commands[5] + `** *true/false*. *False* = you will be pinged, *True* = you will not be pinged.`,
+
+        `The second notification is a direct message. To disable direct messages from pings simply type`
+        + ` **${prefix}` + Commands.commands[6] + `** *true/false*. *False* = you will be DMed, *True* = you will not be DMed.`,
+
+        `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
+        + ` **${prefix}` + Commands.commands[26] + `** *any suggestion here* and I'll forward the message to the creator. For a more general help,`
+        + ` type **${prefix}` + Commands.commands[7] + `**`
+        + `\nAs a final note, this bot is being rapidly developed with new features constantly being added,`
+        + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + Commands.commands[27] + `** *true/false*.`
+    ]
 
     if (user.tutorialStep == -1) {
 
-        newEmbed.description = steps[0];
-        message.channel.send({ embed: newEmbed })
+        //newEmbed.description = GameTutorial.steps[0];
+        message.channel.send({ embed: createTutorialEmbed(0) })
 
         await User.findOneAndUpdate({ id: user.id },
             {
@@ -743,14 +739,14 @@ async function gameTutorial(message, params, command) {
 
             if (command == commandMap.get(Commands.commands[25])) {
 
-                message.channel.send({ embed: newEmbed })
+                message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
                 return 1;
             }
             else if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
 
-                if (user.tutorialStep != steps.length - 1) {
+                if (user.tutorialStep != GameTutorial.steps.length - 1) {
 
-                    message.channel.send({ embed: newEmbed })
+                    message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
 
                     await User.findOneAndUpdate({ id: user.id },
                         {
@@ -762,7 +758,7 @@ async function gameTutorial(message, params, command) {
                 }
                 else {//Tutorial over!!!!!
                     //Need to add the recommend and something else commands
-                    message.channel.send({ embed: newEmbed })
+                    message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
                     if (!user.completedTutorials.includes(0)) {
                         user.completedTutorials.push(0);
                     }
