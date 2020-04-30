@@ -1628,9 +1628,7 @@ function removeGame(message, game, user) {
 
         if (game.length == 1) {
 
-            console.log(`ori: ${game}`)
             let check = checkGame(user.games, game, user);
-            console.log(`pori: ${game}`)
             if (check == -1) {
 
                 message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
@@ -1647,10 +1645,10 @@ function removeGame(message, game, user) {
                     fields: []
                 }
 
-                for(suggestion of prettyArray)
-                    removeEmbed.fields.push({name: suggestion, value: "** **"});
+                for (suggestion of prettyArray)
+                    removeEmbed.fields.push({ name: suggestion, value: "** **" });
 
-                message.channel.send({embed: removeEmbed});
+                message.channel.send({ embed: removeEmbed });
                 specificCommandCreator(removeGame, [message, -1, user], check.result, user);
                 return -11;
             }
@@ -1695,25 +1693,25 @@ function removeGame(message, game, user) {
 
         if (invalidGames.length > 0) {
             invalidGames.sort();
-            let invalidGameField = {name: "Invalid Game(s)", value: ""};
+            let invalidGameField = { name: "Invalid Game(s)", value: "" };
             for (let i = 0; i < invalidGames.length; i++) {
                 //if (invalidGames[i].length > 1)
-               invalidGameField.value += (i+1) + ") " + invalidGames[i];
+                invalidGameField.value += (i + 1) + ") " + invalidGames[i];
             }
             finalEmbed.fields.push(invalidGameField);
         }
 
         if (removedGames.length > 0) {
             removedGames.sort();
-            let removedGameField = {name: "Removed Game(s)", value: ""};
+            let removedGameField = { name: "Removed Game(s)", value: "" };
             for (let i = 0; i < removedGames.length; i++) {
                 //if (tempArr[i].length > 1)
-                removedGameField.value += (i+1) + ") " + removedGames[i];
+                removedGameField.value += (i + 1) + ") " + removedGames[i];
             }
             finalEmbed.fields.push(removedGameField);
         }
 
-        message.channel.send({embed: finalEmbed});
+        message.channel.send({ embed: finalEmbed });
 
 
         gameArr.sort();
@@ -1745,6 +1743,13 @@ async function gameStats(message, params, user) {
 
     if (message.channel.type != 'dm') {
         let game = Array.isArray(params) ? params[0].trim() : params;
+        
+        let finalEmbed = {
+            ...Embed,
+            date: new Date(),
+            fields: []
+        }
+        
         let check = checkGame(games, params, user);
 
         if (check == -1) {
@@ -1760,6 +1765,8 @@ async function gameStats(message, params, user) {
         }
         else {
 
+            game = check.result[0].item;
+            console.log(params)
             let users = await getUsers();
             let signedUp = new Array();
 
