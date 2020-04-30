@@ -861,20 +861,12 @@ async function gameSuggestion(member) {//
 
 function findFurthestDate(date1, date2) {
 
-    let lastDate = "";
+    let numberDate1 = Number(date1.substring(6)) * 365 + Number(date1.substring(3, 5)) * 30 + Number(date1.substring(0, 2));
+    let numberDate2 = Number(date2.substring(6)) * 365 + Number(date2.substring(3, 5)) * 30 + Number(date2.substring(0, 2));
 
-    if ((date1.substr(6).localeCompare(date2.substr(6))) <= 0) {
-
-        if ((date1.substr(1, 4).localeCompare(date2.substr(1, 4))) > 0) {
-            return date2;
-        }
-        else {
-            return date1;
-        }
-    }
-    else {
-        return date2
-    }
+    if (numberDate1 < numberDate2)
+        return date1;
+    return date2;
 }
 
 async function topStats(message) {
@@ -950,8 +942,11 @@ async function topStats(message) {
                 let userDate = findFurthestDate(user.lastMessage[userIndex], user.lastTalked[userIndex]);
                 let MIADate = findFurthestDate(MIA.lastMessage[MIAIndex], MIA.lastTalked[MIAIndex]);
 
-
-                if (userDate == findFurthestDate(userDate, MIADate)) {
+                if (userDate == findFurthestDate(userDate, MIADate) && userDate != "0-0-0") {
+                    MIA = user;
+                    MIAIndex = userIndex;
+                }
+                else if (MIADate == "0-0-0" && userDate != "0-0-0") {
                     MIA = user;
                     MIAIndex = userIndex;
                 }
@@ -959,16 +954,21 @@ async function topStats(message) {
         }
     }
 
-    let index = user.guilds.indexOf(guild.id);
 
-    message.channel.send("Here are the tops stats for this server: \n```" + "The silent type: " + silentType.displayName + " : "
-        + silentType.messages[silentTypeIndex] + " messages sent.\n"
-        + "The loud mouth: " + loudMouth.displayName + " : " + loudMouth.timeTalked[loudMouthIndex] + " minutes spent talking.\n"
-        + "The ghost: " + ghost.displayName + " : " + ghost.timeAFK[ghostIndex] + " minutes spent AFK.\n"
-        + "The MIA: " + MIA.displayName + " : " + findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date.\n"
-        + `The summoner: ${summoner.displayName} : ${summoner.summoner[summonerIndex]} summon rituals completed.`
-        + "```");
+    let statsEmbed = {
+        ...embed,
+        title: embed.title + ` - Top Stats for ${message.guild.name}!`,
+        thumbnail: { url: message.guild.iconURL() },
+        fields: [
+            { name: `The Silent Type: ${silentType.displayName}`, value: `${silentType.messages[silentTypeIndex]} messages sent.` },
+            { name: `The Loud Mouth: ${loudMouth.displayName}`, value: `${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.` },
+            { name: `The Ghost: ${ghost.displayName}`, value: `${ghost.timeAFK[ghostIndex]} minutes spent AFK.` },
+            { name: `The MIA: ${MIA.displayName}`, value: findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date." },
+            { name: `The Summoner: ${summoner.displayName}`, value: `${summoner.summoner[summonerIndex]} summoning rituals completed.` }
+        ]
+    }
 
+    message.channel.send({ embed: statsEmbed });
 }
 
 async function specificStats(message) {
