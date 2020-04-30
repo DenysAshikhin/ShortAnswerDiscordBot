@@ -66,7 +66,7 @@ const options = {
     ]
 };
 
-var embed = {
+var Embed = {
     "title": "Short Answer Bot",
     //"description": "this supports [named links](https://discordapp.com) on top of the previously shown subset of markdown. ```\nyes, even code blocks```",
     "description": "",
@@ -464,7 +464,7 @@ async function commandMatcher(message, command, params, user) {
         }
 
         const newEmbed = {
-            ...embed,
+            ...Embed,
             date: new Date,
             description: `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
             fields: fieldArray
@@ -681,8 +681,8 @@ function createTutorialEmbed(tutorialStep) {
     }
 
     let newEmbed = {
-        ...embed,
-        title: embed.title + " Game Tutorial",
+        ...Embed,
+        title: Embed.title + " Game Tutorial",
         date: new Date,
         description: prompt,
         fields: fieldArray
@@ -823,7 +823,7 @@ async function personalGames(message, params, user) {
 
         if (i % 24 == 0 && i > 0) {
             let gameEmbed = {
-                ...embed,
+                ...Embed,
                 date: new Date(),
                 description: display + " here are the games you are signed up for:",
                 fields: fieldArray
@@ -837,7 +837,7 @@ async function personalGames(message, params, user) {
     if (games.length > 0) {
         if (left) {
             let gameEmbed = {
-                ...embed,
+                ...Embed,
                 date: new Date(),
                 description: display + " here are the games you are signed up for:",
                 fields: fieldArray
@@ -956,9 +956,9 @@ async function topStats(message) {
 
 
     let statsEmbed = {
-        ...embed,
+        ...Embed,
         date: new Date(),
-        title: embed.title + ` - Top Stats for ${message.guild.name}!`,
+        title: Embed.title + ` - Top Stats for ${message.guild.name}!`,
         thumbnail: { url: message.guild.iconURL() },
         fields: [
             { name: `The Silent Type: ${silentType.displayName}`, value: `${silentType.messages[silentTypeIndex]} messages sent.` },
@@ -999,9 +999,9 @@ async function getStats(member, user) {
         let stats = "";
 
         statsEmbed = {
-            ...embed,
+            ...Embed,
             date: new Date(),
-            title: embed.title,
+            title: Embed.title,
             fields: [
                 { name: "Total number of messages sent: ", value: user.messages[index], inline: false },
                 { name: "Last message sent: ", value: user.lastMessage[index], inline: false },
@@ -1024,7 +1024,7 @@ async function personalStats(message, params, user) {
 
     if (message.channel.type != 'dm') {
         let statResult = await getStats(message.member, user);
-        statResult.title = embed.title + ` ${message.member.displayName}'s stats:`
+        statResult.title = Embed.title + ` ${message.member.displayName}'s stats:`
         if (!user.kicked[user.guilds.indexOf(message.guild.id)]) {
             message.channel.send({ embed: statResult });
         }
@@ -1033,9 +1033,9 @@ async function personalStats(message, params, user) {
 
         message.channel.send({
             embed: {
-                ...embed,
+                ...Embed,
                 date: new Date(),
-                title: embed.title,
+                title: Embed.title,
                 description: ` ${message.author.username} Here Are Your General Stats!`,
                 thumbnail: { url: message.author.avatarURL() },
                 fields: [
@@ -1052,9 +1052,9 @@ async function personalStats(message, params, user) {
                 let stats = "";
 
                 statsEmbed = {
-                    ...embed,
+                    ...Embed,
                     date: new Date(),
-                    title: embed.title,
+                    title: Embed.title,
                     description: `Here Are Your Stats For ${message.client.guilds.cache.get(user.guilds[i]).name} Server!`,
                     thumbnail: { url: message.client.guilds.cache.get(user.guilds[i]).iconURL() },
                     fields: [
@@ -1088,7 +1088,8 @@ function search(message, searches) {
 
     let foundOne = false;
     let gameEmbed = {
-        ...embed
+        ...Embed,
+        fields: []
     }
 
     for (let i = 0; i < searches.length; i++) {
@@ -1098,9 +1099,10 @@ function search(message, searches) {
 
 
             gameEmbed = {
-                ...embed,
+                ...Embed,
                 date: new Date(),
-                description: `Here are the results for: ${query}`
+                description: `Here are the results for: ${query}`,
+                fields: []
             }
 
             let fuse = new Fuse(games, options);
@@ -1260,82 +1262,123 @@ function study(message, query) {
 
 function helpMiscellaneous(message) {
 
-    let help =
-        "Command 1: " + prefix + "delete [number]\n``` Deletes the last [number] of messages if you have the 'manage messages' permission.```\n"
-        + "Command 2: " + prefix + "populate [number]\n```Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.```\n"
-    message.channel.send(help);
+    let miscEmbed = {
+        ...Embed,
+        date: new Date(),
+        title: Embed.title + ` Miscellaneous Commands`,
+        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
+        fields: []
+    }
+
+    for (let i = 0; i < Commands.commands.length; i++)
+        if (Commands.subsection[i].includes(3))
+            miscEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
+
+    message.channel.send({ embed: miscEmbed });
 }
 
 function helpStats(message, params, user) {
 
-    let statsMessage =
-        "Command 1: " + prefix + "myStats\n```Shows you all of your stats.```\n"
-        + "Command 2: " + prefix + "userStats @User\n```Shows you the stats of the mentioned/pinged user.```\n"
-        + "Command 3: " + prefix + "topStats\n```Shows the top stats for the called server.```\n"
-        + "Command 4: " + prefix + "allStats\n```Shows the stats for all users on the called server. NOTE: Can only be called by the members with the ADMINSTRATOR permission.```"
+    let newEmbed = {
+        ...Embed,
+        date: new Date(),
+        title: Embed.title + ` Stats Commands`,
+        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
+        fields: []
+    }
 
-    message.channel.send(statsMessage);
+    for (let i = 0; i < Commands.commands.length; i++)
+        if (Commands.subsection[i].includes(2))
+            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
+
+    message.channel.send({ embed: newEmbed });
 }
 
 function helpMusic(message, params, user) {
 
-    let musicMessage =
-        "Command 1: " + prefix + "play [youtube url]\n```Plays the song in the url, if one is already playing, it will be added to the queue.```\n"
-        + "Command 2: " + prefix + "stop\n```Empties the queue and makes the bot leave the voice channel.```\n"
-        + "Command 3: " + prefix + "pause\n```Pauses the current song.```\n"
-        + "Command 4: " + prefix + "resume\n```Resumes playing the current song.```\n"
-        + "Command 5: " + prefix + "skip\n```Skips the current song.```"
-    message.channel.send(musicMessage);
-}
-
-function generalHelp(message, params, user) {
-
-    if (!user.completedTutorials.includes(0)) {
-
-        let tutorialPrompt = `I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
-            + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
-            + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.\n\n`
-        message.channel.send(tutorialPrompt);
+    let newEmbed = {
+        ...Embed,
+        date: new Date(),
+        title: Embed.title + ` Music Commands`,
+        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
+        fields: []
     }
 
-    let helpMessage = "The following commands are broken down into 4 general sections: Games, Stats, Miscellaneous, and Music. Enter: \n"
-        + "```" + "1) " + prefix + "helpGames  || For information on how signUp for games, how to ping games, search for a game and more.\n\n"
-        + "2) " + prefix + "helpStats  || For information on how to view server, personal, top stats and more.\n\n"
-        + "3) " + prefix + "helpMiscellaneous  || For information on random commands.\n\n"
-        + "4) " + prefix + "helpMusic || For information on playing music.\n\n"
-        + "IMPORTANT: Make sure to run " + prefix + "initiliaseUsers || This only needs to be done once per server, otherwise the other commands will not function properly."
-        + " This command adds all users from the called server to the bot's tracker.\n\n"
-        + "```";
+    for (let i = 0; i < Commands.commands.length; i++)
+        if (Commands.subsection[i].includes(4))
+            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
 
-    message.channel.send(helpMessage);
+    message.channel.send({ embed: newEmbed });
 }
 
 function gameHelp(message, params, user) {
 
-    let gameMessage =
-        "Command 1: " + prefix + "signUp [game1], [game2], [game3]...\n```Signs you up to be summoned when someone pings any of the [games] in your games list. "
-        + "You can either write the full game title or the associated number.\n\n"
-        + "Example usage: " + prefix + "signUp Counter-Strike: Global Offensive, 212, Minecraft...\n\nWill add three games to your gamesList.```\n"
+    let newEmbed = {
+        ...Embed,
+        date: new Date(),
+        title: Embed.title + ` Game Commands`,
+        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
+        fields: []
+    }
 
-        + "Command 2: " + prefix + "myGames\n```Show you your games list, if anyone pings a game on your games list, you will get notified.```\n"
+    for (let i = 0; i < Commands.commands.length; i++)
+        if (Commands.subsection[i].includes(1))
+            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
 
-        + "Command 3: " + prefix + "removeGame [game] \n```Removes [game] from your game list.\n\n"
-        + "Example usage: " + prefix + "removeGame 2 |OR| " + prefix + "removeGame Counter-Strike: Global Offensive\n\nWill remove the game specified by the number "
-        + "(which as to correspond to a game in your gamesList) or search your gamesList for the title of the game you wish to remove.```\n"
+    message.channel.send({ embed: newEmbed });
+}
 
-        + "Command 4: " + prefix + "excludePing [true/false] \n```Sets whether you wish to be @mentioned when someone pings a game to play. If set to 'true', you will be excluded from all pings. "
-        + "and vice versa.\nExample usage: " + prefix + "exclude true |OR| " + prefix + "exclude false```\n"
+function generalHelp(message, params, user) {
 
-        + "Command 5: " + prefix + "excludeDM [true/false] \n```Sets whether you wish to receive a direct message when someone pings a game to play. If set to 'true', you will be excluded from all DM's. "
-        + "and vice versa.\nExample usage: " + prefix + "exclude true |OR| " + prefix + "exclude false```\n"
+    let newEmbed = {
+        ...Embed,
+        date: new Date(),
+        title: Embed.title + ` General Help`,
+        description: `You can find out more information about any command or group by typing ${prefix}help *Command*` + "```1) " + prefix + "help Games" + "\n2) " + prefix + "help Ping" + "```",
+        fields: [
+            {name: "Games", value: "", inline: true},
+            {name: "Stats", value: "", inline: true},
+            {name: "Miscellaneous", value: "", inline: true},
+            {name: "Music", value: "", inline: true},
+            {name: "Admins", value: "", inline: true},
+            {name: "Quality of Life", value: "", inline: true},
+            {name: "Help", value: "", inline: true},
+            {name: "General", value: "", inline: true},
+            {name: "Tutorials", value: "", inline: true},
+            {name: "Bugs/Suggestions", value: "", inline: true},
+        ]
+    }
 
-        + "Command 6: " + prefix + "search [game1], [game2].... \n```Searches all the complete game list for the speicified games you wish to find. You can search for as many games as desired, seperated by a comma.\n"
-        + "Example usage: " + prefix + "search Counter, Overwatch, League```\n"
+    for(tag of tags){
 
-        + "Command 7: " + prefix + "ping [game] \n```Pings and DM's every member from the called server who have [game] in their games list and do not have the exclude status enabled.\n"
-        + "Example usage: " + prefix + "ping Counter-Global: Offensive```";
+        for(let i = 0; i < Commands.commands.length; i++){
 
-    message.channel.send(gameMessage);
+            if(Commands.subsection[i].includes(tag)){
+
+                newEmbed.fields[tag-1].value += Commands.commands[i] + "\n"
+            }
+        }
+    }
+
+
+    message.channel.send({ embed: newEmbed });
+}
+
+function gameHelp(message, params, user) {
+
+    let newEmbed = {
+        ...Embed,
+        date: new Date(),
+        title: Embed.title + ` Game Commands`,
+        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
+        fields: []
+    }
+
+    for (let i = 0; i < Commands.commands.length; i++)
+        if (Commands.subsection[i].includes(1))
+            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
+
+    message.channel.send({ embed: newEmbed });
 }
 
 async function guildStats(message, params, user) {

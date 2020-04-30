@@ -50,31 +50,43 @@
         "Signs you up to be summoned when someone pings any of the [games] in your games list. You can either write the full game title or the associated number.",
         "Shows your games list, you will get notifed if anyone pings a game on your games list.",
         "Removes [game] from your game list. [game] can be number or the complete title of the game.",
+       
         "Sets whether you wish to be @mentioned when someone pings a game to play. If set to 'true', you will be excluded from all pings.",
         "Sets whether you wish to receive a direct message when someone pings a game to play. If set to 'true', you will be excluded from all DM's.",
         "Shows the general help screen.",
         "Shows the list of commands involving game functionalities.",
         "Shows the list of commands involving stats functionalities.",
+       
         "Shows the list of commands involving miscellaneous functionalities.",
         "Shows the list of commands involving music functionalities.",
         "????? [Number of results], [Number of minimum matches], [Number of minimum unique matches]",
         "Pings and DM's every member from the called server who have [game] in their games list and do not have the exclude status enabled.",
         "Legacy command, checks every user in the server for existing the the database, no need to run it anymore.",
+       
         "Deletes [number] of the last messages. You and the bot must have the *Manage_Messages* permission in the channel you wish to run the command.",
         "Shows you all of your stats.",
         "Shows the stats for every user in the server. Can only be called by the server *Administrators*.",
         "Shows the stats of a specific user who has been mentioned (@user).",
-        "Plays a song from a specified URL or search result from youtube.",
+        "Shows the top stats of this server.",
+
+        "Plays a song from a specified URL or search result from youtube.",    
         "Empties the queue and makes the bot leave the voice channel.",
         "Pauses the current song.",
         "Resumes playing the current song.",
         "Skips the current song.",
-        "Configure whether you get notified of a new tutorial release, or an addition/modification to one you have already completed. Setting to true will notify you, false will not.",
+
+        "Starts the game tutorial for you, or reminds of your current step if it is already in progress.",
+        "Send a suggestion to the creator of the bot! All are welcome.",
+        "If true, you will get a DM whenever a new feature/update/major fix is released!",
+        "Configure whether you get notified of a new tutorial release, or an addition/modification to one you have already completed. Setting to true will notify you, false will not.",   
         "Quits any current tutorial.",
+        
         "Removes all the games from your games list.",
         "Shows the number of players (and optionally the list of players) signed up for a specific game.",
-        "Sets a custom prefix for this server that only applies to *you*. This prefix the highest priority.",
+        "Shows the top games for the server (by number of players signed up for them). Default length is 5, can be set manually.",
+        "Sets a custom prefix for this server that only applies to *you*. This prefix the highest priority.", 
         "Sets a custom prefix that will be used when DM'ing me, or if the there are no other prefixes set.",
+ 
         "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission."
     ],
         
@@ -84,31 +96,43 @@
         ["1) signUp 3", "2) signUp Minecraft, Counter-Strike: Global Offensive", "3) signUp Minecraft, 321, 33, Counter-Strike: Global Offensive"],
         ["1) myGames"],
         ["1) removeGame 2", "2) removeGame Valorant"],
+       
         ["1) excludePing true", "2) excludePing false"],
         ["1) excludeDM true", "2) excludeDM false"],
         ["1) help"],
         ["1) helpGames"],
         ["1) helpStats"],
+       
         ["1) helpMiscellaneous"],
         ["1) helpMusic"],
         ["1) ???? medicine", "2) ???? medicine, 2", "3) ???? medicine, 2,1", "4) ???? medicine, 2,1,1"],
         ["1) ping Valorant", "2) ping 0"],
         ["1) initialiseUsers"],
+       
         ["1) delete 4"],
         ["1) myStats"],
         ["1) allStats"],
         ["1) userStats @Short Answer Bot"],
+        ["1) topStats"],
+
         ["1) play https://www.youtube.com/watch?v=mMMRGJCFsQE&list=RDmMMRGJCFsQE&start_radio=1", "2) play PegboardNerds Hero"],
         ["1) stop"],
         ["1) pause"],
         ["1) resume"],
         ["1) skip"],
-        ["1) tutorials true", "2) tutorials false"],
+        
+        ["1) gameTutorial"],
+        ["1) suggest *Game xyz is missing from the list, add it!*", "2) suggest the bot should be able to do: !"],
+        ["1) updateMe true", "2) updateme false"],
+        ["1) tutorials true", "2) tutorials false"],     
         ["1) quitTutorial"],
+        
         ["1) purgeGames"],
         ["1) gameStats Valorant"],
-        ["1) setServerPrefix !"],
-        ["1) setDefaultPrefix !"],
+        ["1) topGames", "2) topGames 8"],
+        ["1) setServerPrefix !"],  
+        ["1) setDefaultPrefix !"],   
+        
         ["1) setDefaultServerPrefix !"]
     ],
     "subsection": [
