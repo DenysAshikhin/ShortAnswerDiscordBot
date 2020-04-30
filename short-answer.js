@@ -1759,7 +1759,19 @@ async function gameStats(message, params, user) {
         }
         else if (check.result[0].score != 0) {
 
-            message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+            let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+
+                removeEmbed = {
+                    ...Embed,
+                    date: new Date(),
+                    description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                    fields: []
+                }
+
+                for (suggestion of prettyArray)
+                    removeEmbed.fields.push({ name: suggestion, value: "** **" });
+
+                message.channel.send({ embed: removeEmbed });
             specificCommandCreator(gameStats, [message, -1, user], check.result, user);
             return -11;
         }
@@ -1796,6 +1808,13 @@ async function topGames(message, params) {
     if (message.channel.type != 'dm') {
         let users = await getUsers();
         let gameMap = new Map();
+        let finalEmbed = {
+            ...Embed,
+            date: new Date(),
+            description: "Here are the top stats for " + message.guild.name,
+            thumbnail: {url: message.guild.iconURL()},
+            fields: []
+        }
 
         for (let i = 0; i < users.length; i++) {
 
@@ -1835,22 +1854,23 @@ async function topGames(message, params) {
         else if (maxResults > gameMap.length && maxResults) {
 
             maxResults = gameMap.length;
-            message.channel.send(`There are only ${maxResults} games people signed up for on ${message.guild.name}`);
+            finalEmbed.description = `There are only ${maxResults} games people signed up for on ${message.guild.name}`;
         }
         else {
-            message.channel.send(`You did not specify the number of games to display, as such, I will display the top ${maxResults}`
-                + ` games people signed up for on the ${message.guild.name} server:`);
+            finalEmbed.description = `You did not specify the number of games to display, as such, I will display the top ${maxResults}`
+            + ` games people signed up for on the ${message.guild.name} server:`;
         }
 
         let finalList = ``;
 
         for (let i = 0; i < maxResults; i++) {
 
+            finalEmbed.fields.push({name: `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.`, value: "** **"})
             finalList += `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.\n`;
             //message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
         }
 
-        message.channel.send("```" + finalList + "```");
+        message.channel.send({embed: finalEmbed});
 
         return gameMap.length;
     }
