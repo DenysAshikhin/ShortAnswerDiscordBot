@@ -1402,7 +1402,6 @@ async function guildStats(message, params, user) {
             }
         }
     }
-
     message.channel.send("```DONE!```");
 }
 
@@ -1629,16 +1628,29 @@ function removeGame(message, game, user) {
 
         if (game.length == 1) {
 
+            console.log(`ori: ${game}`)
             let check = checkGame(user.games, game, user);
-
+            console.log(`pori: ${game}`)
             if (check == -1) {
 
-                message.channel.send(game + " is not assigned to any games, please try again.");
+                message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
                 return -1;
             }
             else if (check.result[0].score != 0) {
 
-                message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+                let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+
+                removeEmbed = {
+                    ...Embed,
+                    date: new Date(),
+                    description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                    fields: []
+                }
+
+                for(suggestion of prettyArray)
+                    removeEmbed.fields.push({name: suggestion, value: "** **"});
+
+                message.channel.send({embed: removeEmbed});
                 specificCommandCreator(removeGame, [message, -1, user], check.result, user);
                 return -11;
             }
@@ -1674,26 +1686,34 @@ function removeGame(message, game, user) {
 
         gameArr.sort();
 
+        let finalEmbed = {
+            ...Embed,
+            date: new Date(),
+            fields: []
+        }
+
 
         if (invalidGames.length > 0) {
             invalidGames.sort();
-            let congrats = "";
+            let invalidGameField = {name: "Invalid Game(s)", value: ""};
             for (let i = 0; i < invalidGames.length; i++) {
                 //if (invalidGames[i].length > 1)
-                congrats += i + ") " + invalidGames[i] + "\n";
+               invalidGameField.value += (i+1) + ") " + invalidGames[i];
             }
-            message.channel.send("The following are invalid Games/Numbers: ```" + congrats + "```");
+            finalEmbed.fields.push(invalidGameField);
         }
 
         if (removedGames.length > 0) {
             removedGames.sort();
-            let congrats = "";
+            let removedGameField = {name: "Removed Game(s)", value: ""};
             for (let i = 0; i < removedGames.length; i++) {
                 //if (tempArr[i].length > 1)
-                congrats += i + ") " + removedGames[i] + "\n";
+                removedGameField.value += (i+1) + ") " + removedGames[i];
             }
-            message.channel.send("The following games were successfuly removed from your game list: ```" + congrats + "```");
+            finalEmbed.fields.push(removedGameField);
         }
+
+        message.channel.send({embed: finalEmbed});
 
 
         gameArr.sort();
@@ -1729,7 +1749,7 @@ async function gameStats(message, params, user) {
 
         if (check == -1) {
 
-            message.channel.send(game + " is not assigned to any games, please try again.");
+            message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
             return -1;
         }
         else if (check.result[0].score != 0) {
@@ -1850,7 +1870,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     if (check == -1) {
 
-        message.channel.send(game + " is not assigned to any games, please try again.");
+        message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
     }
     else if (check.result[0].score != 0) {
 
@@ -2256,7 +2276,7 @@ async function updateGames(message, game, user) {
 
         if (check == -1) {
 
-            message.channel.send(game + " is not assigned to any games, please try again.");
+            message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
             return -1;
         }
         else if (check.result[0].score != 0) {
