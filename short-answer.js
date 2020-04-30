@@ -977,9 +977,14 @@ async function specificStats(message) {
         message.channel.send("You have to @someone properly!");
     else if (message.mentions.members.first().id == botID)
         message.channel.send("My stats are private!");
-    else
-        message.channel.send(message.guild.members.cache.get(message.mentions.members.first().id).user.username + ", ```" + message.member.displayName + "``` requested your stats: ```"
-            + (await getStats(message.mentions.members.first())) + "```");
+    else {
+
+        let specificEmbed = await getStats(message.mentions.members.first());
+        specificEmbed.description = message.mentions.members.first().displayName + ", *" + message.member.displayName + "* requested your stats:";
+        specificEmbed.thumbnail.url = message.mentions.members.first().user.avatarURL();
+
+        message.channel.send({ embed: specificEmbed });
+    }
 }
 
 async function getStats(member, user) {
@@ -992,53 +997,73 @@ async function getStats(member, user) {
     if (!user.kicked[index]) {
         let stats = "";
 
-        stats = "Total number of messages sent: " + user.messages[index] + "\n"
-            + "Last message sent: " + user.lastMessage[index] + "\n"
-            + "Total time spent talking (in minutes): " + user.timeTalked[index] + "\n"
-            + "Last time you talked was: " + user.lastTalked[index] + "\n"
-            + "The games you are signed up for: " + user.games + "\n"
-            + "Time spent AFK (in minutes): " + user.timeAFK[index] + "\n"
-            + "You joined this server on: " + user.dateJoined[index] + "\n"
-            + "Whether you are excluded from pings: " + user.excludePing + "\n"
-            + "Whether you are excluded from DMs: " + user.excludeDM + "\n";
-
-        return stats;
-    } {
-        return -1;
+        statsEmbed = {
+            ...embed,
+            title: embed.title,
+            fields: [
+                { name: "Total number of messages sent: ", value: user.messages[index], inline: false },
+                { name: "Last message sent: ", value: user.lastMessage[index], inline: false },
+                { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: false },
+                { name: "Last time you talked was: ", value: user.lastTalked[index], inline: false },
+                { name: "The games you are signed up for: ", value: user.games, inline: false },
+                { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: false },
+                { name: "You joined this server on: ", value: user.dateJoined[index], inline: false },
+                { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: false },
+                { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: false },
+                { name: "Number of succesful summons: ", value: user.summoner[index], inline: false },
+            ]
+        }
+        return statsEmbed;
     }
+    return -1;
 }
 
 async function personalStats(message, params, user) {
 
     if (message.channel.type != 'dm') {
         let statResult = await getStats(message.member, user);
+        statResult.title = embed.title + ` ${message.member.displayName}'s stats:`
         if (!user.kicked[user.guilds.indexOf(message.guild.id)]) {
-            message.channel.send(mention(message.member.id) + " here are your stats: ```"
-                + statResult + "```");
+            message.channel.send({ embed: statResult });
         }
     }
     else {
-        message.channel.send("Here are your general stats:");
 
-        let generalStats = "```"
-            + "The games you are signed up for: " + user.games + "\n"
-            + "Whether you are excluded from pings: " + user.excludePing + "\n"
-            + "Whether you are excluded from DMs: " + user.excludeDM + "```";
-
-        message.channel.send(generalStats);
+        message.channel.send({
+            embed: {
+                ...embed,
+                title: embed.title,
+                description: ` ${message.author.username} Here Are Your General Stats!`,
+                thumbnail: { url: message.author.avatarURL() },
+                fields: [
+                    { name: "The games you are signed up for: ", value: user.games },
+                    { name: "Whether you are excluded from pings: ", value: user.excludePing },
+                    { name: "Whether you are excluded from DMs: ", value: user.excludeDM }
+                ]
+            }
+        });
 
         for (let i = 0; i < user.guilds.length; i++) {
 
             if (!user.kicked[i]) {
                 let stats = "";
-                message.channel.send("Here are the stats for the server: " + message.client.guilds.cache.get(user.guilds[i]).name + "")
-                stats = "```Total number of messages sent: " + user.messages[i] + "\n"
-                    + "Last message sent: " + user.lastMessage[i] + "\n"
-                    + "Total time spent talking (in minutes): " + user.timeTalked[i] + "\n"
-                    + "Last time you talked was: " + user.lastTalked[i] + "\n"
-                    + "Time spent AFK (in minutes): " + user.timeAFK[i] + "\n"
-                    + "You joined this server on: " + user.dateJoined[i] + "```";
-                message.channel.send(stats);
+
+                statsEmbed = {
+                    ...embed,
+                    title: embed.title,
+                    description: `Here Are Your Stats For ${message.client.guilds.cache.get(user.guilds[i]).name} Server!`,
+                    thumbnail: { url: message.client.guilds.cache.get(user.guilds[i]).iconURL() },
+                    fields: [
+                        { name: "Total number of messages sent: ", value: user.messages[i], inline: false },
+                        { name: "Last message sent: ", value: user.lastMessage[i], inline: false },
+                        { name: "Total time spent talking (in minutes): ", value: user.timeTalked[i], inline: false },
+                        { name: "Last time you talked was: ", value: user.lastTalked[i], inline: false },
+                        { name: "Time spent AFK (in minutes): ", value: user.timeAFK[i], inline: false },
+                        { name: "You joined this server on: ", value: user.dateJoined[i], inline: false },
+                        { name: "Number of succesful summons: ", value: user.summoner[i], inline: false },
+                    ]
+                }
+                message.channel.send({ embed: statsEmbed });
             }
         }
     }
@@ -2125,15 +2150,18 @@ async function updateAll() {
     //     //         }
     //     //     });
 
-    //     let tempArr = [];
-
-    //     for(let i = 0; i < user.guilds.length; i++){
-
-    //         tempArr.push("-1");
-    //     }
 
 
-    //     await User.findOneAndUpdate({id: user.id}, {$set: {prefix: tempArr}, defaultPrefix: "-1"}, function(err, doc, res){});
+
+    //     // let tempArr = [];
+
+    //     // for(let i = 0; i < user.guilds.length; i++){
+
+    //     //     tempArr.push("-1");
+    //     // }
+
+
+    //     // await User.findOneAndUpdate({id: user.id}, {$set: {prefix: tempArr}, defaultPrefix: "-1"}, function(err, doc, res){});
 
     // }//for user loop
 
