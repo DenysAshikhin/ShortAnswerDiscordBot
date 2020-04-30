@@ -1336,26 +1336,26 @@ function generalHelp(message, params, user) {
         title: Embed.title + ` General Help`,
         description: `You can find out more information about any command or group by typing ${prefix}help *Command*` + "```1) " + prefix + "help Games" + "\n2) " + prefix + "help Ping" + "```",
         fields: [
-            {name: "Games", value: "", inline: true},
-            {name: "Stats", value: "", inline: true},
-            {name: "Miscellaneous", value: "", inline: true},
-            {name: "Music", value: "", inline: true},
-            {name: "Admins", value: "", inline: true},
-            {name: "Quality of Life", value: "", inline: true},
-            {name: "Help", value: "", inline: true},
-            {name: "General", value: "", inline: true},
-            {name: "Tutorials", value: "", inline: true},
-            {name: "Bugs/Suggestions", value: "", inline: true},
+            { name: "Games", value: "", inline: true },
+            { name: "Stats", value: "", inline: true },
+            { name: "Miscellaneous", value: "", inline: true },
+            { name: "Music", value: "", inline: true },
+            { name: "Admins", value: "", inline: true },
+            { name: "Quality of Life", value: "", inline: true },
+            { name: "Help", value: "", inline: true },
+            { name: "General", value: "", inline: true },
+            { name: "Tutorials", value: "", inline: true },
+            { name: "Bugs/Suggestions", value: "", inline: true },
         ]
     }
 
-    for(tag of tags){
+    for (tag of tags) {
 
-        for(let i = 0; i < Commands.commands.length; i++){
+        for (let i = 0; i < Commands.commands.length; i++) {
 
-            if(Commands.subsection[i].includes(tag)){
+            if (Commands.subsection[i].includes(tag)) {
 
-                newEmbed.fields[tag-1].value += Commands.commands[i] + "\n"
+                newEmbed.fields[tag - 1].value += Commands.commands[i] + "\n"
             }
         }
     }
@@ -1392,10 +1392,14 @@ async function guildStats(message, params, user) {
 
     for (let i = 0; i < memberArray.length; i++) {
 
-        let specificStats = await getStats(memberArray[i])
-        if (specificStats != -1) {
-            await message.channel.send("Here are the stats for " + memberArray[i].displayName + ": ```"
-                + specificStats + "```");
+        if (memberArray[i].id != botID) {
+            let specificStats = await getStats(memberArray[i]);
+            specificStats.description = memberArray[i].displayName + "'s stats.";
+            specificStats.thumbnail.url = memberArray[i].user.avatarURL();
+
+            if (specificStats != -1) {
+                message.channel.send({ embed: specificStats });
+            }
         }
     }
 
@@ -2396,7 +2400,7 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-//set up automated help/explanation text
+//set up automated help/explanation text -> now just automate !help+command :)
 
 //make ping take a 2nd paramter, for number of people needed.
 //People can do !join to join a running ping, if there is more than 1 - givem them a menu selection
