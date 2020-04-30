@@ -1743,13 +1743,13 @@ async function gameStats(message, params, user) {
 
     if (message.channel.type != 'dm') {
         let game = Array.isArray(params) ? params[0].trim() : params;
-        
+
         let finalEmbed = {
             ...Embed,
             date: new Date(),
             fields: []
         }
-        
+
         let check = checkGame(games, params, user);
 
         if (check == -1) {
@@ -1761,17 +1761,17 @@ async function gameStats(message, params, user) {
 
             let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
-                removeEmbed = {
-                    ...Embed,
-                    date: new Date(),
-                    description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-                    fields: []
-                }
+            removeEmbed = {
+                ...Embed,
+                date: new Date(),
+                description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                fields: []
+            }
 
-                for (suggestion of prettyArray)
-                    removeEmbed.fields.push({ name: suggestion, value: "** **" });
+            for (suggestion of prettyArray)
+                removeEmbed.fields.push({ name: suggestion, value: "** **" });
 
-                message.channel.send({ embed: removeEmbed });
+            message.channel.send({ embed: removeEmbed });
             specificCommandCreator(gameStats, [message, -1, user], check.result, user);
             return -11;
         }
@@ -1812,7 +1812,7 @@ async function topGames(message, params) {
             ...Embed,
             date: new Date(),
             description: "Here are the top stats for " + message.guild.name,
-            thumbnail: {url: message.guild.iconURL()},
+            thumbnail: { url: message.guild.iconURL() },
             fields: []
         }
 
@@ -1858,19 +1858,19 @@ async function topGames(message, params) {
         }
         else {
             finalEmbed.description = `You did not specify the number of games to display, as such, I will display the top ${maxResults}`
-            + ` games people signed up for on the ${message.guild.name} server:`;
+                + ` games people signed up for on the ${message.guild.name} server:`;
         }
 
         let finalList = ``;
 
         for (let i = 0; i < maxResults; i++) {
 
-            finalEmbed.fields.push({name: `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.`, value: "** **"})
+            finalEmbed.fields.push({ name: `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.`, value: "** **" })
             finalList += `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.\n`;
             //message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
         }
 
-        message.channel.send({embed: finalEmbed});
+        message.channel.send({ embed: finalEmbed });
 
         return gameMap.length;
     }
@@ -1901,7 +1901,19 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     }
     else if (check.result[0].score != 0) {
 
-        message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+        let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+
+        removeEmbed = {
+            ...Embed,
+            date: new Date(),
+            description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+            fields: []
+        }
+
+        for (suggestion of prettyArray)
+            removeEmbed.fields.push({ name: suggestion, value: "** **" });
+
+        message.channel.send({ embed: removeEmbed });
         specificCommandCreator(pingUsers, [message, -1, user], check.result, user);
         return -11;
     }
@@ -1924,14 +1936,14 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                             if (user.games.includes(game)) {
 
                                 if (user.excludePing == false)
-                                    signedUp += mention(user.id);
+                                    signedUp += mention(user.id) + " ";
                                 if (user.excludeDM == false)
                                     directMessage(message, user.id, game);
                             }
                         }
                         else if (user.games.includes(games[game])) {
                             if (user.excludePing == false)
-                                signedUp += mention(user.id);
+                                signedUp += mention(user.id) + " ";
                             if (user.excludeDM == false)
                                 directMessage(message, user.id, games[game]);
                         }
@@ -1943,9 +1955,16 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                 }
             }
         }//Each user for loop
+        // message.member.displayName + " has summoned " + signedUp + " for some " + game
 
         if (signedUp.length > 3)
-            message.channel.send(message.member.displayName + " has summoned " + signedUp + " for some " + game);
+            message.channel.send({
+                embed: {
+                    ...Embed,
+                    date: new Date(),
+                    description: message.member.displayName + " has summoned " + signedUp + " for some " + game
+                }
+            });
         else
             message.channel.send("No one has signed up for " + game + ".");
         let index = user.guilds.indexOf(message.guild.id);
