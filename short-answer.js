@@ -78,11 +78,16 @@ var embed = {
         "image": ""
     },
     "thumbnail": {
-        "url": "https://cdn.discordapp.com/embed/avatars/0.png"
+        //"url": "https://cdn.discordapp.com/attachments/468997633487273994/705218426280607784/Clan_-_Orange_New_-_New.png"
     },
     "image": {
         "url": ""
     },
+    // "author": {
+    //     "name": " ",
+    //     "url": "",
+    //     "icon_url": "https://cdn.discordapp.com/attachments/468997633487273994/705218426280607784/Clan_-_Orange_New_-_New.png"
+    //   },
     "fields": [
         // {
         //     "name": "🤔",
@@ -284,7 +289,7 @@ connectDB.once('open', async function () {
             commandMatcher(message, command, params, user);
             return;
         }
-        else if (message.content.trim() ==  (defaultPrefix + "help")) {
+        else if (message.content.trim() == (defaultPrefix + "help")) {
             message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
         }
         else {//Command tracker stuff
@@ -475,7 +480,7 @@ async function commandMatcher(message, command, params, user) {
     }
 }
 
-//-1 invalid input, 0 don't delete (passed to command matcher) - need it next time, 1 handled, delete
+//-1 invalid input, 0 don't delete (passed to command matcher) - need it next time, 1 handled - delete
 async function handleCommandTracker(specificCommand, message, user, skipSearch) {
 
     let params = message.content;
@@ -807,23 +812,45 @@ async function personalGames(message, params, user) {
     if (!user.games)
         user = await findUser({ id: message.author.id })
     let games = user.games;
-    let finalList = "";
-
-    for (let i = 0; i < games.length; i++)
-        finalList += i + ") " + games[i] + "\n";
-
-
+    let fieldArray = new Array();
     let display = message.author.username;
     if (message.member != null)
         display = message.member.displayName;
+    let left = false;
 
-    if (finalList.length > 2) {
 
-        message.channel.send("```" + display + " here are the games you are signed up for: \n" +
-            finalList + "```");
-        return 1;
+    for (let i = 0; i < games.length; i++) {
+        left = true;
+
+        fieldArray.push({ name: `${i}) ` + games[i], value: "** **", inline: false })
+
+        if (i % 25 == 0 && i > 0) {
+            let gameEmbed = {
+                ...embed,
+                date: new Date(),
+                description: display + " here are the games you are signed up for:",
+                fields: fieldArray
+            }
+            message.channel.send({ embed: gameEmbed });
+            fieldArray = new Array();
+            left = false;
+        }
     }
 
+    if (games.length > 0) {
+
+        if (left) {
+            let gameEmbed = {
+                ...embed,
+                date: new Date(),
+                description: display + " here are the games you are signed up for:",
+                fields: fieldArray
+            }
+            message.channel.send({ embed: gameEmbed });
+        }
+
+        return 1;
+    }
     else
         message.channel.send("You are not signed up for any games.");
 
@@ -2293,7 +2320,6 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
-//command suggestion make not inline?
 
 //set up automated help/explanation text
 
