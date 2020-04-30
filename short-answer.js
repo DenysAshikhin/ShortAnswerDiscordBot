@@ -66,51 +66,60 @@ const options = {
 };
 
 var embed = {
-    "title": "title ~~(did you know you can have markdown here too?)~~",
-    "description": "this supports [named links](https://discordapp.com) on top of the previously shown subset of markdown. ```\nyes, even code blocks```",
-    "url": "https://discordapp.com",
+    "title": "Short Answer Bot",
+    //"description": "this supports [named links](https://discordapp.com) on top of the previously shown subset of markdown. ```\nyes, even code blocks```",
+    "description": "",
+    "url": "",
     "color": 14837504,
-    "timestamp": "2020-04-29T20:37:33.555Z",
+    "timestamp": new Date(),
     "footer": {
-        "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png",
-        "text": "footer text"
+        "text": "Created by The Last Spark",
+        "image": ""
     },
     "thumbnail": {
         "url": "https://cdn.discordapp.com/embed/avatars/0.png"
     },
     "image": {
-        "url": "https://cdn.discordapp.com/embed/avatars/0.png"
-    },
-    "author": {
-        "name": "author name",
-        "url": "https://discordapp.com",
-        "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
+        "url": ""
     },
     "fields": [
-        {
-            "name": "🤔",
-            "value": "some of these properties have certain limits..."
-        },
-        {
-            "name": "😱",
-            "value": "try exceeding some of them!"
-        },
-        {
-            "name": "🙄",
-            "value": "an informative error should show up, and this view will remain as-is until all issues are fixed"
-        },
-        {
-            "name": "<:thonkang:219069250692841473>",
-            "value": "these last two",
-            "inline": true
-        },
-        {
-            "name": "<:thonkang:219069250692841473>",
-            "value": "are inline fields",
-            "inline": true
-        }
+        // {
+        //     "name": "🤔",
+        //     "value": "some of these properties have certain limits..."
+        // },
+        // {
+        //     "name": "😱",
+        //     "value": "try exceeding some of them!"
+        // },
+        // {
+        //     "name": "🙄",
+        //     "value": "an informative error should show up, and this view will remain as-is until all issues are fixed"
+        // },
+        // {
+        //     "name": "<:thonkang:219069250692841473>",
+        //     "value": "these last two",
+        //     "inline": true
+        // },
+        // {
+        //     "name": "<:thonkang:219069250692841473>",
+        //     "value": "are inline fields",
+        //     "inline": true
+        // }
     ]
 };
+
+const tags = [
+    1,// - games
+    2,// - stats
+    3,// - miscellaneous
+    4,// - music
+    5,// - administrator
+    6,// - quality of life
+    7,// - help
+    8,// - general
+    9,// - tutorials
+    10,// - bugs/suggestions/improvements
+]
 
 
 
@@ -163,6 +172,54 @@ const findGuild = async function (params) {
     } catch (err) { console.log(err) }
 }
 
+function newStuff() {
+
+    for (section of tags) {
+
+        for (let i = 0; i < Commands.commands.length; i++) {
+
+            if (Commands.subsection[i].includes(section)) {
+
+                switch (section) {
+
+                    case 1:
+                        console.log(`Game Command: ${Commands.commands[i]}`)
+                        break;
+                    case 2:
+                        console.log(`Stats Command: ${Commands.commands[i]}`)
+                        break;
+                    case 3:
+                        console.log(`Miscellaneous Command: ${Commands.commands[i]}`)
+                        break;
+                    case 4:
+                        console.log(`Music Command: ${Commands.commands[i]}`)
+                        break;
+                    case 5:
+                        console.log(`Administrator Command: ${Commands.commands[i]}`)
+                        break;
+                    case 6:
+                        console.log(`Quality of Life Command: ${Commands.commands[i]}`)
+                        break;
+                    case 7:
+                        console.log(`Help Command: ${Commands.commands[i]}`)
+                        break;
+                    case 8:
+                        console.log(`General Command: ${Commands.commands[i]}`)
+                        break;
+                    case 9:
+                        console.log(`Tutorial Command: ${Commands.commands[i]}`)
+                        break;
+                    case 10:
+                        console.log(`Bugs Command: ${Commands.commands[i]}`)
+                        break;
+                }
+                console.log(`${Commands.subsection[i]}`)
+                
+            }
+        }
+    }
+}
+
 connectDB.once('open', async function () {
 
     await Client.login(token);
@@ -186,31 +243,6 @@ connectDB.once('open', async function () {
 
     Client.on("message", async (message) => {
         if (message.author.bot) return;
-
-
-        ///////
-        // {
-        //     const embed = new Discord.MessageEmbed()
-        //         // Set the title of the field
-        //         .setTitle('A slick little embed')
-        //         // Set the color of the embed
-        //         .setColor(0xff0000)
-        //         // Set the main content of the embed
-        //         .setDescription('Hello, this is a slick embed!');
-        //     // Send the embed to the same channel as the message
-        //     message.channel.send(embed);
-        // }
-        ////
-
-
-        let time = new Date();
-        embed.timestamp = time;
-        embed.image = "";
-        embed.footer.text = "";
-        
-
-        message.channel.send({ embed })
-
 
         let user = await findUser({ id: message.author.id });
 
@@ -412,7 +444,27 @@ async function commandMatcher(message, command, params, user) {
         return -1;
     }
     else if (check.result[0].score != 0) {
-        message.channel.send(`${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:` + "```" + check.prettyList + "```");
+
+        let fieldArray = new Array();
+
+        for (let i = 0; i < check.result.length; i++) {
+
+
+            fieldArray.push({ name: check.result[i].item, value: i, inline: true })
+            console.log("WTF: ")
+            console.log(fieldArray[i])
+        }
+
+        console.log(check.result)
+
+        const newEmbed = {
+            ...embed,
+            date: new Date,
+            description: `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
+            fields: fieldArray
+        }
+
+        message.channel.send({ embed: newEmbed })
         specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
         return -11;
     }
@@ -549,6 +601,7 @@ function suggest(message, params, user) {
     if (params == message.content) {
         return message.channel.send("You have to provide an actual suggestion!");
     }
+    message.channel.send("Your suggestion has been forwarded!");
     Client.guilds.cache.get(guildID).members.cache.get(creatorID).user.send(`${user.displayName} is suggesting: ${params}`);
 }
 
@@ -608,33 +661,37 @@ async function tutorialHandler(message, command, params, user) {
 async function gameTutorial(message, params, command) {
 
     let steps = [
-        `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[1] + " Counter Strike\n2) " + prefix + Commands.commands[1] + " Counter Strike, Minecrt```",
+        `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`,
+
         `Now that you see a bunch of results, hopefully the game you wanted is towards the top, along with the associated number.`
-        + ` To add this game to your games list type **${prefix}` + Commands.commands[2] + `** *game#*. You can alternatively signup by pasting the complete name of the game.`
-        + "```Example(s):\n1) " + prefix + Commands.commands[2] + " 302\n2) " + prefix + Commands.commands[2] + " Counter-Strike: Global Offensive```"
         + ` Please add any valid (and new) game to your games list to continue`,
-        `You can also sign up for as many games at once as you would like by seperating each entry by a comma - you can mix both words and numbers for each entry as such:`
-        + "```Example(s):\n1) " + prefix + Commands.commands[2] + " 2, Counter-Strike: Global Offensive, 24, Minecraft```"
-        + ` Now it's your turn to sign up for *at least two new games* at once, don't worry, I will show you how to remove any or all games in the following steps.`,
+
+        `You can also sign up for as many games at once as you would like by seperating each entry by a comma - you can mix both words and numbers.`
+        + ` Try signing up for **at least two new games** at once.`,
+
         `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}` + Commands.commands[3] + `**`
         + "```Example(s):\n1) " + prefix + Commands.commands[3] + "```",
+
         `Now try removing any of the games in your games list by typing **${prefix}` + Commands.commands[4] + `** *game#*.`
         + ` Just a heads up that the GAME# is the number from your games list.`
         + "```Example(s):\n1) " + prefix + Commands.commands[4] + " 1```",
+
         `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
         + `** *nameOfGame*/*#ofGame* and anyone who has this game and the proper excludes`
         + ` will be notified. NOTE: "nameOfGame" has to be spelled perfectly but it does not have to be in your games list.`
         + "```Example(s):\n1) " + prefix + Commands.commands[13] + " Counter-Strike: Global Offensive\n2) " + prefix + Commands.commands[13] + " 0" + "```"
         + ` Go ahead, try out the command!`,
+
         `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
         + ` an @mention in the text channel it was sent from. To disable @mentions simply type`
         + ` **${prefix}` + Commands.commands[5] + `** *true/false*. *False* = you will be pinged, *True* = you will not be pinged.`
         + "```Example(s):\n1) " + prefix + Commands.commands[5] + " false```Your turn!",
+
         `The second notification is a direct message. To disable direct messages from pings simply type`
         + ` **${prefix}` + Commands.commands[6] + `** *true/false*. *False* = you will be DMed, *True* = you will not be DMed.`
         + "```Example(s):\n1) " + prefix + Commands.commands[6] + " false```"
         + `To complete the walkthrough go ahead and try it out.`,
+
         `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
         + ` **${prefix}` + Commands.commands[26] + `** *any suggestion here* and I'll forward the message to the creator. For a more general help,`
         + ` type **${prefix}` + Commands.commands[7] + `**`
@@ -644,11 +701,33 @@ async function gameTutorial(message, params, command) {
         + "\n3) " + prefix + Commands.commands[27] + " true```"
     ]
 
+
     let user = await findUser({ id: message.author.id });
+
+    let prompt = steps[user.tutorialStep].substring(0, steps[user.tutorialStep].indexOf("```"));
+    let examples = steps[user.tutorialStep].substring(steps[user.tutorialStep].indexOf("```"), steps[user.tutorialStep]).split("\n");
+    let fieldArray = new Array();
+
+    for (let i = 1; i < examples.length; i++) {
+        console.log(examples[i])
+    }
+
+
+
+    let newEmbed = {
+        ...embed,
+        title: embed.title + " Game Tutorial",
+        date: new Date,
+        description: prompt,
+        fields: fieldArray
+    }
+
 
     if (user.tutorialStep == -1) {
 
-        message.channel.send(steps[0]);
+        newEmbed.description = steps[0];
+        message.channel.send({ embed: newEmbed })
+
         await User.findOneAndUpdate({ id: user.id },
             {
                 $set: {
@@ -664,14 +743,14 @@ async function gameTutorial(message, params, command) {
 
             if (command == commandMap.get(Commands.commands[25])) {
 
-                message.channel.send(steps[user.tutorialStep]);
+                message.channel.send({ embed: newEmbed })
                 return 1;
             }
             else if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
 
                 if (user.tutorialStep != steps.length - 1) {
 
-                    message.channel.send(steps[user.tutorialStep]);
+                    message.channel.send({ embed: newEmbed })
 
                     await User.findOneAndUpdate({ id: user.id },
                         {
@@ -683,7 +762,7 @@ async function gameTutorial(message, params, command) {
                 }
                 else {//Tutorial over!!!!!
                     //Need to add the recommend and something else commands
-                    message.channel.send(steps[user.tutorialStep]);
+                    message.channel.send({ embed: newEmbed })
                     if (!user.completedTutorials.includes(0)) {
                         user.completedTutorials.push(0);
                     }
@@ -1188,10 +1267,10 @@ function gameHelp(message, params, user) {
         + "Example usage: " + prefix + "removeGame 2 |OR| " + prefix + "removeGame Counter-Strike: Global Offensive\n\nWill remove the game specified by the number "
         + "(which as to correspond to a game in your gamesList) or search your gamesList for the title of the game you wish to remove.```\n"
 
-        + "Command 4: " + prefix + "excludePing [true/false] \n```Sets whether you wish to be @mentioned when someone pings a game to play. If set to 'true', you will be excluded from all pings "
+        + "Command 4: " + prefix + "excludePing [true/false] \n```Sets whether you wish to be @mentioned when someone pings a game to play. If set to 'true', you will be excluded from all pings. "
         + "and vice versa.\nExample usage: " + prefix + "exclude true |OR| " + prefix + "exclude false```\n"
 
-        + "Command 5: " + prefix + "excludeDM [true/false] \n```Sets whether you wish to receive a direct message when someone pings a game to play. If set to 'true', you will be excluded from all pings "
+        + "Command 5: " + prefix + "excludeDM [true/false] \n```Sets whether you wish to receive a direct message when someone pings a game to play. If set to 'true', you will be excluded from all DM's. "
         + "and vice versa.\nExample usage: " + prefix + "exclude true |OR| " + prefix + "exclude false```\n"
 
         + "Command 6: " + prefix + "search [game1], [game2].... \n```Searches all the complete game list for the speicified games you wish to find. You can search for as many games as desired, seperated by a comma.\n"
@@ -2214,16 +2293,28 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
+//command suggestion make not inline?
+
 //set up automated help/explanation text
+
+//make ping take a 2nd paramter, for number of people needed.
+//People can do !join to join a running ping, if there is more than 1 - givem them a menu selection
+
+//add an @mention permission check for pinging
 
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial
 //for game stats, add a Y/N for seeing a list of all the people signed up for it
 
+//make a game recommendation
+
 
 //for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
 //if they dont, they can always start it by saying prefixADVANCEDGAMETUTORIAL - which is a seperate tutorial all together. If they want to do it to type that command
 
+
+
+//For game stats and top games, you can list the people under each heading!!! Make sure to add a limit of 25 fields/games!!!
 
 //Be alerted if a user is found in a voice channel? Stalker lmao
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
