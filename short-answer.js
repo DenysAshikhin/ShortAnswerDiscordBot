@@ -377,7 +377,7 @@ function populateCommandMap() {
 function setServerPrefix(message, params, user) {
 
     if (params == message.content) {
-        message.channel.send("You have to provde an actual prefix!");
+        message.channel.send("You have to provide an actual prefix!");
         return -1;
     }
     if (Array.isArray(params))
@@ -644,8 +644,6 @@ function purgeGamesList(message, params, user) {
 //-22 meaning no matching tutorial was found
 async function tutorialHandler(message, command, params, user) {
 
-    console.log(`Tutorial handler param: ${params}`)
-
     switch (user.activeTutorial) {
         case 0:
             if (command == GameTutorial.specificCommand[user.tutorialStep] || command == gameTutorial) {
@@ -712,13 +710,13 @@ async function gameTutorial(message, params, command) {
         + ` Just a heads up that the GAME# is the number from your games list.`,
 
         `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
-        + `** *nameOfGame*/*#ofGame* and anyone who has this game and the proper excludes will be notified.`,
+        + `** *nameOfGame*/*#ofGame* and anyone who has this game will be notified.`,
 
         `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
-        + ` an @mention in the text channel it was sent from. To disable @mentions simply type`
+        + ` an @mention in the text channel it was sent from. To disable/enable @mentions simply type`
         + ` **${prefix}` + Commands.commands[5] + `** *true/false*. *False* = you will be pinged, *True* = you will not be pinged.`,
 
-        `The second notification is a direct message. To disable direct messages from pings simply type`
+        `The second notification is a direct message. To disable/enable direct messages from pings simply type`
         + ` **${prefix}` + Commands.commands[6] + `** *true/false*. *False* = you will be DMed, *True* = you will not be DMed.`,
 
         `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
@@ -788,7 +786,6 @@ async function gameTutorial(message, params, command) {
             else {//Test if their response is the correct one.
 
                 if (command == GameTutorial.specificCommand[user.tutorialStep]) {
-                    console.log("cOmmands maaaatched")
                     let result = await GameTutorial.specificCommand[user.tutorialStep].call(null, message, params, user);
                     if (result >= GameTutorial.expectedOutput[user.tutorialStep]) {
                         User.findOneAndUpdate({ id: user.id }, { $set: { tutorialStep: user.tutorialStep + 1 } }, function (err, doc, res) { });
@@ -824,21 +821,20 @@ async function personalGames(message, params, user) {
 
         fieldArray.push({ name: `${i}) ` + games[i], value: "** **", inline: false })
 
-        if (i % 25 == 0 && i > 0) {
+        if (i % 24 == 0 && i > 0) {
             let gameEmbed = {
                 ...embed,
                 date: new Date(),
                 description: display + " here are the games you are signed up for:",
                 fields: fieldArray
             }
-            message.channel.send({ embed: gameEmbed });
+            await message.channel.send({ embed: gameEmbed });
             fieldArray = new Array();
             left = false;
         }
     }
 
     if (games.length > 0) {
-
         if (left) {
             let gameEmbed = {
                 ...embed,
