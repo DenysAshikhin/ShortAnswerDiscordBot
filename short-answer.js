@@ -2298,8 +2298,6 @@ async function minuteCount() {
 
 async function updateGames(message, game, user) {
 
-    console.log(`game: ${game}`);
-
     if (Array.isArray(game)) {
         let setty = new Set(game);
         game = Array.from(setty);
