@@ -1695,7 +1695,6 @@ function removeGame(message, game, user) {
             invalidGames.sort();
             let invalidGameField = { name: "Invalid Game(s)", value: "" };
             for (let i = 0; i < invalidGames.length; i++) {
-                //if (invalidGames[i].length > 1)
                 invalidGameField.value += (i + 1) + ") " + invalidGames[i];
             }
             finalEmbed.fields.push(invalidGameField);
@@ -1705,7 +1704,6 @@ function removeGame(message, game, user) {
             removedGames.sort();
             let removedGameField = { name: "Removed Game(s)", value: "" };
             for (let i = 0; i < removedGames.length; i++) {
-                //if (tempArr[i].length > 1)
                 removedGameField.value += (i + 1) + ") " + removedGames[i];
             }
             finalEmbed.fields.push(removedGameField);
@@ -2327,7 +2325,19 @@ async function updateGames(message, game, user) {
         }
         else if (check.result[0].score != 0) {
 
-            message.channel.send(`${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:` + "```" + check.prettyList + "```");
+            let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+
+            removeEmbed = {
+                ...Embed,
+                date: new Date(),
+                description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                fields: []
+            }
+
+            for (suggestion of prettyArray)
+                removeEmbed.fields.push({ name: suggestion, value: "** **" });
+
+            message.channel.send({ embed: removeEmbed });
             specificCommandCreator(updateGames, [message, -1, user], check.result, user);
             return -11;
         }
@@ -2371,36 +2381,42 @@ async function updateGames(message, game, user) {
         }
     }
 
-    if (finalGameArray.length > 0) {
 
+    let finalEmbed = {
+        ...Embed,
+        date: new Date(),
+        fields: []
+    }
+
+
+    if (finalGameArray.length > 0) {
         finalGameArray.sort();
-        let congrats = "";
+        let signedField = { name: "Game(s) Succesfully Signup For:", value: "" };
         for (let i = 0; i < finalGameArray.length; i++) {
-            //if (tempArr[i].length > 1)
-            congrats += i + ") " + finalGameArray[i] + "\n";
+            signedField.value += (i + 1) + ") " + finalGameArray[i] + '\n';
         }
-        message.channel.send("Succesfuly signed up for: ```" + congrats + "```");
+        finalEmbed.fields.push(signedField);
     }
 
     if (alreadyTracked.length > 0) {
         alreadyTracked.sort();
-        let congrats = "";
+        let signedField = { name: "Game(s) Already Tracked For You:", value: "" };
         for (let i = 0; i < alreadyTracked.length; i++) {
-            //if (tempArr[i].length > 1)
-            congrats += i + ") " + alreadyTracked[i] + "\n";
+            signedField.value += (i + 1) + ") " + alreadyTracked[i] + '\n';
         }
-        message.channel.send("The following games are already tracked for you: ```" + congrats + "```");
+        finalEmbed.fields.push(signedField);
     }
 
     if (invalidGames.length > 0) {
         invalidGames.sort();
-        let congrats = "";
+        let signedField = { name: "Invalid Game(s):", value: "" };
         for (let i = 0; i < invalidGames.length; i++) {
-            //if (teminvalidGamespArr[i].length > 1)
-            congrats += i + ") " + invalidGames[i] + "\n";
+            signedField.value += (i + 1) + ") " + invalidGames[i] + '\n';
         }
-        message.channel.send("The following are invalid games: ```" + congrats + "```");
+        finalEmbed.fields.push(signedField);
     }
+
+    message.channel.send({ embed: finalEmbed });
 
     let length = finalGameArray.length;
     if (user.games)
