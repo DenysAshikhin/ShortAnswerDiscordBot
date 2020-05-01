@@ -21,7 +21,9 @@
     "mongoose": "^5.9.7",
     "node-opus": "^0.3.3",
     "nodemon": "^2.0.3",
-    "ytdl-core-discord": "^1.2.0"
+    "ytdl-core-discord": "^1.2.0",
+    "ytpl": "^0.1.20",
+    "ytsr": "^0.1.13"
   },
   "ytdl-core": "^2.1.0",
   "devDependencies": {},
