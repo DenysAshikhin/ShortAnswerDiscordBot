@@ -452,7 +452,7 @@ async function commandMatcher(message, command, params, user) {
     let check = await checkCommands(command);
 
     if (check == -1) {
-        message.channel.send(`${command} did not resemble any command I know of, try again?`);
+        message.channel.send(`You have entered an invalid suggestion number please try again or enter **-1** to quit the suggestion.?`);
         return -1;
     }
     else if (check.result[0].score != 0) {
@@ -1502,7 +1502,7 @@ function excludePing(message, params, user) {
     }
     else if (bool == "FALSE") {
 
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludePing: true } }, function (err, doc, res) { });
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludePing: false } }, function (err, doc, res) { });
         message.channel.send(mention(message.author.id) + " can now be pinged once more.");
         return 0;
     }
@@ -1520,13 +1520,13 @@ function excludeDM(message, params, user) {
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: true } }, function (err, doc, res) { });
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: true } }, function (err, doc, res) {if (err)console.log(err) });
         message.channel.send(mention(message.author.id) + " will be excluded from any further DMs.");
         return 1;
     }
     else if (bool == "FALSE") {
 
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { DM: false } }, function (err, doc, res) { });
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: false } }, function (err, doc, res) {if (err)console.log(err) });
         message.channel.send(mention(message.author.id) + " will be DM'ed once more.");
         return 0;
     }
@@ -1931,6 +1931,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                 if (user.guilds.includes(message.guild.id)) {
 
                     if (!user.kicked[user.guilds.indexOf(message.guild.id)]) {
+
                         if (isNaN(game)) {
 
                             if (user.games.includes(game)) {
@@ -1956,6 +1957,8 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             }
         }//Each user for loop
         // message.member.displayName + " has summoned " + signedUp + " for some " + game
+
+        console.log(`FINAL: ${signedUp}`)
 
         if (signedUp.length > 3)
             message.channel.send({
@@ -2138,12 +2141,111 @@ async function resume(message) {
 }
 
 
+//make this automatically generate the specific command, and return either quit, 0 made a command, or an actual object
+async function generalMatcher(message, params, user, searchArray, originalCommand) {
+
+    if (!isNaN(params)) {
+        return -1;
+    }
+    else if (Array.isArray(params)) {
+        params = params[0].trim();
+    }
+    else {
+        params = params.trim();
+    }
+
+    let finalArray = new Array();
+    let finalList = "";
+    let newOptions = {
+        ...options,
+        minMatchCharLength: params.length / 2,
+        findAllMatches: false,
+        includeScore: true,
+        isCaseSensitive: false
+    }
+    //
+    let fuse = new Fuse(searchArray, newOptions);
+    let result = fuse.search(params);
+    let maxResults = 5;
+    if (maxResults > result.length)
+        maxResults = result.length;
+
+    for (let i = 0; i < maxResults; i++) {
+
+        finalList += i + ") " + result[i].item + "\n";
+        finalArray.push(result[i]);
+    }
+
+    let completeCheck = {
+        result: finalArray,
+        prettyList: finalList
+    };
+
+    if (finalArray.length > 0) {
+        if (completeCheck.result[0].score == 0) {
+            specificCommandCreator(originalCommand, [message, completeCheck.result[0].item, user], null, user);
+            await triggerCommandHandler(message, user, true);
+            return completeCheck.result[0].item;
+        }
+        else {
+            let fieldArray = new Array();
+
+            for (let i = 0; i < completeCheck.result.length; i++) {
+
+                //fieldArray.push({ name: completeCheck.result[i].item, value: i, inline: false })
+                fieldArray.push({ name: `${i} - ` + completeCheck.result[i].item, value: "** **", inline: false })
+            }
+
+            const newEmbed = {
+                ...Embed,
+                date: new Date,
+                description: `${command} is not a valid parameter, if you meant one of the following, simply type the **number** you wish to use:`,
+                fields: fieldArray
+            }
+
+            message.channel.send({ embed: newEmbed })
+            specificCommandCreator(originalCommand, [message, -1, params, user], completeCheck.result, user);
+        }
+        return completeCheck;
+    }
+    else {
+        message.channel.send(`You have entered an invalid suggestion number/input please try again or enter **-1** to quit the suggestion.?`);
+        return -1
+    }
+
+
+
+    if (completeCheck.result[0].score != 0) {
+
+
+        return -11;
+    }
+    else {
+
+    }
+}
+
+
+
 /*
 params = {
     custom = true/false,
     url: "Asdasdas"
 }
 */
+
+/**
+ * 
+ * song = {
+ *          url: string
+ *          title: string
+ *          duration: seconds
+ *          time started: ??? 
+ *  
+ * }
+ */
+
+ //to simulate skiping/rewinding, keep track of start time and offset, if you skip, increase offset, decrease -> reduce offset
 
 async function play(message, params) {
 
@@ -2166,12 +2268,18 @@ async function play(message, params) {
 
     let songInfo;
 
-    if (await ytpl.validateURL(args))
+    if (await ytpl.validateURL(args)) {
         console.log("PLAYLISTFOUND")
+
+        let playlist = await ytpl(args);
+        console.log(playlist)
+        for (video of playlist.items)
+            console.log(video.title + '\n')
+    }
     else if (await ytdl.validateURL(args))
         songInfo = await ytdl.getInfo(args);
     else {
-        let searchResult = await ytsr(args, {limit: 1});
+        let searchResult = await ytsr(args, { limit: 1 });
         songInfo = {
             title: searchResult.items[0].title,
             video_url: searchResult.items[0].link
@@ -2511,6 +2619,8 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
+
+//check how fredboat handles skips and stuff. is there a pause or is it
 
 //set up automated help/explanation text -> now just automate !help+command :)
 
