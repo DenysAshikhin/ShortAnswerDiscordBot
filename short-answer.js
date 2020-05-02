@@ -2443,7 +2443,7 @@ async function playSong(guild, song) {
         let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
         youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
         youtubeResolve.on('progress', onProgress)
-        youtubeResolve.on('finish', () => {console.log("FINISHED"); mv(tempAudio, audioOutput,{ clobber: false }, function (err) { if (err) console.log(err) }) })
+        youtubeResolve.on('finish', () => {console.log("FINISHED"); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
         youtubeResolve.on('end', () => { console.log("endy") })
 
         const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
