@@ -2139,6 +2139,7 @@ async function skip(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) {
         queue.get(message.guild.id).songs.shift();
+        
         playSong(message.guild, queue.get(message.guild.id).songs[0]);
     }
 }
@@ -2472,10 +2473,11 @@ async function playSong(guild, song) {
 
 
 const onProgress = (chunkLength, downloaded, total) => {
+    console.log("INSIDE OF onpregors")
     const percent = downloaded / total;
     readline.cursorTo(process.stdout, 0);
     process.stdout.write(`${(percent * 100).toFixed(2)}% downloaded `);
-    process.stdout.write(`(${(downloaded / 1024 / 1024).toFixed(2)}MB of ${(total / 1024 / 1024).toFixed(2)}MB)`);
+    process.stdout.write(`(${(downloaded / 1024 / 1024).toFixed(2)}MB of ${(total / 1024 / 1024).toFixed(2)}MB)\n`);
   };
 
 async function removeLastModifiedSong() {
