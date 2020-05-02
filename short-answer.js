@@ -2374,6 +2374,12 @@ async function play(message, params) {
     }
 }
 
+
+var songsInProgress= new Map();
+
+
+
+
 async function playSong(guild, song) {
     const serverQueue = queue.get(guild.id);
 
@@ -2387,10 +2393,13 @@ async function playSong(guild, song) {
 
     console.log(song);
 
+
     var audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
     var tempAudio = path.resolve(`songs`, song.id + '.mp3');
 
     if (fs.existsSync(audioOutput)) {
+
+        console.log('EXists')
 
         const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
         if(serverQueue.dispatcher) console.log(serverQueue.dispatcher.pauseTime)
@@ -2416,27 +2425,31 @@ async function playSong(guild, song) {
         Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.dispatcher = Dispatcher;
     }
+    else if(fs.existsSync(tempAudio)){
+
+    }
     else {
         console.log("inside of else")
 
         let guildDB = await findGuild({ id: guild.id });
         guildDB.songs.push(song.id);
         guildDB.duration = guildDB.duration + Number(song.duration);
-        Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, { clobber: false }, function (err, doc, res) { if (err) console.log(err) });
+        Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, function (err, doc, res) { if (err) console.log(err) });
 
-        await removeLastModifiedSong();
+        //await removeLastModifiedSong();
 
 
         let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
         youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
-        youtubeResolve.on('finish', () => { mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
+        youtubeResolve.on('progress', onProgress)
+        youtubeResolve.on('finish', () => { mv(tempAudio, audioOutput,{ clobber: false }, function (err) { if (err) console.log(err) }) })
         youtubeResolve.on('end', () => { console.log("endy") })
 
         const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
 
         const Dispatcher = await serverQueue.connection.play(youtubeResolve, {seek: shift})
             .on('error', error => {
-                console.log(error);
+                console.log("inside of error");
             })
             .on('finish', () => {
 
@@ -2455,6 +2468,15 @@ async function playSong(guild, song) {
     }
 }
 
+//make this work with skipping and rewinding, only then see how bad the cut is when skipping to see if its justified makign them wait for the song to get cached
+
+
+const onProgress = (chunkLength, downloaded, total) => {
+    const percent = downloaded / total;
+    readline.cursorTo(process.stdout, 0);
+    process.stdout.write(`${(percent * 100).toFixed(2)}% downloaded `);
+    process.stdout.write(`(${(downloaded / 1024 / 1024).toFixed(2)}MB of ${(total / 1024 / 1024).toFixed(2)}MB)`);
+  };
 
 async function removeLastModifiedSong() {
 
