@@ -117,4 +117,5 @@ dist
 # Environmental stuff
 config.json
 
-songs/
+*.mp3
+*.mp4
