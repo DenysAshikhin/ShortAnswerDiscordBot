@@ -2387,8 +2387,8 @@ async function playSong(guild, song) {
 
     console.log(song);
 
-    var audioOutput = path.resolve(`./songs/finished`, song.id + '.mp3');
-    var tempAudio = path.resolve(`./songs`, song.id + '.mp3');
+    var audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
+    var tempAudio = path.resolve(`songs`, song.id + '.mp3');
 
     if (fs.existsSync(audioOutput)) {
 
