@@ -4,10 +4,21 @@ const Bot = require('./Bot.js');
 const Guild = require('./Guild.js')
 const mongoose = require('mongoose');
 const Fuse = require('fuse.js');
-const ytdl = require("ytdl-core");
+const path = require('path');
+let ytdl = require("ytdl-core");
 const ytpl = require('ytpl');
 const ytsr = require('ytsr');
-//const ytdl = require('ytdl-core-discord');
+
+var mv = require('mv');
+
+
+const readline = require('readline');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegPath);
+
+
+//const ytdlDiscord = require('ytdl-core-discord');
 const gameJSON = require('./gameslist.json');
 const Commands = require('./commands.json');
 const studyJSON = require('./medstudy.json');
@@ -234,6 +245,7 @@ connectDB.once('open', async function () {
 
     updateAll()
     populateCommandMap();
+    removeTempSongs();
 
     for (let element of gameJSON)
         games.push(element.name);
@@ -1520,13 +1532,13 @@ function excludeDM(message, params, user) {
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: true } }, function (err, doc, res) {if (err)console.log(err) });
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: true } }, function (err, doc, res) { if (err) console.log(err) });
         message.channel.send(mention(message.author.id) + " will be excluded from any further DMs.");
         return 1;
     }
     else if (bool == "FALSE") {
 
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: false } }, function (err, doc, res) {if (err)console.log(err) });
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: false } }, function (err, doc, res) { if (err) console.log(err) });
         message.channel.send(mention(message.author.id) + " will be DM'ed once more.");
         return 0;
     }
@@ -2115,7 +2127,11 @@ async function reactAnswers(message) {
 
 async function pause(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.pause(); }
+    if (queue.get(message.guild.id)) {
+        queue.get(message.guild.id).dispatcher.pause();
+        message.channel.send(`I have been playing this song for: ${queue.get(message.guild.id).dispatcher.streamTime / 1000}`)
+    }
+
 }
 
 async function skip(message) {
@@ -2130,6 +2146,7 @@ async function skip(message) {
 async function stop(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) {
+        //queue.get(message.guild.id).dispatcher.destroy();
         queue.get(message.guild.id).voiceChannel.leave();
         queue.delete(message.guild.id);
     }
@@ -2138,6 +2155,18 @@ async function stop(message) {
 async function resume(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.resume(); }
+}
+
+function hmsToSecondsOnly(str) {
+    var p = str.split(':'),
+        s = 0, m = 1;
+
+    while (p.length > 0) {
+        s += m * parseInt(p.pop(), 10);
+        m *= 60;
+    }
+
+    return s;
 }
 
 
@@ -2240,17 +2269,19 @@ params = {
  *          url: string
  *          title: string
  *          duration: seconds
- *          time started: ??? 
+ *          time started: ???,
+ *          offset: Number,
+ *          id: string
  *  
  * }
  */
 
- //to simulate skiping/rewinding, keep track of start time and offset, if you skip, increase offset, decrease -> reduce offset
+//to simulate skiping/rewinding, keep track of start time and offset, if you skip, increase offset, decrease -> reduce offset
 
 async function play(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    const serverQueue = queue.get(message.guild.id);
+    let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ")[1];
 
     const voiceChannel = message.member.voice.channel;
@@ -2266,62 +2297,80 @@ async function play(message, params) {
         return message.channel.send("You need permission to join and speak in your voice channel!");
     }
 
+    let callPlay = false;
+    let queueConstruct;
+
+    if (!serverQueue) {
+        queueConstruct = {
+            textChannel: message.channel,
+            voiceChannel: voiceChannel,
+            connection: null,
+            songs: [],
+            index: 0,
+            volume: 5,
+            playing: true,
+            dispatcher: null
+        };
+        queue.set(message.guild.id, queueConstruct);
+        serverQueue = queueConstruct;
+    } else {
+
+        queueConstruct = serverQueue;
+    }
+
     let songInfo;
 
     if (await ytpl.validateURL(args)) {
-        console.log("PLAYLISTFOUND")
-
+        //ytpl
         let playlist = await ytpl(args);
-        console.log(playlist)
-        for (video of playlist.items)
-            console.log(video.title + '\n')
+        for (video of playlist.items) {
+            queueConstruct.songs.push({ title: video.title, url: video.url, duration: hmsToSecondsOnly(video.duration), start: new Date(), offset: 0, id: video.id });
+        } callPlay = true;
+        message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
     }
-    else if (await ytdl.validateURL(args))
-        songInfo = await ytdl.getInfo(args);
+    else if (await ytdl.validateURL(args)) {
+        songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
+
+        let startTime = args.lastIndexOf('?t=');
+        let offset = 0;
+
+        if (startTime != -1) {
+
+            let tester = args.substring(startTime + 3);
+            offset = (tester.length > 0 && !isNaN(tester)) ? Number(tester) : 0;
+        }
+
+
+
+
+        let song = { title: songInfo.title, url: songInfo.video_url, duration: songInfo.length_seconds, start: new Date(), offset: offset, id: songInfo.video_id };
+        queueConstruct.songs.push(song);
+
+
+        if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
+        else {
+            message.channel.send(`Now playing ${songInfo.title}!`)
+            callPlay = true;
+        }
+    }
     else {
         let searchResult = await ytsr(args, { limit: 1 });
         songInfo = {
             title: searchResult.items[0].title,
             video_url: searchResult.items[0].link
         };
+        return console.log("Hell nah")
     }
-
-
-
-    if (songInfo) {
-        const song = {
-            title: songInfo.title,
-            url: songInfo.video_url,
-        };
-        if (!serverQueue) {
-            console.log(`server que is empty`)
-            const queueConstruct = {
-                textChannel: message.channel,
-                voiceChannel: voiceChannel,
-                connection: null,
-                songs: [],
-                volume: 5,
-                playing: true,
-                dispatcher: null
-            };
-            queue.set(message.guild.id, queueConstruct);
-
-            queueConstruct.songs.push(song);
-
-            try {
-                var connection = await voiceChannel.join();
-                queueConstruct.connection = connection;
-                playSong(message.guild, queueConstruct.songs[0]);
-            } catch (err) {
-                console.log(err);
-                queue.delete(message.guild.id)
-                return message.channel.send("There was an error playing! " + err);
-            }
-        } else {
-            serverQueue.songs.push(song);
-            return message.channel.send(`${song.title} has been added to the queue!`);
+    if (callPlay) {
+        try {
+            var connection = await voiceChannel.join();
+            queueConstruct.connection = connection;
+            playSong(message.guild, queueConstruct.songs[0]);
+        } catch (err) {
+            console.log(err);
+            queue.delete(message.guild.id)
+            return message.channel.send("There was an error playing! " + err);
         }
-
     }
 }
 
@@ -2334,31 +2383,118 @@ async function playSong(guild, song) {
         return;
     }
 
-    const Dispatcher = await serverQueue.connection.play(ytdl(song.url,
-        {
-            filter: "audioonly",
-            highWaterMark: 1 << 25
-        }))
-        .on('end', () => {
-
-        })
-        .on('error', error => {
-            console.log(error);
-        })
-        .on('finish', () => {
-
-            serverQueue.songs.shift();
-            playSong(guild, serverQueue.songs[0]);
-        })
-        .on('start', () => {
-            console.log("start")
-            //I can use this to keep track of ellapsed time, if someone wants to forward or rewind, I can take the difference in ellapsed time, to see where they
-            //wanna go
-        })
 
 
-    Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-    serverQueue.dispatcher = Dispatcher;
+    console.log(song);
+
+    var audioOutput = path.resolve(`./songs/finished`, song.id + '.mp3');
+    var tempAudio = path.resolve(`./songs`, song.id + '.mp3');
+
+    if (fs.existsSync(audioOutput)) {
+
+        const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
+        if(serverQueue.dispatcher) console.log(serverQueue.dispatcher.pauseTime)
+        const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: shift })
+            .on('end', () => {
+                console.log("IN END")
+            })
+            .on('error', error => {
+                console.log(error);
+            })
+            .on('finish', () => {
+
+                serverQueue.songs.shift();
+                playSong(guild, serverQueue.songs[0]);
+            })
+            .on('start', () => {
+
+                //I can use this to keep track of ellapsed time, if someone wants to forward or rewind, I can take the difference in ellapsed time, to see where they
+                //wanna go
+            })
+
+
+        Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+        serverQueue.dispatcher = Dispatcher;
+    }
+    else {
+        console.log("inside of else")
+
+        let guildDB = await findGuild({ id: guild.id });
+        guildDB.songs.push(song.id);
+        guildDB.duration = guildDB.duration + Number(song.duration);
+        Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, { clobber: false }, function (err, doc, res) { if (err) console.log(err) });
+        console.log("before remo")
+        await removeLastModifiedSong();
+        console.log("after remove")
+
+        let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
+        youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
+        youtubeResolve.on('finish', () => { mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
+        youtubeResolve.on('end', () => { console.log("endy") })
+
+        const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
+
+        const Dispatcher = await serverQueue.connection.play(youtubeResolve, {seek: shift})
+            .on('error', error => {
+                console.log(error);
+            })
+            .on('finish', () => {
+
+                serverQueue.songs.shift();
+                playSong(guild, serverQueue.songs[0]);
+            })
+            .on('start', () => {
+ 
+                //I can use this to keep track of ellapsed time, if someone wants to forward or rewind, I can take the difference in ellapsed time, to see where they
+                //wanna go
+            })
+
+
+        Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+        serverQueue.dispatcher = Dispatcher;
+    }
+}
+
+
+async function removeLastModifiedSong() {
+
+    const directory = __dirname + `\\songs`;
+    let song;
+    await fs.readdir(directory, async (err, files) => {
+        if (err) throw err;
+
+        for (const file of files) {
+            if (file != "finished") {
+
+                let stats = fs.statSync(path.join(directory, file));
+
+                if (!song) song = { file: path.join(directory, file), time: stats.aTimeMs }
+
+                if (stats.aTimeMs < song.time) song = { file: path.join(directory, file), time: stats.aTimeMs }
+
+            }
+        }
+
+        console.log("trying to unlink");
+        if (song)
+            fs.unlink(song.file, () => { });
+    });
+}
+
+async function removeTempSongs() {
+    const directory = __dirname + `\\songs`;
+    fs.readdir(directory, (err, files) => {
+        if (err) throw err;
+
+        for (const file of files) {
+
+            if (file != "finished") {
+                fs.unlink(path.join(directory, file), err => {
+                    if (err) throw err;
+                });
+            }
+        }
+    });
 }
 
 async function graphs() {
@@ -2619,6 +2755,9 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
+
+
+//if there is no delay on skipping right away after loading a song first time through, then if there is an initial offset, just play normal and then im
 
 //check how fredboat handles skips and stuff. is there a pause or is it
 
