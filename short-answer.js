@@ -2423,9 +2423,9 @@ async function playSong(guild, song) {
         guildDB.songs.push(song.id);
         guildDB.duration = guildDB.duration + Number(song.duration);
         Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, { clobber: false }, function (err, doc, res) { if (err) console.log(err) });
-        console.log("before remo")
+
         await removeLastModifiedSong();
-        console.log("after remove")
+
 
         let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
         youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
@@ -2458,7 +2458,7 @@ async function playSong(guild, song) {
 
 async function removeLastModifiedSong() {
 
-    const directory = __dirname + `\\songs`;
+    const directory = path.join(__dirname, `songs`);
     let song;
     await fs.readdir(directory, async (err, files) => {
         if (err) throw err;
@@ -2474,15 +2474,13 @@ async function removeLastModifiedSong() {
 
             }
         }
-
-        console.log("trying to unlink");
         if (song)
             fs.unlink(song.file, () => { });
     });
 }
 
 async function removeTempSongs() {
-    const directory = __dirname + `\\songs`;
+    const directory = path.join(__dirname, `songs`);
     fs.readdir(directory, (err, files) => {
         if (err) throw err;
 
