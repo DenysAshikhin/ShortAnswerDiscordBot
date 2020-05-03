@@ -476,13 +476,10 @@ async function commandMatcher(message, command, params, user) {
             //fieldArray.push({ name: check.result[i].item, value: i, inline: false })
             fieldArray.push({ name: `${i} - ` + check.result[i].item, value: "** **", inline: false })
         }
-
-        const newEmbed = {
-            ...Embed,
-            date: new Date,
-            description: `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
-            fields: fieldArray
-        }
+        let newEmbed = JSON.parse(JSON.stringify(Embed));
+        newEmbed.date = new Date();
+        newEmbed.description = `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`;
+        newEmbed.fields = fieldArray;
 
         message.channel.send({ embed: newEmbed })
         specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
@@ -694,13 +691,11 @@ function createTutorialEmbed(tutorialStep) {
 
     }
 
-    let newEmbed = {
-        ...Embed,
-        title: Embed.title + " Game Tutorial",
-        date: new Date,
-        description: prompt,
-        fields: fieldArray
-    }
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.date = new Date();
+    newEmbed.title += " Game Tutorial";
+    newEmbed.description = prompt;
+    newEmbed.fields = fieldArray;
 
     return newEmbed;
 }
@@ -836,12 +831,12 @@ async function personalGames(message, params, user) {
         fieldArray.push({ name: `${i}) ` + games[i], value: "** **", inline: false })
 
         if (i % 24 == 0 && i > 0) {
-            let gameEmbed = {
-                ...Embed,
-                date: new Date(),
-                description: display + " here are the games you are signed up for:",
-                fields: fieldArray
-            }
+
+            let gameEmbed = JSON.parse(JSON.stringify(Embed));
+            gameEmbed.date = new Date();
+            gameEmbed.description = display + " here are the games you are signed up for:";
+            gameEmbed.fields = fieldArray;
+
             await message.channel.send({ embed: gameEmbed });
             fieldArray = new Array();
             left = false;
@@ -850,12 +845,12 @@ async function personalGames(message, params, user) {
 
     if (games.length > 0) {
         if (left) {
-            let gameEmbed = {
-                ...Embed,
-                date: new Date(),
-                description: display + " here are the games you are signed up for:",
-                fields: fieldArray
-            }
+
+            let gameEmbed = JSON.parse(JSON.stringify(Embed));
+            gameEmbed.date = new Date();
+            gameEmbed.description = display + " here are the games you are signed up for:";
+            gameEmbed.fields = fieldArray;
+
             message.channel.send({ embed: gameEmbed });
         }
 
@@ -969,19 +964,18 @@ async function topStats(message) {
     }
 
 
-    let statsEmbed = {
-        ...Embed,
-        date: new Date(),
-        title: Embed.title + ` - Top Stats for ${message.guild.name}!`,
-        thumbnail: { url: message.guild.iconURL() },
-        fields: [
-            { name: `The Silent Type: ${silentType.displayName}`, value: `${silentType.messages[silentTypeIndex]} messages sent.` },
-            { name: `The Loud Mouth: ${loudMouth.displayName}`, value: `${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.` },
-            { name: `The Ghost: ${ghost.displayName}`, value: `${ghost.timeAFK[ghostIndex]} minutes spent AFK.` },
-            { name: `The MIA: ${MIA.displayName}`, value: findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date." },
-            { name: `The Summoner: ${summoner.displayName}`, value: `${summoner.summoner[summonerIndex]} summoning rituals completed.` }
-        ]
-    }
+    let statsEmbed = JSON.parse(JSON.stringify(Embed));
+    statsEmbed.date = new Date();
+    statsEmbed.title = Embed.title + ` - Top Stats for ${message.guild.name}!`;
+    statsEmbed.thumbnail.url = message.guild.iconURL();
+    statsEmbed.fields = [
+        { name: `The Silent Type: ${silentType.displayName}`, value: `${silentType.messages[silentTypeIndex]} messages sent.` },
+        { name: `The Loud Mouth: ${loudMouth.displayName}`, value: `${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.` },
+        { name: `The Ghost: ${ghost.displayName}`, value: `${ghost.timeAFK[ghostIndex]} minutes spent AFK.` },
+        { name: `The MIA: ${MIA.displayName}`, value: findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date." },
+        { name: `The Summoner: ${summoner.displayName}`, value: `${summoner.summoner[summonerIndex]} summoning rituals completed.` }
+    ];
+
 
     message.channel.send({ embed: statsEmbed });
 }
@@ -1012,23 +1006,22 @@ async function getStats(member, user) {
     if (!user.kicked[index]) {
         let stats = "";
 
-        statsEmbed = {
-            ...Embed,
-            date: new Date(),
-            title: Embed.title,
-            fields: [
-                { name: "Total number of messages sent: ", value: user.messages[index], inline: false },
-                { name: "Last message sent: ", value: user.lastMessage[index], inline: false },
-                { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: false },
-                { name: "Last time you talked was: ", value: user.lastTalked[index], inline: false },
-                { name: "The games you are signed up for: ", value: user.games, inline: false },
-                { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: false },
-                { name: "You joined this server on: ", value: user.dateJoined[index], inline: false },
-                { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: false },
-                { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: false },
-                { name: "Number of succesful summons: ", value: user.summoner[index], inline: false },
-            ]
-        }
+
+        let statsEmbed = JSON.parse(JSON.stringify(Embed));
+        statsEmbed.date = new Date();
+        statsEmbed.fields = [
+            { name: "Total number of messages sent: ", value: user.messages[index], inline: false },
+            { name: "Last message sent: ", value: user.lastMessage[index], inline: false },
+            { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: false },
+            { name: "Last time you talked was: ", value: user.lastTalked[index], inline: false },
+            { name: "The games you are signed up for: ", value: user.games, inline: false },
+            { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: false },
+            { name: "You joined this server on: ", value: user.dateJoined[index], inline: false },
+            { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: false },
+            { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: false },
+            { name: "Number of succesful summons: ", value: user.summoner[index], inline: false },
+        ];
+
         return statsEmbed;
     }
     return -1;
@@ -1045,42 +1038,37 @@ async function personalStats(message, params, user) {
     }
     else {
 
-        message.channel.send({
-            embed: {
-                ...Embed,
-                date: new Date(),
-                title: Embed.title,
-                description: ` ${message.author.username} Here Are Your General Stats!`,
-                thumbnail: { url: message.author.avatarURL() },
-                fields: [
-                    { name: "The games you are signed up for: ", value: user.games },
-                    { name: "Whether you are excluded from pings: ", value: user.excludePing },
-                    { name: "Whether you are excluded from DMs: ", value: user.excludeDM }
-                ]
-            }
-        });
+
+        let statsEmbed = JSON.parse(JSON.stringify(Embed));
+        statsEmbed.date = new Date();
+        statsEmbed.description = ` ${message.author.username} Here Are Your General Stats!`;
+        statsEmbed.fields = [
+            { name: "The games you are signed up for: ", value: user.games },
+            { name: "Whether you are excluded from pings: ", value: user.excludePing },
+            { name: "Whether you are excluded from DMs: ", value: user.excludeDM }
+        ];
+
+        message.channel.send({ embed: statsEmbed });
 
         for (let i = 0; i < user.guilds.length; i++) {
 
             if (!user.kicked[i]) {
                 let stats = "";
 
-                statsEmbed = {
-                    ...Embed,
-                    date: new Date(),
-                    title: Embed.title,
-                    description: `Here Are Your Stats For ${message.client.guilds.cache.get(user.guilds[i]).name} Server!`,
-                    thumbnail: { url: message.client.guilds.cache.get(user.guilds[i]).iconURL() },
-                    fields: [
-                        { name: "Total number of messages sent: ", value: user.messages[i], inline: false },
-                        { name: "Last message sent: ", value: user.lastMessage[i], inline: false },
-                        { name: "Total time spent talking (in minutes): ", value: user.timeTalked[i], inline: false },
-                        { name: "Last time you talked was: ", value: user.lastTalked[i], inline: false },
-                        { name: "Time spent AFK (in minutes): ", value: user.timeAFK[i], inline: false },
-                        { name: "You joined this server on: ", value: user.dateJoined[i], inline: false },
-                        { name: "Number of succesful summons: ", value: user.summoner[i], inline: false },
-                    ]
-                }
+                let statsEmbed = JSON.parse(JSON.stringify(Embed));
+                statsEmbed.date = new Date();
+                statsEmbed.description = `Here Are Your Stats For ${message.client.guilds.cache.get(user.guilds[i]).name} Server!`;
+                statsEmbed.thumbnail.url = message.client.guilds.cache.get(user.guilds[i]).iconURL();
+                statsEmbed.fields = [
+                    { name: "Total number of messages sent: ", value: user.messages[i], inline: false },
+                    { name: "Last message sent: ", value: user.lastMessage[i], inline: false },
+                    { name: "Total time spent talking (in minutes): ", value: user.timeTalked[i], inline: false },
+                    { name: "Last time you talked was: ", value: user.lastTalked[i], inline: false },
+                    { name: "Time spent AFK (in minutes): ", value: user.timeAFK[i], inline: false },
+                    { name: "You joined this server on: ", value: user.dateJoined[i], inline: false },
+                    { name: "Number of succesful summons: ", value: user.summoner[i], inline: false },
+                ];
+
                 message.channel.send({ embed: statsEmbed });
             }
         }
@@ -1101,23 +1089,18 @@ function search(message, searches) {
     }
 
     let foundOne = false;
-    let gameEmbed = {
-        ...Embed,
-        fields: []
-    }
+
+
+    let gameEmbed = JSON.parse(JSON.stringify(Embed));
 
     for (let i = 0; i < searches.length; i++) {
 
         let query = searches[i];
         if (query.length > 0) {
 
-
-            gameEmbed = {
-                ...Embed,
-                date: new Date(),
-                description: `Here are the results for: ${query}`,
-                fields: []
-            }
+            let gameEmbed = JSON.parse(JSON.stringify(Embed));
+            gameEmbed.date = new Date();
+            gameEmbed.description = `Here are the results for: ${query}`;
 
             let fuse = new Fuse(games, options);
             let result = fuse.search(query);
@@ -1276,13 +1259,10 @@ function study(message, query) {
 
 function helpMiscellaneous(message) {
 
-    let miscEmbed = {
-        ...Embed,
-        date: new Date(),
-        title: Embed.title + ` Miscellaneous Commands`,
-        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
-        fields: []
-    }
+    let miscEmbed = JSON.parse(JSON.stringify(Embed));
+    miscEmbed.time = new Date();
+    miscEmbed.title = Embed.title + ` Miscellaneous Commands`;
+    miscEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
     for (let i = 0; i < Commands.commands.length; i++)
         if (Commands.subsection[i].includes(3))
@@ -1293,13 +1273,11 @@ function helpMiscellaneous(message) {
 
 function helpStats(message, params, user) {
 
-    let newEmbed = {
-        ...Embed,
-        date: new Date(),
-        title: Embed.title + ` Stats Commands`,
-        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
-        fields: []
-    }
+
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.time = new Date();
+    newEmbed.title = Embed.title + ` Stats Commands`;
+    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
     for (let i = 0; i < Commands.commands.length; i++)
         if (Commands.subsection[i].includes(2))
@@ -1310,13 +1288,10 @@ function helpStats(message, params, user) {
 
 function helpMusic(message, params, user) {
 
-    let newEmbed = {
-        ...Embed,
-        date: new Date(),
-        title: Embed.title + ` Music Commands`,
-        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
-        fields: []
-    }
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.time = new Date();
+    newEmbed.title = Embed.title + ` Music Commands`;
+    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
     for (let i = 0; i < Commands.commands.length; i++)
         if (Commands.subsection[i].includes(4))
@@ -1327,13 +1302,10 @@ function helpMusic(message, params, user) {
 
 function gameHelp(message, params, user) {
 
-    let newEmbed = {
-        ...Embed,
-        date: new Date(),
-        title: Embed.title + ` Game Commands`,
-        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
-        fields: []
-    }
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.time = new Date();
+    newEmbed.title = Embed.title + ` Game Commands`,
+        newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
     for (let i = 0; i < Commands.commands.length; i++)
         if (Commands.subsection[i].includes(1))
@@ -1344,24 +1316,22 @@ function gameHelp(message, params, user) {
 
 function generalHelp(message, params, user) {
 
-    let newEmbed = {
-        ...Embed,
-        date: new Date(),
-        title: Embed.title + ` General Help`,
-        description: `You can find out more information about any command or group by typing ${prefix}help *Command*` + "```1) " + prefix + "help Games" + "\n2) " + prefix + "help Ping" + "```",
-        fields: [
-            { name: "Games", value: "", inline: true },
-            { name: "Stats", value: "", inline: true },
-            { name: "Miscellaneous", value: "", inline: true },
-            { name: "Music", value: "", inline: true },
-            { name: "Admins", value: "", inline: true },
-            { name: "Quality of Life", value: "", inline: true },
-            { name: "Help", value: "", inline: true },
-            { name: "General", value: "", inline: true },
-            { name: "Tutorials", value: "", inline: true },
-            { name: "Bugs/Suggestions", value: "", inline: true },
-        ]
-    }
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.time = new Date();
+    newEmbed.title = Embed.title + ` General Help`;
+    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
+    newEmbed.fields = [
+        { name: "Games", value: "", inline: true },
+        { name: "Stats", value: "", inline: true },
+        { name: "Miscellaneous", value: "", inline: true },
+        { name: "Music", value: "", inline: true },
+        { name: "Admins", value: "", inline: true },
+        { name: "Quality of Life", value: "", inline: true },
+        { name: "Help", value: "", inline: true },
+        { name: "General", value: "", inline: true },
+        { name: "Tutorials", value: "", inline: true },
+        { name: "Bugs/Suggestions", value: "", inline: true },
+    ];
 
     for (tag of tags) {
 
@@ -1380,13 +1350,11 @@ function generalHelp(message, params, user) {
 
 function gameHelp(message, params, user) {
 
-    let newEmbed = {
-        ...Embed,
-        date: new Date(),
-        title: Embed.title + ` Game Commands`,
-        description: `You can find out more information about any command by typing ${prefix}help *Command*`,
-        fields: []
-    }
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.time = new Date();
+    newEmbed.title = Embed.title + ` Game Commands`;
+    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
+
 
     for (let i = 0; i < Commands.commands.length; i++)
         if (Commands.subsection[i].includes(1))
@@ -1652,12 +1620,11 @@ function removeGame(message, game, user) {
 
                 let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
-                removeEmbed = {
-                    ...Embed,
-                    date: new Date(),
-                    description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-                    fields: []
-                }
+                let removeEmbed = JSON.parse(JSON.stringify(Embed));
+                removeEmbed.time = new Date();
+                removeEmbed.title = Embed.title + ` Game Commands`;
+                removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+
 
                 for (suggestion of prettyArray)
                     removeEmbed.fields.push({ name: suggestion, value: "** **" });
@@ -1698,11 +1665,9 @@ function removeGame(message, game, user) {
 
         gameArr.sort();
 
-        let finalEmbed = {
-            ...Embed,
-            date: new Date(),
-            fields: []
-        }
+
+        let finalEmbed = JSON.parse(JSON.stringify(Embed));
+        finalEmbed.time = new Date();
 
 
         if (invalidGames.length > 0) {
@@ -1756,11 +1721,9 @@ async function gameStats(message, params, user) {
     if (message.channel.type != 'dm') {
         let game = Array.isArray(params) ? params[0].trim() : params;
 
-        let finalEmbed = {
-            ...Embed,
-            date: new Date(),
-            fields: []
-        }
+
+        let finalEmbed = JSON.parse(JSON.stringify(Embed));
+        finalEmbed.time = new Date();
 
         let check = checkGame(games, params, user);
 
@@ -1773,12 +1736,11 @@ async function gameStats(message, params, user) {
 
             let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
-            removeEmbed = {
-                ...Embed,
-                date: new Date(),
-                description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-                fields: []
-            }
+
+
+            let removeEmbed = JSON.parse(JSON.stringify(Embed));
+            removeEmbed.time = new Date();
+            removeEmbed.discription = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
             for (suggestion of prettyArray)
                 removeEmbed.fields.push({ name: suggestion, value: "** **" });
@@ -1820,13 +1782,14 @@ async function topGames(message, params) {
     if (message.channel.type != 'dm') {
         let users = await getUsers();
         let gameMap = new Map();
-        let finalEmbed = {
-            ...Embed,
-            date: new Date(),
-            description: "Here are the top stats for " + message.guild.name,
-            thumbnail: { url: message.guild.iconURL() },
-            fields: []
-        }
+
+
+
+        let finalEmbed = JSON.parse(JSON.stringify(Embed));
+        finalEmbed.time = new Date();
+        finalEmbed.discription = "Here are the top stats for " + message.guild.name;
+        finalEmbed.thumbnail.url = message.guild.iconURL();
+
 
         for (let i = 0; i < users.length; i++) {
 
@@ -1915,12 +1878,10 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
         let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
-        removeEmbed = {
-            ...Embed,
-            date: new Date(),
-            description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-            fields: []
-        }
+        let removeEmbed = JSON.parse(JSON.stringify(Embed));
+        removeEmbed.time = new Date();
+        removeEmbed.discription = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+
 
         for (suggestion of prettyArray)
             removeEmbed.fields.push({ name: suggestion, value: "** **" });
@@ -1972,14 +1933,15 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
         console.log(`FINAL: ${signedUp}`)
 
+        let finalEmbed = JSON.parse(JSON.stringify(Embed));
+        finalEmbed.time = new Date();
+        finalEmbed.discription = message.member.displayName + " has summoned " + signedUp + " for some " + game;
+
+
+
+
         if (signedUp.length > 3)
-            message.channel.send({
-                embed: {
-                    ...Embed,
-                    date: new Date(),
-                    description: message.member.displayName + " has summoned " + signedUp + " for some " + game
-                }
-            });
+            message.channel.send({ embed: finalEmbed });
         else
             message.channel.send("No one has signed up for " + game + ".");
         let index = user.guilds.indexOf(message.guild.id);
@@ -2139,7 +2101,7 @@ async function skip(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) {
         queue.get(message.guild.id).songs.shift();
-        
+
         playSong(message.guild, queue.get(message.guild.id).songs[0]);
     }
 }
@@ -2226,12 +2188,10 @@ async function generalMatcher(message, params, user, searchArray, originalComman
                 fieldArray.push({ name: `${i} - ` + completeCheck.result[i].item, value: "** **", inline: false })
             }
 
-            const newEmbed = {
-                ...Embed,
-                date: new Date,
-                description: `${command} is not a valid parameter, if you meant one of the following, simply type the **number** you wish to use:`,
-                fields: fieldArray
-            }
+            let newEmbed = JSON.parse(JSON.stringify(Embed));
+            newEmbed.time = new Date();
+            newEmbed.discription = `${command} is not a valid parameter, if you meant one of the following, simply type the **number** you wish to use:`;
+            newEmbed.fields = fieldArray;
 
             message.channel.send({ embed: newEmbed })
             specificCommandCreator(originalCommand, [message, -1, params, user], completeCheck.result, user);
@@ -2376,7 +2336,7 @@ async function play(message, params) {
 }
 
 
-var songsInProgress= new Map();
+var songsInProgress = new Map();
 
 
 
@@ -2403,7 +2363,7 @@ async function playSong(guild, song) {
         console.log('EXists')
 
         const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
-        if(serverQueue.dispatcher) console.log(serverQueue.dispatcher.pauseTime)
+        if (serverQueue.dispatcher) console.log(serverQueue.dispatcher.pauseTime)
         const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: shift })
             .on('end', () => {
                 console.log("IN END")
@@ -2426,7 +2386,7 @@ async function playSong(guild, song) {
         Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.dispatcher = Dispatcher;
     }
-    else if(fs.existsSync(tempAudio)){
+    else if (fs.existsSync(tempAudio)) {
 
     }
     else {
@@ -2443,12 +2403,12 @@ async function playSong(guild, song) {
         let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
         youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
         youtubeResolve.on('progress', onProgress)
-        youtubeResolve.on('finish', () => {console.log("FINISHED"); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
+        youtubeResolve.on('finish', () => { console.log("FINISHED"); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
         youtubeResolve.on('end', () => { console.log("endy") })
 
         const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
 
-        const Dispatcher = await serverQueue.connection.play(youtubeResolve, {seek: shift})
+        const Dispatcher = await serverQueue.connection.play(youtubeResolve, { seek: shift })
             .on('error', error => {
                 console.log("inside of error");
             })
@@ -2458,7 +2418,7 @@ async function playSong(guild, song) {
                 playSong(guild, serverQueue.songs[0]);
             })
             .on('start', () => {
- 
+
                 //I can use this to keep track of ellapsed time, if someone wants to forward or rewind, I can take the difference in ellapsed time, to see where they
                 //wanna go
             })
@@ -2478,7 +2438,7 @@ const onProgress = (chunkLength, downloaded, total) => {
     readline.cursorTo(process.stdout, 0);
     process.stdout.write(`${(percent * 100).toFixed(2)}% downloaded `);
     process.stdout.write(`(${(downloaded / 1024 / 1024).toFixed(2)}MB of ${(total / 1024 / 1024).toFixed(2)}MB)\n`);
-  };
+};
 
 async function removeLastModifiedSong() {
 
@@ -2622,13 +2582,10 @@ async function updateGames(message, game, user) {
         else if (check.result[0].score != 0) {
 
             let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+            let removeEmbed = JSON.parse(JSON.stringify(Embed));
+            removeEmbed.date = new Date();
+            removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
-            removeEmbed = {
-                ...Embed,
-                date: new Date(),
-                description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-                fields: []
-            }
 
             for (suggestion of prettyArray)
                 removeEmbed.fields.push({ name: suggestion, value: "** **" });
@@ -2677,13 +2634,8 @@ async function updateGames(message, game, user) {
         }
     }
 
-
-    let finalEmbed = {
-        ...Embed,
-        date: new Date(),
-        fields: []
-    }
-
+    let finalEmbed = JSON.parse(JSON.stringify(Embed));
+    finalEmbed.time = new Date();
 
     if (finalGameArray.length > 0) {
         finalGameArray.sort();
