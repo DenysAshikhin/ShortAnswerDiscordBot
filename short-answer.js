@@ -2092,7 +2092,6 @@ async function pause(message) {
         }
 
         guildQueue.dispatcher.pause();
-        message.channel.send(`I have been playing this song for: ${guildQueue.dispatcher.streamTime / 1000}`)
     }
 
 }
@@ -2100,16 +2099,16 @@ async function pause(message) {
 async function resume(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
-    
+
     if (guildQueue) {
 
-        if(guildQueue.paused){
-            
-            guildQueue.pausedTime = (new Time() - guildQueue.paused) * 1000 + guildQueue.pausedTime;
+        if (guildQueue.paused) {
+
+            guildQueue.pausedTime = (new Date() - guildQueue.paused) * 1000 + guildQueue.pausedTime;
             guildQueue.paused = null;
         }
         queue.get(message.guild.id).dispatcher.resume();
-        message.channl.send(`I have paused this song for ${guldQueue.pausedTime} seconds!`)
+        message.channel.send(`I have paused this song for ${guildQueue.pausedTime} seconds!`)
     }
 }
 
@@ -2305,8 +2304,8 @@ async function play(message, params) {
                     start: new Date(),
                     offset: 0,
                     id: video.id,
-                    paused: null,
-                    timePaused: 0,
+                    paused: false,
+                    timePaused: null,
                     started: false,
                     progress: 0
                 });
@@ -2316,7 +2315,7 @@ async function play(message, params) {
     }
     else if (await ytdl.validateURL(args)) {
         songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
-
+        console.log(songInfo)
         let startTime = args.lastIndexOf('?t=');
         let offset = 0;
 
@@ -2333,8 +2332,8 @@ async function play(message, params) {
             start: new Date(),
             offset: offset,
             id: songInfo.video_id,
-            paused: null,
-            timePaused: 0,
+            paused: false,
+            timePaused: null,
             started: false,
             progress: 0
         };
@@ -2369,6 +2368,16 @@ async function play(message, params) {
     }
 }
 
+
+/*
+
+NEED TO CHECK NULL VIDEOS FOR PLAYLISTS AS WELL?????
+*/
+
+
+
+
+
 async function playSong(guild, song, skip) {
     const serverQueue = queue.get(guild.id);
 
@@ -2388,7 +2397,6 @@ async function playSong(guild, song, skip) {
     if (fs.existsSync(audioOutput)) {
 
         console.log('EXists')
-
 
         const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: shift })
             .on('end', () => {
@@ -2424,21 +2432,30 @@ async function playSong(guild, song, skip) {
             //await removeLastModifiedSong();
         }
 
-        let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
+        let downloadYTDL = require('ytdl-core');
+        let youtubeResolve = downloadYTDL(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
 
         if (!fs.existsSync(tempAudio)) {
-            youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
-            youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
-                const percent = downloaded / total;
-                readline.cursorTo(process.stdout, 0);
-                song.progress = Math.floor((percent * 100).toFixed(2));
-                //console.log(`Song ${song.title} is ${song.progress}% finished!`)
-            })
-            youtubeResolve.on('finish', () => { console.log("FINISHED: " + song.title); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
-            youtubeResolve.on('end', () => { })
+        console.log("interesting")
+        let writeStream = fs.createWriteStream(tempAudio);
+        writeStream.on('finish', () => {
+            console.log("FINISHED: WRITE STREAM " + song.title + `|| ${song.progress}`);
+            mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) })
+        })
+
+
+        youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+            const percent = downloaded / total;
+            readline.cursorTo(process.stdout, 0);
+            song.progress = Math.floor((percent * 100).toFixed(2));
+        });
+        youtubeResolve.pipe(writeStream);
         }
 
-        const Dispatcher = await serverQueue.connection.play(youtubeResolve, { seek: shift })
+        //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
+        let streamResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
+
+        const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: shift })
             .on('error', error => {
                 console.log("inside of error");
             })
