@@ -1260,7 +1260,7 @@ function study(message, query) {
 function helpMiscellaneous(message) {
 
     let miscEmbed = JSON.parse(JSON.stringify(Embed));
-    miscEmbed.time = new Date();
+    miscEmbed.timestamp = new Date();
     miscEmbed.title = Embed.title + ` Miscellaneous Commands`;
     miscEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
@@ -1275,7 +1275,7 @@ function helpStats(message, params, user) {
 
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.time = new Date();
+    newEmbed.timestamp = new Date();
     newEmbed.title = Embed.title + ` Stats Commands`;
     newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
@@ -1289,7 +1289,7 @@ function helpStats(message, params, user) {
 function helpMusic(message, params, user) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.time = new Date();
+    newEmbed.timestamp = new Date();
     newEmbed.title = Embed.title + ` Music Commands`;
     newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
@@ -1303,7 +1303,7 @@ function helpMusic(message, params, user) {
 function gameHelp(message, params, user) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.time = new Date();
+    newEmbed.timestamp = new Date();
     newEmbed.title = Embed.title + ` Game Commands`,
         newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
@@ -1317,7 +1317,7 @@ function gameHelp(message, params, user) {
 function generalHelp(message, params, user) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.time = new Date();
+    newEmbed.timestamp = new Date();
     newEmbed.title = Embed.title + ` General Help`;
     newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
     newEmbed.fields = [
@@ -1351,7 +1351,7 @@ function generalHelp(message, params, user) {
 function gameHelp(message, params, user) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.time = new Date();
+    newEmbed.timestamp = new Date();
     newEmbed.title = Embed.title + ` Game Commands`;
     newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
@@ -1621,7 +1621,7 @@ function removeGame(message, game, user) {
                 let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
                 let removeEmbed = JSON.parse(JSON.stringify(Embed));
-                removeEmbed.time = new Date();
+                removeEmbed.timestamp = new Date();
                 removeEmbed.title = Embed.title + ` Game Commands`;
                 removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
@@ -1667,7 +1667,7 @@ function removeGame(message, game, user) {
 
 
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
-        finalEmbed.time = new Date();
+        finalEmbed.timestamp = new Date();
 
 
         if (invalidGames.length > 0) {
@@ -1723,7 +1723,7 @@ async function gameStats(message, params, user) {
 
 
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
-        finalEmbed.time = new Date();
+        finalEmbed.timestamp = new Date();
 
         let check = checkGame(games, params, user);
 
@@ -1739,7 +1739,7 @@ async function gameStats(message, params, user) {
 
 
             let removeEmbed = JSON.parse(JSON.stringify(Embed));
-            removeEmbed.time = new Date();
+            removeEmbed.timestamp = new Date();
             removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
             for (suggestion of prettyArray)
@@ -1786,7 +1786,7 @@ async function topGames(message, params) {
 
 
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
-        finalEmbed.time = new Date();
+        finalEmbed.timestamp = new Date();
         finalEmbed.description = "Here are the top stats for " + message.guild.name;
         finalEmbed.thumbnail.url = message.guild.iconURL();
 
@@ -1879,7 +1879,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
         let removeEmbed = JSON.parse(JSON.stringify(Embed));
-        removeEmbed.time = new Date();
+        removeEmbed.timestamp = new Date();
         removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
 
@@ -1931,7 +1931,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         }//Each user for loop
 
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
-        finalEmbed.time = new Date();
+        finalEmbed.timestamp = new Date();
         finalEmbed.description = message.member.displayName + " has summoned " + signedUp + " for some " + game;
 
         if (signedUp.length > 3)
@@ -2183,7 +2183,7 @@ async function generalMatcher(message, params, user, searchArray, originalComman
             }
 
             let newEmbed = JSON.parse(JSON.stringify(Embed));
-            newEmbed.time = new Date();
+            newEmbed.timestamp = new Date();
             newEmbed.description = `${command} is not a valid parameter, if you meant one of the following, simply type the **number** you wish to use:`;
             newEmbed.fields = fieldArray;
 
@@ -2393,30 +2393,33 @@ async function playSong(guild, song, skip) {
         Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.dispatcher = Dispatcher;
     }
-    else if(skip){
+    else if (skip) {
 
     }
     else {
         console.log("inside of else")
 
-        // let guildDB = await findGuild({ id: guild.id });
-        // guildDB.songs.push(song.id);
-        // guildDB.duration = guildDB.duration + Number(song.duration);
-        // Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, function (err, doc, res) { if (err) console.log(err) });
-        //await removeLastModifiedSong();
-
+        { // let guildDB = await findGuild({ id: guild.id });
+            // guildDB.songs.push(song.id);
+            // guildDB.duration = guildDB.duration + Number(song.duration);
+            // Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, function (err, doc, res) { if (err) console.log(err) });
+            //await removeLastModifiedSong();
+        }
 
         let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
-        youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
-        youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
-            const percent = downloaded / total;
-            readline.cursorTo(process.stdout, 0);
-            song.progress = Math.floor((percent * 100).toFixed(2));
-            //console.log(`Song ${song.title} is ${song.progress}% finished!`)
-        })
-        youtubeResolve.on('finish', () => { console.log("FINISHED: " + song.title); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
-        youtubeResolve.on('end', () => { })
 
+        if (!fs.existsSync(tempAudio)){
+            youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
+            youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+                const percent = downloaded / total;
+                readline.cursorTo(process.stdout, 0);
+                song.progress = Math.floor((percent * 100).toFixed(2));
+                //console.log(`Song ${song.title} is ${song.progress}% finished!`)
+            })
+            youtubeResolve.on('finish', () => { console.log("FINISHED: " + song.title); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
+            youtubeResolve.on('end', () => { })
+        }
+        
         const Dispatcher = await serverQueue.connection.play(youtubeResolve, { seek: shift })
             .on('error', error => {
                 console.log("inside of error");
@@ -2643,7 +2646,7 @@ async function updateGames(message, game, user) {
     }
 
     let finalEmbed = JSON.parse(JSON.stringify(Embed));
-    finalEmbed.time = new Date();
+    finalEmbed.timestamp = new Date();
 
     if (finalGameArray.length > 0) {
         finalGameArray.sort();
@@ -2738,6 +2741,8 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
+
+//general matcher - have an array of visible options, internal options, do differerentiate the two if needed
 
 //if there is no delay on skipping right away after loading a song first time through, then if there is an initial offset, just play normal and then im
 
