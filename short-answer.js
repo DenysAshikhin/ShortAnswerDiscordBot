@@ -2083,11 +2083,34 @@ async function reactAnswers(message) {
 
 async function pause(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    if (queue.get(message.guild.id)) {
-        queue.get(message.guild.id).dispatcher.pause();
-        message.channel.send(`I have been playing this song for: ${queue.get(message.guild.id).dispatcher.streamTime / 1000}`)
+
+    let guildQueue = queue.get(message.guild.id);
+    if (guildQueue) {
+
+        if (!guildQueue.paused) {
+            guildQueue.paused = new Date();
+        }
+
+        guildQueue.dispatcher.pause();
+        message.channel.send(`I have been playing this song for: ${guildQueue.dispatcher.streamTime / 1000}`)
     }
 
+}
+
+async function resume(message) {
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    let guildQueue = queue.get(message.guild.id);
+    
+    if (guildQueue) {
+
+        if(guildQueue.paused){
+            
+            guildQueue.pausedTime = (new Time() - guildQueue.paused) * 1000 + guildQueue.pausedTime;
+            guildQueue.paused = null;
+        }
+        queue.get(message.guild.id).dispatcher.resume();
+        message.channl.send(`I have paused this song for ${guldQueue.pausedTime} seconds!`)
+    }
 }
 
 async function skip(message) {
@@ -2107,11 +2130,6 @@ async function stop(message) {
         queue.get(message.guild.id).voiceChannel.leave();
         queue.delete(message.guild.id);
     }
-}
-
-async function resume(message) {
-    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    if (queue.get(message.guild.id)) { queue.get(message.guild.id).dispatcher.resume(); }
 }
 
 function hmsToSecondsOnly(str) {
@@ -2287,7 +2305,7 @@ async function play(message, params) {
                     start: new Date(),
                     offset: 0,
                     id: video.id,
-                    paused: false,
+                    paused: null,
                     timePaused: 0,
                     started: false,
                     progress: 0
@@ -2315,7 +2333,7 @@ async function play(message, params) {
             start: new Date(),
             offset: offset,
             id: songInfo.video_id,
-            paused: false,
+            paused: null,
             timePaused: 0,
             started: false,
             progress: 0
@@ -2408,7 +2426,7 @@ async function playSong(guild, song, skip) {
 
         let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
 
-        if (!fs.existsSync(tempAudio)){
+        if (!fs.existsSync(tempAudio)) {
             youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
             youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
                 const percent = downloaded / total;
@@ -2419,7 +2437,7 @@ async function playSong(guild, song, skip) {
             youtubeResolve.on('finish', () => { console.log("FINISHED: " + song.title); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
             youtubeResolve.on('end', () => { })
         }
-        
+
         const Dispatcher = await serverQueue.connection.play(youtubeResolve, { seek: shift })
             .on('error', error => {
                 console.log("inside of error");
