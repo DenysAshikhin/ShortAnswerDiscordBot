@@ -25,6 +25,7 @@
     "mv": "^2.1.1",
     "node-opus": "^0.3.3",
     "nodemon": "^2.0.3",
+    "writable-stream-parallel": "^0.1.0",
     "ytdl-core-discord": "^1.2.0",
     "ytpl": "^0.1.20",
     "ytsr": "^0.1.13"

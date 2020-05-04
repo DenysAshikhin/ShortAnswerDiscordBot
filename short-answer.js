@@ -1740,7 +1740,7 @@ async function gameStats(message, params, user) {
 
             let removeEmbed = JSON.parse(JSON.stringify(Embed));
             removeEmbed.time = new Date();
-            removeEmbed.discription = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+            removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
             for (suggestion of prettyArray)
                 removeEmbed.fields.push({ name: suggestion, value: "** **" });
@@ -1787,7 +1787,7 @@ async function topGames(message, params) {
 
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
         finalEmbed.time = new Date();
-        finalEmbed.discription = "Here are the top stats for " + message.guild.name;
+        finalEmbed.description = "Here are the top stats for " + message.guild.name;
         finalEmbed.thumbnail.url = message.guild.iconURL();
 
 
@@ -1880,7 +1880,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
         let removeEmbed = JSON.parse(JSON.stringify(Embed));
         removeEmbed.time = new Date();
-        removeEmbed.discription = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+        removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
 
         for (suggestion of prettyArray)
@@ -1929,16 +1929,10 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                 }
             }
         }//Each user for loop
-        // message.member.displayName + " has summoned " + signedUp + " for some " + game
-
-        console.log(`FINAL: ${signedUp}`)
 
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
         finalEmbed.time = new Date();
-        finalEmbed.discription = message.member.displayName + " has summoned " + signedUp + " for some " + game;
-
-
-
+        finalEmbed.description = message.member.displayName + " has summoned " + signedUp + " for some " + game;
 
         if (signedUp.length > 3)
             message.channel.send({ embed: finalEmbed });
@@ -2050,7 +2044,7 @@ async function checkExistance(member) {
         }
     }
     else {
-        console.log("The user doesnt exist.");
+        console.log("The user doesnt exist. " + member.displayName);
         await createUser(member);
         return false;
     }
@@ -2190,7 +2184,7 @@ async function generalMatcher(message, params, user, searchArray, originalComman
 
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.time = new Date();
-            newEmbed.discription = `${command} is not a valid parameter, if you meant one of the following, simply type the **number** you wish to use:`;
+            newEmbed.description = `${command} is not a valid parameter, if you meant one of the following, simply type the **number** you wish to use:`;
             newEmbed.fields = fieldArray;
 
             message.channel.send({ embed: newEmbed })
@@ -2285,7 +2279,20 @@ async function play(message, params) {
         //ytpl
         let playlist = await ytpl(args);
         for (video of playlist.items) {
-            queueConstruct.songs.push({ title: video.title, url: video.url, duration: hmsToSecondsOnly(video.duration), start: new Date(), offset: 0, id: video.id });
+            if (video.duration) {
+                queueConstruct.songs.push({
+                    title: video.title,
+                    url: video.url,
+                    duration: hmsToSecondsOnly(video.duration),
+                    start: new Date(),
+                    offset: 0,
+                    id: video.id,
+                    paused: false,
+                    timePaused: 0,
+                    started: false,
+                    progress: 0
+                });
+            }
         } callPlay = true;
         message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
     }
@@ -2301,10 +2308,18 @@ async function play(message, params) {
             offset = (tester.length > 0 && !isNaN(tester)) ? Number(tester) : 0;
         }
 
-
-
-
-        let song = { title: songInfo.title, url: songInfo.video_url, duration: songInfo.length_seconds, start: new Date(), offset: offset, id: songInfo.video_id };
+        let song = {
+            title: songInfo.title,
+            url: songInfo.video_url,
+            duration: songInfo.length_seconds,
+            start: new Date(),
+            offset: offset,
+            id: songInfo.video_id,
+            paused: false,
+            timePaused: 0,
+            started: false,
+            progress: 0
+        };
         queueConstruct.songs.push(song);
 
 
@@ -2322,6 +2337,7 @@ async function play(message, params) {
         };
         return console.log("Hell nah")
     }
+
     if (callPlay) {
         try {
             var connection = await voiceChannel.join();
@@ -2335,35 +2351,27 @@ async function play(message, params) {
     }
 }
 
-
-var songsInProgress = new Map();
-
-
-
-
-async function playSong(guild, song) {
+async function playSong(guild, song, skip) {
     const serverQueue = queue.get(guild.id);
 
-    if (!song) {
+    if (!song) {//Will probably have to revisit this later
         serverQueue.voiceChannel.leave();
         queue.delete(guild.id);
         return;
     }
-
-
 
     console.log(song);
 
 
     var audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
     var tempAudio = path.resolve(`songs`, song.id + '.mp3');
+    let shift = song.started ? ((new Date() - song.start) * 1000) + song.offset + (song.timePaused * 1000) : song.offset;
 
     if (fs.existsSync(audioOutput)) {
 
         console.log('EXists')
 
-        const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
-        if (serverQueue.dispatcher) console.log(serverQueue.dispatcher.pauseTime)
+
         const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: shift })
             .on('end', () => {
                 console.log("IN END")
@@ -2378,35 +2386,36 @@ async function playSong(guild, song) {
             })
             .on('start', () => {
 
-                //I can use this to keep track of ellapsed time, if someone wants to forward or rewind, I can take the difference in ellapsed time, to see where they
-                //wanna go
+                song.start = new Date();
             })
 
 
         Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.dispatcher = Dispatcher;
     }
-    else if (fs.existsSync(tempAudio)) {
+    else if(skip){
 
     }
     else {
         console.log("inside of else")
 
-        let guildDB = await findGuild({ id: guild.id });
-        guildDB.songs.push(song.id);
-        guildDB.duration = guildDB.duration + Number(song.duration);
-        Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, function (err, doc, res) { if (err) console.log(err) });
-
+        // let guildDB = await findGuild({ id: guild.id });
+        // guildDB.songs.push(song.id);
+        // guildDB.duration = guildDB.duration + Number(song.duration);
+        // Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, function (err, doc, res) { if (err) console.log(err) });
         //await removeLastModifiedSong();
 
 
         let youtubeResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
         youtubeResolve.pipe(fs.createWriteStream(path.resolve(`./songs`, song.id + '.mp3')));
-        youtubeResolve.on('progress', onProgress)
-        youtubeResolve.on('finish', () => { console.log("FINISHED"); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
-        youtubeResolve.on('end', () => { console.log("endy") })
-
-        const shift = serverQueue.dispatcher ? song.offset + serverQueue.dispatcher.pauseTime : song.offset;
+        youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+            const percent = downloaded / total;
+            readline.cursorTo(process.stdout, 0);
+            song.progress = Math.floor((percent * 100).toFixed(2));
+            //console.log(`Song ${song.title} is ${song.progress}% finished!`)
+        })
+        youtubeResolve.on('finish', () => { console.log("FINISHED: " + song.title); mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) }) })
+        youtubeResolve.on('end', () => { })
 
         const Dispatcher = await serverQueue.connection.play(youtubeResolve, { seek: shift })
             .on('error', error => {
@@ -2419,8 +2428,7 @@ async function playSong(guild, song) {
             })
             .on('start', () => {
 
-                //I can use this to keep track of ellapsed time, if someone wants to forward or rewind, I can take the difference in ellapsed time, to see where they
-                //wanna go
+                song.start = new Date();
             })
 
 
@@ -2433,11 +2441,11 @@ async function playSong(guild, song) {
 
 
 const onProgress = (chunkLength, downloaded, total) => {
-    console.log("INSIDE OF onpregors")
-    const percent = downloaded / total;
-    readline.cursorTo(process.stdout, 0);
-    process.stdout.write(`${(percent * 100).toFixed(2)}% downloaded `);
-    process.stdout.write(`(${(downloaded / 1024 / 1024).toFixed(2)}MB of ${(total / 1024 / 1024).toFixed(2)}MB)\n`);
+    // console.log("INSIDE OF onpregors")
+    // const percent = downloaded / total;
+    // readline.cursorTo(process.stdout, 0);
+    // process.stdout.write(`${(percent * 100).toFixed(2)}% downloaded `);
+    // process.stdout.write(`(${(downloaded / 1024 / 1024).toFixed(2)}MB of ${(total / 1024 / 1024).toFixed(2)}MB)\n`);
 };
 
 async function removeLastModifiedSong() {
