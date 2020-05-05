@@ -2275,22 +2275,6 @@ params = {
     url: "Asdasdas"
 }
 */
-
-/**
- * 
- * song = {
- *          url: string
- *          title: string
- *          duration: seconds
- *          time started: ???,
- *          offset: Number,
- *          id: string
- *  
- * }
- */
-
-//to simulate skiping/rewinding, keep track of start time and offset, if you skip, increase offset, decrease -> reduce offset
-
 async function play(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
@@ -2409,7 +2393,7 @@ async function play(message, params) {
 
 
 /*
-
+need to ensure that format is either full numbers, or switched 2: thne 2: then any number:
 NEED TO CHECK NULL VIDEOS FOR PLAYLISTS AS WELL?????
 */
 
