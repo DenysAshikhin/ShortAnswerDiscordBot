@@ -43,7 +43,9 @@
         "SETDEFAULTPREFIX",
 
         "SETDEFAULTSERVERPREFIX",
-        "FORWARD"
+        "FORWARD",
+        "REWIND",
+        "SEEK"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -89,7 +91,9 @@
         "Sets a custom prefix that will be used when DM'ing me, or if the there are no other prefixes set.",
  
         "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission.",
-        "Forwards a song [number] of seconds."
+        "Forwards a song [number] of seconds. Also works with negative numbers, which will result in a rewind.",
+        "Rewinds a song [number] of seconds or hours:minutes:seconds timestamp. Also works with negative numbers, which will result in a forward.",
+        "Starts playing from the provided timestamp in format *Hours:Minutes:Seconds*"
     ],
         
     "example": [
@@ -136,7 +140,9 @@
         ["1) setDefaultPrefix !"],   
         
         ["1) setDefaultServerPrefix !"],
-        ["1) forward 20", "2) forward 2:20"]
+        ["1) forward 20", "2) forward 2:20", "3) forward -25", "4) forward -2:20"],
+        ["1) rewind 20", "2) rewind 2:20", "3) rewind -25", "4) rewind -2:20"],
+        ["1) seek 2:20", "2) seek 0:25"]
     ],
     "subsection": [
         [3],
@@ -182,6 +188,8 @@
         [6],
 
         [6],
+        [4],
+        [4],
         [4]
     ]
 }

@@ -81,7 +81,8 @@ const UserSchema = new mongoose.Schema({
     defaultPrefix: {
         type: String,
         default: "-1"
-    }
+    },
+    playlists: []
 });
 
 module.exports = mongoose.model('User', UserSchema);

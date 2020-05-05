@@ -389,6 +389,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[34], setDefaultPrefix)
     commandMap.set(Commands.commands[35], setDefaultServerPrefix)
     commandMap.set(Commands.commands[36], forward)
+    commandMap.set(Commands.commands[37], rewind)
+    commandMap.set(Commands.commands[38], seek)
 }
 
 function setServerPrefix(message, params, user) {
@@ -2126,10 +2128,11 @@ async function skip(message) {
 
     if (guildQueue) {
 
-        let song = guildQueue.songs[guildQueue.index];
         guildQueue.index++;
-
-        playSong(message.guild, song, null, message);
+        if(guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
+        console.log(guildQueue.songs);
+        let song = guildQueue.songs[guildQueue.index];
+        playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
     }
 }
 
@@ -2143,44 +2146,114 @@ async function stop(message) {
 }
 
 function hmsToSecondsOnly(str) {
+
+    str = String(str).trim();
     var p = str.split(':'),
         s = 0, m = 1;
-
     while (p.length > 0) {
         s += m * parseInt(p.pop(), 10);
         m *= 60;
     }
-
     return s;
 }
 
+function timeConvert(time) {
 
-//check format of the hmsToSecond before calling it properly :/
+    let seconds = Math.floor(time % 60);
+    let minutes = Math.floor(time / 60 % 60);
+    let hours = Math.floor(time / 60 / 60);
+    console.log(seconds, minutes, hours);
+    let finalTime = seconds;
+    if (minutes > 0) finalTime = minutes + `:${finalTime}`;
+    if (hours > 0) finalTime = hours + `:${finalTime}`;
+    return finalTime;
+}
+
+
 async function forward(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
-    let song = guildQueue.songs[guildQueue.index]
+    let song = guildQueue.songs[guildQueue.index];
 
-    //console.log(`params in forward: ${params}`)
+    try {
+        if (guildQueue) {
 
+            let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
 
-    if (guildQueue) {
-
-        let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
-
-        console.log(newSkip, newSkip + song.offset)
-
-        if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
-        else {
-            song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip : song.offset;
-            song.start = new Date();
-            let skipMessage = await message.channel.send(`Skipping to ${song.offset.toFixed(2)}`)//convert this to a time stamp later
-            console.log(`forward: ${song.offset} `, newSkip);
-            activeSkips.set(song.id, true);
-            playSong(message.guild, song, newSkip, skipMessage);
-            setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
+            if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
+            else {
+                song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip : song.offset;
+                song.start = new Date();
+                let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
+                console.log(`forward: ${song.offset} `, newSkip);
+                activeSkips.set(song.id, true);
+                playSong(message.guild, song, newSkip, skipMessage);
+                setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
+            }
         }
+    }
+    catch (err) {
+        return message.channel.send("You have entered an invalid format for skipping.");
+    }
+}
+
+async function rewind(message, params) {
+
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    let guildQueue = queue.get(message.guild.id);
+    let song = guildQueue.songs[guildQueue.index];
+
+    try {
+        if (guildQueue) {
+
+            let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
+
+            if (song.offset - newSkip > song.duration || song.offset - newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
+            else {
+                song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) - newSkip : song.offset;
+                song.start = new Date();
+                let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
+                console.log(`forward: ${song.offset} `, newSkip);
+                activeSkips.set(song.id, true);
+                playSong(message.guild, song, newSkip, skipMessage);
+                setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
+            }
+        }
+    }
+    catch (err) {
+        return message.channel.send("You have entered an invalid format for rewinding.");
+    }
+}
+
+async function seek(message, params) {
+
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    let guildQueue = queue.get(message.guild.id);
+    let song = guildQueue.songs[guildQueue.index];
+
+    try {
+        if (guildQueue) {
+
+            let newSkip = hmsToSecondsOnly(params);
+
+            if (newSkip > song.duration || newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
+            else {
+                song.offset = newSkip;
+                song.start = new Date();
+
+
+
+                let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
+                console.log(`forward: ${song.offset} `, newSkip);
+                activeSkips.set(song.id, true);
+                playSong(message.guild, song, newSkip, skipMessage);
+                setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
+            }
+        }
+    }
+    catch (err) {
+        return message.channel.send("You have entered an invalid format for rewinding.");
     }
 }
 
@@ -2278,6 +2351,7 @@ params = {
 async function play(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    if(!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ")[1];
 
@@ -2397,6 +2471,8 @@ need to ensure that format is either full numbers, or switched 2: thne 2: then a
 NEED TO CHECK NULL VIDEOS FOR PLAYLISTS AS WELL?????
 */
 
+//addsong or addplaylist will check if parameters is given, then offer to make new playlist or add to exsiting one.
+
 
 async function playSong(guild, song, skip, message) {
     const serverQueue = queue.get(guild.id);
@@ -2404,6 +2480,7 @@ async function playSong(guild, song, skip, message) {
     if (!song) {//Will probably have to revisit this later
         serverQueue.voiceChannel.leave();
         queue.delete(guild.id);
+        message.channel.send(`No more songs queued, leaving!`);
         return;
     }
 
@@ -2552,10 +2629,6 @@ function skippingNotification(message, songID, step) {
         message.delete();
     }
 }
-
-
-//make this work with skipping and rewinding, only then see how bad the cut is when skipping to see if its justified makign them wait for the song to get cached
-
 
 async function removeLastModifiedSong() {
 
@@ -2888,6 +2961,8 @@ setInterval(minuteCount, 60 * 1000);
 //shake user # of times
 
 //Then make a tutorial for the above commands...
+
+//moment.js for converting time zones???
 
 
 //look into start typing in message documentation to make it feel more alive?
