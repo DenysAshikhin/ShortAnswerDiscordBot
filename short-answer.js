@@ -152,6 +152,7 @@ var commandTracker = new Map();
 var config = null;
 var queue = new Map();
 var download = new Map();
+var activeSkips = new Map();
 var defaultPrefix = "sa!";
 var prefix;
 var uri = "";
@@ -2161,6 +2162,9 @@ async function forward(message, params) {
     let guildQueue = queue.get(message.guild.id);
     let song = guildQueue.songs[guildQueue.index]
 
+    //console.log(`params in forward: ${params}`)
+
+
     if (guildQueue) {
 
         let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
@@ -2169,10 +2173,13 @@ async function forward(message, params) {
 
         if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
         else {
-            song.offset =  ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip;
-            let skipMessage = await message.channel.send(`Skipping to ${song.offset}`)//convert this to a time stamp later
+            song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip : song.offset;
+            song.start = new Date();
+            let skipMessage = await message.channel.send(`Skipping to ${song.offset.toFixed(2)}`)//convert this to a time stamp later
             console.log(`forward: ${song.offset} `, newSkip);
+            activeSkips.set(song.id, true);
             playSong(message.guild, song, newSkip, skipMessage);
+            setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
         }
     }
 }
@@ -2416,21 +2423,21 @@ async function playSong(guild, song, skip, message) {
         return;
     }
 
+
+
     console.log(song);
 
 
     var audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
     var tempAudio = path.resolve(`songs`, song.id + '.mp3');
-    console.log(`previous offset: ${song.offset}`)
-    console.log(`I'm trying to add ${((new Date() - song.start) / 1000)} seconds to offset :: `, (new Date() - song.start)/1000, song.start)
-    //song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) : song.offset;
-    console.log(`new offset: ${song.offset}`, skip)
+
+    if (!song.start && song.offset > 0 && !fs.existsSync(audioOutput) && !skip) return forward(message, song.offset)
 
     if (fs.existsSync(audioOutput)) {
 
         console.log('EXists')
 
-        if(skip) message.delete();
+        if (activeSkips.get(song.id)) activeSkips.delete(song.id);
 
         const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: song.offset })
             .on('error', error => {
@@ -2448,7 +2455,9 @@ async function playSong(guild, song, skip, message) {
             })
             .on('start', () => {
 
-                song.start = new Date();
+                if (!song.start)
+                    song.start = new Date();
+                if (activeSkips.get(song.id)) activeSkips.delete(song.id);
             })
 
 
@@ -2464,9 +2473,9 @@ async function playSong(guild, song, skip, message) {
 
         console.log(`toDownload ${percentageToDownload} || toSkip ${percentageToSkip} || map ${download.get(song.id)}`);
 
-        if (percentageToSkip > percentageToDownload) {//I can do the updated message for skipping thanks to a delay - will need to make it bigger tho
+        if (percentageToSkip > percentageToDownload) {
             console.log(console.log("chose to wait"));
-            message.edit(message.content + ' .');
+
             return setTimeout(playSong, 1000, guild, song, skip, message);
         }
         else {
@@ -2526,7 +2535,9 @@ async function playSong(guild, song, skip, message) {
             })
             .on('start', () => {
 
-                song.start = new Date();
+                if (!song.start)
+                    song.start = new Date()
+                if (activeSkips.get(song.id)) activeSkips.delete(song.id);
                 console.log(`set the start ${song.start}`)
             })
 
@@ -2535,6 +2546,29 @@ async function playSong(guild, song, skip, message) {
         serverQueue.dispatcher = Dispatcher;
     }
 }
+
+
+function skippingNotification(message, songID, step) {
+
+    if (activeSkips.get(songID)) {
+
+        if (step == 1) {
+            message.edit(message.content + " :musical_note:");
+            step = 2;
+        }
+        else {
+            message.edit(message.content + " :notes:");
+            step = 1;
+        }
+
+        setTimeout(skippingNotification, 3000, message, songID, step);
+
+    }
+    else {
+        message.delete();
+    }
+}
+
 
 //make this work with skipping and rewinding, only then see how bad the cut is when skipping to see if its justified makign them wait for the song to get cached
 
