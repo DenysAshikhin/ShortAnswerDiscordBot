@@ -1,1 +1,1 @@
-worker: node short-answer.js
+worker: forever start short-answer.js

@@ -2121,17 +2121,24 @@ async function resume(message) {
     }
 }
 
-async function skip(message) {
+async function skip(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
 
     if (guildQueue) {
 
-        guildQueue.index++;
-        if(guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
-        console.log(guildQueue.songs);
-        let song = guildQueue.songs[guildQueue.index];
+        console.log(!isNaN(params), (guildQueue.index + Number(params)) < 0, params)
+
+        if (!isNaN(params))
+            if ((guildQueue.index + Number(params)) >= guildQueue.songs.length || (guildQueue.index + Number(params)) < 0)
+                return message.channel.send(`You're trying to skip too many songs!`);
+            else { guildQueue.index += Number(params); }
+        else if (params == prefix + 'skip');
+            guildQueue.index++;
+
+        console.log(`after: ${guildQueue.index}`)
+        if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
         playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
     }
 }
@@ -2351,7 +2358,7 @@ params = {
 async function play(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    if(!params) return message.reply("You need to provide a song to play!");
+    if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ")[1];
 
@@ -2467,10 +2474,9 @@ async function play(message, params) {
 
 
 /*
-need to ensure that format is either full numbers, or switched 2: thne 2: then any number:
 NEED TO CHECK NULL VIDEOS FOR PLAYLISTS AS WELL?????
 */
-
+//add ability to skip multiple songs at once
 //addsong or addplaylist will check if parameters is given, then offer to make new playlist or add to exsiting one.
 
 

@@ -18,6 +18,7 @@
     "ffmpeg": "0.0.4",
     "ffmpeg-static": "^4.1.1",
     "fluent-ffmpeg": "^2.1.2",
+    "forever": "^2.0.0",
     "fuse.js": "^5.1.0",
     "jamy": "^0.3.0",
     "mongodb": "^3.5.5",
