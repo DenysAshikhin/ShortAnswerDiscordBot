@@ -2181,7 +2181,6 @@ function timeConvert(time) {
     return finalTime;
 }
 
-
 async function forward(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
@@ -2319,10 +2318,8 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         }
         else {
             let fieldArray = new Array();
-            console.log(promptArray)
             for (let i = 0; i < promptArray.length; i++)
                 fieldArray.push({ name: `${i} - ` + promptArray[i].item, value: "** **", inline: false })
-
 
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.timestamp = new Date();
@@ -2330,7 +2327,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
             newEmbed.fields = fieldArray;
 
             message.channel.send({ embed: newEmbed })
-            specificCommandCreator(originalCommand, [message, -1, params, user], parameterArray, user);
+            specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
             return 0;
         }
         return completeCheck;
@@ -2355,7 +2352,6 @@ async function play(message, params, user) {
     if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
-    console.log(`final params: ${args}`);
 
     const voiceChannel = message.member.voice.channel;
 
@@ -2409,6 +2405,7 @@ async function play(message, params, user) {
                     timePaused: 0,
                     progress: 0
                 });
+                cacheSong({id: video.id, url: video.url});
             }
         } callPlay = true;
         message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
@@ -2438,6 +2435,7 @@ async function play(message, params, user) {
                 progress: 0
             };
             queueConstruct.songs.push(song);
+            cacheSong(song);
 
 
             if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
@@ -2451,7 +2449,6 @@ async function play(message, params, user) {
     }
     else {
         let searchResult = await ytsr(args, { limit: 10 });
-        //console.log(searchResult);
 
         let titleArray = [];
         let urlArray = [];
@@ -2463,7 +2460,6 @@ async function play(message, params, user) {
                 urlArray.push({ url: searchResult.items[i].link, custom: true });
             }
         }
-
 
         return generalMatcher(message, searchResult.query, user, titleArray, urlArray, play);
     }
@@ -2496,19 +2492,11 @@ async function playSong(guild, song, skip, message) {
         return;
     }
 
-
-
-    console.log(song);
-
-
-    var audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
-    var tempAudio = path.resolve(`songs`, song.id + '.mp3');
+    let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
 
     if (!song.start && song.offset > 0 && !fs.existsSync(audioOutput) && !skip) return forward(message, song.offset)
 
     if (fs.existsSync(audioOutput)) {
-
-        console.log('EXists')
 
         if (activeSkips.get(song.id)) activeSkips.delete(song.id);
 
@@ -2539,8 +2527,6 @@ async function playSong(guild, song, skip, message) {
     }
     else if (skip) {
 
-        console.log(`inside of skip`)
-
         let percentageToDownload = 100 - download.get(song.id);
         let percentageToSkip = (song.offset / song.duration) * 100;
 
@@ -2552,47 +2538,14 @@ async function playSong(guild, song, skip, message) {
             return setTimeout(playSong, 1000, guild, song, skip, message);
         }
         else {
-            playSong(guild, song, null, message)
+            return playSong(guild, song, null, message)
         }
     }
     else {
-        console.log("inside of else")
-
-        { // let guildDB = await findGuild({ id: guild.id });
-            // guildDB.songs.push(song.id);
-            // guildDB.duration = guildDB.duration + Number(song.duration);
-            // Guild.findOneAndUpdate({ id: guild.id }, { $set: { songs: guildDB.songs, duration: guildDB.duration } }, function (err, doc, res) { if (err) console.log(err) });
-            //await removeLastModifiedSong();
-        }
-
-        let downloadYTDL = require('ytdl-core');
-        let youtubeResolve = downloadYTDL(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
-
-        if (!fs.existsSync(tempAudio)) {
-            console.log("interesting")
-            let writeStream = fs.createWriteStream(tempAudio);
-            writeStream.on('finish', () => {
-                console.log("FINISHED: WRITE STREAM " + song.title + `|| ${song.progress}`);
-                mv(tempAudio, audioOutput, function (err) {
-                    download.delete(song.id);
-                    if (err) console.log(err)
-                });
-            });
-
-
-            youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
-                const percent = downloaded / total;
-
-                readline.cursorTo(process.stdout, 0);
-                song.progress = Math.floor((percent * 100).toFixed(2));
-                download.set(song.id, song.progress);
-            });
-            youtubeResolve.pipe(writeStream);
-        }
+        console.log("inside of else");
 
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
         let streamResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
-
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
                 console.log("inside of error");
@@ -2620,6 +2573,40 @@ async function playSong(guild, song, skip, message) {
     }
 }
 
+/**
+ * 
+ * @param {id: link id, url: youtubelink} song 
+ */
+function cacheSong(song){
+
+    let tempAudio = path.resolve(`songs`, song.id + '.mp3');
+    let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
+
+    if (!fs.existsSync(tempAudio) && !fs.existsSync(audioOutput)) {
+        console.log("interesting")
+
+        let downloadYTDL = require('ytdl-core');
+        let youtubeResolve = downloadYTDL(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
+
+        let writeStream = fs.createWriteStream(tempAudio);
+        writeStream.on('finish', () => {
+            console.log("FINISHED: WRITE STREAM " + song.title + `|| ${song.progress}`);
+            mv(tempAudio, audioOutput, function (err) {
+                if (err) console.log(err);
+                download.delete(song.id);
+            });
+        });
+
+        youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+            const percent = downloaded / total;
+
+            readline.cursorTo(process.stdout, 0);
+            song.progress = Math.floor((percent * 100).toFixed(2));
+            download.set(song.id, song.progress);
+        });
+        youtubeResolve.pipe(writeStream);
+    }
+}
 
 function skippingNotification(message, songID, step) {
 
