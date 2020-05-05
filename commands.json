@@ -42,7 +42,8 @@
         "SETSERVERPREFIX",
         "SETDEFAULTPREFIX",
 
-        "SETDEFAULTSERVERPREFIX"
+        "SETDEFAULTSERVERPREFIX",
+        "FORWARD"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -87,7 +88,8 @@
         "Sets a custom prefix for this server that only applies to *you*. This prefix the highest priority.", 
         "Sets a custom prefix that will be used when DM'ing me, or if the there are no other prefixes set.",
  
-        "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission."
+        "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission.",
+        "Forwards a song [number] of seconds."
     ],
         
     "example": [
@@ -133,7 +135,8 @@
         ["1) setServerPrefix !"],  
         ["1) setDefaultPrefix !"],   
         
-        ["1) setDefaultServerPrefix !"]
+        ["1) setDefaultServerPrefix !"],
+        ["1) forward 20", "2) forward 2:20"]
     ],
     "subsection": [
         [3],
@@ -178,6 +181,7 @@
         [6],
         [6],
 
-        [6]
+        [6],
+        [4]
     ]
 }

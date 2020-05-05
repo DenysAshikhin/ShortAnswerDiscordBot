@@ -151,6 +151,7 @@ var commandMap = new Map();
 var commandTracker = new Map();
 var config = null;
 var queue = new Map();
+var download = new Map();
 var defaultPrefix = "sa!";
 var prefix;
 var uri = "";
@@ -386,6 +387,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[33], setServerPrefix)
     commandMap.set(Commands.commands[34], setDefaultPrefix)
     commandMap.set(Commands.commands[35], setDefaultServerPrefix)
+    commandMap.set(Commands.commands[36], forward)
 }
 
 function setServerPrefix(message, params, user) {
@@ -2086,12 +2088,13 @@ async function pause(message) {
 
     let guildQueue = queue.get(message.guild.id);
     if (guildQueue) {
-
-        if (!guildQueue.paused) {
-            guildQueue.paused = new Date();
+        let song = guildQueue.songs[guildQueue.index];
+        if (!song.paused) {
+            song.paused = new Date();
         }
 
         guildQueue.dispatcher.pause();
+        console.log(`pause: ${song.paused}`)
     }
 
 }
@@ -2102,23 +2105,30 @@ async function resume(message) {
 
     if (guildQueue) {
 
-        if (guildQueue.paused) {
+        let song = guildQueue.songs[guildQueue.index];
+        if (song.paused) {
 
-            guildQueue.pausedTime = (new Date() - guildQueue.paused) * 1000 + guildQueue.pausedTime;
-            guildQueue.paused = null;
+            console.log(song)
+            console.log(`timePaused: ${song.timePaused}`)
+            song.timePaused = (new Date() - song.paused) / 1000 + song.timePaused;
+            song.paused = null;
         }
         queue.get(message.guild.id).dispatcher.resume();
-        message.channel.send(`I have paused this song for ${guildQueue.pausedTime} seconds!`)
+        message.channel.send(`I have paused this song for ${song.timePaused} seconds!`)
     }
 }
 
 async function skip(message) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    if (queue.get(message.guild.id)) {
-        queue.get(message.guild.id).songs.shift();
+    let guildQueue = queue.get(message.guild.id);
 
-        playSong(message.guild, queue.get(message.guild.id).songs[0]);
+    if (guildQueue) {
+
+        let song = guildQueue.songs[guildQueue.index];
+        guildQueue.index++;
+
+        playSong(message.guild, song, null, message);
     }
 }
 
@@ -2141,6 +2151,30 @@ function hmsToSecondsOnly(str) {
     }
 
     return s;
+}
+
+
+//check format of the hmsToSecond before calling it properly :/
+async function forward(message, params) {
+
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    let guildQueue = queue.get(message.guild.id);
+    let song = guildQueue.songs[guildQueue.index]
+
+    if (guildQueue) {
+
+        let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
+
+        console.log(newSkip, newSkip + song.offset)
+
+        if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
+        else {
+            song.offset =  ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip;
+            let skipMessage = await message.channel.send(`Skipping to ${song.offset}`)//convert this to a time stamp later
+            console.log(`forward: ${song.offset} `, newSkip);
+            playSong(message.guild, song, newSkip, skipMessage);
+        }
+    }
 }
 
 
@@ -2301,12 +2335,11 @@ async function play(message, params) {
                     title: video.title,
                     url: video.url,
                     duration: hmsToSecondsOnly(video.duration),
-                    start: new Date(),
+                    start: null,
                     offset: 0,
                     id: video.id,
-                    paused: false,
-                    timePaused: null,
-                    started: false,
+                    paused: null,
+                    timePaused: 0,
                     progress: 0
                 });
             }
@@ -2315,7 +2348,7 @@ async function play(message, params) {
     }
     else if (await ytdl.validateURL(args)) {
         songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
-        console.log(songInfo)
+        //console.log(songInfo)
         let startTime = args.lastIndexOf('?t=');
         let offset = 0;
 
@@ -2329,12 +2362,11 @@ async function play(message, params) {
             title: songInfo.title,
             url: songInfo.video_url,
             duration: songInfo.length_seconds,
-            start: new Date(),
+            start: null,
             offset: offset,
             id: songInfo.video_id,
-            paused: false,
-            timePaused: null,
-            started: false,
+            paused: null,
+            timePaused: 0,
             progress: 0
         };
         queueConstruct.songs.push(song);
@@ -2359,7 +2391,7 @@ async function play(message, params) {
         try {
             var connection = await voiceChannel.join();
             queueConstruct.connection = connection;
-            playSong(message.guild, queueConstruct.songs[0]);
+            playSong(message.guild, queueConstruct.songs[0], null, message);
         } catch (err) {
             console.log(err);
             queue.delete(message.guild.id)
@@ -2375,10 +2407,7 @@ NEED TO CHECK NULL VIDEOS FOR PLAYLISTS AS WELL?????
 */
 
 
-
-
-
-async function playSong(guild, song, skip) {
+async function playSong(guild, song, skip, message) {
     const serverQueue = queue.get(guild.id);
 
     if (!song) {//Will probably have to revisit this later
@@ -2392,23 +2421,30 @@ async function playSong(guild, song, skip) {
 
     var audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
     var tempAudio = path.resolve(`songs`, song.id + '.mp3');
-    let shift = song.started ? ((new Date() - song.start) * 1000) + song.offset + (song.timePaused * 1000) : song.offset;
+    console.log(`previous offset: ${song.offset}`)
+    console.log(`I'm trying to add ${((new Date() - song.start) / 1000)} seconds to offset :: `, (new Date() - song.start)/1000, song.start)
+    //song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) : song.offset;
+    console.log(`new offset: ${song.offset}`, skip)
 
     if (fs.existsSync(audioOutput)) {
 
         console.log('EXists')
 
-        const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: shift })
-            .on('end', () => {
-                console.log("IN END")
-            })
+        if(skip) message.delete();
+
+        const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: song.offset })
             .on('error', error => {
-                console.log(error);
+                console.log("Error inside of dispatcher playing?: ", error);
             })
             .on('finish', () => {
 
-                serverQueue.songs.shift();
-                playSong(guild, serverQueue.songs[0]);
+                //serverQueue.songs.shift();
+                serverQueue.index++;
+                if (serverQueue.index == serverQueue.songs.length) {
+                    message.channel.send("No more songs left in the queue, leaving...");
+                    serverQueue.songs = [];
+                }
+                playSong(guild, serverQueue.songs[serverQueue.index], null, message);
             })
             .on('start', () => {
 
@@ -2421,6 +2457,21 @@ async function playSong(guild, song, skip) {
     }
     else if (skip) {
 
+        console.log(`inside of skip`)
+
+        let percentageToDownload = 100 - download.get(song.id);
+        let percentageToSkip = (song.offset / song.duration) * 100;
+
+        console.log(`toDownload ${percentageToDownload} || toSkip ${percentageToSkip} || map ${download.get(song.id)}`);
+
+        if (percentageToSkip > percentageToDownload) {//I can do the updated message for skipping thanks to a delay - will need to make it bigger tho
+            console.log(console.log("chose to wait"));
+            message.edit(message.content + ' .');
+            return setTimeout(playSong, 1000, guild, song, skip, message);
+        }
+        else {
+            playSong(guild, song, null, message)
+        }
     }
     else {
         console.log("inside of else")
@@ -2436,37 +2487,47 @@ async function playSong(guild, song, skip) {
         let youtubeResolve = downloadYTDL(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
 
         if (!fs.existsSync(tempAudio)) {
-        console.log("interesting")
-        let writeStream = fs.createWriteStream(tempAudio);
-        writeStream.on('finish', () => {
-            console.log("FINISHED: WRITE STREAM " + song.title + `|| ${song.progress}`);
-            mv(tempAudio, audioOutput, function (err) { if (err) console.log(err) })
-        })
+            console.log("interesting")
+            let writeStream = fs.createWriteStream(tempAudio);
+            writeStream.on('finish', () => {
+                console.log("FINISHED: WRITE STREAM " + song.title + `|| ${song.progress}`);
+                mv(tempAudio, audioOutput, function (err) {
+                    download.delete(song.id);
+                    if (err) console.log(err)
+                });
+            });
 
 
-        youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
-            const percent = downloaded / total;
-            readline.cursorTo(process.stdout, 0);
-            song.progress = Math.floor((percent * 100).toFixed(2));
-        });
-        youtubeResolve.pipe(writeStream);
+            youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+                const percent = downloaded / total;
+
+                readline.cursorTo(process.stdout, 0);
+                song.progress = Math.floor((percent * 100).toFixed(2));
+                download.set(song.id, song.progress);
+            });
+            youtubeResolve.pipe(writeStream);
         }
 
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
         let streamResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
 
-        const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: shift })
+        const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
                 console.log("inside of error");
             })
             .on('finish', () => {
 
-                serverQueue.songs.shift();
-                playSong(guild, serverQueue.songs[0]);
+                serverQueue.index++;
+                if (serverQueue.index == serverQueue.songs.length) {
+                    message.channel.send("No more songs left in the queue, leaving...");
+                    serverQueue.songs = [];
+                }
+                playSong(guild, serverQueue.songs[serverQueue.index], null, message);
             })
             .on('start', () => {
 
                 song.start = new Date();
+                console.log(`set the start ${song.start}`)
             })
 
 
@@ -2477,14 +2538,6 @@ async function playSong(guild, song, skip) {
 
 //make this work with skipping and rewinding, only then see how bad the cut is when skipping to see if its justified makign them wait for the song to get cached
 
-
-const onProgress = (chunkLength, downloaded, total) => {
-    // console.log("INSIDE OF onpregors")
-    // const percent = downloaded / total;
-    // readline.cursorTo(process.stdout, 0);
-    // process.stdout.write(`${(percent * 100).toFixed(2)}% downloaded `);
-    // process.stdout.write(`(${(downloaded / 1024 / 1024).toFixed(2)}MB of ${(total / 1024 / 1024).toFixed(2)}MB)\n`);
-};
 
 async function removeLastModifiedSong() {
 
