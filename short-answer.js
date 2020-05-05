@@ -18,6 +18,11 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 
+const numCPUs = require('os').cpus().length;
+console.log(`I have ${numCPUs} cores!`);//https://nodejs.org/api/cluster.html#cluster_cluster - can be useful to shart? Might help me get to like 
+//10k servers on heroku
+
+
 //const ytdlDiscord = require('ytdl-core-discord');
 const gameJSON = require('./gameslist.json');
 const Commands = require('./commands.json');
@@ -457,9 +462,9 @@ async function triggerCommandHandler(message, user, skipSearch) {
         if (message.content == -1) return commandTracker.delete(message.author.id);
 
         let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user, skipSearch);
-        if (result == 1) {
+        if (result == 1)
             commandTracker.delete(message.author.id);
-        }
+
         return result;
     }
 }
@@ -469,7 +474,7 @@ async function commandMatcher(message, command, params, user) {
     let check = await checkCommands(command);
 
     if (check == -1) {
-        message.channel.send(`You have entered an invalid suggestion number please try again or enter **-1** to quit the suggestion.?`);
+        message.channel.send(`You have entered an invalid suggestion number please try again or enter **-1** to quit the suggestion?`);
         return -1;
     }
     else if (check.result[0].score != 0) {
@@ -499,6 +504,7 @@ async function commandMatcher(message, command, params, user) {
 //-1 invalid input, 0 don't delete (passed to command matcher) - need it next time, 1 handled - delete
 async function handleCommandTracker(specificCommand, message, user, skipSearch) {
 
+    //console.log(specificCommand)
     let params = message.content;
     let tutorialResult;
     if (!skipSearch) {
@@ -522,7 +528,6 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
     }
 
     let finishy = await specificCommand.command.apply(null, specificCommand.defaults);
-
     if (finishy == -11 || finishy == 0)
         return 0;
     else {
@@ -2135,7 +2140,7 @@ async function skip(message, params) {
                 return message.channel.send(`You're trying to skip too many songs!`);
             else { guildQueue.index += Number(params); }
         else if (params == prefix + 'skip');
-            guildQueue.index++;
+        guildQueue.index++;
 
         console.log(`after: ${guildQueue.index}`)
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
@@ -2266,7 +2271,7 @@ async function seek(message, params) {
 
 
 //make this automatically generate the specific command, and return either quit, 0 made a command, or an actual object
-async function generalMatcher(message, params, user, searchArray, originalCommand) {
+async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
     if (!isNaN(params)) {
         return -1;
@@ -2278,16 +2283,16 @@ async function generalMatcher(message, params, user, searchArray, originalComman
         params = params.trim();
     }
 
-    let finalArray = new Array();
-    let finalList = "";
+    let promptArray = new Array();
+    let parameterArray = new Array();
     let newOptions = {
         ...options,
         minMatchCharLength: params.length / 2,
-        findAllMatches: false,
+        findAllMatches: true,
         includeScore: true,
         isCaseSensitive: false
     }
-    //
+
     let fuse = new Fuse(searchArray, newOptions);
     let result = fuse.search(params);
     let maxResults = 5;
@@ -2296,54 +2301,43 @@ async function generalMatcher(message, params, user, searchArray, originalComman
 
     for (let i = 0; i < maxResults; i++) {
 
-        finalList += i + ") " + result[i].item + "\n";
-        finalArray.push(result[i]);
+        parameterArray.push({ item: internalArray[result[i].refIndex] });
+        promptArray.push(result[i]);
     }
 
     let completeCheck = {
-        result: finalArray,
-        prettyList: finalList
+
+        promptArray: promptArray,
+        parameterArray: parameterArray,
     };
 
-    if (finalArray.length > 0) {
-        if (completeCheck.result[0].score == 0) {
-            specificCommandCreator(originalCommand, [message, completeCheck.result[0].item, user], null, user);
+    if (promptArray.length > 0) {
+        if (result[0].score == 0) {
+            specificCommandCreator(originalCommand, [message, result[0].item, user], null, user);
             await triggerCommandHandler(message, user, true);
-            return completeCheck.result[0].item;
+            return 0;
         }
         else {
             let fieldArray = new Array();
+            console.log(promptArray)
+            for (let i = 0; i < promptArray.length; i++)
+                fieldArray.push({ name: `${i} - ` + promptArray[i].item, value: "** **", inline: false })
 
-            for (let i = 0; i < completeCheck.result.length; i++) {
-
-                //fieldArray.push({ name: completeCheck.result[i].item, value: i, inline: false })
-                fieldArray.push({ name: `${i} - ` + completeCheck.result[i].item, value: "** **", inline: false })
-            }
 
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.timestamp = new Date();
-            newEmbed.description = `${command} is not a valid parameter, if you meant one of the following, simply type the **number** you wish to use:`;
+            newEmbed.description = `*${params}* ` + flavourText;
             newEmbed.fields = fieldArray;
 
             message.channel.send({ embed: newEmbed })
-            specificCommandCreator(originalCommand, [message, -1, params, user], completeCheck.result, user);
+            specificCommandCreator(originalCommand, [message, -1, params, user], parameterArray, user);
+            return 0;
         }
         return completeCheck;
     }
     else {
-        message.channel.send(`You have entered an invalid suggestion number/input please try again or enter **-1** to quit the suggestion.?`);
+        message.channel.send(`You have entered an invalid suggestion number/input please try again.`);
         return -1
-    }
-
-
-
-    if (completeCheck.result[0].score != 0) {
-
-
-        return -11;
-    }
-    else {
-
     }
 }
 
@@ -2355,12 +2349,13 @@ params = {
     url: "Asdasdas"
 }
 */
-async function play(message, params) {
+async function play(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
-    const args = params.custom ? params.url : message.content.split(" ")[1];
+    const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+    console.log(`final params: ${args}`);
 
     const voiceChannel = message.member.voice.channel;
 
@@ -2420,43 +2415,57 @@ async function play(message, params) {
     }
     else if (await ytdl.validateURL(args)) {
         songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
-        //console.log(songInfo)
-        let startTime = args.lastIndexOf('?t=');
-        let offset = 0;
+        if (songInfo.length_seconds) {
+            console.log(songInfo)
+            let startTime = args.lastIndexOf('?t=');
+            let offset = 0;
 
-        if (startTime != -1) {
+            if (startTime != -1) {
 
-            let tester = args.substring(startTime + 3);
-            offset = (tester.length > 0 && !isNaN(tester)) ? Number(tester) : 0;
+                let tester = args.substring(startTime + 3);
+                offset = (tester.length > 0 && !isNaN(tester)) ? Number(tester) : 0;
+            }
+
+            let song = {
+                title: songInfo.title,
+                url: songInfo.video_url,
+                duration: songInfo.length_seconds,
+                start: null,
+                offset: offset,
+                id: songInfo.video_id,
+                paused: null,
+                timePaused: 0,
+                progress: 0
+            };
+            queueConstruct.songs.push(song);
+
+
+            if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
+            else {
+                message.channel.send(`Now playing ${songInfo.title}!`)
+                callPlay = true;
+            }
         }
-
-        let song = {
-            title: songInfo.title,
-            url: songInfo.video_url,
-            duration: songInfo.length_seconds,
-            start: null,
-            offset: offset,
-            id: songInfo.video_id,
-            paused: null,
-            timePaused: 0,
-            progress: 0
-        };
-        queueConstruct.songs.push(song);
-
-
-        if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
-        else {
-            message.channel.send(`Now playing ${songInfo.title}!`)
-            callPlay = true;
-        }
+        else
+            message.channel.send("I can't access that video, please try another!");
     }
     else {
-        let searchResult = await ytsr(args, { limit: 1 });
-        songInfo = {
-            title: searchResult.items[0].title,
-            video_url: searchResult.items[0].link
-        };
-        return console.log("Hell nah")
+        let searchResult = await ytsr(args, { limit: 10 });
+        //console.log(searchResult);
+
+        let titleArray = [];
+        let urlArray = [];
+
+        for (let i = 0; i < searchResult.items.length || titleArray.length == 5; i++) {
+
+            if (searchResult.items[i].type == 'video') {
+                titleArray.push(searchResult.items[i].title);
+                urlArray.push({ url: searchResult.items[i].link, custom: true });
+            }
+        }
+
+
+        return generalMatcher(message, searchResult.query, user, titleArray, urlArray, play);
     }
 
     if (callPlay) {
@@ -2473,10 +2482,7 @@ async function play(message, params) {
 }
 
 
-/*
-NEED TO CHECK NULL VIDEOS FOR PLAYLISTS AS WELL?????
-*/
-//add ability to skip multiple songs at once
+
 //addsong or addplaylist will check if parameters is given, then offer to make new playlist or add to exsiting one.
 
 
