@@ -50,7 +50,8 @@
 
         "ADDSONG",
         "CREATEPLAYLIST",
-        "MYPLAYLISTS"
+        "MYPLAYLISTS",
+        "REMOVESONG"
 
 
     ],
@@ -105,7 +106,8 @@
 
         "Adds either the current playing song or one from a provided url/suggestion to one of your existing playlists or makes a new one.",
         "Creates a new playlist with the provided name - playlists cannot have the same names.",
-        "Shows you all of your playlists by default, if you provide a number or the name of a playlist it will display the specific playlist."
+        "Shows you all of your playlists by default, if you provide a number or the name of a playlist it will display the specific playlist.",
+        "Removes a song from a playlist. You can either specify the exact playlist to remove a song from, or use the suggestion prompt."
 
 
     ],
@@ -161,7 +163,8 @@
 
         ["1) addSong", "2) addSong In Your Arms", "3) addSong https://www.youtube.com/watch?v=mt1mXwBLsSE&list=RDmt1mXwBLsSE&start_radio=1"],
         ["1) createPlaylist Dankest Wubs"],
-        ["1) myPlayLists", "2) myPlayLists 2", "3) myPlayLists Best Wubs"]
+        ["1) myPlayLists", "2) myPlayLists 2", "3) myPlayLists Best Wubs"],
+        ["1) removeSong", "2) removeSong Best Wubs"]
 
 
     ],
@@ -216,6 +219,7 @@
 
         [4],
         [4],
-        [4] 
+        [4],
+        [4]
     ]
 }

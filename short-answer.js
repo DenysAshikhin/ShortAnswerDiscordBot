@@ -400,6 +400,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[40], addSong)
     commandMap.set(Commands.commands[41], createPlaylist)
     commandMap.set(Commands.commands[42], myPlayLists)
+    commandMap.set(Commands.commands[43], removeSong)
 }
 
 function setServerPrefix(message, params, user) {
@@ -2310,15 +2311,14 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         includeMatches: true
     }
 
-
     if (params != -23) {
         let fuse = new Fuse(searchArray, newOptions);
         let result = fuse.search(params);
-       
-        if(result[0].score == 0){
-            originalCommand.apply(null, [message, internalArray[result[0].refIndex], user]);
-            return 100;
-        }
+
+        if (result[0])
+            if (result[0].score == 0) {
+                return originalCommand.apply(null, [message, internalArray[result[0].refIndex], user]);
+            }
 
         let maxResults = 5;
         if (maxResults > result.length)
@@ -2340,28 +2340,20 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 
     if (promptArray.length > 0) {
 
-      
-        if ([0].score == 0) {
-            // specificCommandCreator(originalCommand, [message, parameterArray[0], user], null, user);
-            // await triggerCommandHandler(message, user, true);
-            console.log("THONK")
+        let fieldArray = new Array();
 
-        }
-        else {
-            let fieldArray = new Array();
+        for (let i = 0; i < promptArray.length; i++)
+            fieldArray.push({ name: `${i}) ` + promptArray[i].item, value: "** **", inline: false })
 
-            for (let i = 0; i < promptArray.length; i++)
-                fieldArray.push({ name: `${i}) ` + promptArray[i].item, value: "** **", inline: false })
+        let newEmbed = JSON.parse(JSON.stringify(Embed));
+        newEmbed.timestamp = new Date();
+        newEmbed.description = flavourText;
+        newEmbed.fields = fieldArray;
 
-            let newEmbed = JSON.parse(JSON.stringify(Embed));
-            newEmbed.timestamp = new Date();
-            newEmbed.description = flavourText;
-            newEmbed.fields = fieldArray;
+        message.channel.send({ embed: newEmbed })
+        specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
+        return 0;
 
-            message.channel.send({ embed: newEmbed })
-            specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
-            return 0;
-        }
     }
     else {
         message.channel.send(`You have entered an invalid suggestion number/input please try again.`);
@@ -2658,6 +2650,7 @@ async function addSong(message, params, user) {
         }
         else if (ytdl.validateURL(params)) {
             songInfo = await ytdl.getInfo(params, { quality: 'highestaudio' });
+            console.log(`length: ${songInfo.length_seconds}`)
             if (songInfo.length_seconds) {
                 let startTime = params.lastIndexOf('?t=');
                 let offset = 0;
@@ -2689,7 +2682,7 @@ async function addSong(message, params, user) {
             let titleArray = [];
             let urlArray = [];
 
-            for (let i = 0; i < searchResult.items.length || titleArray.length == 5; i++) {
+            for (let i = 0; (i < searchResult.items.length) && (titleArray.length != 5); i++) {
 
                 if (searchResult.items[i].type == 'video') {
                     titleArray.push(searchResult.items[i].title);
@@ -2715,6 +2708,55 @@ async function addSong(message, params, user) {
         user.playlists[params.index] = params.playlist;
         message.channel.send(`Succesfully added ${params.song.title} to ${params.playlist.title}`)
         return User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+    }
+}
+
+async function removeSong(message, params, user) {
+
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists!");
+
+    params = params.playlist ? params : message.content.split(" ").slice(1).join(" ");
+    let playListEmbed = JSON.parse(JSON.stringify(Embed));
+    playListEmbed.timestamp = new Date();
+
+    if (!params) {
+
+        let promptArray = [];
+        let internalArray = [];
+
+        for (let i = 0; i < user.playlists.length; i++) {
+
+            promptArray.push(user.playlists[i].title);
+            internalArray.push({ playlist: user.playlists[i] });
+        }
+        return generalMatcher(message, -23, user, promptArray, internalArray, removeSong, `Enter the number of the playlist you wish to remove the song from!`)
+    }
+    else if (params.song) {
+
+        params.playlist.songs.splice(params.index, 1);
+        User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { if (err) console.log(err) });
+        return 100;
+    }
+    else if (params.playlist) {
+
+        let promptArray = [];
+        let internalArray = [];
+
+        for (let i = 0; i < params.playlist.songs.length; i++) {
+            promptArray.push(params.playlist.songs[i].title);
+            internalArray.push({ playlist: params.playlist, song: params.playlist.songs[i], index: i });
+        }
+        return generalMatcher(message, -23, user, promptArray, internalArray, removeSong, `Enter the number of the song you wish to remove from ${params.playlist.title}`);
+
+    } else {
+
+        let playlists = [];
+        let internalArray = [];
+        for (playlist of user.playlists) {
+            playlists.push(playlist.title);
+            internalArray.push({ playlist: playlist });
+        }
+        return generalMatcher(message, params, user, playlists, internalArray, removeSong, `Enter the number of the playlist you wish to remove the song from!`);
     }
 }
 
@@ -2759,7 +2801,6 @@ async function myPlayLists(message, params, user) {
 
         return generalMatcher(message, params, user, playlists, user.playlists, myPlayLists, `Enter the number of the playlist you wish to view more information about!`);
     }
-
 }
 
 function createPlaylist(message, params, user) {
