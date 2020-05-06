@@ -45,7 +45,13 @@
         "SETDEFAULTSERVERPREFIX",
         "FORWARD",
         "REWIND",
-        "SEEK"
+        "SEEK",
+        "REVERSE",
+
+        "ADDSONG",
+        "CREATEPLAYLIST"
+
+
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -76,7 +82,7 @@
         "Empties the queue and makes the bot leave the voice channel.",
         "Pauses the current song.",
         "Resumes playing the current song.",
-        "Skips the current song.",
+        "Skips the current song. Or skips a [number] of songs, if provided.",
 
         "Starts the game tutorial for you, or reminds of your current step if it is already in progress.",
         "Send a suggestion to the creator of the bot! All are welcome.",
@@ -93,7 +99,13 @@
         "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission.",
         "Forwards a song [number] of seconds. Also works with negative numbers, which will result in a rewind.",
         "Rewinds a song [number] of seconds or hours:minutes:seconds timestamp. Also works with negative numbers, which will result in a forward.",
-        "Starts playing from the provided timestamp in format *Hours:Minutes:Seconds*"
+        "Starts playing from the provided timestamp in format *Hours:Minutes:Seconds*",
+        "Reverses the playlist by 1 song. Or a [number] of songs if provided.",
+
+        "Adds either the current playing song or one from a provided url/suggestion to one of your existing playlists or makes a new one.",
+        "Creates a new playlist with the provided name - playlists cannot have the same names."
+
+
     ],
         
     "example": [
@@ -125,7 +137,7 @@
         ["1) stop"],
         ["1) pause"],
         ["1) resume"],
-        ["1) skip"],
+        ["1) skip", "2) skip 3", "3) skip -4"],
         
         ["1) gameTutorial"],
         ["1) suggest *Game xyz is missing from the list, add it!*", "2) suggest the bot should be able to do: !"],
@@ -142,7 +154,13 @@
         ["1) setDefaultServerPrefix !"],
         ["1) forward 20", "2) forward 2:20", "3) forward -25", "4) forward -2:20"],
         ["1) rewind 20", "2) rewind 2:20", "3) rewind -25", "4) rewind -2:20"],
-        ["1) seek 2:20", "2) seek 0:25"]
+        ["1) seek 2:20", "2) seek 0:25"],
+        ["1) reverse", "2) reverse 3", "3) reverse -4"],
+
+        ["1) addSong", "2) addSong In Your Arms", "3) addSong https://www.youtube.com/watch?v=mt1mXwBLsSE&list=RDmt1mXwBLsSE&start_radio=1"],
+        ["1) createPlaylist Dankest Wubs"]
+
+
     ],
     "subsection": [
         [3],
@@ -190,6 +208,10 @@
         [6],
         [4],
         [4],
-        [4]
+        [4],
+        [4],
+
+        [4],
+        [4]    
     ]
 }

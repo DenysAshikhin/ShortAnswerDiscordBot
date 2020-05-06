@@ -396,6 +396,9 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[36], forward)
     commandMap.set(Commands.commands[37], rewind)
     commandMap.set(Commands.commands[38], seek)
+    commandMap.set(Commands.commands[39], reverse)
+    commandMap.set(Commands.commands[40], addSong)
+    commandMap.set(Commands.commands[41], createPlaylist)
 }
 
 function setServerPrefix(message, params, user) {
@@ -474,7 +477,7 @@ async function commandMatcher(message, command, params, user) {
     let check = await checkCommands(command);
 
     if (check == -1) {
-        message.channel.send(`You have entered an invalid suggestion number please try again or enter **-1** to quit the suggestion?`);
+        message.channel.send(`I didn't recognize that command, please try again?`);
         return -1;
     }
     else if (check.result[0].score != 0) {
@@ -2091,6 +2094,34 @@ async function reactAnswers(message) {
     await message.react("🇫");
 }
 
+function hmsToSecondsOnly(str) {
+
+    str = String(str).trim();
+    var p = str.split(':'),
+        s = 0, m = 1;
+    while (p.length > 0) {
+        s += m * parseInt(p.pop(), 10);
+        m *= 60;
+    }
+    return s;
+}
+
+function timeConvert(time) {
+
+    let seconds = Math.floor(time % 60);
+    if ((seconds + "").length < 2) seconds = '0' + seconds;
+    let minutes = Math.floor(time / 60 % 60);
+    if ((minutes + "").length < 2) minutes = '0' + minutes;
+    console.log((minutes + "").length)
+    let hours = Math.floor(time / 60 / 60);
+    if (("" + hours).length < 2) hours = '0' + hours;
+
+    let finalTime = seconds;
+    if (minutes > 0) finalTime = minutes + `:${finalTime}`;
+    if (hours > 0) finalTime = hours + `:${finalTime}`;
+    return finalTime;
+}
+
 async function pause(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
 
@@ -2100,9 +2131,7 @@ async function pause(message) {
         if (!song.paused) {
             song.paused = new Date();
         }
-
         guildQueue.dispatcher.pause();
-        console.log(`pause: ${song.paused}`)
     }
 
 }
@@ -2116,13 +2145,10 @@ async function resume(message) {
         let song = guildQueue.songs[guildQueue.index];
         if (song.paused) {
 
-            console.log(song)
-            console.log(`timePaused: ${song.timePaused}`)
             song.timePaused = (new Date() - song.paused) / 1000 + song.timePaused;
             song.paused = null;
         }
         queue.get(message.guild.id).dispatcher.resume();
-        message.channel.send(`I have paused this song for ${song.timePaused} seconds!`)
     }
 }
 
@@ -2133,14 +2159,32 @@ async function skip(message, params) {
 
     if (guildQueue) {
 
-        console.log(!isNaN(params), (guildQueue.index + Number(params)) < 0, params)
-
         if (!isNaN(params))
             if ((guildQueue.index + Number(params)) >= guildQueue.songs.length || (guildQueue.index + Number(params)) < 0)
                 return message.channel.send(`You're trying to skip too many songs!`);
             else { guildQueue.index += Number(params); }
         else if (params == prefix + 'skip');
         guildQueue.index++;
+
+        console.log(`after: ${guildQueue.index}`)
+        if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
+        playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
+    }
+}
+
+async function reverse(message, params) {
+
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    let guildQueue = queue.get(message.guild.id);
+
+    if (guildQueue) {
+
+        if (!isNaN(params))
+            if ((guildQueue.index - Number(params)) >= guildQueue.songs.length || (guildQueue.index - Number(params)) < 0)
+                return message.channel.send(`You're trying to reverse too many songs!`);
+            else { guildQueue.index -= Number(params); }
+        else if (params == prefix + 'skip');
+        guildQueue.index--;
 
         console.log(`after: ${guildQueue.index}`)
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
@@ -2157,30 +2201,6 @@ async function stop(message) {
     }
 }
 
-function hmsToSecondsOnly(str) {
-
-    str = String(str).trim();
-    var p = str.split(':'),
-        s = 0, m = 1;
-    while (p.length > 0) {
-        s += m * parseInt(p.pop(), 10);
-        m *= 60;
-    }
-    return s;
-}
-
-function timeConvert(time) {
-
-    let seconds = Math.floor(time % 60);
-    let minutes = Math.floor(time / 60 % 60);
-    let hours = Math.floor(time / 60 / 60);
-    console.log(seconds, minutes, hours);
-    let finalTime = seconds;
-    if (minutes > 0) finalTime = minutes + `:${finalTime}`;
-    if (hours > 0) finalTime = hours + `:${finalTime}`;
-    return finalTime;
-}
-
 async function forward(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
@@ -2195,9 +2215,8 @@ async function forward(message, params) {
             if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
             else {
                 song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip : song.offset;
-                song.start = new Date();
+                //song.start = new Date();
                 let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
-                console.log(`forward: ${song.offset} `, newSkip);
                 activeSkips.set(song.id, true);
                 playSong(message.guild, song, newSkip, skipMessage);
                 setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
@@ -2225,7 +2244,6 @@ async function rewind(message, params) {
                 song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) - newSkip : song.offset;
                 song.start = new Date();
                 let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
-                console.log(`forward: ${song.offset} `, newSkip);
                 activeSkips.set(song.id, true);
                 playSong(message.guild, song, newSkip, skipMessage);
                 setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
@@ -2252,13 +2270,9 @@ async function seek(message, params) {
             else {
                 song.offset = newSkip;
                 song.start = new Date();
-
-
-
-                let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
-                console.log(`forward: ${song.offset} `, newSkip);
+                playSong(message.guild, song, newSkip, message);
+                let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)
                 activeSkips.set(song.id, true);
-                playSong(message.guild, song, newSkip, skipMessage);
                 setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
             }
         }
@@ -2272,16 +2286,14 @@ async function seek(message, params) {
 //make this automatically generate the specific command, and return either quit, 0 made a command, or an actual object
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
-    if (!isNaN(params)) {
-        return -1;
-    }
-    else if (Array.isArray(params)) {
+
+    if (Array.isArray(params)) {
         params = params[0].trim();
     }
-    else {
+    else if (isNaN(params)) {
         params = params.trim();
     }
-
+    console.log(params)
     let promptArray = new Array();
     let parameterArray = new Array();
     let newOptions = {
@@ -2289,55 +2301,59 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         minMatchCharLength: params.length / 2,
         findAllMatches: true,
         includeScore: true,
-        isCaseSensitive: false
+        isCaseSensitive: false,
+        includeMatches: true
     }
 
-    let fuse = new Fuse(searchArray, newOptions);
-    let result = fuse.search(params);
-    let maxResults = 5;
-    if (maxResults > result.length)
-        maxResults = result.length;
+    if (params != -23) {
+        let fuse = new Fuse(searchArray, newOptions);
+        let result = fuse.search(params);
+        let maxResults = 5;
+        if (maxResults > result.length)
+            maxResults = result.length;
 
-    for (let i = 0; i < maxResults; i++) {
+        for (let i = 0; i < maxResults; i++) {
 
-        parameterArray.push({ item: internalArray[result[i].refIndex] });
-        promptArray.push(result[i]);
+            parameterArray.push({ item: internalArray[result[i].refIndex] });
+            promptArray.push(result[i]);
+        }
     }
+    else {
 
-    let completeCheck = {
-
-        promptArray: promptArray,
-        parameterArray: parameterArray,
-    };
+        for (let i = 0; i < internalArray.length; i++) {
+            parameterArray.push({ item: internalArray[i] });
+            promptArray.push({ item: searchArray[i] });
+        }
+    }
 
     if (promptArray.length > 0) {
-        if (result[0].score == 0) {
-            specificCommandCreator(originalCommand, [message, result[0].item, user], null, user);
+
+        if (parameterArray[0].score == 0) {
+            specificCommandCreator(originalCommand, [message, parameterArray[0], user], null, user);
             await triggerCommandHandler(message, user, true);
             return 0;
         }
         else {
             let fieldArray = new Array();
+
             for (let i = 0; i < promptArray.length; i++)
                 fieldArray.push({ name: `${i} - ` + promptArray[i].item, value: "** **", inline: false })
 
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.timestamp = new Date();
-            newEmbed.description = `*${params}* ` + flavourText;
+            newEmbed.description = flavourText;
             newEmbed.fields = fieldArray;
 
             message.channel.send({ embed: newEmbed })
             specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
             return 0;
         }
-        return completeCheck;
     }
     else {
         message.channel.send(`You have entered an invalid suggestion number/input please try again.`);
         return -1
     }
 }
-
 
 
 /*
@@ -2405,7 +2421,7 @@ async function play(message, params, user) {
                     timePaused: 0,
                     progress: 0
                 });
-                cacheSong({id: video.id, url: video.url});
+                cacheSong({ id: video.id, url: video.url });
             }
         } callPlay = true;
         message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
@@ -2413,7 +2429,6 @@ async function play(message, params, user) {
     else if (await ytdl.validateURL(args)) {
         songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
         if (songInfo.length_seconds) {
-            console.log(songInfo)
             let startTime = args.lastIndexOf('?t=');
             let offset = 0;
 
@@ -2436,7 +2451,6 @@ async function play(message, params, user) {
             };
             queueConstruct.songs.push(song);
             cacheSong(song);
-
 
             if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
             else {
@@ -2461,7 +2475,7 @@ async function play(message, params, user) {
             }
         }
 
-        return generalMatcher(message, searchResult.query, user, titleArray, urlArray, play);
+        return generalMatcher(message, searchResult.query, user, titleArray, urlArray, play, "Please enter the number matching the video you wish to play!");
     }
 
     if (callPlay) {
@@ -2476,11 +2490,7 @@ async function play(message, params, user) {
         }
     }
 }
-
-
-
 //addsong or addplaylist will check if parameters is given, then offer to make new playlist or add to exsiting one.
-
 
 async function playSong(guild, song, skip, message) {
     const serverQueue = queue.get(guild.id);
@@ -2577,7 +2587,7 @@ async function playSong(guild, song, skip, message) {
  * 
  * @param {id: link id, url: youtubelink} song 
  */
-function cacheSong(song){
+function cacheSong(song) {
 
     let tempAudio = path.resolve(`songs`, song.id + '.mp3');
     let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
@@ -2606,6 +2616,64 @@ function cacheSong(song){
         });
         youtubeResolve.pipe(writeStream);
     }
+}
+
+/**
+ * 
+ * step:
+ * -1 - quit
+ * 1) put the song in a provided playlist
+ */
+function addSong(message, params, user) {
+    if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
+    console.log(params)
+    if (!params.step) {
+
+        let serverQueue = queue.get(message.guild.id);
+        if (params[0].toLowerCase() == (prefix + 'addsong')) {
+
+            if (serverQueue) {
+
+                if (user.playlists.length == 0) {
+
+                    message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!")
+                }
+                else {
+
+                    let titleArray = [];
+                    let internalArray = [];
+                    for (let i = 0; i < user.playlists.length; i++) {
+
+                        titleArray.push(user.playlists[i].title);
+                        internalArray.push({ step: 1, playlist: user.playlists[i], index: i })
+                    }
+                    generalMatcher(message, -23, user, titleArray, internalArray, addSong,
+                        "Enter the number associated with the playlist you wish to add the song to");
+                }
+            }
+            else {
+                return message.channel.send("There is no song currently playing, please provide a url, song name or start playing a song to add a new one to a playlist.")
+            }
+        }
+    }
+    else if (params.step == 1) {
+
+        params.playlist.push(serverQueue.songs[serverQueue.index]);
+        user.playlists[params.index] = params.playlist;
+        User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function(err,doc,res){});
+    }
+}
+
+function createPlaylist(message, params, user) {
+    if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
+    if (message.content.toLowerCase() == (prefix + "createplaylist")) return message.channel.send("You need to provide a name for the new playlist.")
+
+    let newName = message.content.split(" ").slice(1).join(" ");
+
+    if (user.playlists.some((value) => { value.title == newName})) return message.channel.send(`You already have a playlist called ${value.title}`);
+
+    User.findOneAndUpdate({id: user.id}, {$set: {playlists: [{title: newName, songs: []}]}}, function(err,doc,res){});
+
 }
 
 function skippingNotification(message, songID, step) {
@@ -2919,12 +2987,7 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-
-//general matcher - have an array of visible options, internal options, do differerentiate the two if needed
-
-//if there is no delay on skipping right away after loading a song first time through, then if there is an initial offset, just play normal and then im
-
-//check how fredboat handles skips and stuff. is there a pause or is it
+//Test horoku allocation by playing my 500 list song and have it try to dl all of that
 
 //set up automated help/explanation text -> now just automate !help+command :)
 
