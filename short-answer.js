@@ -401,6 +401,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[41], createPlaylist)
     commandMap.set(Commands.commands[42], myPlayLists)
     commandMap.set(Commands.commands[43], removeSong)
+    commandMap.set(Commands.commands[44], playlist)
 }
 
 function setServerPrefix(message, params, user) {
@@ -2718,20 +2719,8 @@ async function removeSong(message, params, user) {
     params = params.playlist ? params : message.content.split(" ").slice(1).join(" ");
     let playListEmbed = JSON.parse(JSON.stringify(Embed));
     playListEmbed.timestamp = new Date();
-
-    if (!params) {
-
-        let promptArray = [];
-        let internalArray = [];
-
-        for (let i = 0; i < user.playlists.length; i++) {
-
-            promptArray.push(user.playlists[i].title);
-            internalArray.push({ playlist: user.playlists[i] });
-        }
-        return generalMatcher(message, -23, user, promptArray, internalArray, removeSong, `Enter the number of the playlist you wish to remove the song from!`)
-    }
-    else if (params.song) {
+    
+    if (params.song) {
 
         params.playlist.songs.splice(params.index, 1);
         User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { if (err) console.log(err) });
@@ -2756,7 +2745,89 @@ async function removeSong(message, params, user) {
             playlists.push(playlist.title);
             internalArray.push({ playlist: playlist });
         }
-        return generalMatcher(message, params, user, playlists, internalArray, removeSong, `Enter the number of the playlist you wish to remove the song from!`);
+        let query = params ? params : -23;
+        return generalMatcher(message, query, user, playlists, internalArray, removeSong, `Enter the number of the playlist you wish to remove the song from!`);
+    }
+}
+
+async function playlist(message, params, user) {
+
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
+    let serverQueue = queue.get(message.guild.id);
+
+    const voiceChannel = message.member.voice.channel;
+
+    if (!voiceChannel) return message.reply("You must be in a voice channel!");
+    const permission = voiceChannel.permissionsFor(message.client.user);
+    if (!permission.has('CONNECT') || !permission.has("SPEAK")) {
+        return message.channel.send("I need permission to join and speak in your voice channel!")
+    }
+
+    const memberPermissions = voiceChannel.permissionsFor(message.author);
+    if (!memberPermissions.has('CONNECT') || !memberPermissions.has("SPEAK")) {
+        return message.channel.send("You need permission to join and speak in your voice channel!");
+    }
+
+    params = params.playlist ? params : message.content.split(" ").slice(1).join(" ");
+
+    if (params.playlist) {
+        let callPlay = false;
+        let queueConstruct;
+
+        if (!serverQueue) {
+            queueConstruct = {
+                textChannel: message.channel,
+                voiceChannel: voiceChannel,
+                connection: null,
+                songs: [],
+                index: 0,
+                volume: 5,
+                playing: true,
+                dispatcher: null
+            };
+            queue.set(message.guild.id, queueConstruct);
+            serverQueue = queueConstruct;
+            callPlay = true;
+        } else {
+
+            queueConstruct = serverQueue;
+        }
+
+        for (video of params.playlist.songs) {
+            if (video.duration) {
+                queueConstruct.songs.push({
+                    ...video,
+                    start: null,
+                });
+                cacheSong({ id: video.id, url: video.url });
+            }
+        }
+        message.channel.send(`${params.playlist.songs.length} songs have been added to the queue!`);
+
+        if (callPlay) {
+            try {
+                var connection = await voiceChannel.join();
+                queueConstruct.connection = connection;
+                playSong(message.guild, queueConstruct.songs[0], null, message);
+            } catch (err) {
+                console.log(err);
+                queue.delete(message.guild.id)
+                return message.channel.send("There was an error playing! " + err);
+            }
+        }
+    }
+    else {
+        let promptArray = [];
+        let internalArray = [];
+
+        for (let i = 0; i < user.playlists.length; i++) {
+
+            promptArray.push(user.playlists[i].title);
+            internalArray.push({ playlist: user.playlists[i] });
+        }
+        let query = params ? params : -23;
+        return generalMatcher(message, query, user, promptArray, internalArray, playlist, `Enter the number of the playlist you wish to load the songs from!`)
     }
 }
 
