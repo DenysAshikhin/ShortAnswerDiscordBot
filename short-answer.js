@@ -399,6 +399,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[39], reverse)
     commandMap.set(Commands.commands[40], addSong)
     commandMap.set(Commands.commands[41], createPlaylist)
+    commandMap.set(Commands.commands[42], myPlayLists)
 }
 
 function setServerPrefix(message, params, user) {
@@ -534,9 +535,6 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
         if (tutorialResult != -22)
             return tutorialResult;
     }
-
-    console.log(specificCommand.command)
-    console.log("GOT TO APPLY", params, skipSearch, specificCommand.defaults)
 
     let finishy = await specificCommand.command.apply(null, specificCommand.defaults);
     console.log(`finishy: ${finishy == 0 || finishy == -11}`)
@@ -2292,8 +2290,6 @@ async function seek(message, params) {
     }
 }
 
-
-//make this automatically generate the specific command, and return either quit, 0 made a command, or an actual object
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
     if (Array.isArray(params)) {
@@ -2314,9 +2310,16 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         includeMatches: true
     }
 
+
     if (params != -23) {
         let fuse = new Fuse(searchArray, newOptions);
         let result = fuse.search(params);
+       
+        if(result[0].score == 0){
+            originalCommand.apply(null, [message, internalArray[result[0].refIndex], user]);
+            return 100;
+        }
+
         let maxResults = 5;
         if (maxResults > result.length)
             maxResults = result.length;
@@ -2337,16 +2340,18 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 
     if (promptArray.length > 0) {
 
-        if (parameterArray[0].score == 0) {
-            specificCommandCreator(originalCommand, [message, parameterArray[0], user], null, user);
-            await triggerCommandHandler(message, user, true);
-            return 0;
+      
+        if ([0].score == 0) {
+            // specificCommandCreator(originalCommand, [message, parameterArray[0], user], null, user);
+            // await triggerCommandHandler(message, user, true);
+            console.log("THONK")
+
         }
         else {
             let fieldArray = new Array();
 
             for (let i = 0; i < promptArray.length; i++)
-                fieldArray.push({ name: `${i} - ` + promptArray[i].item, value: "** **", inline: false })
+                fieldArray.push({ name: `${i}) ` + promptArray[i].item, value: "** **", inline: false })
 
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.timestamp = new Date();
@@ -2640,16 +2645,12 @@ async function addSong(message, params, user) {
 
     let serverQueue = queue.get(message.guild.id);
     let song;
-    console.log(":THINKING:")
-    console.log(params)
 
     if (!params.step)
         params = params.url && !params.step ? params.url : message.content.split(" ").slice(1).join(" ");
 
     if (!params.step) {
-        console.log("YE BOI")
-        console.log(params[0])
-        console.log(params)
+
         if (!params && !serverQueue) return message.channel.send("There is no song currently playing"
             + " and you have not provided a url/search term. Make sure at least one of those exsit before adding a song!");
         else if (!params) {
@@ -2709,9 +2710,6 @@ async function addSong(message, params, user) {
             "Enter the number associated with the playlist you wish to add the song to");
     }
     else {
-        // let args = ;
-
-
         params.playlist.songs.push(params.song);
         console.log(params.playlist);
         user.playlists[params.index] = params.playlist;
@@ -2719,13 +2717,50 @@ async function addSong(message, params, user) {
         return User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
     }
 }
-// if (params.step == 1) {
 
-//     params.playlist.push(serverQueue.songs[serverQueue.index]);
-//     user.playlists[params.index] = params.playlist;
-//     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+async function myPlayLists(message, params, user) {
 
-// }
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists!");
+
+    params = params.title ? params : message.content.split(" ").slice(1).join(" ");
+
+    let playListEmbed = JSON.parse(JSON.stringify(Embed));
+    playListEmbed.timestamp = new Date();
+
+    if (!params) {
+
+        let promptArray = [];
+        let internalArray = [];
+
+        for (let i = 0; i < user.playlists.length; i++) {
+
+            promptArray.push(user.playlists[i].title);
+            internalArray.push(user.playlists[i]);
+        }
+        return generalMatcher(message, -23, user, promptArray, internalArray, myPlayLists, `Enter the number of the playlist you wish to view more information about!`)
+    }
+    else if (params.title) {
+
+        let fields = [];
+
+        for (let i = 0; i < params.songs.length; i++) {
+
+            fields.push({ name: `${i}) ${params.songs[i].title}`, value: "** **" });
+        }
+
+        playListEmbed.fields = fields;
+        playListEmbed.description = `Here are the songs for **${params.title}**`;
+        return message.channel.send({ embed: playListEmbed });
+    } else {
+
+        let playlists = [];
+        for (playlist of user.playlists)
+            playlists.push(playlist.title);
+
+        return generalMatcher(message, params, user, playlists, user.playlists, myPlayLists, `Enter the number of the playlist you wish to view more information about!`);
+    }
+
+}
 
 function createPlaylist(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
@@ -2862,9 +2897,9 @@ async function updateAll() {
 
     // }//for user loop
 
-    // // // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
-    // // //     if (err) console.log('error', err);
-    // // // });
+    // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
+    //     if (err) console.log('error', err);
+    // });
 
 
     // console.log("CALLED UPDATE ALL");
