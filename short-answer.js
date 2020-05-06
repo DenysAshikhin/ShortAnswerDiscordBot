@@ -271,8 +271,8 @@ connectDB.once('open', async function () {
     Client.on("message", async (message) => {
         if (message.author.bot) return;
 
-        let user = await findUser({ id: message.author.id });
 
+        let user = await findUser({ id: message.author.id });
         if (message.channel.type != 'dm') {
 
             let guild = await findGuild({ id: message.guild.id });
@@ -513,14 +513,19 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
     if (!skipSearch) {
         if (!isNaN(params) && params.length > 0) {
             params = Math.floor(params);
-            if (params >= specificCommand.choices.length || params < 0)
+            if (params >= specificCommand.choices.length || params < 0) {
+                console.log("GIVING A -1")
                 return -1;
+            }
 
             specificCommand.defaults[1] = specificCommand.choices[Math.floor(params)].item
-
             tutorialResult = await tutorialHandler(specificCommand.defaults[0], specificCommand.command, specificCommand.defaults[1], user);
             if (tutorialResult != -22)
                 return tutorialResult;
+        }
+        else {
+            message.channel.send("You entered an invalid option, please try again or enter *-1* to quit the suggestion prompt.");
+            return 0;
         }
     }
     else {
@@ -530,7 +535,11 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
             return tutorialResult;
     }
 
+    console.log(specificCommand.command)
+    console.log("GOT TO APPLY", params, skipSearch, specificCommand.defaults)
+
     let finishy = await specificCommand.command.apply(null, specificCommand.defaults);
+    console.log(`finishy: ${finishy == 0 || finishy == -11}`)
     if (finishy == -11 || finishy == 0)
         return 0;
     else {
@@ -1627,7 +1636,7 @@ function removeGame(message, game, user) {
             if (check == -1) {
 
                 message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-                return -1;
+                return 0;
             }
             else if (check.result[0].score != 0) {
 
@@ -1743,7 +1752,7 @@ async function gameStats(message, params, user) {
         if (check == -1) {
 
             message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-            return -1;
+            return 0;
         }
         else if (check.result[0].score != 0) {
 
@@ -1886,6 +1895,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     if (check == -1) {
 
         message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
+        return 0;
     }
     else if (check.result[0].score != 0) {
 
@@ -2286,14 +2296,13 @@ async function seek(message, params) {
 //make this automatically generate the specific command, and return either quit, 0 made a command, or an actual object
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
-
     if (Array.isArray(params)) {
         params = params[0].trim();
     }
     else if (isNaN(params)) {
         params = params.trim();
     }
-    console.log(params)
+
     let promptArray = new Array();
     let parameterArray = new Array();
     let newOptions = {
@@ -2426,7 +2435,7 @@ async function play(message, params, user) {
         } callPlay = true;
         message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
     }
-    else if (await ytdl.validateURL(args)) {
+    else if (ytdl.validateURL(args)) {
         songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
         if (songInfo.length_seconds) {
             let startTime = args.lastIndexOf('?t=');
@@ -2623,46 +2632,100 @@ function cacheSong(song) {
  * step:
  * -1 - quit
  * 1) put the song in a provided playlist
+ * 2) They chose a search result and a freaking playlist
  */
-function addSong(message, params, user) {
+async function addSong(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
+
+    let serverQueue = queue.get(message.guild.id);
+    let song;
+    console.log(":THINKING:")
     console.log(params)
+
+    if (!params.step)
+        params = params.url && !params.step ? params.url : message.content.split(" ").slice(1).join(" ");
+
     if (!params.step) {
-
-        let serverQueue = queue.get(message.guild.id);
-        if (params[0].toLowerCase() == (prefix + 'addsong')) {
-
-            if (serverQueue) {
-
-                if (user.playlists.length == 0) {
-
-                    message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!")
-                }
-                else {
-
-                    let titleArray = [];
-                    let internalArray = [];
-                    for (let i = 0; i < user.playlists.length; i++) {
-
-                        titleArray.push(user.playlists[i].title);
-                        internalArray.push({ step: 1, playlist: user.playlists[i], index: i })
-                    }
-                    generalMatcher(message, -23, user, titleArray, internalArray, addSong,
-                        "Enter the number associated with the playlist you wish to add the song to");
-                }
-            }
-            else {
-                return message.channel.send("There is no song currently playing, please provide a url, song name or start playing a song to add a new one to a playlist.")
-            }
+        console.log("YE BOI")
+        console.log(params[0])
+        console.log(params)
+        if (!params && !serverQueue) return message.channel.send("There is no song currently playing"
+            + " and you have not provided a url/search term. Make sure at least one of those exsit before adding a song!");
+        else if (!params) {
+            song = serverQueue.songs[serverQueue.index];
         }
-    }
-    else if (params.step == 1) {
+        else if (ytdl.validateURL(params)) {
+            songInfo = await ytdl.getInfo(params, { quality: 'highestaudio' });
+            if (songInfo.length_seconds) {
+                let startTime = params.lastIndexOf('?t=');
+                let offset = 0;
 
-        params.playlist.push(serverQueue.songs[serverQueue.index]);
+                if (startTime != -1) {
+
+                    let tester = params.substring(startTime + 3);
+                    offset = (tester.length > 0 && !isNaN(tester)) ? Number(tester) : 0;
+                }
+
+                song = {
+                    title: songInfo.title,
+                    url: songInfo.video_url,
+                    duration: songInfo.length_seconds,
+                    start: null,
+                    offset: offset,
+                    id: songInfo.video_id,
+                    paused: null,
+                    timePaused: 0,
+                    progress: 0
+                };
+            }
+            else
+                message.channel.send("I can't access that video, please try another!");
+        }
+        else {
+            let searchResult = await ytsr(params, { limit: 10 });
+
+            let titleArray = [];
+            let urlArray = [];
+
+            for (let i = 0; i < searchResult.items.length || titleArray.length == 5; i++) {
+
+                if (searchResult.items[i].type == 'video') {
+                    titleArray.push(searchResult.items[i].title);
+                    urlArray.push({ url: searchResult.items[i].link });
+                }
+            }
+            return generalMatcher(message, searchResult.query, user, titleArray, urlArray, addSong, "Please enter the number matching the song you wish to add!");
+        }
+
+        let titleArray = [];
+        let internalArray = [];
+        for (let i = 0; i < user.playlists.length; i++) {
+
+            titleArray.push(user.playlists[i].title);
+            internalArray.push({ step: 1, playlist: user.playlists[i], index: i, song: song });
+        }
+        return generalMatcher(message, -23, user, titleArray, internalArray, addSong,
+            "Enter the number associated with the playlist you wish to add the song to");
+    }
+    else {
+        // let args = ;
+
+
+        params.playlist.songs.push(params.song);
+        console.log(params.playlist);
         user.playlists[params.index] = params.playlist;
-        User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function(err,doc,res){});
+        message.channel.send(`Succesfully added ${params.song.title} to ${params.playlist.title}`)
+        return User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
     }
 }
+// if (params.step == 1) {
+
+//     params.playlist.push(serverQueue.songs[serverQueue.index]);
+//     user.playlists[params.index] = params.playlist;
+//     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+
+// }
 
 function createPlaylist(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
@@ -2670,10 +2733,10 @@ function createPlaylist(message, params, user) {
 
     let newName = message.content.split(" ").slice(1).join(" ");
 
-    if (user.playlists.some((value) => { value.title == newName})) return message.channel.send(`You already have a playlist called ${value.title}`);
+    if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
 
-    User.findOneAndUpdate({id: user.id}, {$set: {playlists: [{title: newName, songs: []}]}}, function(err,doc,res){});
-
+    user.playlists.push({ title: newName, songs: [] })
+    User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { console.log(err, res) });
 }
 
 function skippingNotification(message, songID, step) {
@@ -2834,7 +2897,7 @@ async function updateGames(message, game, user) {
         if (check == -1) {
 
             message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-            return -1;
+            return 0;
         }
         else if (check.result[0].score != 0) {
 
