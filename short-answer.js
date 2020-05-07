@@ -2588,6 +2588,8 @@ async function playSong(guild, song, skip, message) {
     }
 }
 
+
+//make a queue system for a max of 20 songs at a time.
 /**
  * 
  * @param {id: link id, url: youtubelink} song 
