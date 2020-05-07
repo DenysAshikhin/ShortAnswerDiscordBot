@@ -2525,10 +2525,9 @@ async function playSong(guild, song, skip, message) {
 
                 //serverQueue.songs.shift();
                 serverQueue.index++;
-                if (serverQueue.index == serverQueue.songs.length) {
-                    message.channel.send("No more songs left in the queue, leaving...");
+                if (serverQueue.index == serverQueue.songs.length)
                     serverQueue.songs = [];
-                }
+
                 playSong(guild, serverQueue.songs[serverQueue.index], null, message);
             })
             .on('start', () => {
@@ -2562,7 +2561,7 @@ async function playSong(guild, song, skip, message) {
         console.log("inside of else");
 
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
-        let streamResolve = ytdl(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
+        let streamResolve = ytdl(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 });
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
                 console.log("inside of error");
@@ -2570,10 +2569,9 @@ async function playSong(guild, song, skip, message) {
             .on('finish', () => {
 
                 serverQueue.index++;
-                if (serverQueue.index == serverQueue.songs.length) {
-                    message.channel.send("No more songs left in the queue, leaving...");
+                if (serverQueue.index == serverQueue.songs.length)
                     serverQueue.songs = [];
-                }
+
                 playSong(guild, serverQueue.songs[serverQueue.index], null, message);
             })
             .on('start', () => {
@@ -2603,7 +2601,7 @@ function cacheSong(song) {
         console.log("interesting")
 
         let downloadYTDL = require('ytdl-core');
-        let youtubeResolve = downloadYTDL(song.url, { filter: format => format.container === 'mp4', quality: 'highestaudio', highWaterMark: 1 << 25 });
+        let youtubeResolve = downloadYTDL(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 });
 
         let writeStream = fs.createWriteStream(tempAudio);
         writeStream.on('finish', () => {
@@ -2719,7 +2717,7 @@ async function removeSong(message, params, user) {
     params = params.playlist ? params : message.content.split(" ").slice(1).join(" ");
     let playListEmbed = JSON.parse(JSON.stringify(Embed));
     playListEmbed.timestamp = new Date();
-    
+
     if (params.song) {
 
         params.playlist.songs.splice(params.index, 1);
