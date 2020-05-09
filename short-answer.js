@@ -12,6 +12,8 @@ const ytsr = require('ytsr');
 var mv = require('mv');
 
 
+
+
 const readline = require('readline');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const ffmpeg = require('fluent-ffmpeg');
@@ -19,7 +21,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 
 
 const numCPUs = require('os').cpus().length;
-console.log(`I have ${numCPUs} cores!`);//https://nodejs.org/api/cluster.html#cluster_cluster - can be useful to shart? Might help me get to like 
+console.log(`I have ${numCPUs} cores!`);//https://nodejs.org/api/cluster.html#cluster_cluster - can be useful to shard? Might help me get to like 
 //10k servers on heroku
 
 
@@ -30,6 +32,8 @@ const studyJSON = require('./medstudy.json');
 const DATABASE = require('./backups/26-04-2020.json');
 
 const fs = require('fs');
+const fsPromises = fs.promises;
+
 const creatorID = '99615909085220864';
 const botID = '689315272531902606';
 const guildID = '97354142502092800';
@@ -2417,9 +2421,9 @@ async function play(message, params, user) {
         let playlist = await ytpl(args);
         for (video of playlist.items) {
             if (video.duration) {
-                queueConstruct.songs.push({
+                let song = {
                     title: video.title,
-                    url: video.url,
+                    url: video.url_simple,
                     duration: hmsToSecondsOnly(video.duration),
                     start: null,
                     offset: 0,
@@ -2427,8 +2431,10 @@ async function play(message, params, user) {
                     paused: null,
                     timePaused: 0,
                     progress: 0
-                });
-                cacheSong({ id: video.id, url: video.url });
+                }
+
+                queueConstruct.songs.push(song);
+                cacheSong(song, message.guild.id);
             }
         } callPlay = true;
         message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
@@ -2457,7 +2463,7 @@ async function play(message, params, user) {
                 progress: 0
             };
             queueConstruct.songs.push(song);
-            cacheSong(song);
+            cacheSong(song, message.guild.id);
 
             if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
             else {
@@ -2499,6 +2505,10 @@ async function play(message, params, user) {
 }
 //addsong or addplaylist will check if parameters is given, then offer to make new playlist or add to exsiting one.
 
+
+
+//filter: format => format.container === 'mp4' && !format.qualityLabel,
+
 async function playSong(guild, song, skip, message) {
     const serverQueue = queue.get(guild.id);
 
@@ -2510,10 +2520,16 @@ async function playSong(guild, song, skip, message) {
     }
 
     let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
+    let audioOutputExists = false;
+    await fsPromises.access(audioOutput)
+        .then(() => { audioOutputExists = true; })
+        .catch(() => { })
 
-    if (!song.start && song.offset > 0 && !fs.existsSync(audioOutput) && !skip) return forward(message, song.offset)
 
-    if (fs.existsSync(audioOutput)) {
+
+    if (!song.start && (song.offset > 0) && !audioOutputExists && !skip) return forward(message, song.offset)
+
+    if (audioOutputExists) {
 
         if (activeSkips.get(song.id)) activeSkips.delete(song.id);
 
@@ -2543,12 +2559,12 @@ async function playSong(guild, song, skip, message) {
     }
     else if (skip) {
 
-        let percentageToDownload = 100 - download.get(song.id);
+        let percentageToDownload = 100 - download.get(guild.id).progress;
         let percentageToSkip = (song.offset / song.duration) * 100;
 
         console.log(`toDownload ${percentageToDownload} || toSkip ${percentageToSkip} || map ${download.get(song.id)}`);
 
-        if (percentageToSkip > percentageToDownload) {
+        if ((percentageToSkip > percentageToDownload) && (download.get(guild.id).songToDownload.id == song.id)) {
             console.log(console.log("chose to wait"));
 
             return setTimeout(playSong, 1000, guild, song, skip, message);
@@ -2561,7 +2577,9 @@ async function playSong(guild, song, skip, message) {
         console.log("inside of else");
 
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
+        console.log(`BBBBB ${song.url}`)
         let streamResolve = ytdl(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 });
+        console.log("PAST B?")
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
                 console.log("inside of error");
@@ -2594,34 +2612,81 @@ async function playSong(guild, song, skip, message) {
  * 
  * @param {id: link id, url: youtubelink} song 
  */
-function cacheSong(song) {
+async function cacheSong(song, guild) {
 
-    let tempAudio = path.resolve(`songs`, song.id + '.mp3');
-    let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
+    if (!download.get(guild)) {
 
-    if (!fs.existsSync(tempAudio) && !fs.existsSync(audioOutput)) {
-        console.log("interesting")
+        console.log("initialising download");
 
-        let downloadYTDL = require('ytdl-core');
-        let youtubeResolve = downloadYTDL(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 });
+        download.set(guild,
+            {
+                songToDownload: null,
+                progress: 0,
+                leftOver: [JSON.parse(JSON.stringify(song))]
+            }
+        );
+    }
 
-        let writeStream = fs.createWriteStream(tempAudio);
-        writeStream.on('finish', () => {
-            console.log("FINISHED: WRITE STREAM " + song.title + `|| ${song.progress}`);
-            mv(tempAudio, audioOutput, function (err) {
-                if (err) console.log(err);
-                download.delete(song.id);
+    let serverDownload = download.get(guild);
+
+    if (!serverDownload.songToDownload && serverDownload.leftOver.length > 0) {
+
+        serverDownload.songToDownload = serverDownload.leftOver.shift();
+        song = serverDownload.songToDownload;
+        console.log(song)
+
+        let tempAudio = path.resolve(`songs`, song.id + '.mp3');
+        let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
+
+        let audioExists = false;
+        let tempAudioExists = false;
+
+        await fsPromises.access(audioOutput)
+            .then(() => { audioExists = true; })
+            .catch(() => { })
+
+        await fsPromises.access(tempAudioExists)
+            .then(() => { tempAudioExists = true; })
+            .catch(() => { })
+
+        if (audioExists) {
+            console.log('Audio exists')
+            serverDownload.songToDownload = null;
+            serverDownload.progress = 0;
+            cacheSong(null, guild);
+            return;
+        }
+
+        if (!tempAudioExists && !audioExists) {
+            console.log("interesting")
+
+            let downloadYTDL = require('ytdl-core');
+            console.log(`AAA ${song.url}`)
+            let youtubeResolve = downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
+
+            let writeStream = fs.createWriteStream(tempAudio);
+
+            writeStream.on('finish', () => {
+                console.log("FINISHED: WRITE STREAM " + song.title);
+                mv(tempAudio, audioOutput, function (err) {
+                    if (err) console.log(err);
+                    serverDownload.songToDownload = null;
+                    serverDownload.progress = 0;
+                    cacheSong(null, guild);
+                });
             });
-        });
 
-        youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
-            const percent = downloaded / total;
-
-            readline.cursorTo(process.stdout, 0);
-            song.progress = Math.floor((percent * 100).toFixed(2));
-            download.set(song.id, song.progress);
-        });
-        youtubeResolve.pipe(writeStream);
+            youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+                const percent = downloaded / total;
+                readline.cursorTo(process.stdout, 0);
+                song.progress = Math.floor((percent * 100).toFixed(2));
+                download.get(guild).progress = song.progress;
+            });
+            youtubeResolve.pipe(writeStream);
+        }
+    }
+    else if (song) {
+        serverDownload.leftOver.push(JSON.parse(JSON.stringify(song)));
     }
 }
 
