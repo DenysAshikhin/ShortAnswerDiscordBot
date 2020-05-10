@@ -2445,7 +2445,7 @@ async function play(message, params, user) {
                 }
 
                 queueConstruct.songs.push(song);
-                //cacheSong(song, message.guild.id);
+                cacheSong(song, message.guild.id);
             }
         } callPlay = true;
         message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
@@ -2474,7 +2474,7 @@ async function play(message, params, user) {
                 progress: 0
             };
             queueConstruct.songs.push(song);
-            //cacheSong(song, message.guild.id);
+            cacheSong(song, message.guild.id);
 
             if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
             else {
@@ -2524,7 +2524,7 @@ async function playSong(guild, sonG, skip, message) {
     const serverQueue = queue.get(guild.id);
     const song = JSON.parse(JSON.stringify(sonG))
 
-    if (!song) {//Will probably have to revisit this later
+    if (!song) {
         message.channel.send(`No more songs queued, leaving!`);
         stop(message);
         return;
@@ -2535,8 +2535,6 @@ async function playSong(guild, sonG, skip, message) {
     await fsPromises.access(audioOutput)
         .then(() => { audioOutputExists = true; })
         .catch(() => { })
-
-
 
     if (!song.start && (song.offset > 0) && !audioOutputExists && !skip) return forward(message, song.offset)
 
