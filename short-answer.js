@@ -73,7 +73,7 @@ const GameTutorial = {
     steps: []
 };
 const options = {
-    isCaseSensitive: true,
+    isCaseSensitive: false,
     findAllMatches: true,
     includeMatches: false,
     includeScore: false,
@@ -163,6 +163,7 @@ var queue = new Map();
 var download = new Map();
 var activeSkips = new Map();
 var lastSkip = new Map();
+var squads = new Map();
 var defaultPrefix = "sa!";
 var prefix;
 var uri = "";
@@ -583,8 +584,9 @@ async function checkCommands(params, user) {
 
     let finalArray = new Array();
     let finalList = "";
-    let newOptions = {
-        ...options,
+    let newOptions = JSON.parse(JSON.stringify(options));
+    newOptions = {
+        ...newOptions,
         minMatchCharLength: params.length / 2,
         findAllMatches: false,
         includeScore: true,
@@ -1942,6 +1944,13 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         return -1;
     }
 
+    let squadSize;
+
+    if(game.length > 1 && Array.isArray(game)){
+        game = game[0];
+        squadSize = game[1];
+    }
+
     let check = checkGame(games, game, user);
 
     if (check == -1) {
@@ -2007,7 +2016,8 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
         finalEmbed.timestamp = new Date();
-        finalEmbed.description = message.member.displayName + " has summoned " + signedUp + " for some " + game;
+        finalEmbed.description = message.member.displayName + " has summoned " + signedUp + " for some " + game
+        + `\nTo accept the summons type ${prefix}q`;
 
         if (signedUp.length > 3)
             message.channel.send({ embed: finalEmbed });
@@ -2363,10 +2373,12 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 
     let promptArray = new Array();
     let parameterArray = new Array();
-    let newOptions = {
-        ...options,
+
+    let newOptions = JSON.parse(JSON.stringify(options));
+    newOptions = {
+        ...newOptions,
         minMatchCharLength: params.length / 2,
-        findAllMatches: true,
+        findAllMatches: false,
         includeScore: true,
         isCaseSensitive: false,
         includeMatches: true
@@ -3341,8 +3353,9 @@ function checkGame(gameArray, params, user) {
 
     let finalArray = new Array();
     let finalList = "";
-    let newOptions = {
-        ...options,
+    let newOptions = JSON.parse(JSON.stringify(options));
+    newOptions = {
+        ...newOptions,
         minMatchCharLength: params.length / 2,
         findAllMatches: false,
         includeScore: true,
