@@ -52,9 +52,9 @@
         "CREATEPLAYLIST",
         "MYPLAYLISTS",
         "REMOVESONG",
-        "PLAYLIST"
+        "PLAYLIST",
 
-
+        "SAVEPLAYLIST"
 
     ],
     "explanation": [
@@ -110,9 +110,9 @@
         "Creates a new playlist with the provided name - playlists cannot have the same names.",
         "Shows you all of your playlists by default, if you provide a number or the name of a playlist it will display the specific playlist.",
         "Removes a song from a playlist. You can either specify the exact playlist to remove a song from, or use the suggestion prompt.",
-        "Loads one of your playlists into the the queue. If you provide a name of a playlist it, otherwise a suggestion prompt will appear."
+        "Loads one of your playlists into the the queue. If you provide a name of a playlist it, otherwise a suggestion prompt will appear.",
 
-
+        "Saves the current playing playlist into one of your playlists."
     ],
         
     "example": [
@@ -168,9 +168,9 @@
         ["1) createPlaylist Dankest Wubs"],
         ["1) myPlayLists", "2) myPlayLists 2", "3) myPlayLists Best Wubs"],
         ["1) removeSong", "2) removeSong Best Wubs"],
-        ["1) playlist", "2) playlist Best Wubs"]
+        ["1) playlist", "2) playlist Best Wubs"],
 
-
+        ["1) savePlayList", "2) savePlayList Best Wubs"]
     ],
     "subsection": [
         [3],
@@ -225,6 +225,8 @@
         [4],
         [4],
         [4],
+        [4],
+
         [4]
     ]
 }

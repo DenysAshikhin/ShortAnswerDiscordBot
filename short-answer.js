@@ -407,6 +407,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[42], myPlayLists)
     commandMap.set(Commands.commands[43], removeSong)
     commandMap.set(Commands.commands[44], playlist)
+    commandMap.set(Commands.commands[45], savePlayList)
 }
 
 function setServerPrefix(message, params, user) {
@@ -2181,7 +2182,7 @@ async function skip(message, params) {
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
         lastSkip.set(message.guild.id, new Date());
-        
+
         if (!isNaN(params))
             if ((guildQueue.index + Number(params)) >= guildQueue.songs.length || (guildQueue.index + Number(params)) < 0)
                 return message.channel.send(`You're trying to skip too many songs!`);
@@ -2727,7 +2728,7 @@ async function addSong(message, params, user) {
         }
         else if (ytdl.validateURL(params)) {
             songInfo = await ytdl.getInfo(params, { quality: 'highestaudio' });
-            console.log(`length: ${songInfo.length_seconds}`)
+
             if (songInfo.length_seconds) {
                 let startTime = params.lastIndexOf('?t=');
                 let offset = 0;
@@ -2781,9 +2782,47 @@ async function addSong(message, params, user) {
     }
     else {
         params.playlist.songs.push(params.song);
-        console.log(params.playlist);
         user.playlists[params.index] = params.playlist;
         message.channel.send(`Succesfully added ${params.song.title} to ${params.playlist.title}`)
+        return User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+    }
+}
+
+async function savePlayList(message, params, user) {
+
+    if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
+
+    let serverQueue = queue.get(message.guild.id);
+    let song;
+
+    if (!params.playlist)
+        params = params.url && !params.step ? params.url : message.content.split(" ").slice(1).join(" ");
+
+    if (!params.playlist) {
+
+        if (!serverQueue) return message.channel.send("No songs are currently playing, start some before trying to add them to a playlist.");
+
+        let titleArray = [];
+        let internalArray = [];
+        for (let i = 0; i < user.playlists.length; i++) {
+
+            titleArray.push(user.playlists[i].title);
+            internalArray.push({ playlist: user.playlists[i], index: i, });
+        }
+
+        let query = params ? params : -23;
+            return generalMatcher(message, params, user, titleArray, internalArray, savePlayList,
+                "Enter the number associated with the playlist you wish to add the song to");
+    }
+    else {
+
+        for (song of serverQueue.songs) {
+            params.playlist.songs.push(JSON.parse(JSON.stringify(song)));
+        }
+
+        user.playlists[params.index] = params.playlist;
+        message.channel.send(`Succesfully added ${serverQueue.songs.length} songs to ${params.playlist.title}`)
         return User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
     }
 }
@@ -2959,7 +2998,7 @@ function createPlaylist(message, params, user) {
     if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
 
     user.playlists.push({ title: newName, songs: [] })
-    User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { console.log(err, res) });
+    User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
 }
 
 function skippingNotification(message, songID, step) {
