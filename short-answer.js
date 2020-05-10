@@ -408,7 +408,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[44], playlist)
     commandMap.set(Commands.commands[45], savePlayList)
     commandMap.set(Commands.commands[46], removePlayList)
-    commandMap.set(Commands.commands[47], queue)
+    commandMap.set(Commands.commands[47], Queue)
 }
 
 function setServerPrefix(message, params, user) {
@@ -1937,11 +1937,13 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         return -1;
     }
 
-    let squadSize;
+    let sizeLimit = message.content.split(',')[1];
+    if (sizeLimit)
+        sizeLimite.trim();
+    let squadSize = !isNaN(sizeLimit) && sizeLimit.length > 0 ? Number(sizeLimit) : 5;
 
     if (game.length > 1 && Array.isArray(game)) {
         game = game[0];
-        squadSize = game[1];
     }
 
     let check = checkGame(games, game, user);
@@ -2014,7 +2016,8 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
         if (signedUp.length > 3) {
 
-            squads.set(user.id, {game: game, players: [], size: 5, created: new Date()});
+            //into players put yourSELF!!!! NOTE note
+            squads.set(user.id, { game: game, players: [], size: squadSize, created: new Date() });
             message.channel.send({ embed: finalEmbed });
         }
         else
@@ -2026,9 +2029,47 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     }
 }
 
-async function queue(message, params, user){
+async function Queue(message, params, user) {
+    
+    let ETA = message.content.split(',')[1];
+    if (ETA)
+        ETA.trim();
+    let finalETA = !isNaN(ETA) && ETA.length > 0 ? Number(ETA) : -1;
 
+    if (squads.size == 0) return message.channel.send("There aren't any squads active, start a new one? :wink:");
+    else if (squads.size == 1) {
+        let squad = squads.values().next().value;
+        if (squad.players.length < squad.size - 1) {
 
+            if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this squad!");
+
+            squad.players.push(mention(user.id));
+            let newEmbed = JSON.parse(JSON.stringify(Embed));
+            newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the squad!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
+            newEmbed.fields = [{ name: `Current squad members: ${squad.players.length}/${squad.size}`, value: squad.players }];
+            return message.channel.send({ embed: newEmbed });
+        }
+        else return message.channel.send("There is no space left in the squad!");
+    }
+    else if (message.mentions.members.size > 0) {
+
+        let squad = squads.get(message.mentions.members.values().next().value.id);
+        if(!squad) return message.channel.send("That user does not have any active summoninings!");
+        if (squad.players.length < squad.size - 1) {
+
+            if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this squad!");
+
+            squad.players.push(mention(user.id));
+            let newEmbed = JSON.parse(JSON.stringify(Embed));
+            newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the squad!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
+            newEmbed.fields = [{ name: `Current squad members: ${squad.players.length}/${squad.size}`, value: squad.players }];
+            return message.channel.send({ embed: newEmbed });
+        }
+        else return message.channel.send("There is no space left in the squad!");
+    }
+    else{
+        return message.channel.send("There are more than one active squad, please @mention who you want to join!");
+    }
 }
 
 async function createUser(member) {
@@ -2665,7 +2706,6 @@ async function playSong(guild, sonG, skip, message) {
     }
 }
 
-
 //make a queue system for a max of 20 songs at a time.
 /**
  * 
@@ -3203,6 +3243,14 @@ async function updateAll() {
 
 async function minuteCount() {
     countTalk();
+
+    //Checking for squad timeouts
+    {
+        for (squad of squads.entries())
+            if ((new Date() - squad[1].created) >= 1, 800, 000)
+                squads.delete(squad[0]);
+
+    }
 }
 
 async function updateGames(message, game, user) {
@@ -3381,6 +3429,7 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
+//ability to deque, squad leader to kick people, viewing active squads
 
 //Test horoku allocation by playing my 500 list song and have it try to dl all of that
 
@@ -3393,11 +3442,18 @@ setInterval(minuteCount, 60 * 1000);
 
 //forcefuly sign up a user, and everyone.
 
+//add squad time expiration checking to minutecount.
+
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial
 //for game stats, add a Y/N for seeing a list of all the people signed up for it
 
 //make a game recommendation
+
+//make parties last 30 minutes
+
+//add playlist stats to all stats
+//put all the current bool permissions into a map? To reference easier.
 
 
 //for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
