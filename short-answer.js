@@ -1345,36 +1345,70 @@ function gameHelp(message, params, user) {
 
 function generalHelp(message, params, user) {
 
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` General Help`;
-    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-    newEmbed.fields = [
-        { name: "Games", value: "", inline: true },
-        { name: "Stats", value: "", inline: true },
-        { name: "Miscellaneous", value: "", inline: true },
-        { name: "Music", value: "", inline: true },
-        { name: "Admins", value: "", inline: true },
-        { name: "Quality of Life", value: "", inline: true },
-        { name: "Help", value: "", inline: true },
-        { name: "General", value: "", inline: true },
-        { name: "Tutorials", value: "", inline: true },
-        { name: "Bugs/Suggestions", value: "", inline: true },
-    ];
 
-    for (tag of tags) {
+    const args = message.content.split(" ").slice(1).join(" ");
+
+
+    if (!args) {
+        let newEmbed = JSON.parse(JSON.stringify(Embed));
+        newEmbed.timestamp = new Date();
+        newEmbed.title = Embed.title + ` General Help`;
+        newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
+        newEmbed.fields = [
+            { name: "Games", value: "", inline: true },
+            { name: "Stats", value: "", inline: true },
+            { name: "Miscellaneous", value: "", inline: true },
+            { name: "Music", value: "", inline: true },
+            { name: "Admins", value: "", inline: true },
+            { name: "Quality of Life", value: "", inline: true },
+            { name: "Help", value: "", inline: true },
+            { name: "General", value: "", inline: true },
+            { name: "Tutorials", value: "", inline: true },
+            { name: "Bugs/Suggestions", value: "", inline: true },
+        ];
+
+        for (tag of tags) {
+
+            for (let i = 0; i < Commands.commands.length; i++) {
+
+                if (Commands.subsection[i].includes(tag)) {
+
+                    newEmbed.fields[tag - 1].value += Commands.commands[i] + "\n"
+                }
+            }
+        }
+
+        return message.channel.send({ embed: newEmbed });
+    }
+
+    if(params.index){
+
+        let examples = "```md\n";
+
+        for(example of Commands.example[params.index]){
+
+            let index = example.indexOf(" ");
+            examples += `<${example.slice(0, index)}` + prefix + `${example.slice(index+1)}>\n\n`;
+        }
+        examples += "```";
+       
+        let prompt =  `${Commands.explanation[params.index]}` + `${examples}`;
+        return message.channel.send(prompt);
+    }
+    else{
+
+        let promptArray = [];
+        let internalArray = [];
 
         for (let i = 0; i < Commands.commands.length; i++) {
 
-            if (Commands.subsection[i].includes(tag)) {
-
-                newEmbed.fields[tag - 1].value += Commands.commands[i] + "\n"
-            }
+            promptArray.push(Commands.commands[i]);
+            internalArray.push({ index: i });
         }
+        let query = args;
+        console.log(args)
+        return generalMatcher(message, query, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
     }
-
-
-    message.channel.send({ embed: newEmbed });
 }
 
 function gameHelp(message, params, user) {
@@ -2233,24 +2267,24 @@ async function forward(message, params) {
     let guildQueue = queue.get(message.guild.id);
     let song = guildQueue.songs[guildQueue.index];
 
-    try {
-        if (guildQueue) {
+    if (guildQueue) {
 
-            let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
+        if (Array.isArray(params)) params = params[0];
+        console.log(params)
+        console.log("BRUH: " + /^[:0-9]+$/.test(params))
+        if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid forward format!");
 
-            if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
-            else {
-                song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip : song.offset;
-                //song.start = new Date();
-                let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
-                activeSkips.set(song.id, true);
-                playSong(message.guild, song, newSkip, skipMessage);
-                setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
-            }
+        let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
+
+        if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
+        else {
+            song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip : song.offset;
+            //song.start = new Date();
+            let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
+            activeSkips.set(song.id, true);
+            playSong(message.guild, song, newSkip, skipMessage);
+            setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
         }
-    }
-    catch (err) {
-        return message.channel.send("You have entered an invalid format for skipping.");
     }
 }
 
@@ -2260,24 +2294,24 @@ async function rewind(message, params) {
     let guildQueue = queue.get(message.guild.id);
     let song = guildQueue.songs[guildQueue.index];
 
-    try {
-        if (guildQueue) {
+    if (guildQueue) {
 
-            let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
+        if (Array.isArray(params)) params = params[0];
+        console.log(params)
+        console.log("BRUH: " + /^[:0-9]+$/.test(params))
+        if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid rewind format!");
 
-            if (song.offset - newSkip > song.duration || song.offset - newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
-            else {
-                song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) - newSkip : song.offset;
-                song.start = new Date();
-                let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
-                activeSkips.set(song.id, true);
-                playSong(message.guild, song, newSkip, skipMessage);
-                setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
-            }
+        let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
+
+        if (song.offset - newSkip > song.duration || song.offset - newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
+        else {
+            song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) - newSkip : song.offset;
+            song.start = new Date();
+            let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
+            activeSkips.set(song.id, true);
+            playSong(message.guild, song, newSkip, skipMessage);
+            setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
         }
-    }
-    catch (err) {
-        return message.channel.send("You have entered an invalid format for rewinding.");
     }
 }
 
@@ -3019,7 +3053,6 @@ function createPlaylist(message, params, user) {
 
 function skippingNotification(message, songID, step) {
 
-    console.log(activeSkips)
     if (activeSkips.get(songID)) {
 
         if (step == 1) {
