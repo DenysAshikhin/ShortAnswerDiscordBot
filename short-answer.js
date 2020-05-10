@@ -274,6 +274,7 @@ connectDB.once('open', async function () {
     });
 
     Client.on("message", async (message) => {
+
         if (message.author.bot) return;
 
 
@@ -305,7 +306,12 @@ connectDB.once('open', async function () {
 
         if (message.content.substr(0, prefix.length) == prefix) {
 
-            if (maintenance) message.channel.send("Just a heads up that I'm being developed in real time and certain actions may be bugged!");
+            let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
+            if (!permission.has("SEND_MESSAGES"))
+                return message.author.send("I don't have the right permissions to send messages and embed links in that channel!");
+            if (!permission.has("EMBED_LINKS"))
+                await message.channel.send("I don't have the right permissions to embed links in this channel, **some commands may not work!**");
+
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
@@ -612,6 +618,11 @@ async function Delete(message, params) {
 
     if (!message.channel.permissionsFor(message.member).has("MANAGE_MESSAGES"))
         return message.channel.send("You do not have the required permissions to delete messages!")
+
+
+    let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
+    if (!permission.has("MANAGE_MESSAGES"))
+        return message.channel.send("I do not have the required permissions to delete messages!")
 
 
     let amount = 0;
@@ -1381,21 +1392,21 @@ function generalHelp(message, params, user) {
         return message.channel.send({ embed: newEmbed });
     }
 
-    if(params.index){
+    if (params.index) {
 
         let examples = "```md\n";
 
-        for(example of Commands.example[params.index]){
+        for (example of Commands.example[params.index]) {
 
             let index = example.indexOf(" ");
-            examples += `<${example.slice(0, index)}` + prefix + `${example.slice(index+1)}>\n\n`;
+            examples += `<${example.slice(0, index)}` + prefix + `${example.slice(index + 1)}>\n\n`;
         }
         examples += "```";
-       
-        let prompt =  `${Commands.explanation[params.index]}` + `${examples}`;
+
+        let prompt = `${Commands.explanation[params.index]}` + `${examples}`;
         return message.channel.send(prompt);
     }
-    else{
+    else {
 
         let promptArray = [];
         let internalArray = [];
@@ -3364,7 +3375,6 @@ setInterval(minuteCount, 60 * 1000);
 
 //Test horoku allocation by playing my 500 list song and have it try to dl all of that
 
-//set up automated help/explanation text -> now just automate !help+command :)
 
 //make ping take a 2nd paramter, for number of people needed.
 //People can do !join to join a running ping, if there is more than 1 - givem them a menu selection
