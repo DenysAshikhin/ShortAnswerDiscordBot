@@ -2287,28 +2287,23 @@ async function seek(message, params) {
     let guildQueue = queue.get(message.guild.id);
     let song = guildQueue.songs[guildQueue.index];
 
-    try {
-        if (guildQueue) {
+    if (guildQueue) {
 
-            if(isArray(params)) params = params[0];
-            console.log(params)
-            console.log(/^[:0-9]+$/.test(params))
-            if(/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid seek format!");
-            let newSkip = isNaN(params) ? hmsToSecondsOnly(params) : Number(params);
+        if (Array.isArray(params)) params = params[0];
+        console.log(params)
+        console.log("BRUH: " + /^[:0-9]+$/.test(params))
+        if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid seek format!");
+        let newSkip = isNaN(params) ? hmsToSecondsOnly(params) : Number(params);
 
-            if (newSkip > song.duration || newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
-            else {
-                song.offset = newSkip;
-                song.start = new Date();
-                playSong(message.guild, song, newSkip, message);
-                let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)
-                activeSkips.set(song.id, true);
-                setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
-            }
+        if (newSkip > song.duration || newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
+        else {
+            song.offset = newSkip;
+            song.start = new Date();
+            let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)
+            activeSkips.set(song.id, true);
+            playSong(message.guild, song, newSkip, message);
+            setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
         }
-    }
-    catch (err) {
-        return message.channel.send("You have entered an invalid format for seeking!");
     }
 }
 
@@ -2563,7 +2558,6 @@ async function playSong(guild, sonG, skip, message) {
 
                 if (!song.start)
                     song.start = new Date();
-                    console.log(`wat the ${song.id}`)
                 if (activeSkips.get(song.id)) activeSkips.delete(song.id);
             })
 
@@ -2643,7 +2637,6 @@ async function cacheSong(song, guild) {
 
         serverDownload.songToDownload = serverDownload.leftOver.shift();
         song = serverDownload.songToDownload;
-        console.log(song)
 
         let tempAudio = path.resolve(`songs`, song.id + '.mp3');
         let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
@@ -2808,8 +2801,8 @@ async function savePlayList(message, params, user) {
         }
 
         let query = params ? params : -23;
-            return generalMatcher(message, params, user, titleArray, internalArray, savePlayList,
-                "Enter the number associated with the playlist you wish to add the song to");
+        return generalMatcher(message, params, user, titleArray, internalArray, savePlayList,
+            "Enter the number associated with the playlist you wish to add the song to");
     }
     else {
 
@@ -2942,7 +2935,7 @@ async function playlist(message, params, user) {
     }
 }
 
-async function removePlayList(message, params, user){
+async function removePlayList(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
@@ -2950,10 +2943,10 @@ async function removePlayList(message, params, user){
     params = params.playlist ? params : message.content.split(" ").slice(1).join(" ");
 
     if (params.playlist) {
-     
+
         message.channel.send(`${params.playlist.title} has been deleted!`);
         user.playlists.splice(params.index, 1);
-        User.findOneAndUpdate({id: user.id}, {$set: {playlists: user.playlists}}, function(err, doc, res) {});
+        User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
     }
     else {
         let promptArray = [];
