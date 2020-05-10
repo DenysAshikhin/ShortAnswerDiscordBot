@@ -12,8 +12,6 @@ const ytsr = require('ytsr');
 var mv = require('mv');
 
 
-
-
 const readline = require('readline');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const ffmpeg = require('fluent-ffmpeg');
@@ -24,8 +22,6 @@ const numCPUs = require('os').cpus().length;
 console.log(`I have ${numCPUs} cores!`);//https://nodejs.org/api/cluster.html#cluster_cluster - can be useful to shard? Might help me get to like 
 //10k servers on heroku
 
-
-//const ytdlDiscord = require('ytdl-core-discord');
 const gameJSON = require('./gameslist.json');
 const Commands = require('./commands.json');
 const studyJSON = require('./medstudy.json');
@@ -150,11 +146,7 @@ const tags = [
 ]
 
 
-
-const maintenance = false;
-
 //FAT NOTE: (true >= false) is TRUE
-
 var Client = new Discord.Client();
 var commandMap = new Map();
 var commandTracker = new Map();
@@ -416,6 +408,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[44], playlist)
     commandMap.set(Commands.commands[45], savePlayList)
     commandMap.set(Commands.commands[46], removePlayList)
+    commandMap.set(Commands.commands[47], queue)
 }
 
 function setServerPrefix(message, params, user) {
@@ -1056,7 +1049,7 @@ async function getStats(member, user) {
             { name: "Last message sent: ", value: user.lastMessage[index], inline: false },
             { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: false },
             { name: "Last time you talked was: ", value: user.lastTalked[index], inline: false },
-            { name: "The games you are signed up for: ", value: user.games, inline: false },
+            { name: "Number of games you are signed up for: ", value: user.games.length, inline: false },
             { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: false },
             { name: "You joined this server on: ", value: user.dateJoined[index], inline: false },
             { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: false },
@@ -1946,7 +1939,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     let squadSize;
 
-    if(game.length > 1 && Array.isArray(game)){
+    if (game.length > 1 && Array.isArray(game)) {
         game = game[0];
         squadSize = game[1];
     }
@@ -2017,22 +2010,25 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
         finalEmbed.timestamp = new Date();
         finalEmbed.description = message.member.displayName + " has summoned " + signedUp + " for some " + game
-        + `\nTo accept the summons type ${prefix}q`;
+            + "```fix\n" + `To accept the summons type ${prefix}q` + "```";
 
-        if (signedUp.length > 3)
+        if (signedUp.length > 3) {
+
+            squads.set(user.id, {game: game, players: [], size: 5, created: new Date()});
             message.channel.send({ embed: finalEmbed });
+        }
         else
             message.channel.send("No one has signed up for " + game + ".");
         let index = user.guilds.indexOf(message.guild.id);
         user.summoner[index] += 1;
         User.findOneAndUpdate({ id: user.id }, { $set: { summoner: user.summoner } }, function (err, doc, res) { });
         return 1;
-        // if (defaulted.length > 1) {
-
-        //     message.channel.send(defaulted + "``` you have yet to exlcude yourself from summons or signUp for a game so have been pinged by default"
-        //         + " if you wish to never be summoned for games, type sa!exclude, or signUp for at least one game. Type " + prefix + " for more information```");
-        // }NOTE ENABLE LATER
     }
+}
+
+async function queue(message, params, user){
+
+
 }
 
 async function createUser(member) {
@@ -3388,9 +3384,14 @@ setInterval(minuteCount, 60 * 1000);
 
 //Test horoku allocation by playing my 500 list song and have it try to dl all of that
 
+//add a parameter to q for time (minutes) then have automated excuse like: Chimera has accepted your summons, they will be there in x minutes after they do ____
+//also use @mentions for the person whose queue to accept if there are multiple going on!
+
 
 //make ping take a 2nd paramter, for number of people needed.
 //People can do !join to join a running ping, if there is more than 1 - givem them a menu selection
+
+//forcefuly sign up a user, and everyone.
 
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial

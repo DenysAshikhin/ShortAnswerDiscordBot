@@ -55,7 +55,8 @@
         "PLAYLIST",
 
         "SAVEPLAYLIST",
-        "REMOVEPLAYLIST"
+        "REMOVEPLAYLIST",
+        "Q"
 
     ],
     "explanation": [
@@ -74,7 +75,7 @@
         "Shows the list of commands involving miscellaneous functionalities.",
         "Shows the list of commands involving music functionalities.",
         "????? [Number of results], [Number of minimum matches], [Number of minimum unique matches]",
-        "Pings and DM's every member from the called server who have [game] in their games list and do not have the exclude status enabled.",
+        "Pings and DM's every member from the called server who have [game] in their games list. Also starts a squad for the game, default size of 5, can be modified by passing a number after the game title with a ','.",
         "Legacy command, checks every user in the server for existing the the database, no need to run it anymore.",
        
         "Deletes [number] of the last messages. You and the bot must have the *Manage_Messages* permission in the channel you wish to run the command.",
@@ -114,7 +115,8 @@
         "Loads one of your playlists into the the queue. If you provide a name of a playlist it, otherwise a suggestion prompt will appear.",
 
         "Saves the current playing playlist into one of your playlists.",
-        "Removes a specified playlist."
+        "Removes a specified playlist.",
+        "Joins an active summon (squad). In the case of multiple active summons, you can specify who to join using an @mention. A number following a comma will notify the others that you will join them in [number] minutes."
     ],
         
     "example": [
@@ -133,7 +135,7 @@
         ["1) helpMiscellaneous"],
         ["1) helpMusic"],
         ["1) ???? medicine", "2) ???? medicine, 2", "3) ???? medicine, 2,1", "4) ???? medicine, 2,1,1"],
-        ["1) ping Valorant", "2) ping 0"],
+        ["1) ping Valorant", "2) ping 0", "3) ping Valorant, 4"],
         ["1) initialiseUsers"],
        
         ["1) delete 4"],
@@ -173,7 +175,8 @@
         ["1) playlist", "2) playlist Best Wubs"],
 
         ["1) savePlayList", "2) savePlayList Best Wubs"],
-        ["1) removePlayList", "2) removePlayList Best Wubs"]
+        ["1) removePlayList", "2) removePlayList Best Wubs"],
+        ["1) q", "2) q @The Last Spark", "3) q @The Last Spark, 5"]
     ],
     "subsection": [
         [3],
@@ -231,6 +234,7 @@
         [4],
 
         [4],
-        [4]
+        [4],
+        [1]
     ]
 }
