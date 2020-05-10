@@ -408,6 +408,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[43], removeSong)
     commandMap.set(Commands.commands[44], playlist)
     commandMap.set(Commands.commands[45], savePlayList)
+    commandMap.set(Commands.commands[46], removePlayList)
 }
 
 function setServerPrefix(message, params, user) {
@@ -2289,7 +2290,11 @@ async function seek(message, params) {
     try {
         if (guildQueue) {
 
-            let newSkip = hmsToSecondsOnly(params);
+            if(isArray(params)) params = params[0];
+            console.log(params)
+            console.log(/^[:0-9]+$/.test(params))
+            if(/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid seek format!");
+            let newSkip = isNaN(params) ? hmsToSecondsOnly(params) : Number(params);
 
             if (newSkip > song.duration || newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
             else {
@@ -2303,7 +2308,7 @@ async function seek(message, params) {
         }
     }
     catch (err) {
-        return message.channel.send("You have entered an invalid format for rewinding.");
+        return message.channel.send("You have entered an invalid format for seeking!");
     }
 }
 
@@ -2541,8 +2546,6 @@ async function playSong(guild, sonG, skip, message) {
 
     if (audioOutputExists) {
 
-        if (activeSkips.get(song.id)) activeSkips.delete(song.id);
-
         const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: song.offset })
             .on('error', error => {
                 console.log("Error inside of dispatcher playing?: ", error);
@@ -2560,6 +2563,7 @@ async function playSong(guild, sonG, skip, message) {
 
                 if (!song.start)
                     song.start = new Date();
+                    console.log(`wat the ${song.id}`)
                 if (activeSkips.get(song.id)) activeSkips.delete(song.id);
             })
 
@@ -2607,12 +2611,10 @@ async function playSong(guild, sonG, skip, message) {
                 if (!song.start)
                     song.start = new Date()
                 if (activeSkips.get(song.id)) activeSkips.delete(song.id);
-                console.log(`set the start ${song.start}`)
             })
 
         Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.dispatcher = Dispatcher;
-        console.log("finished else")
     }
 }
 
@@ -2625,8 +2627,6 @@ async function playSong(guild, sonG, skip, message) {
 async function cacheSong(song, guild) {
 
     if (!download.get(guild) && song) {
-
-        console.log("initialising download");
 
         download.set(guild,
             {
@@ -2660,7 +2660,6 @@ async function cacheSong(song, guild) {
             .catch(() => { })
 
         if (audioExists) {
-            console.log('Audio exists')
             serverDownload.songToDownload = null;
             serverDownload.progress = 0;
             cacheSong(null, guild);
@@ -2671,11 +2670,8 @@ async function cacheSong(song, guild) {
             console.log("interesting")
 
             let downloadYTDL = require('ytdl-core');
-            console.log(`AAA ${song.url}`)
             let youtubeResolve = downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
-            console.log(11111)
             let writeStream = fs.createWriteStream(tempAudio);
-            console.log(2222)
             writeStream.on('finish', () => {
                 console.log("FINISHED: WRITE STREAM " + song.title);
                 mv(tempAudio, audioOutput, function (err) {
@@ -2946,6 +2942,33 @@ async function playlist(message, params, user) {
     }
 }
 
+async function removePlayList(message, params, user){
+
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
+
+    params = params.playlist ? params : message.content.split(" ").slice(1).join(" ");
+
+    if (params.playlist) {
+     
+        message.channel.send(`${params.playlist.title} has been deleted!`);
+        user.playlists.splice(params.index, 1);
+        User.findOneAndUpdate({id: user.id}, {$set: {playlists: user.playlists}}, function(err, doc, res) {});
+    }
+    else {
+        let promptArray = [];
+        let internalArray = [];
+
+        for (let i = 0; i < user.playlists.length; i++) {
+
+            promptArray.push(user.playlists[i].title);
+            internalArray.push({ playlist: user.playlists[i] });
+        }
+        let query = params ? params : -23;
+        return generalMatcher(message, query, user, promptArray, internalArray, removePlayList, `Enter the number of the playlist you wish to delete!`)
+    }
+}
+
 async function myPlayLists(message, params, user) {
 
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists!");
@@ -3003,6 +3026,7 @@ function createPlaylist(message, params, user) {
 
 function skippingNotification(message, songID, step) {
 
+    console.log(activeSkips)
     if (activeSkips.get(songID)) {
 
         if (step == 1) {
@@ -3319,8 +3343,6 @@ setInterval(minuteCount, 60 * 1000);
 //make ping take a 2nd paramter, for number of people needed.
 //People can do !join to join a running ping, if there is more than 1 - givem them a menu selection
 
-//add an @mention permission check for pinging
-
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial
 //for game stats, add a Y/N for seeing a list of all the people signed up for it
@@ -3345,7 +3367,7 @@ setInterval(minuteCount, 60 * 1000);
 //roll command - for however many sided die
 //ping-pong command
 //add a timer
-//shake user # of times
+//shake user # of times -> have to check for move user perms
 
 //Then make a tutorial for the above commands...
 
@@ -3362,15 +3384,14 @@ setInterval(minuteCount, 60 * 1000);
 //youtube live streams are broken 
 
 
-//Twitch notification/signup when a streamer goes live
+//Twitch notification/signup when a streamer goes live -> npm module for it?
 //https://dev.twitch.tv/docs/api/reference/#get-streams
 //add streamer stats
 
 
 
 //Make a vote system for the next feature to focus on
-//MEE6 bot - beatiful ui, build in message formatin? embeds or something,
-//if authorised, you can control stuff from the website.
+//MEE6 bot - beatiful ui, mainly the website
 
 //seal idan easter eggs
 process.on('unhandledRejection', (reason, p) => { console.log("FFFFFF"); console.log(reason) });

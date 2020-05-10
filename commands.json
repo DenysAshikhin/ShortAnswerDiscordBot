@@ -54,7 +54,8 @@
         "REMOVESONG",
         "PLAYLIST",
 
-        "SAVEPLAYLIST"
+        "SAVEPLAYLIST",
+        "REMOVEPLAYLIST"
 
     ],
     "explanation": [
@@ -103,7 +104,7 @@
         "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission.",
         "Forwards a song [number] of seconds. Also works with negative numbers, which will result in a rewind.",
         "Rewinds a song [number] of seconds or hours:minutes:seconds timestamp. Also works with negative numbers, which will result in a forward.",
-        "Starts playing from the provided timestamp in format *Hours:Minutes:Seconds*",
+        "Starts playing from the provided timestamp in format *Hours:Minutes:Seconds* **OR** *numberOfSeconds*",
         "Reverses the playlist by 1 song. Or a [number] of songs if provided.",
 
         "Adds either the current playing song or one from a provided url/suggestion to one of your existing playlists or makes a new one.",
@@ -112,7 +113,8 @@
         "Removes a song from a playlist. You can either specify the exact playlist to remove a song from, or use the suggestion prompt.",
         "Loads one of your playlists into the the queue. If you provide a name of a playlist it, otherwise a suggestion prompt will appear.",
 
-        "Saves the current playing playlist into one of your playlists."
+        "Saves the current playing playlist into one of your playlists.",
+        "Removes a specified playlist."
     ],
         
     "example": [
@@ -161,7 +163,7 @@
         ["1) setDefaultServerPrefix !"],
         ["1) forward 20", "2) forward 2:20", "3) forward -25", "4) forward -2:20"],
         ["1) rewind 20", "2) rewind 2:20", "3) rewind -25", "4) rewind -2:20"],
-        ["1) seek 2:20", "2) seek 0:25"],
+        ["1) seek 2:20", "2) seek 33"],
         ["1) reverse", "2) reverse 3", "3) reverse -4"],
 
         ["1) addSong", "2) addSong In Your Arms", "3) addSong https://www.youtube.com/watch?v=mt1mXwBLsSE&list=RDmt1mXwBLsSE&start_radio=1"],
@@ -170,7 +172,8 @@
         ["1) removeSong", "2) removeSong Best Wubs"],
         ["1) playlist", "2) playlist Best Wubs"],
 
-        ["1) savePlayList", "2) savePlayList Best Wubs"]
+        ["1) savePlayList", "2) savePlayList Best Wubs"],
+        ["1) removePlayList", "2) removePlayList Best Wubs"]
     ],
     "subsection": [
         [3],
@@ -227,6 +230,7 @@
         [4],
         [4],
 
+        [4],
         [4]
     ]
 }
