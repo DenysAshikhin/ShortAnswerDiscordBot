@@ -162,6 +162,7 @@ var config = null;
 var queue = new Map();
 var download = new Map();
 var activeSkips = new Map();
+var lastSkip = new Map();
 var defaultPrefix = "sa!";
 var prefix;
 var uri = "";
@@ -2170,9 +2171,17 @@ async function skip(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
-
+    let skipy = lastSkip.get(message.guild.id);
     if (guildQueue) {
 
+        console.log(((new Date()) - skipy) <= 200)
+        if (!skipy) lastSkip.set(message.guild.id, new Date());
+        if (((new Date()) - skipy) <= 1000) {
+            console.log("Chill corner")
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        lastSkip.set(message.guild.id, new Date());
+        
         if (!isNaN(params))
             if ((guildQueue.index + Number(params)) >= guildQueue.songs.length || (guildQueue.index + Number(params)) < 0)
                 return message.channel.send(`You're trying to skip too many songs!`);
@@ -2212,6 +2221,7 @@ async function stop(message) {
         //queue.get(message.guild.id).dispatcher.destroy();
         queue.get(message.guild.id).voiceChannel.leave();
         queue.delete(message.guild.id);
+        download.delete(message.guild.id);
     }
 }
 
@@ -2418,9 +2428,10 @@ async function play(message, params, user) {
 
     if (await ytpl.validateURL(args)) {
         //ytpl
-        let playlist = await ytpl(args);
-        for (video of playlist.items) {
-            if (video.duration) {
+        let playlist = await ytpl(args, { limit: 0 });
+        for (Video of playlist.items) {
+            if (Video.duration) {
+                let video = JSON.parse(JSON.stringify(Video))
                 let song = {
                     title: video.title,
                     url: video.url_simple,
@@ -2434,7 +2445,7 @@ async function play(message, params, user) {
                 }
 
                 queueConstruct.songs.push(song);
-                cacheSong(song, message.guild.id);
+                //cacheSong(song, message.guild.id);
             }
         } callPlay = true;
         message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
@@ -2463,7 +2474,7 @@ async function play(message, params, user) {
                 progress: 0
             };
             queueConstruct.songs.push(song);
-            cacheSong(song, message.guild.id);
+            //cacheSong(song, message.guild.id);
 
             if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
             else {
@@ -2509,13 +2520,13 @@ async function play(message, params, user) {
 
 //filter: format => format.container === 'mp4' && !format.qualityLabel,
 
-async function playSong(guild, song, skip, message) {
+async function playSong(guild, sonG, skip, message) {
     const serverQueue = queue.get(guild.id);
+    const song = JSON.parse(JSON.stringify(sonG))
 
     if (!song) {//Will probably have to revisit this later
-        serverQueue.voiceChannel.leave();
-        queue.delete(guild.id);
         message.channel.send(`No more songs queued, leaving!`);
+        stop(message);
         return;
     }
 
@@ -2562,7 +2573,7 @@ async function playSong(guild, song, skip, message) {
         let percentageToDownload = 100 - download.get(guild.id).progress;
         let percentageToSkip = (song.offset / song.duration) * 100;
 
-        console.log(`toDownload ${percentageToDownload} || toSkip ${percentageToSkip} || map ${download.get(song.id)}`);
+        console.log(`toDownload ${percentageToDownload} || toSkip ${percentageToSkip}`);
 
         if ((percentageToSkip > percentageToDownload) && (download.get(guild.id).songToDownload.id == song.id)) {
             console.log(console.log("chose to wait"));
@@ -2574,12 +2585,12 @@ async function playSong(guild, song, skip, message) {
         }
     }
     else {
-        console.log("inside of else");
+        console.log("inside of else", song.url, song.title);
 
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
-        console.log(`BBBBB ${song.url}`)
-        let streamResolve = ytdl(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 });
-        console.log("PAST B?")
+
+        let streamResolve = await ytdl(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 });
+
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
                 console.log("inside of error");
@@ -2600,9 +2611,9 @@ async function playSong(guild, song, skip, message) {
                 console.log(`set the start ${song.start}`)
             })
 
-
         Dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.dispatcher = Dispatcher;
+        console.log("finished else")
     }
 }
 
@@ -2614,7 +2625,7 @@ async function playSong(guild, song, skip, message) {
  */
 async function cacheSong(song, guild) {
 
-    if (!download.get(guild)) {
+    if (!download.get(guild) && song) {
 
         console.log("initialising download");
 
@@ -2628,7 +2639,7 @@ async function cacheSong(song, guild) {
     }
 
     let serverDownload = download.get(guild);
-
+    if (!serverDownload) return -1;
     if (!serverDownload.songToDownload && serverDownload.leftOver.length > 0) {
 
         serverDownload.songToDownload = serverDownload.leftOver.shift();
@@ -2663,9 +2674,9 @@ async function cacheSong(song, guild) {
             let downloadYTDL = require('ytdl-core');
             console.log(`AAA ${song.url}`)
             let youtubeResolve = downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
-
+            console.log(11111)
             let writeStream = fs.createWriteStream(tempAudio);
-
+            console.log(2222)
             writeStream.on('finish', () => {
                 console.log("FINISHED: WRITE STREAM " + song.title);
                 mv(tempAudio, audioOutput, function (err) {
@@ -2680,7 +2691,8 @@ async function cacheSong(song, guild) {
                 const percent = downloaded / total;
                 readline.cursorTo(process.stdout, 0);
                 song.progress = Math.floor((percent * 100).toFixed(2));
-                download.get(guild).progress = song.progress;
+                if (download.get(guild))
+                    download.get(guild).progress = song.progress;
             });
             youtubeResolve.pipe(writeStream);
         }
@@ -2688,6 +2700,7 @@ async function cacheSong(song, guild) {
     else if (song) {
         serverDownload.leftOver.push(JSON.parse(JSON.stringify(song)));
     }
+
 }
 
 /**
@@ -3323,4 +3336,5 @@ setInterval(minuteCount, 60 * 1000);
 //if authorised, you can control stuff from the website.
 
 //seal idan easter eggs
-process.on('unhandledRejection', (reason, p) => { console.log(reason) });
+process.on('unhandledRejection', (reason, p) => { console.log("FFFFFF"); console.log(reason) });
+process.on('unhandledException', (reason, p) => { console.log(";;;;;;;;;;;;;;;;;;"); console.log(reason) });
