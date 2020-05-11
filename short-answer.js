@@ -409,6 +409,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[45], savePlayList)
     commandMap.set(Commands.commands[46], removePlayList)
     commandMap.set(Commands.commands[47], Queue)
+    commandMap.set(Commands.commands[48], deQueue)
+    commandMap.set(Commands.commands[49], viewActiveSummons)
 }
 
 function setServerPrefix(message, params, user) {
@@ -2017,7 +2019,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         if (signedUp.length > 3) {
 
             //into players put yourSELF!!!! NOTE note
-            squads.set(user.id, { game: game, players: [], size: squadSize, created: new Date() });
+            squads.set(user.id, { game: game, players: [], size: squadSize, created: new Date(), summoner: user.displayName });
             message.channel.send({ embed: finalEmbed });
         }
         else
@@ -2030,46 +2032,81 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 }
 
 async function Queue(message, params, user) {
-    
+
+    if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+
     let ETA = message.content.split(',')[1];
     if (ETA)
         ETA.trim();
     let finalETA = !isNaN(ETA) && ETA.length > 0 ? Number(ETA) : -1;
 
-    if (squads.size == 0) return message.channel.send("There aren't any squads active, start a new one? :wink:");
-    else if (squads.size == 1) {
+    if (squads.size == 1) {
         let squad = squads.values().next().value;
         if (squad.players.length < squad.size - 1) {
 
-            if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this squad!");
+            if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this summon!");
 
             squad.players.push(mention(user.id));
             let newEmbed = JSON.parse(JSON.stringify(Embed));
-            newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the squad!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
+            newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the summon!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
             newEmbed.fields = [{ name: `Current squad members: ${squad.players.length}/${squad.size}`, value: squad.players }];
             return message.channel.send({ embed: newEmbed });
         }
-        else return message.channel.send("There is no space left in the squad!");
+        else return message.channel.send("There is no space left in the summon!");
     }
     else if (message.mentions.members.size > 0) {
 
         let squad = squads.get(message.mentions.members.values().next().value.id);
-        if(!squad) return message.channel.send("That user does not have any active summoninings!");
+        if (!squad) return message.channel.send("That user does not have any active summoninings!");
         if (squad.players.length < squad.size - 1) {
 
-            if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this squad!");
+            if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this summon!");
 
             squad.players.push(mention(user.id));
             let newEmbed = JSON.parse(JSON.stringify(Embed));
-            newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the squad!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
+            newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the summon!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
             newEmbed.fields = [{ name: `Current squad members: ${squad.players.length}/${squad.size}`, value: squad.players }];
             return message.channel.send({ embed: newEmbed });
         }
-        else return message.channel.send("There is no space left in the squad!");
+        else return message.channel.send("There is no space left in the summon!");
     }
-    else{
+    else {
         return message.channel.send("There are more than one active squad, please @mention who you want to join!");
     }
+}
+
+async function deQueue(message, params, user) {
+
+    if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+
+    let mention = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
+
+    if (mention != -1) {
+
+        let squad = squads.get(mention);
+        return squad.players.splice(squads.players.indexOf(mention), 1);
+    }
+    else {
+
+        for (let squad of squads.values())
+            if (squad.players.contains(mention(user.id)))
+                squad.players.splice(squad.players.indexOf(mention(user.id)), 1);
+        return message.channel.send("You have left all of your active summons.");
+    }
+}
+
+async function viewActiveSummons(message, params, user){
+
+    if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.description = `There are ${squads.size} active summons!`;
+    
+    for(let squad of squads.entries()){
+        newEmbed.fields.push({name: `${squad[1].summoner}'s Squad: ${squad[1].players.length}/${squad[1].size}`, value: squad.players, inline: true});
+    }
+    
+    message.channel.send({embed: newEmbed});
 }
 
 async function createUser(member) {
