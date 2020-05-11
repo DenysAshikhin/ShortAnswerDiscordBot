@@ -2079,34 +2079,38 @@ async function deQueue(message, params, user) {
 
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
-    let mention = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
+    let mentionID = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
 
-    if (mention != -1) {
+    if (mentionID != -1) {
 
-        let squad = squads.get(mention);
-        return squad.players.splice(squads.players.indexOf(mention), 1);
+        let squad = squads.get(mentionID);
+        if (squad.summoner == user.displayName)
+            return squads.clear();
+        return squad.players.splice(squads.players.indexOf(mentionID), 1);
     }
     else {
+        for (let squad of squads.entries())
+            if (squad[1].summoner == user.displayName)
+                squads.delete(squad[0])
+            else if (squad[1].players.includes(mention(user.id)))
+                squad[1].players.splice(squad[1].players.indexOf(mention(user.id)), 1);
 
-        for (let squad of squads.values())
-            if (squad.players.contains(mention(user.id)))
-                squad.players.splice(squad.players.indexOf(mention(user.id)), 1);
         return message.channel.send("You have left all of your active summons.");
     }
 }
 
-async function viewActiveSummons(message, params, user){
+async function viewActiveSummons(message, params, user) {
 
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = `There are ${squads.size} active summons!`;
-    
-    for(let squad of squads.entries()){
-        newEmbed.fields.push({name: `${squad[1].summoner}'s Squad: ${squad[1].players.length}/${squad[1].size}`, value: squad.players, inline: true});
+
+    for (let squad of squads.entries()) {
+        newEmbed.fields.push({ name: `${squad[1].summoner}'s Squad: ${squad[1].players.length}/${squad[1].size}`, value: squad.players, inline: true });
     }
-    
-    message.channel.send({embed: newEmbed});
+
+    message.channel.send({ embed: newEmbed });
 }
 
 async function createUser(member) {
