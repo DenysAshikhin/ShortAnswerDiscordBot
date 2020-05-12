@@ -526,7 +526,7 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
         if (!isNaN(params) && params.length > 0) {
             params = Math.floor(params);
             if (params >= specificCommand.choices.length || params < 0) {
-                console.log("GIVING A -1")
+                message.channel.send("You have entered an invalid number, please try again.");
                 return -1;
             }
 
@@ -1941,7 +1941,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     let sizeLimit = message.content.split(',')[1];
     if (sizeLimit)
-        sizeLimite.trim();
+        sizeLimit.trim();
     let squadSize = !isNaN(sizeLimit) && sizeLimit.length > 0 ? Number(sizeLimit) : 5;
 
     if (game.length > 1 && Array.isArray(game)) {
@@ -2019,7 +2019,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         if (signedUp.length > 3) {
 
             //into players put yourSELF!!!! NOTE note
-            squads.set(user.id, { game: game, players: [], size: squadSize, created: new Date(), summoner: user.displayName });
+            squads.set(user.id, { game: game, players: [mention(user.id)], size: squadSize, created: new Date(), summoner: user.displayName });
             message.channel.send({ embed: finalEmbed });
         }
         else
@@ -2107,7 +2107,8 @@ async function viewActiveSummons(message, params, user) {
     newEmbed.description = `There are ${squads.size} active summons!`;
 
     for (let squad of squads.entries()) {
-        newEmbed.fields.push({ name: `${squad[1].summoner}'s Squad: ${squad[1].players.length}/${squad[1].size}`, value: squad.players, inline: true });
+        console.log(squad)
+        newEmbed.fields.push({ name: `${squad[1].summoner}'s Squad: ${squad[1].players.length}/${squad[1].size}`, value: squad[1].players, inline: true });
     }
 
     message.channel.send({ embed: newEmbed });
@@ -2834,7 +2835,7 @@ async function cacheSong(song, guild) {
  */
 async function addSong(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
-    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
 
     let serverQueue = queue.get(message.guild.id);
     let song;
@@ -2914,7 +2915,7 @@ async function addSong(message, params, user) {
 async function savePlayList(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
-    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
 
     let serverQueue = queue.get(message.guild.id);
     let song;
@@ -2991,7 +2992,7 @@ async function removeSong(message, params, user) {
 async function playlist(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
     let serverQueue = queue.get(message.guild.id);
 
     const voiceChannel = message.member.voice.channel;
@@ -3072,7 +3073,7 @@ async function playlist(message, params, user) {
 async function removePlayList(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*!");
+    if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
 
     params = params.playlist ? params : message.content.split(" ").slice(1).join(" ");
 
@@ -3143,12 +3144,16 @@ function createPlaylist(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
     if (message.content.toLowerCase() == (prefix + "createplaylist")) return message.channel.send("You need to provide a name for the new playlist.")
 
-    let newName = message.content.split(" ").slice(1).join(" ");
+    let newName = message.content.split(" ").slice(1).join(" ").trim();
+
+    if(newName.length == 0) return message.channel.send("You can't have a blank for the playlist name!");
 
     if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
 
     user.playlists.push({ title: newName, songs: [] })
     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+
+    message.channel.send(`${newName} has been created!`);
 }
 
 function skippingNotification(message, songID, step) {
