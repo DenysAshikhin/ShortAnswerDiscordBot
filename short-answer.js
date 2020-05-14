@@ -3289,6 +3289,16 @@ async function updateAll() {
 
     // for (let user of users) {
 
+    //     // for(let i = 0; i < user.dateJoined.length; i++){
+
+    //     //     let splity = user.dateJoined[i].split('-');
+    //     //     splity[1] = splity[1].length == 1 ? "0" + splity[1] : splity[1];
+    //     //     user.dateJoined[i] = splity.join("-");
+    //     // }
+
+    //     // console.log(user.dateJoined);
+    //     // await User.findOneAndUpdate({id: user.id}, {$set: {dateJoined: user.dateJoined}}, function(err, doc, res){});
+
     //     // if (!nameArray.includes(user.displayName))
     //     //     nameArray.push(user.displayName)
     //     // else
@@ -3319,8 +3329,6 @@ async function updateAll() {
     //     //     });
 
 
-
-
     //     // let tempArr = [];
 
     //     // for(let i = 0; i < user.guilds.length; i++){
@@ -3333,10 +3341,9 @@ async function updateAll() {
 
     // }//for user loop
 
-    // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
-    //     if (err) console.log('error', err);
-    // });
-
+    // // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
+    // //     if (err) console.log('error', err);
+    // // });
 
     // console.log("CALLED UPDATE ALL");
 }
