@@ -411,6 +411,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[47], Queue)
     commandMap.set(Commands.commands[48], deQueue)
     commandMap.set(Commands.commands[49], viewActiveSummons)
+    commandMap.set(Commands.commands[50], banish)
 }
 
 function setServerPrefix(message, params, user) {
@@ -526,7 +527,7 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
         if (!isNaN(params) && params.length > 0) {
             params = Math.floor(params);
             if (params >= specificCommand.choices.length || params < 0) {
-                message.channel.send("You have entered an invalid number, please try again.");
+                message.channel.send("You have entered an invalid number, please try again. Or type *-1* to quit the suggestion.");
                 return -1;
             }
 
@@ -1332,7 +1333,7 @@ function helpMusic(message, params, user) {
 
     for (let i = 0; i < Commands.commands.length; i++)
         if (Commands.subsection[i].includes(4))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
+            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i], inline: true });
 
     message.channel.send({ embed: newEmbed });
 }
@@ -1429,7 +1430,7 @@ function gameHelp(message, params, user) {
 
     for (let i = 0; i < Commands.commands.length; i++)
         if (Commands.subsection[i].includes(1))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
+            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i], inline: true });
 
     message.channel.send({ embed: newEmbed });
 }
@@ -1791,7 +1792,8 @@ async function gameStats(message, params, user) {
 
     if (message.channel.type != 'dm') {
         let game = Array.isArray(params) ? params[0].trim() : params;
-
+        const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+        if (!args) return message.channel.send("You have to provide the name of a game whose stats you wish to see!");
 
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
         finalEmbed.timestamp = new Date();
@@ -1854,13 +1856,10 @@ async function topGames(message, params) {
         let users = await getUsers();
         let gameMap = new Map();
 
-
-
         let finalEmbed = JSON.parse(JSON.stringify(Embed));
         finalEmbed.timestamp = new Date();
         finalEmbed.description = "Here are the top stats for " + message.guild.name;
         finalEmbed.thumbnail.url = message.guild.iconURL();
-
 
         for (let i = 0; i < users.length; i++) {
 
@@ -1890,7 +1889,11 @@ async function topGames(message, params) {
 
         let maxResults = 5;
         if (!(isNaN(params[0])))
-            maxResults = params[0];
+            maxResults = params[0] <= 0 ? 5 : params[0];
+        if (maxResults > 25) {
+            maxResults = 25;
+            message.channel.send("Search results are limited to a max of 25 games!");
+        }
 
         if (gameMap.length == 0) {
             message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
@@ -1903,21 +1906,16 @@ async function topGames(message, params) {
             finalEmbed.description = `There are only ${maxResults} games people signed up for on ${message.guild.name}`;
         }
         else {
-            finalEmbed.description = `You did not specify the number of games to display, as such, I will display the top ${maxResults}`
+            finalEmbed.description = `You did not specify a valid number of games to display, as such, I will display the top ${maxResults}`
                 + ` games people signed up for on the ${message.guild.name} server:`;
         }
-
-        let finalList = ``;
 
         for (let i = 0; i < maxResults; i++) {
 
             finalEmbed.fields.push({ name: `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.`, value: "** **" })
-            finalList += `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.\n`;
-            //message.channel.send(`${gameMap}There are ${gameMap.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
         }
 
         message.channel.send({ embed: finalEmbed });
-
         return gameMap.length;
     }
     else {
@@ -1943,6 +1941,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     if (sizeLimit)
         sizeLimit.trim();
     let squadSize = !isNaN(sizeLimit) && sizeLimit.length > 0 ? Number(sizeLimit) : 5;
+    squadSize = squadSize < 0 ? 5 : squadSize;
 
     if (game.length > 1 && Array.isArray(game)) {
         game = game[0];
@@ -2019,7 +2018,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         if (signedUp.length > 3) {
 
             //into players put yourSELF!!!! NOTE note
-            squads.set(user.id, { game: game, players: [mention(user.id)], size: squadSize, created: new Date(), summoner: user.displayName });
+            squads.set(user.id, { game: game, players: [mention(user.id)], displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName });
             message.channel.send({ embed: finalEmbed });
         }
         else
@@ -2039,17 +2038,20 @@ async function Queue(message, params, user) {
     if (ETA)
         ETA.trim();
     let finalETA = !isNaN(ETA) && ETA.length > 0 ? Number(ETA) : -1;
+    if (finalETA < 0)
+        finalETA = -1;
 
-    if (squads.size == 1) {
-        let squad = squads.values().next().value;
+    if (squads.size == 1 || params.summon) {
+        let squad = params.summon ? params.summon : squads.values().next().value;
         if (squad.players.length < squad.size - 1) {
 
             if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this summon!");
 
             squad.players.push(mention(user.id));
+            squad.displayNames.push(user.displayName);
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the summon!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
-            newEmbed.fields = [{ name: `Current squad members: ${squad.players.length}/${squad.size}`, value: squad.players }];
+            newEmbed.fields = [{ name: `Current summons members: ${squad.players.length}/${squad.size}`, value: squad.players }];
             return message.channel.send({ embed: newEmbed });
         }
         else return message.channel.send("There is no space left in the summon!");
@@ -2071,7 +2073,16 @@ async function Queue(message, params, user) {
         else return message.channel.send("There is no space left in the summon!");
     }
     else {
-        return message.channel.send("There are more than one active squad, please @mention who you want to join!");
+
+        let searchArray = [];
+        let internalArray = [];
+
+        for (let squad of squads.entries()) {
+            searchArray.push(`${squad[1].summoner}'s Summon: ${squad[1].players.length}/${squad[1].size}`);
+            internalArray.push({ summon: squad[1] });
+        }
+
+        return generalMatcher(message, -23, user, searchArray, internalArray, Queue, "There are more than one active summon, please enter the number whose summon you wish to answer!");
     }
 }
 
@@ -2084,18 +2095,25 @@ async function deQueue(message, params, user) {
     if (mentionID != -1) {
 
         let squad = squads.get(mentionID);
-        if (squad.summoner == user.displayName)
+        if (!squad) return message.channel.send(`${mention(mentionID)} doesn't have a summon!`);
+        if (squad.summoner == user.displayName) {
+            message.channel.send("You have cancelled your summon!");
             return squads.clear();
-        return squad.players.splice(squads.players.indexOf(mentionID), 1);
+        }
+        message.channel.send(`Left ${squad.summoner}'s summon!`);
+        squad.displayName.splice(squad.players.indexOf(mentionID), 1);
+        return squad.players.splice(squad.players.indexOf(mentionID), 1);
     }
     else {
         for (let squad of squads.entries())
             if (squad[1].summoner == user.displayName)
                 squads.delete(squad[0])
-            else if (squad[1].players.includes(mention(user.id)))
+            else if (squad[1].players.includes(mention(user.id))) {
+                squad[1].displayName.splice(squad[1].players.indexOf(mentionID), 1);
                 squad[1].players.splice(squad[1].players.indexOf(mention(user.id)), 1);
+            }
 
-        return message.channel.send("You have left all of your active summons.");
+        return message.channel.send("You have destroyed any of your active summons!");
     }
 }
 
@@ -2107,11 +2125,48 @@ async function viewActiveSummons(message, params, user) {
     newEmbed.description = `There are ${squads.size} active summons!`;
 
     for (let squad of squads.entries()) {
-        console.log(squad)
-        newEmbed.fields.push({ name: `${squad[1].summoner}'s Squad: ${squad[1].players.length}/${squad[1].size}`, value: squad[1].players, inline: true });
+        newEmbed.fields.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].players.length}/${squad[1].size}`, value: squad[1].players, inline: true });
     }
 
     message.channel.send({ embed: newEmbed });
+}
+
+async function banish(message, params, user) {
+
+    if (!squads.get(user.id)) return message.channel.send("You don't have any active summons to kick from!");
+    let squad = squads.get(user.id);
+    let mentionID = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
+
+    if (mentionID != -1) {
+
+        if (mentionID == user.id) return message.channel.send("You can't banish yourself from the summon, use the dq command instead!");
+        for (let squad of squads.entries())
+            if (squad[1].summoner == user.displayName)
+                return message.channel.send(`${squad[1].players.splice(squad[1].players.indexOf(mention(mentionID)), 1)} has been banished from your summon!`);
+        message.channel.send("Either you don't have an active summon or such player wasn't part of it!");
+    }
+    else if (params.player) {
+
+        squad.players.splice(squad.displayNames.indexOf(params.player), 1);
+        return message.channel.send(`${squad.displayNames.splice(squad.displayNames.indexOf(params.player), 1)} has been banished from your summon!`);
+    }
+    else {
+
+        let searchArray = [];
+        let internalArray = [];
+
+        for (let i = 0; i < squad.players.length; i++) {
+
+            if (squad.displayNames[i] != user.displayName) {
+                searchArray.push(squad.displayNames[i]);
+                internalArray.push({ player: squad.displayNames[i] });
+            }
+        }
+
+        if (searchArray.length == 0) return message.channel.send("There is no one to banish from your summon!");
+
+        return generalMatcher(message, -23, user, searchArray, internalArray, banish, "Enter the number of the player you wish to banish from your summon!");
+    }
 }
 
 async function createUser(member) {
@@ -2513,7 +2568,6 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
     }
 }
 
-
 /*
 params = {
     custom = true/false,
@@ -2651,7 +2705,7 @@ async function play(message, params, user) {
         }
     }
 }
-//addsong or addplaylist will check if parameters is given, then offer to make new playlist or add to exsiting one.
+//addsong or addplaylist will check if parameters is given, then offer to make new playlist or add to existing one.
 
 
 
@@ -2659,7 +2713,7 @@ async function play(message, params, user) {
 
 async function playSong(guild, sonG, skip, message) {
     const serverQueue = queue.get(guild.id);
-    const song = JSON.parse(JSON.stringify(sonG))
+    const song = sonG;
 
     if (!song) {
         message.channel.send(`No more songs queued, leaving!`);
@@ -3146,7 +3200,7 @@ function createPlaylist(message, params, user) {
 
     let newName = message.content.split(" ").slice(1).join(" ").trim();
 
-    if(newName.length == 0) return message.channel.send("You can't have a blank for the playlist name!");
+    if (newName.length == 0) return message.channel.send("You can't have a blank for the playlist name!");
 
     if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
 
@@ -3308,6 +3362,9 @@ async function updateGames(message, game, user) {
     else {
         game = [game];
     }
+
+    const args = message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
 
     games.sort();
     let existingGames = user.games;
@@ -3475,20 +3532,11 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
-//ability to deque, squad leader to kick people, viewing active squads
+//ability to squad leader to kick people
 
 //Test horoku allocation by playing my 500 list song and have it try to dl all of that
 
-//add a parameter to q for time (minutes) then have automated excuse like: Chimera has accepted your summons, they will be there in x minutes after they do ____
-//also use @mentions for the person whose queue to accept if there are multiple going on!
-
-
-//make ping take a 2nd paramter, for number of people needed.
-//People can do !join to join a running ping, if there is more than 1 - givem them a menu selection
-
 //forcefuly sign up a user, and everyone.
-
-//add squad time expiration checking to minutecount.
 
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial
@@ -3496,10 +3544,9 @@ setInterval(minuteCount, 60 * 1000);
 
 //make a game recommendation
 
-//make parties last 30 minutes
-
 //add playlist stats to all stats
-//put all the current bool permissions into a map? To reference easier.
+
+//make custom 'command prefixes' possible
 
 
 //for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N

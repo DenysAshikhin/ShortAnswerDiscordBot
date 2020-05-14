@@ -58,7 +58,9 @@
         "REMOVEPLAYLIST",
         "Q",
         "DQ",
-        "VIEWACTIVESUMMONS"
+        "VIEWACTIVESUMMONS",
+
+        "BANISH"
 
     ],
     "explanation": [
@@ -119,8 +121,10 @@
         "Saves the current playing playlist into one of your playlists.",
         "Removes a specified playlist.",
         "Joins an active summon (squad). In the case of multiple active summons, you can specify who to join using an @mention. A number following a comma will notify the others that you will join them in [number] minutes.",
-        "Will remove you from any active summons you have joined. If you provide an @mention, it will attempt to leave that player's summon",
-        "Shows all of the acive summons for this server."
+        "Will remove you from any active summons you have joined. If you provide an @mention, it will attempt to leave that player's summon.",
+        "Shows all of the acive summons for this server.",
+
+        "Kicks a player from your summon."
     ],
         
     "example": [
@@ -182,7 +186,8 @@
         ["1) removePlayList", "2) removePlayList Best Wubs"],
         ["1) q", "2) q @The Last Spark", "3) q @The Last Spark, 5"],
         ["1) dq", "2) dq @The Last Spark"],
-        ["1) viewActiveSummons"]
+        ["1) viewActiveSummons"],
+        ["1) banish", "2) banish @The Last Spark"]
     ],
     "subsection": [
         [3],
@@ -243,6 +248,8 @@
         [4],
         [1],
         [1],
-        [1]
+        [1],
+
+        [4]
     ]
 }
