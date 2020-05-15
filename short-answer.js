@@ -549,7 +549,7 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
     }
 
     let finishy = await specificCommand.command.apply(null, specificCommand.defaults);
-    console.log(`finishy: ${finishy == 0 || finishy == -11}`)
+    //console.log(`finishy: ${finishy == 0 || finishy == -11}`)
     if (finishy == -11 || finishy == 0)
         return 0;
     else {
@@ -2780,7 +2780,7 @@ async function playSong(guild, sonG, skip, message) {
 
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
-                console.log("inside of error");
+                console.log("inside of error   ", error);
             })
             .on('finish', () => {
 
@@ -3539,7 +3539,6 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
-//ability to squad leader to kick people
 
 //Test horoku allocation by playing my 500 list song and have it try to dl all of that
 
@@ -3566,7 +3565,13 @@ setInterval(minuteCount, 60 * 1000);
 //Be alerted if a user is found in a voice channel? Stalker lmao
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
+//poker, texas hold em, war, gold fish, 
+
+//make a text channel for logs
+
 //Stats Tutorial
+
+//don't ping someone else in the same voice channel....
 
 //coin flipper
 //game decider
