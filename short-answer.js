@@ -2055,6 +2055,8 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 }
 
 async function Queue(message, params, user) {
+    
+    if(message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
@@ -2112,6 +2114,8 @@ async function Queue(message, params, user) {
 
 async function deQueue(message, params, user) {
 
+    if(message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let mentionID = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
@@ -2143,6 +2147,8 @@ async function deQueue(message, params, user) {
 
 async function viewActiveSummons(message, params, user) {
 
+    if(message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
@@ -2156,6 +2162,8 @@ async function viewActiveSummons(message, params, user) {
 }
 
 async function banish(message, params, user) {
+
+    if(message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     if (!squads.get(user.id)) return message.channel.send("You don't have any active summons to kick from!");
     let squad = squads.get(user.id);
@@ -3238,7 +3246,7 @@ function createPlaylist(message, params, user) {
 
     if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
 
-    if(user.playlists.length >= 25) return message.channel.send("You have reached the maximum number of allowed playlists!");
+    if (user.playlists.length >= 25) return message.channel.send("You have reached the maximum number of allowed playlists!");
     user.playlists.push({ title: newName, songs: [] })
     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
 
@@ -3401,9 +3409,9 @@ async function updateGames(message, game, user) {
         let setty = new Set(game);
         game = Array.from(setty);
     }
-    else {
+    else
         game = [game];
-    }
+
 
     const args = message.content.split(" ").slice(1).join(" ");
     if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
@@ -3575,8 +3583,6 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-//Test horoku allocation by playing my 500 list song and have it try to dl all of that
-
 //forcefuly sign up a user, and everyone.
 
 
@@ -3589,10 +3595,8 @@ setInterval(minuteCount, 60 * 1000);
 
 //make custom 'command prefixes' possible
 
-
 //for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
 //if they dont, they can always start it by saying prefixADVANCEDGAMETUTORIAL - which is a seperate tutorial all together. If they want to do it to type that command
-
 
 
 //For game stats and top games, you can list the people under each heading!!! Make sure to add a limit of 25 fields/games!!!
@@ -3601,8 +3605,6 @@ setInterval(minuteCount, 60 * 1000);
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
 //poker, texas hold em, war, gold fish, 
-
-//make a text channel for logs
 
 //Stats Tutorial
 
