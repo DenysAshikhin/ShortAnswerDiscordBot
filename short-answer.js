@@ -1814,139 +1814,176 @@ function directMessage(message, memberID, game) {
 
 async function gameStats(message, params, user) {
 
-    if (message.channel.type != 'dm') {
-        let game = Array.isArray(params) ? params[0].trim() : params;
-        const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
-        if (!args) return message.channel.send("You have to provide the name of a game whose stats you wish to see!");
+    if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
 
-        let finalEmbed = JSON.parse(JSON.stringify(Embed));
-        finalEmbed.timestamp = new Date();
+    if (params != null) {
+        if (params.userList) {
 
-        let check = checkGame(games, params, user);
+            let runningString = "";
+            let groupNumber = 1;
+            let field = { name: "", value: [], inline: true };
+            let newEmbed = JSON.parse(JSON.stringify(Embed));
+            newEmbed.description = `Here are the users signed up for ${params.gameTitle}`;
+            newEmbed.fields = [];
 
-        if (check == -1) {
+            for (player of params.userList) {
 
-            message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-            return 0;
-        }
-        else if (check.result[0].score != 0) {
+                if (runningString.length < 1000) {
 
-            let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+                    runningString += player;
+                    field.value.push(player);
+                }
+                else {
+                    field.name = `Group ${groupNumber}`;
+                    newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+                    runningString = "";
+                    groupNumber++;
+                    field = {name: "", value: [], inline: true};
 
+                    if (groupNumber == 26) {
 
-
-            let removeEmbed = JSON.parse(JSON.stringify(Embed));
-            removeEmbed.timestamp = new Date();
-            removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
-
-            for (suggestion of prettyArray)
-                removeEmbed.fields.push({ name: suggestion, value: "** **" });
-
-            message.channel.send({ embed: removeEmbed });
-            specificCommandCreator(gameStats, [message, -1, user], check.result, user);
-            return -11;
-        }
-        else {
-
-            game = check.result[0].item;
-            console.log(params)
-            let users = await getUsers();
-            let signedUp = new Array();
-
-            for (let i = 0; i < users.length; i++) {
-
-                if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
-                    if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
-                        signedUp.push(users[i]);
+                        groupNumber = 1;
+                        message.channel.send({ embed: newEmbed });
+                        newEmbed = JSON.parse(JSON.stringify(Embed));
+                        newEmbed.description = `Here are the users signed up for ${params.gameTitle}`;
+                        newEmbed.fields = [];
                     }
+                }
             }
 
-            if (signedUp.length > 0)
-                message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
-            else
-                message.channel.send(`There are ${signedUp.length} users signed up for ${game}.`);
-            return signedUp.length;
+            field.name = `Group ${groupNumber}`;
+            newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+            console.log(newEmbed);
+            return message.channel.send({ embed: newEmbed });
         }
     }
-    else {
-        message.channel.send(`*${Commands.commands[31]}* is only valid from inside a server text channel!`);
+    else
         return -1;
+
+
+    let game = Array.isArray(params) ? params[0].trim() : params;
+    const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You have to provide the name of a game whose stats you wish to see!");
+
+    let finalEmbed = JSON.parse(JSON.stringify(Embed));
+    finalEmbed.timestamp = new Date();
+
+    let check = checkGame(games, params, user);
+
+    if (check == -1) {
+
+        message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
+        return 0;
     }
+    else if (check.result[0].score != 0) {
+
+        let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+
+        let removeEmbed = JSON.parse(JSON.stringify(Embed));
+        removeEmbed.timestamp = new Date();
+        removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+
+        for (suggestion of prettyArray)
+            removeEmbed.fields.push({ name: suggestion, value: "** **" });
+
+        message.channel.send({ embed: removeEmbed });
+        specificCommandCreator(gameStats, [message, -1, user], check.result, user);
+        return -11;
+    }
+    else {
+
+        game = check.result[0].item;
+        console.log(params)
+        let users = await getUsers();
+        let signedUp = new Array();
+
+
+        for (let i = 0; i < users.length; i++) {
+
+            if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
+                if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
+                    signedUp.push(users[i].displayName);
+                }
+        }
+
+        if (signedUp.length > 0) {
+            //message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
+            return generalMatcher(message, -23, user, ['Yes', 'No'], [{ userList: signedUp, gameTitle: game }, null], gameStats, `There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up?`);
+        }
+        else
+            message.channel.send(`There are ${signedUp.length} users signed up for ${game}.`);
+        return signedUp.length;
+    }
+
 }
 
 async function topGames(message, params) {
     if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
-    if (message.channel.type != 'dm') {
-        let users = await getUsers();
-        let gameMap = new Map();
 
-        let finalEmbed = JSON.parse(JSON.stringify(Embed));
-        finalEmbed.timestamp = new Date();
-        finalEmbed.description = "Here are the top stats for " + message.guild.name;
-        finalEmbed.thumbnail.url = message.guild.iconURL();
+    let users = await getUsers();
+    let gameMap = new Map();
 
-        for (let i = 0; i < users.length; i++) {
+    let finalEmbed = JSON.parse(JSON.stringify(Embed));
+    finalEmbed.timestamp = new Date();
+    finalEmbed.description = "Here are the top stats for " + message.guild.name;
+    finalEmbed.thumbnail.url = message.guild.iconURL();
 
-            if (users[i].guilds.includes(message.guild.id)) {
+    for (let i = 0; i < users.length; i++) {
 
-                if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
-                    let tempGames = users[i].games;
+        if (users[i].guilds.includes(message.guild.id)) {
 
-                    for (let j = 0; j < tempGames.length; j++) {
+            if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
+                let tempGames = users[i].games;
 
-                        if (tempGames[j].length > 2) {
+                for (let j = 0; j < tempGames.length; j++) {
 
-                            if (!gameMap.get(tempGames[j])) {
+                    if (tempGames[j].length > 2) {
 
-                                gameMap.set(tempGames[j], 1);
-                            }
-                            else {
-                                gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
-                            }
+                        if (!gameMap.get(tempGames[j])) {
+
+                            gameMap.set(tempGames[j], 1);
+                        }
+                        else {
+                            gameMap.set(tempGames[j], (gameMap.get(tempGames[j]) + 1));
                         }
                     }
                 }
             }
         }
+    }
 
-        gameMap = [...gameMap.entries()].sort(function (a, b) { return b[1] - a[1] });
+    gameMap = [...gameMap.entries()].sort(function (a, b) { return b[1] - a[1] });
 
-        let maxResults = 5;
-        if (!(isNaN(params[0])))
-            maxResults = params[0] <= 0 ? 5 : params[0];
-        if (maxResults > 25) {
-            maxResults = 25;
-            message.channel.send("Search results are limited to a max of 25 games!");
-        }
+    let maxResults = 5;
+    if (!(isNaN(params[0])))
+        maxResults = params[0] <= 0 ? 5 : params[0];
+    if (maxResults > 25) {
+        maxResults = 25;
+        message.channel.send("Search results are limited to a max of 25 games!");
+    }
 
-        if (gameMap.length == 0) {
-            message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
-            return;
-        }
+    if (gameMap.length == 0) {
+        message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
+        return;
+    }
 
-        else if (maxResults > gameMap.length && maxResults) {
+    else if (maxResults > gameMap.length && maxResults) {
 
-            maxResults = gameMap.length;
-            finalEmbed.description = `There are only ${maxResults} games people signed up for on ${message.guild.name}`;
-        }
-        else {
-            finalEmbed.description = `You did not specify a valid number of games to display, as such, I will display the top ${maxResults}`
-                + ` games people signed up for on the ${message.guild.name} server:`;
-        }
-
-        for (let i = 0; i < maxResults; i++) {
-
-            finalEmbed.fields.push({ name: `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.`, value: "** **" })
-        }
-
-        message.channel.send({ embed: finalEmbed });
-        return gameMap.length;
+        maxResults = gameMap.length;
+        finalEmbed.description = `There are only ${maxResults} games people signed up for on ${message.guild.name}`;
     }
     else {
-
-        message.channel.send(`*${Commands.commands[32]}* is only valid from inside a server text channel!`);
-        return -1;
+        finalEmbed.description = `You did not specify a valid number of games to display, as such, I will display the top ${maxResults}`
+            + ` games people signed up for on the ${message.guild.name} server:`;
     }
+
+    for (let i = 0; i < maxResults; i++) {
+
+        finalEmbed.fields.push({ name: `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.`, value: "** **" })
+    }
+
+    message.channel.send({ embed: finalEmbed });
+    return gameMap.length;
 }
 
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
@@ -2055,8 +2092,8 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 }
 
 async function Queue(message, params, user) {
-    
-    if(message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+
+    if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
@@ -2114,7 +2151,7 @@ async function Queue(message, params, user) {
 
 async function deQueue(message, params, user) {
 
-    if(message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+    if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
@@ -2147,7 +2184,7 @@ async function deQueue(message, params, user) {
 
 async function viewActiveSummons(message, params, user) {
 
-    if(message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+    if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
@@ -2163,7 +2200,7 @@ async function viewActiveSummons(message, params, user) {
 
 async function banish(message, params, user) {
 
-    if(message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+    if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     if (!squads.get(user.id)) return message.channel.send("You don't have any active summons to kick from!");
     let squad = squads.get(user.id);
