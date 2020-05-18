@@ -173,6 +173,7 @@ if (config == null) {
 else {
     uri = config.uri;
     token = config.token;
+    defaultPrefix = "##";
 }
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useFindAndModify', false);
@@ -270,8 +271,8 @@ connectDB.once('open', async function () {
 
         if (message.author.bot) return;
 
-
         let user = await findUser({ id: message.author.id });
+
         if (message.channel.type != 'dm') {
 
             let guild = await findGuild({ id: message.guild.id });
@@ -296,6 +297,9 @@ connectDB.once('open', async function () {
             if (user.defaultPrefix != "-1") prefix = user.defaultPrefix;
             else prefix = defaultPrefix;
         }
+
+        if(defaultPrefix == "##")
+            prefix = "##";
 
         if (message.content.substr(0, prefix.length) == prefix) {
 
