@@ -30,6 +30,7 @@ const DATABASE = require('./backups/26-04-2020.json');
 const fs = require('fs');
 const fsPromises = fs.promises;
 
+const logID = '712000077295517796';
 const creatorID = '99615909085220864';
 const botID = '689315272531902606';
 const guildID = '97354142502092800';
@@ -182,19 +183,28 @@ const connectDB = mongoose.connection;
 const getUsers = async function () {
     try {
         return await User.find({})
-    } catch (err) { console.log(err) }
+    } catch (err) {
+        console.log(err);
+        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+    }
 }
 
 const findUser = async function (params) {
     try {
         return await User.findOne(params)
-    } catch (err) { console.log(err) }
+    } catch (err) {
+        console.log(err);
+        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+    }
 }
 
 const findGuild = async function (params) {
     try {
         return await Guild.findOne(params)
-    } catch (err) { console.log(err) }
+    } catch (err) {
+        console.log(err);
+        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+    }
 }
 
 function newStuff() {
@@ -298,7 +308,7 @@ connectDB.once('open', async function () {
             else prefix = defaultPrefix;
         }
 
-        if(defaultPrefix == "##")
+        if (defaultPrefix == "##")
             prefix = "##";
 
         if (message.content.substr(0, prefix.length) == prefix) {
@@ -1576,13 +1586,23 @@ function excludeDM(message, params, user) {
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
     if (bool == "TRUE") {
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: true } }, function (err, doc, res) { if (err) console.log(err) });
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: true } }, function (err, doc, res) {
+            if (err) {
+                console.log(err);
+                Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+            }
+        });
         message.channel.send(mention(message.author.id) + " will be excluded from any further DMs.");
         return 1;
     }
     else if (bool == "FALSE") {
 
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: false } }, function (err, doc, res) { if (err) console.log(err) });
+        User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: false } }, function (err, doc, res) {
+            if (err) {
+                console.log(err)
+                Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+            }
+        });
         message.channel.send(mention(message.author.id) + " will be DM'ed once more.");
         return 0;
     }
@@ -2704,6 +2724,7 @@ async function play(message, params, user) {
             playSong(message.guild, queueConstruct.songs[0], null, message);
         } catch (err) {
             console.log(err);
+            Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
             queue.delete(message.guild.id)
             return message.channel.send("There was an error playing! " + err);
         }
@@ -2861,7 +2882,10 @@ async function cacheSong(song, guild) {
             writeStream.on('finish', () => {
                 console.log("FINISHED: WRITE STREAM " + song.title);
                 mv(tempAudio, audioOutput, function (err) {
-                    if (err) console.log(err);
+                    if (err) {
+                        console.log(err);
+                        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+                    }
                     serverDownload.songToDownload = null;
                     serverDownload.progress = 0;
                     cacheSong(null, guild);
@@ -3020,7 +3044,12 @@ async function removeSong(message, params, user) {
     if (params.song) {
 
         params.playlist.songs.splice(params.index, 1);
-        User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { if (err) console.log(err) });
+        User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) {
+            if (err) {
+                console.log(err);
+                Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+            }
+        });
         return 100;
     }
     else if (params.playlist) {
@@ -3109,6 +3138,7 @@ async function playlist(message, params, user) {
                 playSong(message.guild, queueConstruct.songs[0], null, message);
             } catch (err) {
                 console.log(err);
+                Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
                 queue.delete(message.guild.id)
                 return message.channel.send("There was an error playing! " + err);
             }
