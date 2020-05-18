@@ -60,7 +60,9 @@
         "DQ",
         "VIEWACTIVESUMMONS",
 
-        "BANISH"
+        "BANISH",
+        "SIGNUPALLUSERS",
+        "REMOVEGAMEFROMUSERS"
 
     ],
     "explanation": [
@@ -124,7 +126,9 @@
         "Will remove you from any active summons you have joined. If you provide an @mention, it will attempt to leave that player's summon.",
         "Shows all of the acive summons for this server.",
 
-        "Kicks a player from your summon."
+        "Kicks a player from your summon.",
+        "Admin-exclusive command to forcefully signup every user for a specified game. Works identical to the *signUp* command.",
+        "Admin-exclusive command to forcefully remove a game from every user in the server. Works identical to the *removeGame* command"
     ],
         
     "example": [
@@ -187,7 +191,11 @@
         ["1) q", "2) q @The Last Spark", "3) q @The Last Spark, 5"],
         ["1) dq", "2) dq @The Last Spark"],
         ["1) viewActiveSummons"],
-        ["1) banish", "2) banish @The Last Spark"]
+
+        ["1) banish", "2) banish @The Last Spark"],
+        ["1) signUpAllUsers 3", "2) signUpAllUsers Minecraft, Counter-Strike: Global Offensive", "3) signUpAllUsers Minecraft, 321, 33, Counter-Strike: Global Offensive"],
+        ["1) removeGameFromUsers 2", "2) removeGameFromUsers Valorant"]
+
     ],
     "subsection": [
         [3],
@@ -250,6 +258,8 @@
         [1],
         [1],
 
-        [4]
+        [4],
+        [4, 5],
+        [4, 5]
     ]
 }

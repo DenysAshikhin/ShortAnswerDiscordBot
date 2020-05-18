@@ -426,6 +426,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[48], deQueue)
     commandMap.set(Commands.commands[49], viewActiveSummons)
     commandMap.set(Commands.commands[50], banish)
+    commandMap.set(Commands.commands[51], signUpAllUsers)
+    commandMap.set(Commands.commands[52], removeGameFromUsers)
 }
 
 function setServerPrefix(message, params, user) {
@@ -1838,7 +1840,7 @@ async function gameStats(message, params, user) {
                     newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
                     runningString = "";
                     groupNumber++;
-                    field = {name: "", value: [], inline: true};
+                    field = { name: "", value: [], inline: true };
 
                     if (groupNumber == 26) {
 
@@ -1853,7 +1855,6 @@ async function gameStats(message, params, user) {
 
             field.name = `Group ${groupNumber}`;
             newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
-            console.log(newEmbed);
             return message.channel.send({ embed: newEmbed });
         }
     }
@@ -3426,6 +3427,17 @@ async function updateAll() {
     // // });
 
     // console.log("CALLED UPDATE ALL");
+    //createBackUp();
+}
+async function createBackUp() {
+
+    let users = await getUsers();
+
+    await fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
+        if (err) console.log('error', err);
+    });
+
+    console.log("CALLED BACKUP");
 }
 
 async function minuteCount() {
@@ -3440,7 +3452,19 @@ async function minuteCount() {
     }
 }
 
-async function updateGames(message, game, user) {
+async function removeGameFromUsers(message, game, user) {
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only administrators can forcefully signup players on the server!");
+    const args = message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
+
+}
+
+async function signUpAllUsers(message, game, user) {
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only administrators can forcefully signup players on the server!");
 
     if (Array.isArray(game)) {
         let setty = new Set(game);
@@ -3448,6 +3472,38 @@ async function updateGames(message, game, user) {
     }
     else
         game = [game];
+
+    const args = message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
+
+    let users = await getUsers();
+    let guild = message.guild.id;
+    let tally = 0;
+
+    for (currUser of users) {
+
+        if (currUser.guilds.includes(guild)) {
+            updateGames(message, { game: game, mass: true }, currUser);
+            tally++;
+            console.log(currUser.displayName);
+        }
+    }
+
+    return message.channel.send(`${tally} users have been signed up for ${game}!`);
+}
+
+async function updateGames(message, game, user) {
+
+    let mass = game.mass;
+    game = game.mass ? game.game : game;
+
+    if (Array.isArray(game)) {
+        let setty = new Set(game);
+        game = Array.from(setty);
+    }
+    else
+        game = [game];
+
 
 
     const args = message.content.split(" ").slice(1).join(" ");
@@ -3553,7 +3609,8 @@ async function updateGames(message, game, user) {
         finalEmbed.fields.push(signedField);
     }
 
-    message.channel.send({ embed: finalEmbed });
+    if (!mass)
+        message.channel.send({ embed: finalEmbed });
 
     let length = finalGameArray.length;
     if (user.games)

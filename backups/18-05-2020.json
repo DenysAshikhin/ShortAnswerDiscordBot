@@ -1,0 +1,6752 @@
+[
+	{
+		"messages": [
+			92,
+			9
+		],
+		"lastMessage": [
+			"17-05-2020",
+			"09-05-2020"
+		],
+		"timeTalked": [
+			5555,
+			4335
+		],
+		"lastTalked": [
+			"17-05-2020",
+			"16-05-2020"
+		],
+		"games": [
+			"BORDERLANDS",
+			"League of Legends",
+			"Counter-Strike: Global Offensive",
+			"Valorant"
+		],
+		"timeAFK": [
+			0,
+			6
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"18-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			5,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121166f8d43ef0d51627",
+		"displayName": "hailfire",
+		"id": "113091505471655936",
+		"__v": 10,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			448,
+			1
+		],
+		"lastMessage": [
+			"18-05-2020",
+			"05-05-2020"
+		],
+		"timeTalked": [
+			12444,
+			347
+		],
+		"lastTalked": [
+			"18-05-2020",
+			"09-05-2020"
+		],
+		"games": [
+			"20XX",
+			"Counter-Strike: Global Offensive",
+			"Counter-Strike: Source",
+			"Deep Rock Galactic",
+			"Divinity Original Sin 2",
+			"Divinity: Original Sin Enhanced Edition",
+			"Don't Starve Together",
+			"Factorio",
+			"Hades",
+			"Halo: The Master Chief Collection",
+			"League of Legends",
+			"Minecraft",
+			"Risk of Rain",
+			"Risk of Rain 2",
+			"SYNTHETIK",
+			"Satisfactory",
+			"Underlords",
+			"Valorant"
+		],
+		"timeAFK": [
+			79,
+			0
+		],
+		"dateJoined": [
+			"06-05-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [
+			0
+		],
+		"canSuggest": true,
+		"summoner": [
+			22,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [
+			{
+				"title": "testing",
+				"songs": []
+			}
+		],
+		"_id": "5e95121166f8d43ef0d51629",
+		"displayName": "Abysmal Chimera",
+		"id": "99613721113931776",
+		"__v": 21,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			491
+		],
+		"lastTalked": [
+			"23-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121166f8d43ef0d5162a",
+		"displayName": "zackattack",
+		"id": "651168107364089877",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121166f8d43ef0d5162b",
+		"displayName": "Shelly",
+		"id": "133098357185839104",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			22
+		],
+		"lastMessage": [
+			"04-05-2020"
+		],
+		"timeTalked": [
+			1
+		],
+		"lastTalked": [
+			"04-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"26-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121166f8d43ef0d5162c",
+		"displayName": "The Shadow Assassin",
+		"id": "99615791263014912",
+		"__v": 17,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0,
+			0
+		],
+		"lastMessage": [
+			"0-0-0",
+			"0-0-0"
+		],
+		"timeTalked": [
+			21,
+			0
+		],
+		"lastTalked": [
+			"25-04-2020",
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0,
+			0
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"18-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5162d",
+		"displayName": "Shellymezh",
+		"id": "437002413493321738",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5162e",
+		"displayName": "Brendan",
+		"id": "227526425337528320",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51630",
+		"displayName": "Eroticfishcake",
+		"id": "217779694005780481",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			588
+		],
+		"lastTalked": [
+			"03-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5162f",
+		"displayName": "Draft Dodger",
+		"id": "118873547320852482",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51631",
+		"displayName": "Alpha_Batman",
+		"id": "264600338559008768",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51632",
+		"displayName": "#1 osu! Player",
+		"id": "206573046843179008",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51633",
+		"displayName": "PoTaToE",
+		"id": "226545458674139137",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			407
+		],
+		"lastTalked": [
+			"10-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51634",
+		"displayName": "Ramie's Holy Dick",
+		"id": "184405311681986560",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			10
+		],
+		"lastMessage": [
+			"14-04-2020"
+		],
+		"timeTalked": [
+			518
+		],
+		"lastTalked": [
+			"06-05-2020"
+		],
+		"games": [
+			"Counter-Strike: Global Offensive",
+			"Tom Clancy's Rainbow Six Siege"
+		],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51636",
+		"displayName": "thepieisalie",
+		"id": "193431646698078208",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51635",
+		"displayName": "DuhWangChang",
+		"id": "189557957292195840",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			76
+		],
+		"lastTalked": [
+			"23-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51637",
+		"displayName": "Joshlarose12",
+		"id": "359125728832520193",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			82
+		],
+		"lastMessage": [
+			"10-05-2020"
+		],
+		"timeTalked": [
+			2590
+		],
+		"lastTalked": [
+			"17-05-2020"
+		],
+		"games": [
+			"Darksiders III",
+			"Destiny 2",
+			"Don't Starve Together",
+			"Halo: The Master Chief Collection",
+			"Hearthstone",
+			"League of Legends",
+			"Minecraft",
+			"Risk of Rain 2",
+			"Smite"
+		],
+		"timeAFK": [
+			55
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			6
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"!"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51638",
+		"displayName": "Blackwolf2662",
+		"id": "518287002886471690",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			6
+		],
+		"lastMessage": [
+			"15-05-2020"
+		],
+		"timeTalked": [
+			123
+		],
+		"lastTalked": [
+			"18-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51639",
+		"displayName": "Massive Legend",
+		"id": "102530505009811456",
+		"__v": 19,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			4,
+			71
+		],
+		"lastMessage": [
+			"02-05-2020",
+			"17-05-2020"
+		],
+		"timeTalked": [
+			511,
+			12298
+		],
+		"lastTalked": [
+			"10-05-2020",
+			"18-05-2020"
+		],
+		"games": [
+			"Valorant",
+			"Call of Duty: Warzone"
+		],
+		"timeAFK": [
+			0,
+			212
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"18-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			1
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5163a",
+		"displayName": "Trigger_Happy",
+		"id": "116297174266019844",
+		"__v": 6,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5163b",
+		"displayName": "Tylo",
+		"id": "180133690179977226",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			619
+		],
+		"lastTalked": [
+			"23-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5163c",
+		"displayName": "PolarIceKing",
+		"id": "282350543312257025",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0,
+			0,
+			0,
+			0
+		],
+		"lastMessage": [
+			"0-0-0",
+			"0-0-0",
+			"0-0-0",
+			"0-0-0"
+		],
+		"timeTalked": [
+			1993,
+			8,
+			3,
+			957
+		],
+		"lastTalked": [
+			"17-05-2020",
+			"16-05-2020",
+			"25-04-2020",
+			"12-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0,
+			0,
+			0,
+			0
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"16-04-2020",
+			"18-04-2020",
+			"22-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"694595993341132881",
+			"475130120949071872",
+			"689313920107675714"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			0,
+			0,
+			0
+		],
+		"kicked": [
+			false,
+			false,
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1",
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5163d",
+		"displayName": "Short Answer Bot",
+		"id": "689315272531902606",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			20
+		],
+		"lastMessage": [
+			"10-05-2020"
+		],
+		"timeTalked": [
+			3115
+		],
+		"lastTalked": [
+			"17-05-2020"
+		],
+		"games": [
+			"Counter-Strike: Global Offensive",
+			"Risk of Rain 2",
+			"Valorant",
+			"League of Legends",
+			"Apex Legends",
+			"osu!",
+			"MapleStory",
+			"Overwatch"
+		],
+		"timeAFK": [
+			106
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5163e",
+		"displayName": "KiritoShimon",
+		"id": "180761942292430848",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d5163f",
+		"displayName": "Andy",
+		"id": "328272333284573184",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0,
+			170
+		],
+		"lastMessage": [
+			"0-0-0",
+			"18-05-2020"
+		],
+		"timeTalked": [
+			39,
+			6601
+		],
+		"lastTalked": [
+			"01-04-2020",
+			"18-05-2020"
+		],
+		"games": [
+			"Call of Duty: Modern Warfare",
+			"Rocket League"
+		],
+		"timeAFK": [
+			0,
+			265
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"16-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "!",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51640",
+		"displayName": "Mattic",
+		"id": "316977067512168453",
+		"__v": 13,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			207,
+			1
+		],
+		"lastMessage": [
+			"18-05-2020",
+			"07-05-2020"
+		],
+		"timeTalked": [
+			3258,
+			7
+		],
+		"lastTalked": [
+			"18-05-2020",
+			"07-05-2020"
+		],
+		"games": [
+			"Borderlands 3",
+			"Call of Duty: Warzone",
+			"Counter-Strike: Global Offensive",
+			"Deep Rock Galactic",
+			"Halo: The Master Chief Collection",
+			"Minecraft",
+			"Path of Exile",
+			"Risk of Rain 2",
+			"Rust",
+			"Warframe",
+			"osu!"
+		],
+		"timeAFK": [
+			0,
+			0
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"07-05-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [
+			0
+		],
+		"canSuggest": true,
+		"summoner": [
+			3,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "!",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51641",
+		"displayName": "Xato",
+		"id": "99883738191663104",
+		"__v": 6,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			61
+		],
+		"lastTalked": [
+			"23-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51642",
+		"displayName": "beerPresident",
+		"id": "389913538619113474",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			173,
+			0
+		],
+		"lastMessage": [
+			"18-05-2020",
+			"0-0-0"
+		],
+		"timeTalked": [
+			5289,
+			96
+		],
+		"lastTalked": [
+			"18-05-2020",
+			"24-04-2020"
+		],
+		"games": [
+			"100% Orange Juice",
+			"Apex Legends",
+			"Battlefield 2",
+			"Borderlands 3",
+			"Call of Duty: Modern Warfare",
+			"Counter-Strike: Global Offensive",
+			"Dauntless",
+			"Destiny 2",
+			"Halo: The Master Chief Collection",
+			"League of Legends",
+			"Minecraft",
+			"Path of Exile",
+			"Risk of Rain 2",
+			"Rocket League",
+			"Valorant",
+			"Warframe",
+			"osu!"
+		],
+		"timeAFK": [
+			453,
+			0
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"18-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [
+			0
+		],
+		"canSuggest": true,
+		"summoner": [
+			8,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": ".",
+		"playlists": [
+			{
+				"title": "t",
+				"songs": []
+			}
+		],
+		"_id": "5e95121266f8d43ef0d51643",
+		"displayName": "Sh4de",
+		"id": "97353102444748800",
+		"__v": 6,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0,
+			108
+		],
+		"lastMessage": [
+			"0-0-0",
+			"18-05-2020"
+		],
+		"timeTalked": [
+			56,
+			518
+		],
+		"lastTalked": [
+			"19-04-2020",
+			"18-05-2020"
+		],
+		"games": [
+			"Minecraft",
+			"Portal 2",
+			"osu!"
+		],
+		"timeAFK": [
+			0,
+			0
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"22-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"689313920107675714"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": false,
+		"completedTutorials": [
+			0
+		],
+		"canSuggest": true,
+		"summoner": [
+			0,
+			1
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [
+			{
+				"title": "songs",
+				"songs": []
+			}
+		],
+		"_id": "5e95121266f8d43ef0d51644",
+		"displayName": "ashira_123",
+		"id": "645824590458650624",
+		"__v": 11,
+		"excludeDM": true,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			52,
+			70
+		],
+		"lastMessage": [
+			"01-05-2020",
+			"18-05-2020"
+		],
+		"timeTalked": [
+			906,
+			3261
+		],
+		"lastTalked": [
+			"01-05-2020",
+			"18-05-2020"
+		],
+		"games": [
+			"ASTRONEER",
+			"Apex Legends",
+			"Minecraft",
+			"PokerStars",
+			"Rocket League",
+			"Scribble.io",
+			"Tom Clancy's Rainbow Six Siege"
+		],
+		"timeAFK": [
+			0,
+			21
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"16-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"694595993341132881"
+		],
+		"activeTutorial": 0,
+		"tutorialStep": 2,
+		"previousTutorialStep": 2,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			8
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51646",
+		"displayName": "The Fake Windiana",
+		"id": "367117589081751554",
+		"__v": 12,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0,
+			0
+		],
+		"lastMessage": [
+			"0-0-0",
+			"0-0-0"
+		],
+		"timeTalked": [
+			2,
+			1198
+		],
+		"lastTalked": [
+			"16-04-2020",
+			"09-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0,
+			0
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"18-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51645",
+		"displayName": "🖤Hawzay🖤",
+		"id": "155914110863671296",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			24
+		],
+		"lastMessage": [
+			"29-04-2020"
+		],
+		"timeTalked": [
+			748
+		],
+		"lastTalked": [
+			"06-05-2020"
+		],
+		"games": [
+			"Counter-Strike: Global Offensive",
+			"Hearthstone",
+			"Valorant"
+		],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"14-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e95121266f8d43ef0d51647",
+		"displayName": "Grasp",
+		"id": "225425722192297996",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			4
+		],
+		"lastMessage": [
+			"23-04-2020"
+		],
+		"timeTalked": [
+			207
+		],
+		"lastTalked": [
+			"22-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"16-04-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e98b6e728593a0004ce2225",
+		"displayName": "DarkWeeper",
+		"id": "241305274281885696",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			23,
+			1
+		],
+		"lastMessage": [
+			"18-05-2020",
+			"01-04-2020"
+		],
+		"timeTalked": [
+			6638,
+			65
+		],
+		"lastTalked": [
+			"18-05-2020",
+			"01-05-2020"
+		],
+		"games": [
+			"Rocket League"
+		],
+		"timeAFK": [
+			0,
+			0
+		],
+		"dateJoined": [
+			"16-04-2020",
+			"01-04-2020"
+		],
+		"guilds": [
+			"694595993341132881",
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e98b6e728593a0004ce2226",
+		"displayName": "BigSean9898",
+		"id": "451575194096762880",
+		"__v": 11,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			4,
+			4
+		],
+		"lastMessage": [
+			"30-04-2020",
+			"26-04-2020"
+		],
+		"timeTalked": [
+			91,
+			5705
+		],
+		"lastTalked": [
+			"06-05-2020",
+			"18-05-2020"
+		],
+		"games": [
+			"Valorant"
+		],
+		"timeAFK": [
+			0,
+			17
+		],
+		"dateJoined": [
+			"17-04-2020",
+			"18-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a17e7000f470004d2c51e",
+		"displayName": "Noot",
+		"id": "247536907209146368",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			89
+		],
+		"lastTalked": [
+			"05-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"17-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a17e7000f470004d2c51f",
+		"displayName": "Merlin246",
+		"id": "595375965375430667",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			400
+		],
+		"lastTalked": [
+			"23-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"17-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			true
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a17e7000f470004d2c51d",
+		"displayName": "VS",
+		"id": "567875039052038155",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			420
+		],
+		"lastTalked": [
+			"18-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"17-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a27e900783000042cbc05",
+		"displayName": "The1TrueSamwich",
+		"id": "501862035441713172",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			17
+		],
+		"lastMessage": [
+			"12-05-2020"
+		],
+		"timeTalked": [
+			5907
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			186
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc06",
+		"displayName": "pops",
+		"id": "129632739967107073",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			3
+		],
+		"lastMessage": [
+			"18-05-2020"
+		],
+		"timeTalked": [
+			1935
+		],
+		"lastTalked": [
+			"18-05-2020"
+		],
+		"games": [
+			"Valorant"
+		],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc08",
+		"displayName": "DeliveryPickle",
+		"id": "116369285772738562",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc0c",
+		"displayName": "Wizz",
+		"id": "585972404195426304",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc0b",
+		"displayName": "Totherino",
+		"id": "263808514051276800",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			7
+		],
+		"lastMessage": [
+			"16-05-2020"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [
+			"Call of Duty: Warzone",
+			"Rocket League"
+		],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc11",
+		"displayName": "Bling ツ",
+		"id": "603258763306205221",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc0e",
+		"displayName": "Blessing",
+		"id": "286639854970732544",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc12",
+		"displayName": "suhaibkho",
+		"id": "640325792982892566",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc14",
+		"displayName": "Nexinite",
+		"id": "250497825882767371",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc16",
+		"displayName": "MattyMan101",
+		"id": "698076658829099059",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc18",
+		"displayName": "Ahrar",
+		"id": "266026251687297024",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc1c",
+		"displayName": "Shood",
+		"id": "437421279382077470",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc1b",
+		"displayName": "Thry Soul.",
+		"id": "186741240631394304",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc1f",
+		"displayName": "777",
+		"id": "213843345217290242",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			6
+		],
+		"lastMessage": [
+			"26-04-2020"
+		],
+		"timeTalked": [
+			621
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc20",
+		"displayName": "Pingu",
+		"id": "116592848526245893",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			115
+		],
+		"lastTalked": [
+			"19-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc23",
+		"displayName": "OBRV",
+		"id": "210949968800907265",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc25",
+		"displayName": "Pancakes",
+		"id": "267475805708222474",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			265
+		],
+		"lastTalked": [
+			"26-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc26",
+		"displayName": "Ayzu",
+		"id": "657453721906839573",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc28",
+		"displayName": "Rythm",
+		"id": "235088799074484224",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc2a",
+		"displayName": "Wisconsin",
+		"id": "188707650047967233",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc2c",
+		"displayName": "Raythe",
+		"id": "214602261198929920",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc2f",
+		"displayName": "The Tryhard 0ne",
+		"id": "585872107489984667",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc30",
+		"displayName": "Peas and Beans",
+		"id": "152958873211240449",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"15-05-2020"
+		],
+		"timeTalked": [
+			293
+		],
+		"lastTalked": [
+			"22-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			2
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc32",
+		"displayName": "Icemanchillz",
+		"id": "227877969123606528",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc34",
+		"displayName": "LucaS",
+		"id": "181086356024328192",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			3
+		],
+		"lastMessage": [
+			"26-04-2020"
+		],
+		"timeTalked": [
+			76
+		],
+		"lastTalked": [
+			"26-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			1
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc36",
+		"displayName": "The Abyss",
+		"id": "230500485075959809",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc38",
+		"displayName": "RL Stat Tracker",
+		"id": "424398041043435520",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"24-04-2020"
+		],
+		"timeTalked": [
+			1594
+		],
+		"lastTalked": [
+			"15-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			25
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc3b",
+		"displayName": "Verbattum",
+		"id": "221324961027981312",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc3c",
+		"displayName": "Dr_Toad",
+		"id": "324281142192635905",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			7
+		],
+		"lastMessage": [
+			"08-05-2020"
+		],
+		"timeTalked": [
+			5
+		],
+		"lastTalked": [
+			"22-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc40",
+		"displayName": "Cats.",
+		"id": "208302084871684096",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			8
+		],
+		"lastMessage": [
+			"17-05-2020"
+		],
+		"timeTalked": [
+			604
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc3e",
+		"displayName": "CosmicDex",
+		"id": "177534857986048001",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0,
+			1
+		],
+		"lastMessage": [
+			"0-0-0",
+			"24-04-2020"
+		],
+		"timeTalked": [
+			826,
+			0
+		],
+		"lastTalked": [
+			"09-05-2020",
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0,
+			0
+		],
+		"dateJoined": [
+			"18-04-2020",
+			"24-04-2020"
+		],
+		"guilds": [
+			"475130120949071872",
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0,
+			0
+		],
+		"kicked": [
+			false,
+			false
+		],
+		"prefix": [
+			"-1",
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc46",
+		"displayName": "Headless",
+		"id": "255146447111061504",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			404
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			51
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc44",
+		"displayName": "Sykløne",
+		"id": "361708521697574920",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			533
+		],
+		"lastTalked": [
+			"13-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc43",
+		"displayName": "Lina",
+		"id": "364578410237788160",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc4b",
+		"displayName": "sterlingmyson",
+		"id": "298139517963993089",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492200783000042cbc48",
+		"displayName": "Zed",
+		"id": "454825480172994571",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc4d",
+		"displayName": "Akkad",
+		"id": "160487893591130112",
+		"__v": 6
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"26-04-2020"
+		],
+		"timeTalked": [
+			420
+		],
+		"lastTalked": [
+			"03-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc50",
+		"displayName": "QUE K",
+		"id": "221688747098505218",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			true
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc4f",
+		"displayName": "akmf502425",
+		"id": "456597117532766208",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			79
+		],
+		"lastTalked": [
+			"18-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc54",
+		"displayName": "remmah",
+		"id": "192839874678751232",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			1303
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			5
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc53",
+		"displayName": "Crawg",
+		"id": "300219559154286593",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			1
+		],
+		"lastTalked": [
+			"29-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc57",
+		"displayName": "LOKY",
+		"id": "460710400535691285",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc58",
+		"displayName": "Coates",
+		"id": "165327360193724416",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc5a",
+		"displayName": "myst",
+		"id": "118223013001953281",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			5
+		],
+		"lastMessage": [
+			"09-05-2020"
+		],
+		"timeTalked": [
+			76
+		],
+		"lastTalked": [
+			"26-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc5c",
+		"displayName": "BeetleJuice",
+		"id": "266694366456709130",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			1
+		],
+		"lastTalked": [
+			"01-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"25-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc5e",
+		"displayName": "DocDoctor",
+		"id": "356549532982575120",
+		"__v": 11,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc60",
+		"displayName": "ryan",
+		"id": "109270287551315968",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc64",
+		"displayName": "KingChris",
+		"id": "436968394915577856",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc62",
+		"displayName": "JasonR",
+		"id": "374406382809513986",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			83
+		],
+		"lastTalked": [
+			"20-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc66",
+		"displayName": "Ushysushi",
+		"id": "133276830236016640",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc68",
+		"displayName": "BRIAN",
+		"id": "268598688576700416",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc6a",
+		"displayName": "Local Striker",
+		"id": "321088248241979392",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"18-05-2020"
+		],
+		"timeTalked": [
+			1538
+		],
+		"lastTalked": [
+			"18-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc6c",
+		"displayName": "Brandon",
+		"id": "117104024339218439",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc6e",
+		"displayName": "zanqy",
+		"id": "536067728273047553",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc70",
+		"displayName": "Andoo_Pls",
+		"id": "324352416549961730",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc73",
+		"displayName": "Role Bot",
+		"id": "204255221017214977",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc74",
+		"displayName": "kot_bosiley123",
+		"id": "402986743101390857",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			1189
+		],
+		"lastTalked": [
+			"17-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc76",
+		"displayName": "TehGuyWithPants",
+		"id": "146748194422784000",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			7
+		],
+		"lastMessage": [
+			"09-05-2020"
+		],
+		"timeTalked": [
+			14
+		],
+		"lastTalked": [
+			"29-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc78",
+		"displayName": "DaSquizzle",
+		"id": "396078555705901056",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc7a",
+		"displayName": "param.ganeshan",
+		"id": "410240498553323521",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			true
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc7d",
+		"displayName": "icarus.",
+		"id": "96656671257935872",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc7e",
+		"displayName": "Kaiss",
+		"id": "267865022540152833",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc82",
+		"displayName": "Private 6 Mans",
+		"id": "527490735453241355",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"24-04-2020"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc80",
+		"displayName": "Untamed",
+		"id": "223922904180457479",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc84",
+		"displayName": "Bfizz",
+		"id": "213817744645160960",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			1
+		],
+		"lastTalked": [
+			"19-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc86",
+		"displayName": "OH SO SAD",
+		"id": "233355279113256962",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			9
+		],
+		"lastTalked": [
+			"24-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc88",
+		"displayName": "TheYoungCoolKidGodAtRL",
+		"id": "277958131643056129",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9a492300783000042cbc8a",
+		"displayName": "Saaba | Nathan",
+		"id": "154724881924096000",
+		"__v": 6
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			525
+		],
+		"lastTalked": [
+			"03-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"19-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9c95a652b37400047a3807",
+		"displayName": "Pierre Tru-Dank ☭",
+		"id": "186584997212192769",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			5
+		],
+		"lastMessage": [
+			"01-04-2020"
+		],
+		"timeTalked": [
+			1135
+		],
+		"lastTalked": [
+			"18-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"22-04-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9f8b831e20fb00044fa6cc",
+		"displayName": "adamj",
+		"id": "701867327322325073",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"22-04-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9f8b831e20fb00044fa6cd",
+		"displayName": "SangramBhalerao",
+		"id": "702280500605091980",
+		"__v": 5,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			9
+		],
+		"lastMessage": [
+			"06-05-2020"
+		],
+		"timeTalked": [
+			707
+		],
+		"lastTalked": [
+			"06-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"22-04-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9f9c6848c7d81748a6adae",
+		"displayName": "Moh",
+		"id": "168420359274496000",
+		"__v": 14,
+		"excludeDM": false,
+		"excludePing": false
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"22-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": true,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5e9fba9f3945342ef06602ca",
+		"displayName": "ghost.",
+		"id": "491748318397857804",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 5
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"25-04-2020"
+		],
+		"timeTalked": [
+			120
+		],
+		"lastTalked": [
+			"25-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"25-04-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ea38a5b864ef9000478d675",
+		"displayName": "AsianStereotype",
+		"id": "703408501929541762",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 5
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			635
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"25-04-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ea38e68864ef9000478d676",
+		"displayName": "harshil17",
+		"id": "697948633601015830",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 7
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"25-04-2020"
+		],
+		"timeTalked": [
+			59
+		],
+		"lastTalked": [
+			"25-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"25-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ea3b509864ef9000478d677",
+		"displayName": "BurningPIg",
+		"id": "629049635129917480",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 5
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"25-04-2020"
+		],
+		"guilds": [
+			"689313920107675714"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ea3c882864ef9000478d678",
+		"displayName": "MEE6",
+		"id": "159985870458322944",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 5
+	},
+	{
+		"messages": [
+			8
+		],
+		"lastMessage": [
+			"06-05-2020"
+		],
+		"timeTalked": [
+			601
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			3
+		],
+		"dateJoined": [
+			"26-04-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ea4ec193dac4b276cf38b78",
+		"displayName": "when u only work upper body",
+		"id": "301809637102059520",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 14
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"01-04-2020"
+		],
+		"timeTalked": [
+			449
+		],
+		"lastTalked": [
+			"06-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"26-04-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ea5e392e4b11d31d8c1f31b",
+		"displayName": "PolishBoyVG",
+		"id": "593522950595018752",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			2803,
+			1022,
+			43
+		],
+		"lastMessage": [
+			"18-05-2020",
+			"18-05-2020",
+			"18-05-2020"
+		],
+		"timeTalked": [
+			11765,
+			1105,
+			105
+		],
+		"lastTalked": [
+			"18-05-2020",
+			"18-05-2020",
+			"18-05-2020"
+		],
+		"games": [
+			"100% Orange Juice",
+			"140",
+			"7 Days to Die",
+			"911 Operator",
+			"9Dragons",
+			"A Study in Steampunk: Choice by Gaslight",
+			"ASTRONEER",
+			"AT SUNDOWN: SitD",
+			"ATLAS",
+			"AdVenture Capitalist",
+			"Age of Mythology: Extended Edition",
+			"Alan Wake",
+			"Albion Online",
+			"Assassin's Creed",
+			"Banner Saga 3",
+			"Bare Metal",
+			"CABAL Online",
+			"CHAOS CODE -NEW SIGN OF CATASTROPHE-",
+			"Castle Crashers",
+			"Clustertruck",
+			"Counter-Strike: Global Offensive",
+			"Counter-Strike: Source",
+			"Crash Bandicoot™ N. Sane Trilogy",
+			"DARK SOULS™ II",
+			"DARK SOULS™: Prepare To Die Edition",
+			"DCS World",
+			"Dead Space™",
+			"Deep Rock Galactic",
+			"FIFA 15",
+			"Hyperdimension Neptunia Re;Birth1",
+			"Minecraft",
+			"Parkasaurus",
+			"Project Highrise",
+			"Risk of Rain 2",
+			"Rocket League",
+			"SYNTHETIK",
+			"Underlords"
+		],
+		"timeAFK": [
+			72,
+			0,
+			0
+		],
+		"dateJoined": [
+			"14-04-2020",
+			"22-04-2020",
+			"01-04-2020"
+		],
+		"guilds": [
+			"97354142502092800",
+			"689313920107675714",
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [
+			0
+		],
+		"canSuggest": true,
+		"summoner": [
+			73,
+			16,
+			2
+		],
+		"kicked": [
+			false,
+			false,
+			false
+		],
+		"prefix": [
+			"!",
+			"!",
+			"-1"
+		],
+		"defaultPrefix": "!",
+		"playlists": [
+			{
+				"title": "tester test",
+				"songs": [
+					{
+						"title": "Eurythmics - Sweet Dreams (Dwin & Echo Remix) (Bass Boosted)",
+						"url": "https://www.youtube.com/watch?v=0eve0iGVqRE",
+						"duration": 143,
+						"start": null,
+						"offset": 0,
+						"id": "0eve0iGVqRE",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Infinity Ink - Infinity (Dubdogz & Bhaskar Remix) (Bass Boosted)",
+						"url": "https://www.youtube.com/watch?v=5-xhpcgBMe4",
+						"duration": 334,
+						"start": null,
+						"offset": 0,
+						"id": "5-xhpcgBMe4",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Stromae - Alors On Danse (Dubdogz Remix) (Bass Boosted)",
+						"url": "https://www.youtube.com/watch?v=Rwf8eS3isWk",
+						"duration": 299,
+						"start": null,
+						"offset": 0,
+						"id": "Rwf8eS3isWk",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "t.A.T.u.- All The Things She Said (HBz Remix) (Bass Boosted)",
+						"url": "https://www.youtube.com/watch?v=pk_fUhOo0nc",
+						"duration": 281,
+						"start": null,
+						"offset": 0,
+						"id": "pk_fUhOo0nc",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Lucky Luke - DRÜG (ft. Emie)",
+						"url": "https://www.youtube.com/watch?v=Ocd4UWyiOOM",
+						"duration": 220,
+						"start": null,
+						"offset": 0,
+						"id": "Ocd4UWyiOOM",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Triplo Max - Shadow",
+						"url": "https://www.youtube.com/watch?v=dlO8aANekSM",
+						"duration": 178,
+						"start": null,
+						"offset": 0,
+						"id": "dlO8aANekSM",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Far East Movement - Like A G6 (Zulker & Folky Remix) (Bass Boosted)",
+						"url": "https://www.youtube.com/watch?v=F0iySc5gabE",
+						"duration": 272,
+						"start": null,
+						"offset": 0,
+						"id": "F0iySc5gabE",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Ugg'A - Think About",
+						"url": "https://www.youtube.com/watch?v=Py5WNFpT5F4",
+						"duration": 174,
+						"start": null,
+						"offset": 0,
+						"id": "Py5WNFpT5F4",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Burak Yeter - Tuesday (Fafaq Remix) (Bass Boosted)",
+						"url": "https://www.youtube.com/watch?v=NutKfA7C0cU",
+						"duration": 218,
+						"start": null,
+						"offset": 0,
+						"id": "NutKfA7C0cU",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Martin Vide - Make It Bounce (Bass Boosted)",
+						"url": "https://www.youtube.com/watch?v=GjuaWQKJKfc",
+						"duration": 198,
+						"start": null,
+						"offset": 0,
+						"id": "GjuaWQKJKfc",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					},
+					{
+						"title": "Billie Eilish - Bad Guy x Satisfaction (ANGEMI vs. Rudeejay & Da Brozz Remix) (Bass Boosted)",
+						"url": "https://www.youtube.com/watch?v=m41MKgZzffA",
+						"duration": 232,
+						"start": null,
+						"offset": 0,
+						"id": "m41MKgZzffA",
+						"paused": null,
+						"timePaused": 0,
+						"progress": 0
+					}
+				]
+			},
+			{
+				"title": "",
+				"songs": []
+			},
+			{
+				"title": "ee",
+				"songs": []
+			}
+		],
+		"_id": "5ea5e91972fd6e3c38a77e66",
+		"displayName": "The Last Spark",
+		"id": "99615909085220864",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 298
+	},
+	{
+		"messages": [
+			16
+		],
+		"lastMessage": [
+			"27-04-2020"
+		],
+		"timeTalked": [
+			1
+		],
+		"lastTalked": [
+			"27-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"26-04-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": 0,
+		"tutorialStep": 0,
+		"previousTutorialStep": 0,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ea5fdd29942ba356cff5202",
+		"displayName": "Testing Bot",
+		"id": "703760786153013308",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 16
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"27-04-2020"
+		],
+		"timeTalked": [
+			41
+		],
+		"lastTalked": [
+			"27-04-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"27-04-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			true
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ea6423bb9c2294530750169",
+		"displayName": "pls.josh",
+		"id": "628791316708589588",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 1
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"03-05-2020"
+		],
+		"timeTalked": [
+			91
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"03-05-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eae4530463d3d00044d1677",
+		"displayName": "Callery™",
+		"id": "158119123136675841",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"03-05-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eae4530463d3d00044d1678",
+		"displayName": "Callery™",
+		"id": "158119123136675841",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"06-05-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eb203ff5671ed19e4053a96",
+		"displayName": "Abysmal Chimera",
+		"id": "99613721113931776",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"06-05-2020"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"06-05-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eb2086b1a458c0004b36cfc",
+		"displayName": "nimol",
+		"id": "707391164604612609",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			1
+		],
+		"lastMessage": [
+			"06-05-2020"
+		],
+		"timeTalked": [
+			131
+		],
+		"lastTalked": [
+			"06-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"06-05-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eb208831a458c0004b36cfd",
+		"displayName": "nimol70",
+		"id": "707391155049988118",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			21
+		],
+		"lastMessage": [
+			"16-05-2020"
+		],
+		"timeTalked": [
+			494
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			10
+		],
+		"dateJoined": [
+			"06-05-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eb22b1b1a458c0004b36cfe",
+		"displayName": "Arsenal",
+		"id": "287014534542131200",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			22
+		],
+		"lastMessage": [
+			"17-05-2020"
+		],
+		"timeTalked": [
+			137
+		],
+		"lastTalked": [
+			"07-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"06-05-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eb331912616291c38137ef7",
+		"displayName": "Eclipse",
+		"id": "477313156620746772",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			30
+		],
+		"lastMessage": [
+			"06-05-2020"
+		],
+		"timeTalked": [
+			16
+		],
+		"lastTalked": [
+			"06-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"06-05-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eb342be9c913209b09eb815",
+		"displayName": "obsrecordere",
+		"id": "707729451861016699",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			147
+		],
+		"lastTalked": [
+			"16-05-2020"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"10-05-2020"
+		],
+		"guilds": [
+			"694595993341132881"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eb74ccc3bccf52f3c132f9d",
+		"displayName": "Konchord",
+		"id": "138138129218535424",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			3
+		],
+		"lastMessage": [
+			"16-05-2020"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"11-05-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5eb9c8ea858b780f7068b5d7",
+		"displayName": "Batesy",
+		"id": "480302267711488011",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"15-05-2020"
+		],
+		"guilds": [
+			"475130120949071872"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ebe1037055a3618605abb59",
+		"displayName": "Trigger_Happy",
+		"id": "116297174266019844",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	},
+	{
+		"messages": [
+			0
+		],
+		"lastMessage": [
+			"0-0-0"
+		],
+		"timeTalked": [
+			0
+		],
+		"lastTalked": [
+			"0-0-0"
+		],
+		"games": [],
+		"timeAFK": [
+			0
+		],
+		"dateJoined": [
+			"18-05-2020"
+		],
+		"guilds": [
+			"97354142502092800"
+		],
+		"activeTutorial": -1,
+		"tutorialStep": -1,
+		"previousTutorialStep": -1,
+		"notifyUpdate": false,
+		"notifyTutorial": true,
+		"completedTutorials": [],
+		"canSuggest": false,
+		"summoner": [
+			0
+		],
+		"kicked": [
+			false
+		],
+		"prefix": [
+			"-1"
+		],
+		"defaultPrefix": "-1",
+		"playlists": [],
+		"_id": "5ec2ca031407cb000479326d",
+		"displayName": "Tester Bot",
+		"id": "711993142689136715",
+		"excludePing": false,
+		"excludeDM": false,
+		"__v": 0
+	}
+]
