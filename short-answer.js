@@ -1684,20 +1684,27 @@ function getDate() {
 
 function removeGame(message, game, user) {
 
-    if (user.games.length < 1) {
+    if (user.games.length < 1 && !game.mass) {
 
         message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2]);
         return;
     }
     else {
 
-        if (Array.isArray(game)) {
-            let setty = new Set(game);
-            game = Array.from(setty);
+        let mass;
+        if (!game.mass) {
+            if (Array.isArray(game)) {
+                let setty = new Set(game);
+                game = Array.from(setty);
+            }
+            else {
+
+                game = [game];
+            }
         }
         else {
-
-            game = [game];
+            mass = game.mass;
+            game = game.game;
         }
 
         let gameArr = user.games;
@@ -1709,12 +1716,14 @@ function removeGame(message, game, user) {
         if (game.length == 1) {
 
             let check = checkGame(user.games, game, user);
-            if (check == -1) {
+            console.log("WO   ", check);
+            if ((check == -1)) {
 
-                message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
+                if (!mass)
+                    message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
                 return 0;
             }
-            else if (check.result[0].score != 0) {
+            else if ((check.result[0].score != 0) && !mass) {
 
                 let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
@@ -1786,7 +1795,8 @@ function removeGame(message, game, user) {
             finalEmbed.fields.push(removedGameField);
         }
 
-        message.channel.send({ embed: finalEmbed });
+        if (!mass)
+            message.channel.send({ embed: finalEmbed });
 
 
         gameArr.sort();
@@ -3459,6 +3469,29 @@ async function removeGameFromUsers(message, game, user) {
     const args = message.content.split(" ").slice(1).join(" ");
     if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
 
+    if (!game.valid) {
+
+        let internalArray = [];
+
+        for (GAME of games)
+            internalArray.push({ valid: true, game: GAME });
+        console.log(game);
+        return generalMatcher(message, game, user, games, internalArray, removeGameFromUsers, "Select the number of the game you wish to remove from every server member's games list");
+    }
+
+
+    let users = await getUsers();
+    let tally = 0;
+
+    for (currUser of users) {
+
+        if (message.guild.members.cache.get(currUser.id)) {
+            removeGame(message, { game: game.game, mass: true }, currUser);
+            tally++;
+        }
+    }
+
+    return message.channel.send(`${tally} users have had ${game.game} removed from their games list!`);
 }
 
 async function signUpAllUsers(message, game, user) {
@@ -3477,12 +3510,11 @@ async function signUpAllUsers(message, game, user) {
     if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
 
     let users = await getUsers();
-    let guild = message.guild.id;
     let tally = 0;
 
     for (currUser of users) {
 
-        if (currUser.guilds.includes(guild)) {
+        if (message.guild.members.cache.get(currUser.id)) {
             updateGames(message, { game: game, mass: true }, currUser);
             tally++;
             console.log(currUser.displayName);
@@ -3736,5 +3768,5 @@ setInterval(minuteCount, 60 * 1000);
 //MEE6 bot - beatiful ui, mainly the website
 
 //seal idan easter eggs
-process.on('unhandledRejection', (reason, p) => { console.log("FFFFFF"); console.log(reason) });
-process.on('unhandledException', (reason, p) => { console.log(";;;;;;;;;;;;;;;;;;"); console.log(reason) });
+process.on('unhandledRejection', (reason, p) => { console.log("FFFFFF"); console.log(reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(reason); });
+process.on('unhandledException', (reason, p) => { console.log(";;;;;;;;;;;;;;;;;;"); console.log(reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(reason); });
