@@ -3238,6 +3238,7 @@ function createPlaylist(message, params, user) {
 
     if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
 
+    if(user.playlists.length >= 25) return message.channel.send("You have reached the maximum number of allowed playlists!");
     user.playlists.push({ title: newName, songs: [] })
     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
 
