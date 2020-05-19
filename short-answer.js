@@ -1682,138 +1682,6 @@ function getDate() {
     return dayNumber + "-" + monthNumber + "-" + today.getFullYear();
 }
 
-function removeGame(message, game, user) {
-
-    if (user.games.length < 1 && !game.mass) {
-
-        message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2]);
-        return;
-    }
-    else {
-
-        let mass;
-        if (!game.mass) {
-            if (Array.isArray(game)) {
-                let setty = new Set(game);
-                game = Array.from(setty);
-            }
-            else {
-
-                game = [game];
-            }
-        }
-        else {
-            mass = game.mass;
-            game = game.game;
-        }
-
-        let gameArr = user.games;
-        let invalidGames = new Array();
-        let removedGames = new Array();
-
-        games.sort();
-
-        if (game.length == 1) {
-
-            let check = checkGame(user.games, game, user);
-            console.log("WO   ", check);
-            if ((check == -1)) {
-
-                if (!mass)
-                    message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-                return 0;
-            }
-            else if ((check.result[0].score != 0) && !mass) {
-
-                let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
-
-                let removeEmbed = JSON.parse(JSON.stringify(Embed));
-                removeEmbed.timestamp = new Date();
-                removeEmbed.title = Embed.title + ` Game Commands`;
-                removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
-
-
-                for (suggestion of prettyArray)
-                    removeEmbed.fields.push({ name: suggestion, value: "** **" });
-
-                message.channel.send({ embed: removeEmbed });
-                specificCommandCreator(removeGame, [message, -1, user], check.result, user);
-                return -11;
-            }
-            else {
-
-                game[0] = check.result[0].item;
-            }
-        }
-
-        //game.forEach(async gameTitle => {make it for...of loop!
-
-        let gameTitle = game[0];
-
-        if (isNaN(gameTitle)) {
-
-            if (gameArr.includes(gameTitle)) {
-                removedGames.push(gameTitle);
-                gameArr.splice(gameArr.indexOf(gameTitle), 1);
-            }
-            else
-                invalidGames.push(gameTitle);
-        }
-        else {
-            gameTitle = Math.floor(gameTitle);
-            if (gameTitle < gameArr.length && gameTitle >= 0) {
-                removedGames.push(gameArr[gameTitle]);
-                gameArr.splice(gameTitle, 1)
-            }
-            else
-                invalidGames.push(gameTitle);
-        }
-        //});
-
-        gameArr.sort();
-
-
-        let finalEmbed = JSON.parse(JSON.stringify(Embed));
-        finalEmbed.timestamp = new Date();
-
-
-        if (invalidGames.length > 0) {
-            invalidGames.sort();
-            let invalidGameField = { name: "Invalid Game(s)", value: "" };
-            for (let i = 0; i < invalidGames.length; i++) {
-                invalidGameField.value += (i + 1) + ") " + invalidGames[i];
-            }
-            finalEmbed.fields.push(invalidGameField);
-        }
-
-        if (removedGames.length > 0) {
-            removedGames.sort();
-            let removedGameField = { name: "Removed Game(s)", value: "" };
-            for (let i = 0; i < removedGames.length; i++) {
-                removedGameField.value += (i + 1) + ") " + removedGames[i];
-            }
-            finalEmbed.fields.push(removedGameField);
-        }
-
-        if (!mass)
-            message.channel.send({ embed: finalEmbed });
-
-
-        gameArr.sort();
-        User.findOneAndUpdate({ id: user.id },
-            {
-                $set: { games: gameArr }
-            }, function (err, doc, res) {
-                //console.log(doc);
-            });
-
-        if (removedGames.length > 0)
-            return removedGames.length;
-        else
-            return 0;
-    }
-}
-
 function mention(id) {
     return "<@" + id + ">"
 }
@@ -3462,6 +3330,137 @@ async function minuteCount() {
     }
 }
 
+function removeGame(message, game, user) {
+
+    if (user.games.length < 1 && !game.mass) {
+
+        message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2]);
+        return;
+    }
+    else {
+
+        let mass;
+        if (!game.mass) {
+            if (Array.isArray(game)) {
+                let setty = new Set(game);
+                game = Array.from(setty);
+            }
+            else {
+
+                game = [game];
+            }
+        }
+        else {
+            mass = game.mass;
+            game = game.game;
+        }
+
+        let gameArr = user.games;
+        let invalidGames = new Array();
+        let removedGames = new Array();
+
+        games.sort();
+
+        if (game.length == 1) {
+
+            let check = checkGame(user.games, game, user);
+            console.log("WO   ", check);
+            if ((check == -1)) {
+
+                if (!mass)
+                    message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
+                return 0;
+            }
+            else if ((check.result[0].score != 0) && !mass) {
+
+                let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+
+                let removeEmbed = JSON.parse(JSON.stringify(Embed));
+                removeEmbed.timestamp = new Date();
+                removeEmbed.title = Embed.title + ` Game Commands`;
+                removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+
+
+                for (suggestion of prettyArray)
+                    removeEmbed.fields.push({ name: suggestion, value: "** **" });
+
+                message.channel.send({ embed: removeEmbed });
+                specificCommandCreator(removeGame, [message, -1, user], check.result, user);
+                return -11;
+            }
+            else {
+
+                game[0] = check.result[0].item;
+            }
+        }
+
+        //game.forEach(async gameTitle => {make it for...of loop!
+        let gameTitle = mass ? game : game[0];
+
+        if (isNaN(gameTitle)) {
+
+            if (gameArr.includes(gameTitle)) {
+                removedGames.push(gameTitle);
+                gameArr.splice(gameArr.indexOf(gameTitle), 1);
+            }
+            else
+                invalidGames.push(gameTitle);
+        }
+        else {
+            gameTitle = Math.floor(gameTitle);
+            if (gameTitle < gameArr.length && gameTitle >= 0) {
+                removedGames.push(gameArr[gameTitle]);
+                gameArr.splice(gameTitle, 1)
+            }
+            else
+                invalidGames.push(gameTitle);
+        }
+        //});
+
+        gameArr.sort();
+
+
+        let finalEmbed = JSON.parse(JSON.stringify(Embed));
+        finalEmbed.timestamp = new Date();
+
+
+        if (invalidGames.length > 0) {
+            invalidGames.sort();
+            let invalidGameField = { name: "Invalid Game(s)", value: "" };
+            for (let i = 0; i < invalidGames.length; i++) {
+                invalidGameField.value += (i + 1) + ") " + invalidGames[i];
+            }
+            finalEmbed.fields.push(invalidGameField);
+        }
+
+        if (removedGames.length > 0) {
+            removedGames.sort();
+            let removedGameField = { name: "Removed Game(s)", value: "" };
+            for (let i = 0; i < removedGames.length; i++) {
+                removedGameField.value += (i + 1) + ") " + removedGames[i];
+            }
+            finalEmbed.fields.push(removedGameField);
+        }
+
+        if (!mass)
+            message.channel.send({ embed: finalEmbed });
+
+
+        gameArr.sort();
+        User.findOneAndUpdate({ id: user.id },
+            {
+                $set: { games: gameArr }
+            }, function (err, doc, res) {
+                //console.log(doc);
+            });
+
+        if (removedGames.length > 0)
+            return removedGames.length;
+        else
+            return 0;
+    }
+}
+
 async function removeGameFromUsers(message, game, user) {
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
@@ -3475,7 +3474,6 @@ async function removeGameFromUsers(message, game, user) {
 
         for (GAME of games)
             internalArray.push({ valid: true, game: GAME });
-        console.log(game);
         return generalMatcher(message, game, user, games, internalArray, removeGameFromUsers, "Select the number of the game you wish to remove from every server member's games list");
     }
 
@@ -3768,5 +3766,5 @@ setInterval(minuteCount, 60 * 1000);
 //MEE6 bot - beatiful ui, mainly the website
 
 //seal idan easter eggs
-process.on('unhandledRejection', (reason, p) => { console.log("FFFFFF"); console.log(reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(reason); });
+process.on('unhandledRejection', (reason, promise) => { console.log("FFFFFF"); console.log(reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(JSON.stringify(reason)); });
 process.on('unhandledException', (reason, p) => { console.log(";;;;;;;;;;;;;;;;;;"); console.log(reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(reason); });
