@@ -2045,7 +2045,7 @@ async function deQueue(message, params, user) {
             return squads.clear();
         }
         message.channel.send(`Left ${squad.summoner}'s summon!`);
-        squad.displayName.splice(squad.players.indexOf(mentionID), 1);
+        squad.displayNames.splice(squad.players.indexOf(mentionID), 1);
         return squad.players.splice(squad.players.indexOf(mentionID), 1);
     }
     else {
@@ -2053,7 +2053,8 @@ async function deQueue(message, params, user) {
             if (squad[1].summoner == user.displayName)
                 squads.delete(squad[0])
             else if (squad[1].players.includes(mention(user.id))) {
-                squad[1].displayName.splice(squad[1].players.indexOf(mentionID), 1);
+                console.log(squad[1]);
+                squad[1].displayNames.splice(squad[1].players.indexOf(mentionID), 1);//cannot splice on undefined
                 squad[1].players.splice(squad[1].players.indexOf(mention(user.id)), 1);
             }
 
