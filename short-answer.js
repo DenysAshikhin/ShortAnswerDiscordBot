@@ -3767,5 +3767,5 @@ setInterval(minuteCount, 60 * 1000);
 //MEE6 bot - beatiful ui, mainly the website
 
 //seal idan easter eggs
-process.on('unhandledRejection', (reason, promise) => { console.log("FFFFFF"); console.log(reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(JSON.stringify(reason)); });
-process.on('unhandledException', (reason, p) => { console.log(";;;;;;;;;;;;;;;;;;"); console.log(reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(reason); });
+process.on('unhandledRejection', (reason, promise) => { console.log("FFFFFF      ", reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(JSON.stringify(reason)); });
+process.on('unhandledException', (reason, p) => { console.log(";;;;;;;;;;;,       ", reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(reason); });
