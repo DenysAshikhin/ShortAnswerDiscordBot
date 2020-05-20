@@ -1921,6 +1921,11 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         let users = await getUsers();
         let signedUp = "";
         let defaulted = "";
+        let commonUsers = [];
+
+        const voiceChannel = message.member.voice.channel;
+        for (member of voiceChannel.members)
+            commonUsers.push(member[0]);
 
         for (let user of users) {
             if ((user.id != message.author.id) && (user.id != botID)) {
@@ -1933,16 +1938,22 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
                             if (user.games.includes(game)) {
 
-                                if (user.excludePing == false)
+                                if ((user.excludePing == false) && !(commonUsers.includes(user.id)))
                                     signedUp += mention(user.id) + " ";
-                                if (user.excludeDM == false)
+                                else
+                                    signedUp += `${user.displayName} `;
+
+                                if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
                                     directMessage(message, user.id, game);
                             }
                         }
                         else if (user.games.includes(games[game])) {
-                            if (user.excludePing == false)
+                            if ((user.excludePing == false) && !(commonUsers.includes(user.id)))
                                 signedUp += mention(user.id) + " ";
-                            if (user.excludeDM == false)
+                            else
+                                signedUp += `${user.displayName} `;
+
+                            if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
                                 directMessage(message, user.id, games[game]);
                         }
                         else if (user.games.length < 2) {
@@ -1951,6 +1962,9 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                         }
                     }
                 }
+            }
+            else if (commonUsers.includes(user.id)) {
+
             }
         }//Each user for loop
 
@@ -2529,7 +2543,7 @@ params = {
 */
 async function play(message, params, user) {
 
-    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    if (message.channel.type == 'dm') return message.reply("You must be in a server voice channel and send the command from a server!");
     if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
@@ -3468,7 +3482,7 @@ function removeGame(message, game, user) {
 
 async function removeGameFromUsers(message, game, user) {
 
-    if(message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
+    if (message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can forcefully signup players on the server!");
@@ -3501,12 +3515,12 @@ async function removeGameFromUsers(message, game, user) {
 
 async function removeGameFromSpecificUser(message, game, user) {
 
-    if(message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
+    if (message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can forcefully remove games from others on the server!");
     if (message.mentions.members.size < 1) return message.channel.send("You have to @mention at least one other member!");
-    
+
     const args = game.valid ? game.game : game[0].split(" ");
     if (args[0].includes('<@!')) return message.channel.send("You first have to provide the name or number of a game which you want to remove for!");
 
@@ -3532,7 +3546,7 @@ async function removeGameFromSpecificUser(message, game, user) {
 
 async function signUpSpecificUser(message, game, user) {
 
-    if(message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
+    if (message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can forcefully signUp others for games on the server!");
@@ -3563,7 +3577,7 @@ async function signUpSpecificUser(message, game, user) {
 
 async function signUpAllUsers(message, game, user) {
 
-    if(message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
+    if (message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can forcefully signup players on the server!");
