@@ -2975,6 +2975,9 @@ async function savePlayList(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
 
+
+    console.log(message);
+
     let serverQueue = queue.get(message.guild.id);
     let song;
 
@@ -2994,7 +2997,7 @@ async function savePlayList(message, params, user) {
         }
 
         let query = params ? params : -23;
-        return generalMatcher(message, params, user, titleArray, internalArray, savePlayList,
+        return generalMatcher(message, query, user, titleArray, internalArray, savePlayList,
             "Enter the number associated with the playlist you wish to add the song to");
     }
     else {
@@ -3825,7 +3828,7 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-//currentSong to show timestamp essentially
+//add a total duration for playlists
 
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial
