@@ -2788,7 +2788,10 @@ async function cacheSong(song, guild) {
         );
     }
 
+    console.log('WWWW:   ', )
+
     let serverDownload = download.get(guild);
+    console.log('WWWW:   ', serverDownload);
     if (!serverDownload) return -1;
     if (!serverDownload.songToDownload && serverDownload.leftOver.length > 0) {
 
@@ -3791,8 +3794,6 @@ function checkGame(gameArray, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
-
-//forcefuly sign up a user, 
 
 //currentSong to show timestamp essentially
 

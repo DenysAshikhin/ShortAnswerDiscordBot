@@ -64,7 +64,9 @@
         "SIGNUPALLUSERS",
         "REMOVEGAMEFROMUSERS",
         "SIGNUPSPECIFICUSER",
-        "REMOVEGAMEFROMSPECIFICUSER"
+        "REMOVEGAMEFROMSPECIFICUSER",
+
+        "CURRENTSONG"
 
     ],
     "explanation": [
@@ -132,7 +134,9 @@
         "Admin-exclusive command to forcefully signup every user for a specified game. Works identical to the *signUp* command.",
         "Admin-exclusive command to forcefully remove a game from every user in the server. Works identical to the *removeGame* command",
         "Admin-exclusive command to forcefully signUp one or more users for a specified game.",
-        "Admin-exclusive command to forcefully remove a game from one or more users for a specified game."
+        "Admin-exclusive command to forcefully remove a game from one or more users for a specified game.",
+
+        "Shows the current timestamp of the song out of the total."
     ],
         
     "example": [
@@ -200,7 +204,9 @@
         ["1) signUpAllUsers 3", "2) signUpAllUsers Minecraft, Counter-Strike: Global Offensive", "3) signUpAllUsers Minecraft, 321, 33, Counter-Strike: Global Offensive"],
         ["1) removeGameFromUsers 2", "2) removeGameFromUsers Valorant"],
         ["1) signUpSpecificUser Valorant @TheLastSpark", "2) signUpSpecificUser Valorant @TheLastSpark @Whoever"],
-        ["1) removeGameFromSpecificUser Valorant @TheLastSpark", "2) removeGameFromSpecificUser Valorant @TheLastSpark @Whoever"]
+        ["1) removeGameFromSpecificUser Valorant @TheLastSpark", "2) removeGameFromSpecificUser Valorant @TheLastSpark @Whoever"],
+
+        ["1) showCurrentSong"]
 
     ],
     "subsection": [
@@ -264,10 +270,12 @@
         [1],
         [1],
 
-        [4],
-        [4, 5],
-        [4, 5],
-        [4, 5],
-        [4, 5]
+        [1],
+        [1, 5],
+        [1, 5],
+        [1, 5],
+        [1, 5],
+    
+        [4]
     ]
 }
