@@ -313,11 +313,13 @@ connectDB.once('open', async function () {
 
         if (message.content.substr(0, prefix.length) == prefix) {
 
-            let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
-            if (!permission.has("SEND_MESSAGES"))
-                return message.author.send("I don't have the right permissions to send messages and embed links in that channel!");
-            if (!permission.has("EMBED_LINKS"))
-                await message.channel.send("I don't have the right permissions to embed links in this channel, **some commands may not work!**");
+            if (message.channel.type != 'dm') {
+                let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
+                if (!permission.has("SEND_MESSAGES"))
+                    return message.author.send("I don't have the right permissions to send messages and embed links in that channel!");
+                if (!permission.has("EMBED_LINKS"))
+                    await message.channel.send("I don't have the right permissions to embed links in this channel, **some commands may not work!**");
+            }
 
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
@@ -428,6 +430,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[50], banish)
     commandMap.set(Commands.commands[51], signUpAllUsers)
     commandMap.set(Commands.commands[52], removeGameFromUsers)
+    commandMap.set(Commands.commands[53], signUpSpecificUser)
+    commandMap.set(Commands.commands[54], removeGameFromSpecificUser)
 }
 
 function setServerPrefix(message, params, user) {
@@ -1919,7 +1923,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         let defaulted = "";
 
         for (let user of users) {
-            if (user.id != message.author.id) {
+            if ((user.id != message.author.id) && (user.id != botID)) {
 
                 if (user.guilds.includes(message.guild.id)) {
 
@@ -2359,7 +2363,7 @@ async function stop(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (queue.get(message.guild.id)) {
         //queue.get(message.guild.id).dispatcher.destroy();
-        queue.get(message.guild.id).voiceChannel.leave();
+        await queue.get(message.guild.id).voiceChannel.leave();
         queue.delete(message.guild.id);
         download.delete(message.guild.id);
     }
@@ -3464,6 +3468,8 @@ function removeGame(message, game, user) {
 
 async function removeGameFromUsers(message, game, user) {
 
+    if(message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
+
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can forcefully signup players on the server!");
     const args = message.content.split(" ").slice(1).join(" ");
@@ -3493,7 +3499,71 @@ async function removeGameFromUsers(message, game, user) {
     return message.channel.send(`${tally} users have had ${game.game} removed from their games list!`);
 }
 
+async function removeGameFromSpecificUser(message, game, user) {
+
+    if(message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only administrators can forcefully remove games from others on the server!");
+    if (message.mentions.members.size < 1) return message.channel.send("You have to @mention at least one other member!");
+    
+    const args = game.valid ? game.game : game[0].split(" ");
+    if (args[0].includes('<@!')) return message.channel.send("You first have to provide the name or number of a game which you want to remove for!");
+
+    if (!game.valid) {
+
+        let internalArray = [];
+
+        for (GAME of games)
+            internalArray.push({ valid: true, game: GAME });
+        return generalMatcher(message, args[0], user, games, internalArray, removeGameFromSpecificUser, "Select the number of the game you wish to remove from the specified member's games list");
+    }
+
+    let finalList = [];
+
+    for (member of message.mentions.members.values()) {
+        let tempUser = await findUser({ id: member.id });
+        finalList.push(tempUser.displayName);
+        removeGame(message, { game: game.game, mass: true }, tempUser);
+    }
+
+    return message.channel.send(`Succesfully removed ${game.game} from: *${finalList}*`);
+}
+
+async function signUpSpecificUser(message, game, user) {
+
+    if(message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only administrators can forcefully signUp others for games on the server!");
+    if (message.mentions.members.size < 1) return message.channel.send("You have to @mention at least one other member!");
+
+    const args = game.valid ? game.game : game[0].split(" ");
+    if (args[0].includes('<@!')) return message.channel.send("You first have to provide the name or number of a game which you want to signUp for!");
+
+    if (!game.valid) {
+
+        let internalArray = [];
+
+        for (GAME of games)
+            internalArray.push({ valid: true, game: GAME });
+        return generalMatcher(message, args[0], user, games, internalArray, signUpSpecificUser, "Select the number of the game you wish to signUp to the specified member's games list");
+    }
+
+    let finalList = [];
+
+    for (member of message.mentions.members.values()) {
+        let tempUser = await findUser({ id: member.id });
+        finalList.push(tempUser.displayName);
+        updateGames(message, { game: game.game, mass: true }, tempUser);
+    }
+
+    return message.channel.send(`Succesfully signedUp ${game.game} for: *${finalList}*`);
+}
+
 async function signUpAllUsers(message, game, user) {
+
+    if(message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can forcefully signup players on the server!");
@@ -3708,7 +3778,9 @@ function checkGame(gameArray, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-//forcefuly sign up a user, and everyone.
+//forcefuly sign up a user, 
+
+//currentSong to show timestamp essentially
 
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial
@@ -3767,5 +3839,12 @@ setInterval(minuteCount, 60 * 1000);
 //MEE6 bot - beatiful ui, mainly the website
 
 //seal idan easter eggs
-process.on('unhandledRejection', (reason, promise) => { console.log("FFFFFF      ", reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(JSON.stringify(reason)); });
-process.on('unhandledException', (reason, p) => { console.log(";;;;;;;;;;;,       ", reason); Client.guilds.cache.get(guildID).channels.cache.get(logID).send(reason); });
+process.on('unhandledRejection', (reason, promise) => {
+    console.log("FFFFFF   ", reason);
+    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```"));
+});
+
+process.on('unhandledException', (reason, p) => {
+    console.log(";;;;;;;;;;; ", reason);
+    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```"));
+});
