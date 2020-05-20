@@ -432,6 +432,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[52], removeGameFromUsers)
     commandMap.set(Commands.commands[53], signUpSpecificUser)
     commandMap.set(Commands.commands[54], removeGameFromSpecificUser)
+    commandMap.set(Commands.commands[55], currentSong)
 }
 
 function setServerPrefix(message, params, user) {
@@ -2392,16 +2393,24 @@ async function forward(message, params) {
     if (guildQueue) {
 
         if (Array.isArray(params)) params = params[0];
-        console.log(params)
-        console.log("BRUH: " + /^[:0-9]+$/.test(params))
-        if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid forward format!");
+        if (!/^[:0-9]+$/.test(params.substr(1))) return message.channel.send("You have entered an invalid forward format!");
 
         let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
 
         if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
         else {
-            song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) + newSkip : song.offset;
-            //song.start = new Date();
+
+            if (song.start)
+                if (!song.paused)
+                    song.offset = ((new Date() - song.start) / 1000) + song.offset - song.timePaused + newSkip;
+                else
+                    song.offset = (((new Date() - song.start) - (new Date() - song.paused)) / 1000) + song.offset - song.timePaused + newSkip;
+            else
+
+            song.timePaused = 0;
+            song.paused = null;
+            song.start = null;
+
             let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
             activeSkips.set(song.id, true);
             playSong(message.guild, song, newSkip, skipMessage);
@@ -2419,16 +2428,21 @@ async function rewind(message, params) {
     if (guildQueue) {
 
         if (Array.isArray(params)) params = params[0];
-        console.log(params)
-        console.log("BRUH: " + /^[:0-9]+$/.test(params))
-        if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid rewind format!");
+        if (!/^[:0-9]+$/.test(params.substr(1))) return message.channel.send("You have entered an invalid rewind format!");
 
         let newSkip = !isNaN(params) ? Number(params) : hmsToSecondsOnly(params);
 
         if (song.offset - newSkip > song.duration || song.offset - newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
         else {
-            song.offset = song.start ? ((new Date() - song.start) / 1000) + song.offset - (song.timePaused / 1000) - newSkip : song.offset;
-            song.start = new Date();
+            if (song.start)
+                if (!song.paused)
+                    song.offset = ((new Date() - song.start) / 1000) + song.offset - song.timePaused - newSkip;
+                else
+                    song.offset = (((new Date() - song.start) - (new Date() - song.paused)) / 1000) + song.offset - song.timePaused - newSkip;
+
+            song.timePaused = 0;
+            song.paused = null;
+            song.start = null;
             let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)//convert this to a time stamp later
             activeSkips.set(song.id, true);
             playSong(message.guild, song, newSkip, skipMessage);
@@ -2446,21 +2460,40 @@ async function seek(message, params) {
     if (guildQueue) {
 
         if (Array.isArray(params)) params = params[0];
-        console.log(params)
-        console.log("BRUH: " + /^[:0-9]+$/.test(params))
         if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid seek format!");
         let newSkip = isNaN(params) ? hmsToSecondsOnly(params) : Number(params);
 
         if (newSkip > song.duration || newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
         else {
             song.offset = newSkip;
-            song.start = new Date();
+            song.timePaused = 0;
+            song.paused = null;
+            song.start = null;
+            console.log(song);
             let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)
             activeSkips.set(song.id, true);
             playSong(message.guild, song, newSkip, message);
             setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
         }
     }
+}
+
+async function currentSong(message, params, user) {
+
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    let guildQueue = queue.get(message.guild.id);
+    if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the progress!");
+    let song = guildQueue.songs[guildQueue.index];
+
+    console.log("general: ", (new Date() - song.start) / 1000);
+    console.log("active pause: ", ((new Date() - song.paused)) / 1000)
+    console.log("offset: ", song.offset);
+    console.log("timePaused: ", song.timePaused);
+
+    let current = song.paused ? song.offset - song.timePaused + ((Math.floor(new Date() - song.start - ((new Date() - song.paused)))) / 1000)
+        : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
+    return message.channel.send("```md\n#" + song.title + "\n[" + timeConvert(current) + "](" + timeConvert(Math.floor(song.duration)) + ")```");
 }
 
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
@@ -2673,15 +2706,10 @@ async function play(message, params, user) {
         }
     }
 }
-//addsong or addplaylist will check if parameters is given, then offer to make new playlist or add to existing one.
-
-
-
-//filter: format => format.container === 'mp4' && !format.qualityLabel,
 
 async function playSong(guild, sonG, skip, message) {
     const serverQueue = queue.get(guild.id);
-    const song = sonG;
+    let song = sonG;
 
     if (!song) {
         message.channel.send(`No more songs queued, leaving!`);
@@ -2716,6 +2744,11 @@ async function playSong(guild, sonG, skip, message) {
 
                 if (!song.start)
                     song.start = new Date();
+                if (song.paused) {
+
+                    song.timePaused = (new Date() - song.paused) / 1000 + song.timePaused;
+                    song.paused = null;
+                }
                 if (activeSkips.get(song.id)) activeSkips.delete(song.id);
             })
 
@@ -2762,6 +2795,11 @@ async function playSong(guild, sonG, skip, message) {
 
                 if (!song.start)
                     song.start = new Date()
+                if (song.paused) {
+
+                    song.timePaused = (new Date() - song.paused) / 1000 + song.timePaused;
+                    song.paused = null;
+                }
                 if (activeSkips.get(song.id)) activeSkips.delete(song.id);
             })
 
@@ -2788,10 +2826,8 @@ async function cacheSong(song, guild) {
         );
     }
 
-    console.log('WWWW:   ', )
-
     let serverDownload = download.get(guild);
-    console.log('WWWW:   ', serverDownload);
+
     if (!serverDownload) return -1;
     if (!serverDownload.songToDownload && serverDownload.leftOver.length > 0) {
 
