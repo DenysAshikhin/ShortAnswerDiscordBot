@@ -3368,7 +3368,7 @@ async function createBackUp() {
     });
 
     console.log("CALLED BACKUP");
-}
+}//
 
 async function minuteCount() {
     countTalk();
