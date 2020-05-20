@@ -2469,7 +2469,6 @@ async function seek(message, params) {
             song.timePaused = 0;
             song.paused = null;
             song.start = null;
-            console.log(song);
             let skipMessage = await message.channel.send(`Skipping to ${timeConvert(Math.floor(song.offset))}`)
             activeSkips.set(song.id, true);
             playSong(message.guild, song, newSkip, message);
@@ -2485,11 +2484,6 @@ async function currentSong(message, params, user) {
     let guildQueue = queue.get(message.guild.id);
     if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the progress!");
     let song = guildQueue.songs[guildQueue.index];
-
-    console.log("general: ", (new Date() - song.start) / 1000);
-    console.log("active pause: ", ((new Date() - song.paused)) / 1000)
-    console.log("offset: ", song.offset);
-    console.log("timePaused: ", song.timePaused);
 
     let current = song.paused ? song.offset - song.timePaused + ((Math.floor(new Date() - song.start - ((new Date() - song.paused)))) / 1000)
         : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
