@@ -3898,12 +3898,38 @@ function checkGame(gameArray, params, user) {
 
 async function searchForUser(message, params, user) {
 
-    if (!params && (message.mentions.members.size < 1)) return message.reply("You need to provide the name/mention a user to search for!");
-
     const args = message.content.split(" ").slice(1).join(" ");
-    console.log(params);
-    console.log(args);
+    if (!args && (message.mentions.members.size < 1)) return message.reply("You need to provide the name/mention a user to search for!");
 
+    if (message.mentions.members.size > 0) {
+
+        let goal = message.mentions.members.values().next().value.id;
+
+        for (guild of Client.guilds.cache.values()) {
+            for (channel of guild.channels.cache.values()) {
+                if (channel.type == "voice") {
+                    if (channel.members.size > 0)
+                        for (member of channel.members.values()) {
+                            if (member.id == goal)
+                                message.channel.send("```diff\n" + `${member.displayName} was found in:\n+Server: ${guild.name}\n-Channel: ${channel.name}` + "```");
+                        }
+                }
+            }
+        }
+    }
+    else {
+        for (guild of Client.guilds.cache.values()) {
+            for (channel of guild.channels.cache.values()) {
+                if (channel.type == "voice") {
+                    if (channel.members.size > 0)
+                        for (member of channel.members.values()) {
+                            if (member.displayName == args)
+                            message.channel.send("```diff\n" + `${member.displayName} was found in:\n+Server: ${guild.name}\n-Channel: ${channel.name}` + "```");
+                        }
+                }
+            }
+        }
+    }
 }
 
 setInterval(minuteCount, 60 * 1000);
