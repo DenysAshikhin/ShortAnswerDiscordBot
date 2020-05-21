@@ -3901,8 +3901,8 @@ async function searchForUser(message, params, user) {
     if (!params && (message.mentions.members.size < 1)) return message.reply("You need to provide the name/mention a user to search for!");
 
     const args = message.content.split(" ").slice(1).join(" ");
-
-    console.log(args)
+    console.log(params);
+    console.log(args);
 
 }
 
