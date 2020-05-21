@@ -433,6 +433,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[53], signUpSpecificUser)
     commandMap.set(Commands.commands[54], removeGameFromSpecificUser)
     commandMap.set(Commands.commands[55], currentSong)
+    commandMap.set(Commands.commands[56], currentPlaylist)
 }
 
 function setServerPrefix(message, params, user) {
@@ -1706,17 +1707,19 @@ async function gameStats(message, params, user) {
 
             let runningString = "";
             let groupNumber = 1;
+            let tally = 1;
             let field = { name: "", value: [], inline: true };
             let newEmbed = JSON.parse(JSON.stringify(Embed));
-            newEmbed.description = `Here are the users signed up for ${params.gameTitle}`;
+            newEmbed.description = `Here are the users signed up for ${params.gameTitle}. Total: ${params.userList.length}`;
             newEmbed.fields = [];
+            params.userList.sort();
 
             for (player of params.userList) {
 
-                if (runningString.length < 1000) {
+                if (runningString.length < 75) {
 
                     runningString += player;
-                    field.value.push(player);
+                    field.value.push(`${tally}) ${player}`);
                 }
                 else {
                     field.name = `Group ${groupNumber}`;
@@ -1725,15 +1728,18 @@ async function gameStats(message, params, user) {
                     groupNumber++;
                     field = { name: "", value: [], inline: true };
 
-                    if (groupNumber == 26) {
+                    if (((groupNumber % 25) == 1) && (groupNumber > 25)) {
 
-                        groupNumber = 1;
                         message.channel.send({ embed: newEmbed });
                         newEmbed = JSON.parse(JSON.stringify(Embed));
-                        newEmbed.description = `Here are the users signed up for ${params.gameTitle}`;
+                        newEmbed.description = `Here are the users signed up for ${params.gameTitle}. Total: ${params.userList.length}`;
                         newEmbed.fields = [];
                     }
+
+                    runningString += player;
+                    field.value.push(`${tally}) ${player}`);
                 }
+                tally++;
             }
 
             field.name = `Group ${groupNumber}`;
@@ -1780,7 +1786,6 @@ async function gameStats(message, params, user) {
         console.log(params)
         let users = await getUsers();
         let signedUp = new Array();
-
 
         for (let i = 0; i < users.length; i++) {
 
@@ -3222,6 +3227,55 @@ function createPlaylist(message, params, user) {
     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
 
     message.channel.send(`${newName} has been created!`);
+}
+
+async function currentPlaylist(message, params, user){
+
+    if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
+
+    let songQueue = queue.get(message.guild.id);
+
+    if(!songQueue) return message.channel.send(`There aren't any songs playing!`);
+
+        let totalDuration = songQueue.songs.reduce((total, num) => {return total + Number(num.duration)}, 0);
+        let runningString = "";
+        let groupNumber = 1;
+        let tally = 1;
+        let field = { name: "", value: [], inline: true };
+        let newEmbed = JSON.parse(JSON.stringify(Embed));
+        newEmbed.description = `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${timeConvert(totalDuration)}`;
+        newEmbed.fields = [];
+
+        for (song of songQueue.songs) {
+
+            if (runningString.length < 75) {
+
+                runningString += song;
+                field.value.push(`${tally}) ${song.title}\n`);
+            }
+            else {
+                field.name = `Part ${groupNumber}`;
+                newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+                runningString = "";
+                groupNumber++;
+                field = { name: "", value: [], inline: true };
+
+                if (((groupNumber % 25) == 1) && (groupNumber > 25)) {
+                    await message.channel.send({ embed: newEmbed });
+                    newEmbed = JSON.parse(JSON.stringify(Embed));
+                    newEmbed.description = `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${timeConvert(totalDuration)}`;
+                    newEmbed.fields = [];
+                }
+
+                runningString += song;
+                field.value.push(`${tally}) ${song.title}\n`);
+            }
+            tally++;
+        }
+
+        field.name = `Group ${groupNumber}`;
+        newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+        return message.channel.send({ embed: newEmbed });
 }
 
 function skippingNotification(message, songID, step) {

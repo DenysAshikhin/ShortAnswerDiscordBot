@@ -66,8 +66,8 @@
         "SIGNUPSPECIFICUSER",
         "REMOVEGAMEFROMSPECIFICUSER",
 
-        "CURRENTSONG"
-
+        "CURRENTSONG",
+        "CURRENTPLAYLIST"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -136,7 +136,8 @@
         "Admin-exclusive command to forcefully signUp one or more users for a specified game.",
         "Admin-exclusive command to forcefully remove a game from one or more users for a specified game.",
 
-        "Shows the current timestamp of the song out of the total."
+        "Shows the current timestamp of the song out of the total.",
+        "Shows the current playlist information."
     ],
         
     "example": [
@@ -206,7 +207,8 @@
         ["1) signUpSpecificUser Valorant @TheLastSpark", "2) signUpSpecificUser Valorant @TheLastSpark @Whoever"],
         ["1) removeGameFromSpecificUser Valorant @TheLastSpark", "2) removeGameFromSpecificUser Valorant @TheLastSpark @Whoever"],
 
-        ["1) showCurrentSong"]
+        ["1) currentSong"],
+        ["1) currentPlaylist"]
 
     ],
     "subsection": [
@@ -276,6 +278,7 @@
         [1, 5],
         [1, 5],
     
+        [4],
         [4]
     ]
 }
