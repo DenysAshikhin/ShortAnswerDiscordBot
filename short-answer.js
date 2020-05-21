@@ -3264,7 +3264,8 @@ async function currentPlaylist(message, params, user) {
         if (runningString.length < 75) {
 
             runningString += song;
-            field.value.push(`${tally}) ${song.title}\n`);
+            if (song == songQueue.songs[songQueue.index]) field.value.push("```md\n#" + `${tally}) ${song.title}` + "```");
+            else field.value.push(`${tally}) ${song.title}\n`);
         }
         else {
             field.name = `Part ${groupNumber}`;
@@ -3281,7 +3282,8 @@ async function currentPlaylist(message, params, user) {
             }
 
             runningString += song;
-            field.value.push(`${tally}) ${song.title}\n`);
+            if (song == songQueue.songs[songQueue.index]) field.value.push("```md\n#" + `${tally}) ${song.title}` + "```");
+            else field.value.push(`${tally}) ${song.title}\n`);
         }
         tally++;
     }
