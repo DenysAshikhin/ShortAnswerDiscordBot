@@ -434,6 +434,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[54], removeGameFromSpecificUser)
     commandMap.set(Commands.commands[55], currentSong)
     commandMap.set(Commands.commands[56], currentPlaylist)
+    commandMap.set(Commands.commands[57], searchForUser)
 }
 
 function setServerPrefix(message, params, user) {
@@ -1070,16 +1071,17 @@ async function getStats(member, user) {
         let statsEmbed = JSON.parse(JSON.stringify(Embed));
         statsEmbed.date = new Date();
         statsEmbed.fields = [
-            { name: "Total number of messages sent: ", value: user.messages[index], inline: false },
-            { name: "Last message sent: ", value: user.lastMessage[index], inline: false },
-            { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: false },
-            { name: "Last time you talked was: ", value: user.lastTalked[index], inline: false },
-            { name: "Number of games you are signed up for: ", value: user.games.length, inline: false },
-            { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: false },
-            { name: "You joined this server on: ", value: user.dateJoined[index], inline: false },
-            { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: false },
-            { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: false },
-            { name: "Number of succesful summons: ", value: user.summoner[index], inline: false },
+            { name: "Total number of messages sent: ", value: user.messages[index], inline: true },
+            { name: "Last message sent: ", value: user.lastMessage[index], inline: true },
+            { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: true },
+            { name: "Last time you talked was: ", value: user.lastTalked[index], inline: true },
+            { name: "Number of games you are signed up for: ", value: user.games.length, inline: true },
+            { name: "Number of saved playlists: ", value: user.playlists.length, inline: true },
+            { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: true },
+            { name: "You joined this server on: ", value: user.dateJoined[index], inline: true },
+            { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: true },
+            { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: true },
+            { name: "Number of succesful summons: ", value: user.summoner[index], inline: true },
         ];
 
         return statsEmbed;
@@ -2350,8 +2352,8 @@ async function skip(message, params) {
             if ((guildQueue.index + Number(params)) >= guildQueue.songs.length || (guildQueue.index + Number(params)) < 0)
                 return message.channel.send(`You're trying to skip too many songs!`);
             else { guildQueue.index += Number(params); }
-        else if (params == prefix + 'skip');
-        guildQueue.index++;
+        else if (params == prefix + 'skip')
+            guildQueue.index++;
 
         console.log(`after: ${guildQueue.index}`)
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
@@ -2371,8 +2373,8 @@ async function reverse(message, params) {
             if ((guildQueue.index - Number(params)) >= guildQueue.songs.length || (guildQueue.index - Number(params)) < 0)
                 return message.channel.send(`You're trying to reverse too many songs!`);
             else { guildQueue.index -= Number(params); }
-        else if (params == prefix + 'skip');
-        guildQueue.index--;
+        else if (params == prefix + 'skip')
+            guildQueue.index--;
 
         console.log(`after: ${guildQueue.index}`)
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
@@ -3894,35 +3896,22 @@ function checkGame(gameArray, params, user) {
     else return -1
 }
 
+async function searchForUser(message, params, user) {
+
+    if (!params && (message.mentions.members.size < 1)) return message.reply("You need to provide the name/mention a user to search for!");
+
+    const args = message.content.split(" ").slice(1).join(" ");
+
+    console.log(args)
+
+}
+
 setInterval(minuteCount, 60 * 1000);
 
 
-//add a total duration for playlists
-
-
-//DM quality of life (for now its just prefixes?) - prefix tutorial
-//for game stats, add a Y/N for seeing a list of all the people signed up for it
-
-//make a game recommendation
-
-//add playlist stats to all stats
-
-//make custom 'command prefixes' possible
-
-//for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
-//if they dont, they can always start it by saying prefixADVANCEDGAMETUTORIAL - which is a seperate tutorial all together. If they want to do it to type that command
-
-
-//For game stats and top games, you can list the people under each heading!!! Make sure to add a limit of 25 fields/games!!!
-
-//Be alerted if a user is found in a voice channel? Stalker lmao
+//Be alerted if a user is found in a voice channel? Stalker lmao ->>>>>>> Make this a single run command, not a constant background scanning.
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
-//poker, texas hold em, war, gold fish, 
-
-//Stats Tutorial
-
-//don't ping someone else in the same voice channel....
 
 //coin flipper
 //game decider
@@ -3931,29 +3920,22 @@ setInterval(minuteCount, 60 * 1000);
 //add a timer
 //shake user # of times -> have to check for move user perms
 
-//Then make a tutorial for the above commands...
 
-//moment.js for converting time zones???
 
 
 //look into start typing in message documentation to make it feel more alive?
 
 //make remove game array - it is but broken - ez fix, mark all the spots with -1, then splice out all of them
 
-
-
-//Make the youtube player complete (at least youtube)
-//youtube live streams are broken 
-
+//make custom 'command prefixes' possible
 
 //Twitch notification/signup when a streamer goes live -> npm module for it?
 //https://dev.twitch.tv/docs/api/reference/#get-streams
+
 //add streamer stats
 
+//moment.js for converting time zones???
 
-
-//Make a vote system for the next feature to focus on
-//MEE6 bot - beatiful ui, mainly the website
 
 //seal idan easter eggs
 process.on('unhandledRejection', (reason, promise) => {
@@ -3965,3 +3947,19 @@ process.on('unhandledException', (reason, p) => {
     console.log(";;;;;;;;;;; ", reason);
     if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```"));
 });
+
+//DM quality of life (for now its just prefixes?) - prefix tutorial
+//Stats Tutorial
+//for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
+//if they dont, they can always start it by saying prefixADVANCEDGAMETUTORIAL - which is a seperate tutorial all together. If they want to do it to type that command
+
+//Then make a tutorial for the above commands...
+
+
+
+//youtube live streams are broken 
+
+//poker, texas hold em, war, gold fish, 
+
+//Make a vote system for the next feature to focus on
+//MEE6 bot - beatiful ui, mainly the website
