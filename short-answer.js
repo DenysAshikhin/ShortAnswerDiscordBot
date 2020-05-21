@@ -2355,6 +2355,7 @@ async function skip(message, params) {
 
         console.log(`after: ${guildQueue.index}`)
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
+        resetSong(guildQueue.songs[guildQueue.index]);
         playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
     }
 }
@@ -2375,6 +2376,7 @@ async function reverse(message, params) {
 
         console.log(`after: ${guildQueue.index}`)
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
+        resetSong(guildQueue.songs[guildQueue.index]);
         playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
     }
 }
@@ -2412,7 +2414,7 @@ async function forward(message, params) {
                     song.offset = (((new Date() - song.start) - (new Date() - song.paused)) / 1000) + song.offset - song.timePaused + newSkip;
             else
 
-            song.timePaused = 0;
+                song.timePaused = 0;
             song.paused = null;
             song.start = null;
 
@@ -2565,6 +2567,15 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         message.channel.send(`You have entered an invalid suggestion number/input please try again.`);
         return -1
     }
+}
+
+function resetSong(song) {
+
+    song.paused = null;
+    song.timePaused = 0;
+    song.start = null;
+    song.offset = 0;
+    song.progress = 0;
 }
 
 /*
@@ -2737,6 +2748,7 @@ async function playSong(guild, sonG, skip, message) {
                 if (serverQueue.index == serverQueue.songs.length)
                     serverQueue.songs = [];
 
+                resetSong(serverQueue.songs[serverQueue.index]);
                 playSong(guild, serverQueue.songs[serverQueue.index], null, message);
             })
             .on('start', () => {
@@ -2788,6 +2800,7 @@ async function playSong(guild, sonG, skip, message) {
                 if (serverQueue.index == serverQueue.songs.length)
                     serverQueue.songs = [];
 
+                resetSong(serverQueue.songs[serverQueue.index]);
                 playSong(guild, serverQueue.songs[serverQueue.index], null, message);
             })
             .on('start', () => {
@@ -3229,53 +3242,53 @@ function createPlaylist(message, params, user) {
     message.channel.send(`${newName} has been created!`);
 }
 
-async function currentPlaylist(message, params, user){
+async function currentPlaylist(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
 
     let songQueue = queue.get(message.guild.id);
 
-    if(!songQueue) return message.channel.send(`There aren't any songs playing!`);
+    if (!songQueue) return message.channel.send(`There aren't any songs playing!`);
 
-        let totalDuration = songQueue.songs.reduce((total, num) => {return total + Number(num.duration)}, 0);
-        let runningString = "";
-        let groupNumber = 1;
-        let tally = 1;
-        let field = { name: "", value: [], inline: true };
-        let newEmbed = JSON.parse(JSON.stringify(Embed));
-        newEmbed.description = `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${timeConvert(totalDuration)}`;
-        newEmbed.fields = [];
+    let totalDuration = songQueue.songs.reduce((total, num) => { return total + Number(num.duration) }, 0);
+    let runningString = "";
+    let groupNumber = 1;
+    let tally = 1;
+    let field = { name: "", value: [], inline: true };
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.description = `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${timeConvert(totalDuration)}`;
+    newEmbed.fields = [];
 
-        for (song of songQueue.songs) {
+    for (song of songQueue.songs) {
 
-            if (runningString.length < 75) {
+        if (runningString.length < 75) {
 
-                runningString += song;
-                field.value.push(`${tally}) ${song.title}\n`);
-            }
-            else {
-                field.name = `Part ${groupNumber}`;
-                newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
-                runningString = "";
-                groupNumber++;
-                field = { name: "", value: [], inline: true };
-
-                if (((groupNumber % 25) == 1) && (groupNumber > 25)) {
-                    await message.channel.send({ embed: newEmbed });
-                    newEmbed = JSON.parse(JSON.stringify(Embed));
-                    newEmbed.description = `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${timeConvert(totalDuration)}`;
-                    newEmbed.fields = [];
-                }
-
-                runningString += song;
-                field.value.push(`${tally}) ${song.title}\n`);
-            }
-            tally++;
+            runningString += song;
+            field.value.push(`${tally}) ${song.title}\n`);
         }
+        else {
+            field.name = `Part ${groupNumber}`;
+            newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+            runningString = "";
+            groupNumber++;
+            field = { name: "", value: [], inline: true };
 
-        field.name = `Group ${groupNumber}`;
-        newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
-        return message.channel.send({ embed: newEmbed });
+            if (((groupNumber % 25) == 1) && (groupNumber > 25)) {
+                await message.channel.send({ embed: newEmbed });
+                newEmbed = JSON.parse(JSON.stringify(Embed));
+                newEmbed.description = `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${timeConvert(totalDuration)}`;
+                newEmbed.fields = [];
+            }
+
+            runningString += song;
+            field.value.push(`${tally}) ${song.title}\n`);
+        }
+        tally++;
+    }
+
+    field.name = `Group ${groupNumber}`;
+    newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+    return message.channel.send({ embed: newEmbed });
 }
 
 function skippingNotification(message, songID, step) {
