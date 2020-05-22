@@ -429,7 +429,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[49], viewActiveSummons)
     commandMap.set(Commands.commands[50], banish)
     commandMap.set(Commands.commands[51], signUpAllUsers)
-    commandMap.set(Commands.commands[52], removeGameFromUsers)
+    commandMap.set(Commands.commands[52], removeGameFromAllUsers)
     commandMap.set(Commands.commands[53], signUpSpecificUser)
     commandMap.set(Commands.commands[54], removeGameFromSpecificUser)
     commandMap.set(Commands.commands[55], currentSong)
@@ -1445,7 +1445,7 @@ function generalHelp(message, params, user) {
 
                 if (Commands.subsection[i].includes(tag)) {
 
-                    newEmbed.fields[tag - 1].value += Commands.commands[i] + "\n"
+                    newEmbed.fields[tag - 1].value += (i+1) + ") " + Commands.commands[i] + "\n"
                 }
             }
         }
@@ -2058,7 +2058,7 @@ async function Queue(message, params, user) {
             squad.displayNames.push(user.displayName);
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the summon!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
-            newEmbed.fields = [{ name: `Current summons members: ${squad.players.length}/${squad.size}`, value: squad.players }];
+            newEmbed.fields = [{ name: `Current summons members: ${squad.players.length}/${squad.size}`, value: squad.displayNames }];
             return message.channel.send({ embed: newEmbed });
         }
         else return message.channel.send("There is no space left in the summon!");
@@ -2074,7 +2074,7 @@ async function Queue(message, params, user) {
             squad.players.push(mention(user.id));
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the summon!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
-            newEmbed.fields = [{ name: `Current squad members: ${squad.players.length}/${squad.size}`, value: squad.players }];
+            newEmbed.fields = [{ name: `Current squad members: ${squad.players.length}/${squad.size}`, value: squad.displayNames }];
             return message.channel.send({ embed: newEmbed });
         }
         else return message.channel.send("There is no space left in the summon!");
@@ -2137,7 +2137,7 @@ async function viewActiveSummons(message, params, user) {
     newEmbed.description = `There are ${squads.size} active summons!`;
 
     for (let squad of squads.entries()) {
-        newEmbed.fields.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].players.length}/${squad[1].size}`, value: squad[1].players, inline: true });
+        newEmbed.fields.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].players.length}/${squad[1].size}`, value: squad[1].displayNames, inline: true });
     }
 
     message.channel.send({ embed: newEmbed });
@@ -3057,7 +3057,7 @@ async function savePlayList(message, params, user) {
 
         let query = params ? params : -23;
         return generalMatcher(message, query, user, titleArray, internalArray, savePlayList,
-            "Enter the number associated with the playlist you wish to add the song to");
+            "Enter the number associated with the playlist you wish to add the song to. Or create a new playlist with the *createPlayList* command.");
     }
     else {
 
@@ -3329,7 +3329,7 @@ async function currentPlaylist(message, params, user) {
         tally++;
     }
 
-    field.name = `Group ${groupNumber}`;
+    field.name = `Part ${groupNumber}`;
     newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
     return message.channel.send({ embed: newEmbed });
 }
@@ -3626,7 +3626,7 @@ function removeGame(message, game, user) {
     }
 }
 
-async function removeGameFromUsers(message, game, user) {
+async function removeGameFromAllUsers(message, game, user) {
 
     if (message.channel.type == 'dm') return message.channel.send("This command is exclusive to server-text channels!");
 
@@ -3974,9 +3974,7 @@ async function searchForUser(message, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-
-
-//coin flipper
+//shuffle playlist
 //game decider
 //roll command - for however many sided die
 //ping-pong command
@@ -4018,7 +4016,6 @@ process.on('unhandledException', (reason, p) => {
 //if they dont, they can always start it by saying prefixADVANCEDGAMETUTORIAL - which is a seperate tutorial all together. If they want to do it to type that command
 
 //Then make a tutorial for the above commands...
-
 
 
 //youtube live streams are broken 

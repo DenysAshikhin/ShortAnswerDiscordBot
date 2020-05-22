@@ -62,7 +62,7 @@
 
         "BANISH",
         "SIGNUPALLUSERS",
-        "REMOVEGAMEFROMUSERS",
+        "REMOVEGAMEFROMALLUSERS",
         "SIGNUPSPECIFICUSER",
         "REMOVEGAMEFROMSPECIFICUSER",
 
@@ -207,7 +207,7 @@
 
         ["1) banish", "2) banish @The Last Spark"],
         ["1) signUpAllUsers 3", "2) signUpAllUsers Minecraft, Counter-Strike: Global Offensive", "3) signUpAllUsers Minecraft, 321, 33, Counter-Strike: Global Offensive"],
-        ["1) removeGameFromUsers 2", "2) removeGameFromUsers Valorant"],
+        ["1) removeGameFromAllUsers 2", "2) removeGameFromAllUsers Valorant"],
         ["1) signUpSpecificUser Valorant @TheLastSpark", "2) signUpSpecificUser Valorant @TheLastSpark @Whoever"],
         ["1) removeGameFromSpecificUser Valorant @TheLastSpark", "2) removeGameFromSpecificUser Valorant @TheLastSpark @Whoever"],
 
