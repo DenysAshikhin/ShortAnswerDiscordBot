@@ -435,6 +435,45 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[55], currentSong)
     commandMap.set(Commands.commands[56], currentPlaylist)
     commandMap.set(Commands.commands[57], searchForUser)
+    commandMap.set(Commands.commands[58], flipCoin)
+}
+
+async function flipCoin(message, params, user) {
+
+
+    if (!params.step) {
+        let messa = await message.channel.send("Flipping coin...");
+        return setTimeout(flipCoin, 750, messa, { step: 1 }, user);
+    }
+
+
+    switch (params.step) {
+
+        case 1:
+            message.edit(message.content + "\n---");
+            break;
+        case 2:
+            message.edit(message.content + "\n\\");
+            break;
+        case 3:
+            message.edit(message.content + "\n |");
+            break;
+        case 4:
+            message.edit(message.content + "\n/");
+            break;
+        case 5:
+            message.edit(message.content + "\n---");
+            break;
+        case 6:
+
+            let coin = Math.floor(Math.random() * 2) == 0 ? "Tails!" : "Heads!";
+            message.edit(message.content + `\n${coin}`);
+            break;
+    }
+
+    params.step++;
+    if (params.step != 7)
+        setTimeout(flipCoin, 750, message, { step: params.step }, user);
 }
 
 function setServerPrefix(message, params, user) {
@@ -3924,7 +3963,7 @@ async function searchForUser(message, params, user) {
                     if (channel.members.size > 0)
                         for (member of channel.members.values()) {
                             if (member.displayName == args)
-                            message.channel.send("```diff\n" + `${member.displayName} was found in:\n+Server: ${guild.name}\n-Channel: ${channel.name}` + "```");
+                                message.channel.send("```diff\n" + `${member.displayName} was found in:\n+Server: ${guild.name}\n-Channel: ${channel.name}` + "```");
                         }
                 }
             }
@@ -3935,8 +3974,6 @@ async function searchForUser(message, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-//Be alerted if a user is found in a voice channel? Stalker lmao ->>>>>>> Make this a single run command, not a constant background scanning.
-//play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
 
 //coin flipper
@@ -3947,6 +3984,7 @@ setInterval(minuteCount, 60 * 1000);
 //shake user # of times -> have to check for move user perms
 
 
+//play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
 
 //look into start typing in message documentation to make it feel more alive?
