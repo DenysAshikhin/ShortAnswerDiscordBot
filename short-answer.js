@@ -1419,11 +1419,10 @@ function gameHelp(message, params, user) {
 
 function generalHelp(message, params, user) {
 
-
     const args = message.content.split(" ").slice(1).join(" ");
 
-
     if (!args) {
+
         let newEmbed = JSON.parse(JSON.stringify(Embed));
         newEmbed.timestamp = new Date();
         newEmbed.title = Embed.title + ` General Help`;
@@ -1443,11 +1442,12 @@ function generalHelp(message, params, user) {
 
         for (tag of tags) {
 
+            let counter = 0;
             for (let i = 0; i < Commands.commands.length; i++) {
 
                 if (Commands.subsection[i].includes(tag)) {
-
-                    newEmbed.fields[tag - 1].value += (i + 1) + ") " + Commands.commands[i] + "\n"
+                    counter++;
+                    newEmbed.fields[tag - 1].value += counter + ") " + Commands.commands[i] + "\n"
                 }
             }
         }
@@ -2341,7 +2341,7 @@ function timeConvert(time) {
     let finalTime = seconds;
     if (minutes > 0) finalTime = minutes + `:${finalTime}`;
     if (hours > 0) finalTime = hours + `:${finalTime}`;
-    if ( (minutes == '00') && (hours == '00')) finalTime = `00:${finalTime}`;
+    if ((minutes == '00') && (hours == '00')) finalTime = `00:${finalTime}`;
     return finalTime;
 }
 
@@ -3989,10 +3989,6 @@ setInterval(minuteCount, 60 * 1000);
 //-> go to command to go to a specific song.
 
 //"""in summons change out of mentions into orange fix
-
-//general help -> add numbering
-
-//add an extra 00: to current song if its sub 60 seconds
 
 
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
