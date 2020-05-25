@@ -69,7 +69,8 @@
         "CURRENTSONG",
         "CURRENTPLAYLIST",
         "SEARCHFORUSER",
-        "FLIPCOIN"
+        "FLIPCOIN",
+        "GOTO"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -141,7 +142,8 @@
         "Shows the current timestamp of the song out of the total.",
         "Shows the current playlist information.",
         "Searches all of the servers' voice channels I know of for a specific user, stalker imo :shrug:",
-        "Can't decide between heads or tails? Flip a coin!"
+        "Can't decide between heads or tails? Flip a coin!",
+        "Go to a specific song in the playlist."
     ],
         
     "example": [
@@ -214,7 +216,8 @@
         ["1) currentSong"],
         ["1) currentPlaylist"],
         ["1) searchForUser @TheLastSpark", "2) searchForUser The Last Spark"],
-        ["1) flipCoin"]
+        ["1) flipCoin"],
+        ["1) goTo 12"]
 
     ],
     "subsection": [
@@ -287,6 +290,7 @@
         [4],
         [4],
         [3],
-        [3]
+        [3],
+        [4]
     ]
 }

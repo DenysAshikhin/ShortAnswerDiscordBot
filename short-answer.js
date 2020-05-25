@@ -438,6 +438,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[56], currentPlaylist)
     commandMap.set(Commands.commands[57], searchForUser)
     commandMap.set(Commands.commands[58], flipCoin)
+    commandMap.set(Commands.commands[59], goTo);
 }
 
 async function flipCoin(message, params, user) {
@@ -1973,8 +1974,9 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         let commonUsers = [];
 
         const voiceChannel = message.member.voice.channel;
-        for (member of voiceChannel.members)
-            commonUsers.push(member[0]);
+        if (voiceChannel)
+            for (member of voiceChannel.members)
+                commonUsers.push(member[0]);
 
         for (let user of users) {
             if ((user.id != message.author.id) && (user.id != botID)) {
@@ -2526,6 +2528,27 @@ async function seek(message, params) {
             setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
         }
     }
+}
+
+async function goTo(message, params, user) {
+
+    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    let guildQueue = queue.get(message.guild.id);
+    if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the progress!");
+
+    const args = message.content.split(" ").slice(1).join(" ");
+
+    if(!args || isNaN(args)) return message.channel.send("You have to provide the number of the song to go to!");
+
+    if ((guildQueue.songs.length < args) || (args < 0)) return message.channel.send("You must enter a valid song number!");
+
+    guildQueue.index = args - 1;
+
+    if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
+
+    resetSong(guildQueue.songs[guildQueue.index]);
+    playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
 }
 
 async function currentSong(message, params, user) {
@@ -3985,10 +4008,6 @@ setInterval(minuteCount, 60 * 1000);
 //ping-pong command
 //add a timer
 //shake user # of times -> have to check for move user perms
-
-//-> go to command to go to a specific song.
-
-//"""in summons change out of mentions into orange fix
 
 
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
