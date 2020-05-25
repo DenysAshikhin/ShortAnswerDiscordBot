@@ -167,13 +167,15 @@ try {
 catch (err) {
     console.log("config.json doesn't exist - probably running on heroku?");
 }
-if (config == null) {
-    uri = process.env.URI;
-    token = process.env.TOKEN;
+
+if (process.argv.length == 3) {
+
+    uri = config.uri;
+    token = config.token;
 }
 else {
     uri = config.uri;
-    token = config.token;
+    token = config.TesterToken;
     defaultPrefix = "##";
 }
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -1445,7 +1447,7 @@ function generalHelp(message, params, user) {
 
                 if (Commands.subsection[i].includes(tag)) {
 
-                    newEmbed.fields[tag - 1].value += (i+1) + ") " + Commands.commands[i] + "\n"
+                    newEmbed.fields[tag - 1].value += (i + 1) + ") " + Commands.commands[i] + "\n"
                 }
             }
         }
@@ -2339,6 +2341,7 @@ function timeConvert(time) {
     let finalTime = seconds;
     if (minutes > 0) finalTime = minutes + `:${finalTime}`;
     if (hours > 0) finalTime = hours + `:${finalTime}`;
+    if ( (minutes == '00') && (hours == '00')) finalTime = `00:${finalTime}`;
     return finalTime;
 }
 
@@ -2539,6 +2542,8 @@ async function currentSong(message, params, user) {
 }
 
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
+
+    console.log(message.content, originalCommand, flavourText);
 
     if (Array.isArray(params)) {
         params = params[0].trim();
@@ -2789,7 +2794,7 @@ async function playSong(guild, sonG, skip, message) {
                 if (serverQueue.index == serverQueue.songs.length)
                     serverQueue.songs = [];
 
-                resetSong(serverQueue.songs[serverQueue.index]);
+                if (serverQueue.songs[serverQueue.index]) resetSong(serverQueue.songs[serverQueue.index]);
                 playSong(guild, serverQueue.songs[serverQueue.index], null, message);
             })
             .on('start', () => {
@@ -2841,7 +2846,7 @@ async function playSong(guild, sonG, skip, message) {
                 if (serverQueue.index == serverQueue.songs.length)
                     serverQueue.songs = [];
 
-                resetSong(serverQueue.songs[serverQueue.index]);
+                if (serverQueue.songs[serverQueue.index]) resetSong(serverQueue.songs[serverQueue.index]);
                 playSong(guild, serverQueue.songs[serverQueue.index], null, message);
             })
             .on('start', () => {
@@ -3980,6 +3985,14 @@ setInterval(minuteCount, 60 * 1000);
 //ping-pong command
 //add a timer
 //shake user # of times -> have to check for move user perms
+
+//-> go to command to go to a specific song.
+
+//"""in summons change out of mentions into orange fix
+
+//general help -> add numbering
+
+//add an extra 00: to current song if its sub 60 seconds
 
 
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
