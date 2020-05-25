@@ -438,7 +438,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[56], currentPlaylist)
     commandMap.set(Commands.commands[57], searchForUser)
     commandMap.set(Commands.commands[58], flipCoin)
-    commandMap.set(Commands.commands[59], goTo);
+    commandMap.set(Commands.commands[59], goTo)
+    commandMap.set(Commands.commands[60], shuffle)
 }
 
 async function flipCoin(message, params, user) {
@@ -2527,6 +2528,26 @@ async function seek(message, params) {
             playSong(message.guild, song, newSkip, message);
             setTimeout(skippingNotification, 1000, skipMessage, song.id, 1);
         }
+    }
+}
+
+//ask how to handle the location of new song
+async function shuffle(message, params, user){
+
+    if (message.channel.type == 'dm') return message.reply("This command must be called from a server text channel!");
+    let guildQueue = queue.get(message.guild.id);
+    if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the progress!");
+
+    shuffleArray(guildQueue.songs);
+    guildQueue.index = 0;
+    playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
+    message.channel.send("The playlist has been shuffled!");
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
 }
 

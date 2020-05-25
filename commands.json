@@ -70,7 +70,9 @@
         "CURRENTPLAYLIST",
         "SEARCHFORUSER",
         "FLIPCOIN",
-        "GOTO"
+        "GOTO",
+
+        "SHUFFLE"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -143,7 +145,9 @@
         "Shows the current playlist information.",
         "Searches all of the servers' voice channels I know of for a specific user, stalker imo :shrug:",
         "Can't decide between heads or tails? Flip a coin!",
-        "Go to a specific song in the playlist."
+        "Go to a specific song in the playlist.",
+
+        "Shuffles the current playlist"
     ],
         
     "example": [
@@ -217,7 +221,9 @@
         ["1) currentPlaylist"],
         ["1) searchForUser @TheLastSpark", "2) searchForUser The Last Spark"],
         ["1) flipCoin"],
-        ["1) goTo 12"]
+        ["1) goTo 12"],
+
+        ["1) shuffle"]
 
     ],
     "subsection": [
@@ -291,6 +297,8 @@
         [4],
         [3],
         [3],
+        [4],
+        
         [4]
     ]
 }
