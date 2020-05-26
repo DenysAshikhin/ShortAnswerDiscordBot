@@ -157,6 +157,7 @@ var download = new Map();
 var activeSkips = new Map();
 var lastSkip = new Map();
 var guildSquads = new Map();
+var timers = new Map();
 var defaultPrefix = "sa!";
 var prefix;
 var uri = "";
@@ -450,6 +451,27 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[61], repeat)
     commandMap.set(Commands.commands[62], decider)
     commandMap.set(Commands.commands[63], roll)
+    commandMap.set(Commands.commands[64], setTimer)
+}
+
+async function setTimer(message, params, user) {
+
+    let args = message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You have to provide a time for the timer!");
+
+    if (!/^[:0-9]+$/.test(args)) return message.channel.send("You have entered an invalid time format!");
+
+    if (args.includes(':'))
+        args = hmsToSecondsOnly(args);
+
+    let author = message.author;
+
+    if (timers.get(user.id))
+        message = await message.channel.send(`Overwriting your previous timer (${timeConvert(timers.get(user.id).time)} remaining) to: ${timeConvert(args)}`);
+    else
+        message = await message.channel.send(`Set a timer to go off in ${timeConvert(args)}`)
+
+    return timers.set(user.id, { time: args, author: author, message: message });
 }
 
 async function roll(message, params, user) {
@@ -1620,13 +1642,15 @@ function updateMessage(message, user) {
     User.findOneAndUpdate({ id: user.id },
         {
             $set: {
-
                 messages: user.messages,
                 lastMessage: user.lastMessage,
             }
         }, function (err, doc, res) {
-            if (err) console.trace(err)
-            if (res) console.trace(res)
+            if (err) {
+                Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err.toString());
+                console.log(err);
+            }
+            if (res) Client.guilds.cache.get(guildID).channels.cache.get(logID).send(res.toString())
         });
 }
 
@@ -1948,11 +1972,7 @@ async function topGames(message, params) {
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     const args = message.content.split(" ").slice(1).join(" ");
-    console.log(message.author.client.ws.ping)
-    console.log(message.createdTimestamp)
-    console.log((new Date()) - message.createdTimestamp);
     if (!args) return message.channel.send(`Pong! The time delay is ${message.author.client.ws.ping}ms`);
-
 
     if (message.channel.type == 'dm') {
         message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game
@@ -2293,6 +2313,7 @@ async function addGuild(member, memberDB) {
     memberDB.set("kicked", memberDB.kicked)
     memberDB.set("prefix", memberDB.prefix)
     memberDB.save();
+    console.log("Inside of addGUild")
 }
 
 async function createGuild(guild) {
@@ -3548,6 +3569,7 @@ async function graphs() {
 async function updateAll() {
 
     // let users = await getUsers();
+
     // let nameArray = new Array();
 
     // for (let user of users) {
@@ -3632,6 +3654,19 @@ async function minuteCount() {
                 if ((new Date() - squad[1].created) >= 1, 800, 000)
                     squads.delete(squad[0]);
             }
+    }
+}
+
+async function timerTrack() {
+    for (timer of timers.entries()) {
+
+        timer[1].time -= 1;
+        timer[1].message.edit(`Set a timer to go off in ${timeConvert(timer[1].time)}`);
+        if (timer[1].time <= 0) {
+            timer[1].author.send("Your timer has finished!");
+            timers.delete(timer[0]);
+            timer[1].message.edit(":alarm_clock: *Ring* **Ring** *Ring* :alarm_clock:");
+        }
     }
 }
 
@@ -4112,38 +4147,39 @@ async function searchForUser(message, params, user) {
 }
 
 setInterval(minuteCount, 60 * 1000);
+setInterval(timerTrack, 1000);
 
-//ping-pong command
 //add a timer
 //shake user # of times -> have to check for move user perms
+//sptofiy playlist
+//twitch
+//make remove game array - it is but broken - ez fix, mark all the spots with -1, then splice out all of them
+//make custom 'command prefixes' possible
+//moment.js for converting time zones???
+//video game stats
 
 
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
 
-//look into start typing in message documentation to make it feel more alive?
 
-//make remove game array - it is but broken - ez fix, mark all the spots with -1, then splice out all of them
 
-//make custom 'command prefixes' possible
-
-//Twitch notification/signup when a streamer goes live -> npm module for it?
 //https://dev.twitch.tv/docs/api/reference/#get-streams
 
-//add streamer stats
 
-//moment.js for converting time zones???
+
+
 
 
 //seal idan easter eggs
 process.on('unhandledRejection', (reason, promise) => {
     console.log("FFFFFF   ", reason);
-    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`" + lastMessage + "`"));
+    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
 });
 
 process.on('unhandledException', (reason, p) => {
     console.log(";;;;;;;;;;; ", reason);
-    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`" + lastMessage + "`"));
+    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
 });
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial
