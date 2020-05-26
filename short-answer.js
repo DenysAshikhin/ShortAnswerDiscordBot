@@ -440,6 +440,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[58], flipCoin)
     commandMap.set(Commands.commands[59], goTo)
     commandMap.set(Commands.commands[60], shuffle)
+    commandMap.set(Commands.commands[61], repeat)
 }
 
 async function flipCoin(message, params, user) {
@@ -2028,7 +2029,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         if (signedUp.length > 3) {
 
             //into players put yourSELF!!!! NOTE note
-            squads.set(user.id, { game: game, players: [mention(user.id)], displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName });
+            squads.set(user.id, { game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName });
             message.channel.send({ embed: finalEmbed });
         }
         else
@@ -2055,15 +2056,15 @@ async function Queue(message, params, user) {
 
     if (squads.size == 1 || params.summon) {
         let squad = params.summon ? params.summon : squads.values().next().value;
-        if (squad.players.length < squad.size - 1) {
+        if (squad.displayNames.length < squad.size - 1) {
 
-            if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this summon!");
+            if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
 
-            squad.players.push(mention(user.id));
+            //squad.players.push(mention(user.id));
             squad.displayNames.push(user.displayName);
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the summon!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
-            newEmbed.fields = [{ name: `Current summons members: ${squad.players.length}/${squad.size}`, value: squad.displayNames }];
+            newEmbed.fields = [{ name: `Current summons members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
             return message.channel.send({ embed: newEmbed });
         }
         else return message.channel.send("There is no space left in the summon!");
@@ -2072,14 +2073,14 @@ async function Queue(message, params, user) {
 
         let squad = squads.get(message.mentions.members.values().next().value.id);
         if (!squad) return message.channel.send("That user does not have any active summoninings!");
-        if (squad.players.length < squad.size - 1) {
+        if (squad.displayNames.length < squad.size - 1) {
 
-            if (squad.players.includes(mention(user.id))) return message.channel.send("You have already joined this summon!");
+            if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
 
-            squad.players.push(mention(user.id));
+            //squad.players.push(mention(user.id));
             let newEmbed = JSON.parse(JSON.stringify(Embed));
             newEmbed.description = (finalETA == -1) ? `${mention(user.id)} has joined the summon!` : `${mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
-            newEmbed.fields = [{ name: `Current squad members: ${squad.players.length}/${squad.size}`, value: squad.displayNames }];
+            newEmbed.fields = [{ name: `Current squad members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
             return message.channel.send({ embed: newEmbed });
         }
         else return message.channel.send("There is no space left in the summon!");
@@ -2090,7 +2091,7 @@ async function Queue(message, params, user) {
         let internalArray = [];
 
         for (let squad of squads.entries()) {
-            searchArray.push(`${squad[1].summoner}'s Summon: ${squad[1].players.length}/${squad[1].size}`);
+            searchArray.push(`${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`);
             internalArray.push({ summon: squad[1] });
         }
 
@@ -2115,8 +2116,8 @@ async function deQueue(message, params, user) {
             return squads.clear();
         }
         message.channel.send(`Left ${squad.summoner}'s summon!`);
-        squad.displayNames.splice(squad.players.indexOf(mentionID), 1);
-        return squad.players.splice(squad.players.indexOf(mentionID), 1);
+        return squad.displayNames.splice(squad.displayNames.indexOf(user.displayName), 1);
+        //return squad.players.splice(squad.players.indexOf(mentionID), 1);
     }
     else {
         for (let squad of squads.entries())
@@ -2124,8 +2125,8 @@ async function deQueue(message, params, user) {
                 squads.delete(squad[0])
             else if (squad[1].players.includes(mention(user.id))) {
                 console.log(squad[1]);
-                squad[1].displayNames.splice(squad[1].players.indexOf(mentionID), 1);//cannot splice on undefined
-                squad[1].players.splice(squad[1].players.indexOf(mention(user.id)), 1);
+                squad[1].displayNames.splice(squad[1].displayNames.indexOf(user.displayName), 1);//cannot splice on undefined
+                //squad[1].players.splice(squad[1].players.indexOf(mention(user.id)), 1);
             }
 
         return message.channel.send("You have destroyed any of your active summons!");
@@ -2142,7 +2143,7 @@ async function viewActiveSummons(message, params, user) {
     newEmbed.description = `There are ${squads.size} active summons!`;
 
     for (let squad of squads.entries()) {
-        newEmbed.fields.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].players.length}/${squad[1].size}`, value: squad[1].displayNames, inline: true });
+        newEmbed.fields.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames, inline: true });
     }
 
     message.channel.send({ embed: newEmbed });
@@ -2166,7 +2167,7 @@ async function banish(message, params, user) {
     }
     else if (params.player) {
 
-        squad.players.splice(squad.displayNames.indexOf(params.player), 1);
+        squad.displayNames.splice(squad.displayNames.indexOf(params.player), 1);
         return message.channel.send(`${squad.displayNames.splice(squad.displayNames.indexOf(params.player), 1)} has been banished from your summon!`);
     }
     else {
@@ -2532,7 +2533,7 @@ async function seek(message, params) {
 }
 
 //ask how to handle the location of new song
-async function shuffle(message, params, user){
+async function shuffle(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("This command must be called from a server text channel!");
     let guildQueue = queue.get(message.guild.id);
@@ -2556,11 +2557,11 @@ async function goTo(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
 
     let guildQueue = queue.get(message.guild.id);
-    if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the progress!");
+    if (!guildQueue) return message.channel.send("There needs to be a song playing!");
 
     const args = message.content.split(" ").slice(1).join(" ");
 
-    if(!args || isNaN(args)) return message.channel.send("You have to provide the number of the song to go to!");
+    if (!args || isNaN(args)) return message.channel.send("You have to provide the number of the song to go to!");
 
     if ((guildQueue.songs.length < args) || (args < 0)) return message.channel.send("You must enter a valid song number!");
 
@@ -2570,6 +2571,32 @@ async function goTo(message, params, user) {
 
     resetSong(guildQueue.songs[guildQueue.index]);
     playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
+}
+
+async function repeat(message, params, user) {
+
+    if (!params.mode) {
+        if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+        let guildQueue = queue.get(message.guild.id);
+        if (!guildQueue) return message.channel.send("There needs to be a song playing!");
+
+        const args = message.content.split(" ").slice(1).join(" ");
+        if (!args || !isNaN(args)) return message.channel.send("You have to provide a valid repeat mode!");
+
+        generalMatcher(message, args, user, ["One", "All", "Off"], [{ mode: "One" }, { mode: "All" }, { mode: "Off" }], repeat, "Enter the number associted with repeat mode you want.");
+    }
+    else {
+
+        let guildQueue = queue.get(message.guild.id);
+
+        if (params.mode.localeCompare("One") == 0)
+            guildQueue.repeat = 1;
+        else if (params.mode.localeCompare("All") == 0)
+            guildQueue.repeat = 100;
+        else
+            guildQueue.repeat = null;
+    }
 }
 
 async function currentSong(message, params, user) {
@@ -2587,7 +2614,9 @@ async function currentSong(message, params, user) {
 
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
-    console.log(message.content, originalCommand, flavourText);
+    console.log("message.content: ", message.content, 
+    "ORGINI COMMAND:  ", originalCommand, 
+    "FLAVY:  ", flavourText);
 
     if (Array.isArray(params)) {
         params = params[0].trim();
@@ -2706,7 +2735,8 @@ async function play(message, params, user) {
             index: 0,
             volume: 5,
             playing: true,
-            dispatcher: null
+            dispatcher: null,
+            repeat: -1
         };
         queue.set(message.guild.id, queueConstruct);
         serverQueue = queueConstruct;
@@ -2807,6 +2837,25 @@ async function play(message, params, user) {
     }
 }
 
+async function nextSong(serverQueue, guild, message) {
+
+    if (serverQueue.repeat == 1) {
+        resetSong(serverQueue.songs[serverQueue.index]);
+        return (playSong(guild, serverQueue.songs[serverQueue.index]));
+    }
+
+    serverQueue.index++;
+
+    if (serverQueue.index == serverQueue.songs.length)
+        if (serverQueue.repeat == 100)
+            serverQueue.index = 0;
+        else
+            serverQueue.songs = [];
+
+    if (serverQueue.songs[serverQueue.index]) resetSong(serverQueue.songs[serverQueue.index]);
+    playSong(guild, serverQueue.songs[serverQueue.index], null, message);
+}
+
 async function playSong(guild, sonG, skip, message) {
     const serverQueue = queue.get(guild.id);
     let song = sonG;
@@ -2833,13 +2882,7 @@ async function playSong(guild, sonG, skip, message) {
             })
             .on('finish', () => {
 
-                //serverQueue.songs.shift();
-                serverQueue.index++;
-                if (serverQueue.index == serverQueue.songs.length)
-                    serverQueue.songs = [];
-
-                if (serverQueue.songs[serverQueue.index]) resetSong(serverQueue.songs[serverQueue.index]);
-                playSong(guild, serverQueue.songs[serverQueue.index], null, message);
+                nextSong(serverQueue, guild, message);
             })
             .on('start', () => {
 
@@ -2886,12 +2929,7 @@ async function playSong(guild, sonG, skip, message) {
             })
             .on('finish', () => {
 
-                serverQueue.index++;
-                if (serverQueue.index == serverQueue.songs.length)
-                    serverQueue.songs = [];
-
-                if (serverQueue.songs[serverQueue.index]) resetSong(serverQueue.songs[serverQueue.index]);
-                playSong(guild, serverQueue.songs[serverQueue.index], null, message);
+                nextSong(serverQueue, guild, message);
             })
             .on('start', () => {
 
@@ -4021,6 +4059,10 @@ async function searchForUser(message, params, user) {
 }
 
 setInterval(minuteCount, 60 * 1000);
+
+
+//remove need for a comma if there is no mention
+//check queus for same server
 
 
 //shuffle playlist

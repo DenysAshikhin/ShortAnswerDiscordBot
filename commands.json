@@ -72,7 +72,8 @@
         "FLIPCOIN",
         "GOTO",
 
-        "SHUFFLE"
+        "SHUFFLE",
+        "REPEAT"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -147,7 +148,8 @@
         "Can't decide between heads or tails? Flip a coin!",
         "Go to a specific song in the playlist.",
 
-        "Shuffles the current playlist"
+        "Shuffles the current playlist",
+        "Sets the repeat mode for songs. One: repeats the current song. All: loops the entire playlist."
     ],
         
     "example": [
@@ -223,7 +225,8 @@
         ["1) flipCoin"],
         ["1) goTo 12"],
 
-        ["1) shuffle"]
+        ["1) shuffle"],
+        ["1) repeat One", "2) repeat All", "3) repeat Off"]
 
     ],
     "subsection": [
@@ -299,6 +302,7 @@
         [3],
         [4],
         
+        [4],
         [4]
     ]
 }
