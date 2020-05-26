@@ -449,6 +449,15 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[60], shuffle)
     commandMap.set(Commands.commands[61], repeat)
     commandMap.set(Commands.commands[62], decider)
+    commandMap.set(Commands.commands[63], roll)
+}
+
+async function roll(message, params, user) {
+
+    const args = message.content.split(" ").slice(1).join(" ");
+    if (args)
+        return message.channel.send(`${user.displayName} rolled a ${Math.floor((Math.random() * args) + 1)}`);
+    return message.channel.send(`${user.displayName} rolled a ${Math.floor((Math.random() * 20) + 1)}`);
 }
 
 async function decider(message, params, user) {
@@ -4097,8 +4106,6 @@ async function searchForUser(message, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
-
-//game decider
 //roll command - for however many sided die
 //ping-pong command
 //add a timer

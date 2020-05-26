@@ -74,7 +74,8 @@
 
         "SHUFFLE",
         "REPEAT",
-        "DECIDER"
+        "DECIDER",
+        "ROLL"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -151,7 +152,8 @@
 
         "Shuffles the current playlist",
         "Sets the repeat mode for songs. One: repeats the current song. All: loops the entire playlist.",
-        "Randomly chooses an option out of the ones provided."
+        "Randomly chooses an option out of the ones provided.",
+        "Rolls any number-sided die. Default is 20."
     ],
         
     "example": [
@@ -229,7 +231,8 @@
 
         ["1) shuffle"],
         ["1) repeat One", "2) repeat All", "3) repeat Off"],
-        ["1) decider choice A, choice B, choice C"]
+        ["1) decider choice A, choice B, choice C"],
+        ["1) roll", "2) roll 6"]
 
     ],
     "subsection": [
@@ -307,6 +310,7 @@
         
         [4],
         [4],
-        [3, 6, 8]
+        [3, 6, 8],
+        [3]
     ]
 }
