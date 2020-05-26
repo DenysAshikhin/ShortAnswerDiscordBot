@@ -182,6 +182,11 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
 
+
+let lastMessage;
+
+
+
 const getUsers = async function () {
     try {
         return await User.find({})
@@ -309,6 +314,8 @@ connectDB.once('open', async function () {
             if (user.defaultPrefix != "-1") prefix = user.defaultPrefix;
             else prefix = defaultPrefix;
         }
+
+        lastMessage = message.content;
 
         if (defaultPrefix == "##")
             prefix = "##";
@@ -2053,7 +2060,12 @@ async function Queue(message, params, user) {
 
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
-    let ETA = message.content.split(',')[1];
+    let ETA;
+    if (message.content.includes(','))
+        ETA = message.content.split(',')[1];
+    else if (message.mentions.members.size == 0)
+        ETA = message.content.split(" ").slice(1).join(" ");
+
     if (ETA)
         ETA.trim();
     let finalETA = !isNaN(ETA) && ETA.length > 0 ? Number(ETA) : -1;
@@ -2708,6 +2720,7 @@ function resetSong(song) {
     song.start = null;
     song.offset = 0;
     song.progress = 0;
+    if (activeSkips.get(song.id)) activeSkips.delete(song.id);
 }
 
 /*
@@ -3438,6 +3451,8 @@ function skippingNotification(message, songID, step) {
 
     if (activeSkips.get(songID)) {
 
+        console.log(activeSkips)
+
         if (step == 1) {
             message.edit(message.content + " :musical_note:");
             step = 2;
@@ -3588,10 +3603,11 @@ async function minuteCount() {
     //Checking for squad timeouts
     {
         for (guildSq of guildSquads.entries())
-            for (squad of guildSq[1])
+            for (squad of guildSq[1]) {
                 console.log("www  ", squad);
-        if ((new Date() - squad[1].created) >= 1, 800, 000)
-            squads.delete(squad[0]);
+                if ((new Date() - squad[1].created) >= 1, 800, 000)
+                    squads.delete(squad[0]);
+            }
     }
 }
 
@@ -4106,12 +4122,12 @@ setInterval(minuteCount, 60 * 1000);
 //seal idan easter eggs
 process.on('unhandledRejection', (reason, promise) => {
     console.log("FFFFFF   ", reason);
-    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```"));
+    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`" + lastMessage + "`"));
 });
 
 process.on('unhandledException', (reason, p) => {
     console.log(";;;;;;;;;;; ", reason);
-    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```"));
+    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`" + lastMessage + "`"));
 });
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial
