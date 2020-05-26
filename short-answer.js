@@ -1947,6 +1947,13 @@ async function topGames(message, params) {
 
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
+    const args = message.content.split(" ").slice(1).join(" ");
+    console.log(message.author.client.ws.ping)
+    console.log(message.createdTimestamp)
+    console.log((new Date()) - message.createdTimestamp);
+    if (!args) return message.channel.send(`Pong! The time delay is ${message.author.client.ws.ping}ms`);
+
+
     if (message.channel.type == 'dm') {
         message.channel.send(message.author.username + " has summoned " + mention(botID) + " for some " + game
             + "\nUnfortunately I cannot play games, why not try the same command inside a server?");
@@ -4106,7 +4113,6 @@ async function searchForUser(message, params, user) {
 
 setInterval(minuteCount, 60 * 1000);
 
-//roll command - for however many sided die
 //ping-pong command
 //add a timer
 //shake user # of times -> have to check for move user perms
