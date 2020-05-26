@@ -448,6 +448,15 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[59], goTo)
     commandMap.set(Commands.commands[60], shuffle)
     commandMap.set(Commands.commands[61], repeat)
+    commandMap.set(Commands.commands[62], decider)
+}
+
+async function decider(message, params, user) {
+
+    const args = message.content.split(" ").slice(1).join(" ").split(",");
+
+    if (!args) return message.channel.send("You have to provide at least 1 option!");
+    return message.channel.send(`I have chosen: ${args[Math.floor(Math.random() * args.length)]}`)
 }
 
 async function flipCoin(message, params, user) {
@@ -626,9 +635,8 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
     //console.log(`finishy: ${finishy == 0 || finishy == -11}`)
     if (finishy == -11 || finishy == 0)
         return 0;
-    else {
+    else
         return 1;
-    }
 }
 
 function specificCommandCreator(command, defaults, choices, user) {
@@ -4090,11 +4098,6 @@ async function searchForUser(message, params, user) {
 setInterval(minuteCount, 60 * 1000);
 
 
-//remove need for a comma if there is no mention
-
-
-
-//shuffle playlist
 //game decider
 //roll command - for however many sided die
 //ping-pong command

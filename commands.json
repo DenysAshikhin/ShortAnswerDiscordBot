@@ -73,7 +73,8 @@
         "GOTO",
 
         "SHUFFLE",
-        "REPEAT"
+        "REPEAT",
+        "DECIDER"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -149,7 +150,8 @@
         "Go to a specific song in the playlist.",
 
         "Shuffles the current playlist",
-        "Sets the repeat mode for songs. One: repeats the current song. All: loops the entire playlist."
+        "Sets the repeat mode for songs. One: repeats the current song. All: loops the entire playlist.",
+        "Randomly chooses an option out of the ones provided."
     ],
         
     "example": [
@@ -226,7 +228,8 @@
         ["1) goTo 12"],
 
         ["1) shuffle"],
-        ["1) repeat One", "2) repeat All", "3) repeat Off"]
+        ["1) repeat One", "2) repeat All", "3) repeat Off"],
+        ["1) decider choice A, choice B, choice C"]
 
     ],
     "subsection": [
@@ -303,6 +306,7 @@
         [4],
         
         [4],
-        [4]
+        [4],
+        [3, 6, 8]
     ]
 }
