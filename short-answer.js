@@ -156,7 +156,7 @@ var queue = new Map();
 var download = new Map();
 var activeSkips = new Map();
 var lastSkip = new Map();
-var squads = new Map();
+var guildSquads = new Map();
 var defaultPrefix = "sa!";
 var prefix;
 var uri = "";
@@ -2029,7 +2029,11 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         if (signedUp.length > 3) {
 
             //into players put yourSELF!!!! NOTE note
-            squads.set(user.id, { game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName });
+            let squads = guildSquads.get(message.guild.id);
+            if (squads)
+                squads.push({ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName });
+            else
+                guildSquads.set(message.guild.id, [{ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName }])
             message.channel.send({ embed: finalEmbed });
         }
         else
@@ -2044,6 +2048,8 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 async function Queue(message, params, user) {
 
     if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+
+    let squads = guildSquads.get(message.guild.id);
 
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
@@ -2103,6 +2109,8 @@ async function deQueue(message, params, user) {
 
     if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
+    let squads = guildSquads.get(message.guild.id);
+
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let mentionID = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
@@ -2137,6 +2145,8 @@ async function viewActiveSummons(message, params, user) {
 
     if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
+    let squads = guildSquads.get(message.guild.id);
+    
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
@@ -2152,6 +2162,8 @@ async function viewActiveSummons(message, params, user) {
 async function banish(message, params, user) {
 
     if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+
+    let squads = guildSquads.get(message.guild.id);
 
     if (!squads.get(user.id)) return message.channel.send("You don't have any active summons to kick from!");
     let squad = squads.get(user.id);
@@ -2614,9 +2626,9 @@ async function currentSong(message, params, user) {
 
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
-    console.log("message.content: ", message.content, 
-    "ORGINI COMMAND:  ", originalCommand, 
-    "FLAVY:  ", flavourText);
+    console.log("message.content: ", message.content,
+        "ORGINI COMMAND:  ", originalCommand,
+        "FLAVY:  ", flavourText);
 
     if (Array.isArray(params)) {
         params = params[0].trim();
