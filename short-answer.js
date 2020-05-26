@@ -2146,7 +2146,7 @@ async function viewActiveSummons(message, params, user) {
     if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     let squads = guildSquads.get(message.guild.id);
-    
+
     if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
@@ -2608,6 +2608,7 @@ async function repeat(message, params, user) {
             guildQueue.repeat = 100;
         else
             guildQueue.repeat = null;
+        return message.channel.send(`Repeat mode set to ${params.mode}`);
     }
 }
 
@@ -3584,13 +3585,13 @@ async function createBackUp() {
 
 async function minuteCount() {
     countTalk();
-
     //Checking for squad timeouts
     {
-        for (squad of squads.entries())
-            if ((new Date() - squad[1].created) >= 1, 800, 000)
-                squads.delete(squad[0]);
-
+        for (guildSq of guildSquads.entries())
+            for (squad of guildSq[1])
+                console.log("www  ", squad);
+        if ((new Date() - squad[1].created) >= 1, 800, 000)
+            squads.delete(squad[0]);
     }
 }
 
@@ -4074,7 +4075,7 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //remove need for a comma if there is no mention
-//check queus for same server
+
 
 
 //shuffle playlist
