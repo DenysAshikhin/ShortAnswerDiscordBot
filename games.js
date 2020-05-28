@@ -7,6 +7,11 @@ var games = new Array();
 var guildSquads = new Map();
 
 
+for (let element of gameJSON)
+    games.push(element.name);
+games.sort();
+
+
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     const args = message.content.split(" ").slice(1).join(" ");
@@ -182,13 +187,6 @@ function checkGame(gameArray, params, user) {
         return completeCheck;
     else return -1
 }
-
-function populateGamesList() {
-    for (let element of gameJSON)
-        games.push(element.name);
-    games.sort();
-}
-exports.populateGamesList = populateGamesList;
 
 function purgeGamesList(message, params, user) {
 
