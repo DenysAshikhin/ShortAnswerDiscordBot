@@ -11,6 +11,12 @@ const STATS = require('./stats.js');
 const MISCELLANEOUS = require('./miscellaneous.js')
 const GAMES = require('./games.js');
 const MUSIC = require('./music.js');
+const ADMINISTRATOR = require('./administrator.js');
+const QOF = require('./QOF.js');
+const HELP = require('./help.js');
+const GENERAL = require('./general.js');
+const TUTORIAL = require('./tutorial.js');
+const BUGS = require('./bugs.js');
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -211,19 +217,8 @@ exports.findGuild = findGuild;
 connectDB.once('open', async function () {
 
     await Client.login(token);
-
     updateAll();
     populateCommandMap();
-
-
-    // for (let i = 0; i < commandMap.size; i++) {
-
-    //     if (Commands.subsection[i].includes(4))
-    //         console.log(Commands.commands[i])
-    // }
-
-
-
 
     Client.on("ready", () => {
 
@@ -341,15 +336,15 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[4], GAMES.removeGame)
     commandMap.set(Commands.commands[5], GAMES.excludePing)
     commandMap.set(Commands.commands[6], GAMES.excludeDM)
-    commandMap.set(Commands.commands[7], generalHelp)
-    commandMap.set(Commands.commands[8], gameHelp)
-    commandMap.set(Commands.commands[9], helpStats)
-    commandMap.set(Commands.commands[10], helpMiscellaneous)
-    commandMap.set(Commands.commands[11], helpMusic)
+    commandMap.set(Commands.commands[7], HELP.generalHelp)
+    commandMap.set(Commands.commands[8], HELP.gameHelp)
+    commandMap.set(Commands.commands[9], HELP.helpStats)
+    commandMap.set(Commands.commands[10], HELP.helpMiscellaneous)
+    commandMap.set(Commands.commands[11], HELP.helpMusic)
     commandMap.set(Commands.commands[12], MISCELLANEOUS.study)
     commandMap.set(Commands.commands[13], GAMES.pingUsers)
-    commandMap.set(Commands.commands[14], initialiseUsers)
-    commandMap.set(Commands.commands[15], Delete)
+    commandMap.set(Commands.commands[14], ADMINISTRATOR.initialiseUsers)
+    commandMap.set(Commands.commands[15], GENERAL.Delete)
     commandMap.set(Commands.commands[16], STATS.personalStats)
     commandMap.set(Commands.commands[17], STATS.guildStats)
     commandMap.set(Commands.commands[18], STATS.specificStats)
@@ -359,17 +354,17 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[22], MUSIC.pause)
     commandMap.set(Commands.commands[23], MUSIC.resume)
     commandMap.set(Commands.commands[24], MUSIC.skip)
-    commandMap.set(Commands.commands[25], gameTutorial)
-    commandMap.set(Commands.commands[26], suggest)
-    commandMap.set(Commands.commands[27], setNotifyUpdate)
-    commandMap.set(Commands.commands[28], setNotifyTutorials)
-    commandMap.set(Commands.commands[29], quitTutorial)
+    commandMap.set(Commands.commands[25], TUTORIAL.gameTutorial)
+    commandMap.set(Commands.commands[26], BUGS.suggest)
+    commandMap.set(Commands.commands[27], QOF.setNotifyUpdate)
+    commandMap.set(Commands.commands[28], TUTORIAL.setNotifyTutorials)
+    commandMap.set(Commands.commands[29], TUTORIAL.quitTutorial)
     commandMap.set(Commands.commands[30], GAMES.purgeGamesList)
     commandMap.set(Commands.commands[31], GAMES.gameStats)
     commandMap.set(Commands.commands[32], GAMES.topGames)
-    commandMap.set(Commands.commands[33], setServerPrefix)
-    commandMap.set(Commands.commands[34], setDefaultPrefix)
-    commandMap.set(Commands.commands[35], setDefaultServerPrefix)
+    commandMap.set(Commands.commands[33], QOF.setServerPrefix)
+    commandMap.set(Commands.commands[34], QOF.setDefaultPrefix)
+    commandMap.set(Commands.commands[35], ADMINISTRATOR.setDefaultServerPrefix)
     commandMap.set(Commands.commands[36], MUSIC.forward)
     commandMap.set(Commands.commands[37], MUSIC.rewind)
     commandMap.set(Commands.commands[38], MUSIC.seek)
@@ -398,99 +393,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[61], MUSIC.repeat)
     commandMap.set(Commands.commands[62], MISCELLANEOUS.decider)
     commandMap.set(Commands.commands[63], MISCELLANEOUS.roll)
-    commandMap.set(Commands.commands[64], setTimer)
+    commandMap.set(Commands.commands[64], QOF.setTimer)
     commandMap.set(Commands.commands[65], MISCELLANEOUS.shakeUser)
-}
-
-async function setTimer(message, params, user) {
-
-    let args = message.content.split(" ").slice(1).join(" ");
-    if (!args) return message.channel.send("You have to provide a time for the timer!");
-
-    if (!/^[:0-9]+$/.test(args)) return message.channel.send("You have entered an invalid time format!");
-
-    if (args.includes(':'))
-        args = hmsToSecondsOnly(args);
-
-    let author = message.author;
-
-    if (timers.get(user.id))
-        message = await message.channel.send(`Overwriting your previous timer (${timeConvert(timers.get(user.id).time)} remaining) to: ${timeConvert(args)}`);
-    else
-        message = await message.channel.send(`Set a timer to go off in ${timeConvert(args)}`)
-
-    return timers.set(user.id, { time: args, author: author, message: message });
-}
-
-function helpMiscellaneous(message) {
-
-    let miscEmbed = JSON.parse(JSON.stringify(Embed));
-    miscEmbed.timestamp = new Date();
-    miscEmbed.title = Embed.title + ` Miscellaneous Commands`;
-    miscEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(3))
-            miscEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
-
-    message.channel.send({ embed: miscEmbed });
-}
-
-function setServerPrefix(message, params, user) {
-
-    if (params == message.content) {
-        message.channel.send("You have to provide an actual prefix!");
-        return -1;
-    }
-    if (Array.isArray(params))
-        params = params[0];
-
-    let index = user.guilds.indexOf(message.guild.id);
-    user.prefix[index] = params;
-
-    message.channel.send(`Your new prefix for this server is: "${params}"`);
-
-    User.findOneAndUpdate({ id: user.id }, { $set: { prefix: user.prefix } }, function (err, doc, res) { });
-    return 1;
-}
-
-function setDefaultServerPrefix(message, params, user) {
-
-    if (message.channel.type == 'dm') return message.channel.send("You can only set the default server prefix from inside a server text channel");
-
-    if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("You do not have the required permissions to set the default prefix for the server")
-
-
-    if (params == message.content) {
-        message.channel.send("You have to provde an actual prefix!");
-        return -1;
-    }
-    if (Array.isArray(params))
-        params = params[0];
-
-    let index = user.guilds.indexOf(message.guild.id);
-    user.prefix[index] = params;
-
-    message.channel.send(`This server's default prefix is: "${params}"`);
-
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { prefix: params } }, function (err, doc, res) { });
-    return 1;
-}
-
-function setDefaultPrefix(message, params, user) {
-
-    if (params == message.content) {
-        message.channel.send("You have to provde an actual prefix!");
-        return -1;
-    }
-    if (Array.isArray(params))
-        params = params[0];
-
-    message.channel.send(`Your new base (default) prefix is: "${params}"`);
-
-    User.findOneAndUpdate({ id: user.id }, { $set: { defaultPrefix: params } }, function (err, doc, res) { });
-    return 1;
 }
 
 async function triggerCommandHandler(message, user, skipSearch) {
@@ -631,62 +535,6 @@ async function checkCommands(params, user) {
     else return -1
 }
 
-async function Delete(message, params) {
-
-    if (message.channel.type == 'dm') return -1;
-
-    if (!message.channel.permissionsFor(message.member).has("MANAGE_MESSAGES"))
-        return message.channel.send("You do not have the required permissions to delete messages!")
-
-
-    let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
-    if (!permission.has("MANAGE_MESSAGES"))
-        return message.channel.send("I do not have the required permissions to delete messages!")
-
-
-    let amount = 0;
-    if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-    else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-    else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-    else if (params[0] < 1) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
-    else {
-
-        amount = Number(params[0]) + 1;
-        await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
-            message.channel.bulkDelete(messages).catch(err => {
-                console.log("Error deleting bulk messages: " + err);
-                message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
-            });
-        });
-    }
-}
-
-function suggest(message, params, user) {
-
-    if (params == message.content) {
-        return message.channel.send("You have to provide an actual suggestion!");
-    }
-    message.channel.send("Your suggestion has been forwarded!");
-    Client.guilds.cache.get(guildID).members.cache.get(creatorID).user.send(`${user.displayName} is suggesting: ${params}`);
-}
-
-function quitTutorial(message, params, user) {
-
-    User.findOneAndUpdate({ id: user.id },
-        {
-            $set: {
-
-                activeTutorial: -1,
-                tutorialStep: -1,
-                previousTutorialStep: -1
-            }
-        }, function (err, doc, res) {
-            if (err) console.trace(err)
-            if (res) console.trace(res)
-        });
-    message.channel.send("You have quit the previous tutorial and may begin a new one at any point!");
-}
-
 //-22 meaning no matching tutorial was found
 async function tutorialHandler(message, command, params, user) {
 
@@ -708,146 +556,6 @@ async function tutorialHandler(message, command, params, user) {
 // + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
 // + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.`
 
-function createTutorialEmbed(tutorialStep) {
-
-    let prompt = GameTutorial.steps[tutorialStep];
-    let index = Commands.commands.indexOf(GameTutorial.expectedCommand[tutorialStep]);
-    let fieldArray = new Array();
-
-    if (index != -1) {
-        for (let i = 0; i < Commands.example[index].length; i++) {
-
-            fieldArray.push({
-                name: `Example ${i + 1})`,
-                value: prefix + Commands.example[index][i].substring(3)
-            })
-        }
-    } else {
-
-    }
-
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.date = new Date();
-    newEmbed.title += " Game Tutorial";
-    newEmbed.description = prompt;
-    newEmbed.fields = fieldArray;
-
-    return newEmbed;
-}
-
-async function gameTutorial(message, params, command) {
-
-    let user = await findUser({ id: message.author.id });
-
-    GameTutorial.steps = [
-        `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`,
-
-        `Now that you see a bunch of results, hopefully the game you wanted is towards the top, along with the associated number.`
-        + ` Please add any valid (and new) game to your games list to continue`,
-
-        `You can also sign up for as many games at once as you would like by seperating each entry by a comma - you can mix both words and numbers.`
-        + ` Try signing up for **at least two new games** at once.`,
-
-        `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}` + Commands.commands[3] + `**`,
-
-        `Now try removing any of the games in your games list by typing **${prefix}` + Commands.commands[4] + `** *game#*.`
-        + ` Just a heads up that the GAME# is the number from your games list.`,
-
-        `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
-        + `** *nameOfGame*/*#ofGame* and anyone who has this game will be notified.`,
-
-        `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
-        + ` an @mention in the text channel it was sent from. To disable/enable @mentions simply type`
-        + ` **${prefix}` + Commands.commands[5] + `** *true/false*. *False* = you will be pinged, *True* = you will not be pinged.`,
-
-        `The second notification is a direct message. To disable/enable direct messages from pings simply type`
-        + ` **${prefix}` + Commands.commands[6] + `** *true/false*. *False* = you will be DMed, *True* = you will not be DMed.`,
-
-        `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
-        + ` **${prefix}` + Commands.commands[26] + `** *any suggestion here* and I'll forward the message to the creator. For a more general help,`
-        + ` type **${prefix}` + Commands.commands[7] + `**`
-        + `\nAs a final note, this bot is being rapidly developed with new features constantly being added,`
-        + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + Commands.commands[27] + `** *true/false*.`
-    ]
-
-    if (user.tutorialStep == -1) {
-
-        //newEmbed.description = GameTutorial.steps[0];
-        message.channel.send({ embed: createTutorialEmbed(0) })
-
-        await User.findOneAndUpdate({ id: user.id },
-            {
-                $set: {
-                    activeTutorial: 0,
-                    tutorialStep: 0,
-                    previousTutorialStep: 0
-                }
-            }, function (err, doc, res) { });
-        return 1;
-    }//
-    else {
-        if (user.activeTutorial == 0 || user.activeTutorial == -1) {
-
-            if (command == commandMap.get(Commands.commands[25])) {
-
-                message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
-                return 1;
-            }
-            else if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
-
-                if (user.tutorialStep != GameTutorial.steps.length - 1) {
-
-                    message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
-
-                    await User.findOneAndUpdate({ id: user.id },
-                        {
-                            $set: {
-                                previousTutorialStep: user.previousTutorialStep + 1,
-                            }
-                        }, function (err, doc, res) { });
-                    return 1;
-                }
-                else {//Tutorial over!!!!!
-                    //Need to add the recommend and something else commands
-                    message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
-                    if (!user.completedTutorials.includes(0)) {
-                        user.completedTutorials.push(0);
-                    }
-                    await User.findOneAndUpdate({ id: user.id },
-                        {
-                            $set: {
-                                activeTutorial: -1,
-                                previousTutorialStep: -1,
-                                tutorialStep: -1,
-                                canSuggest: true,
-                                completedTutorials: user.completedTutorials
-
-                            }
-                        }, function (err, doc, res) { });
-                    return 1;
-                }
-            }
-            else {//Test if their response is the correct one.
-
-                if (command == GameTutorial.specificCommand[user.tutorialStep]) {
-                    let result = await GameTutorial.specificCommand[user.tutorialStep].call(null, message, params, user);
-                    if (result >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                        User.findOneAndUpdate({ id: user.id }, { $set: { tutorialStep: user.tutorialStep + 1 } }, function (err, doc, res) { });
-                        setTimeout(gameTutorial, 1000, message, params, command);
-                    }
-                    return result;
-                }
-                else
-                    return false;
-            }
-        }
-        else {
-            message.channel.send(`You are already doing ${tutorial[user.activeTutorial]}, to quit it type **${prefix}quitTutorial**`);
-            return 1;
-        }
-    }
-}
-
 async function gameSuggestion(member) {//
 
 
@@ -863,132 +571,6 @@ function findFurthestDate(date1, date2) {
     return date2;
 }
 exports.findFurthestDate = findFurthestDate;
-
-function helpStats(message, params, user) {
-
-
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` Stats Commands`;
-    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(2))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
-
-    message.channel.send({ embed: newEmbed });
-}
-
-function helpMusic(message, params, user) {
-
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` Music Commands`;
-    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(4))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i], inline: true });
-
-    message.channel.send({ embed: newEmbed });
-}
-
-function gameHelp(message, params, user) {
-
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` Game Commands`,
-        newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(1))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
-
-    message.channel.send({ embed: newEmbed });
-}
-
-function generalHelp(message, params, user) {
-
-    const args = message.content.split(" ").slice(1).join(" ");
-
-    if (!args) {
-
-        let newEmbed = JSON.parse(JSON.stringify(Embed));
-        newEmbed.timestamp = new Date();
-        newEmbed.title = Embed.title + ` General Help`;
-        newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-        newEmbed.fields = [
-            { name: "Games", value: "", inline: true },
-            { name: "Stats", value: "", inline: true },
-            { name: "Miscellaneous", value: "", inline: true },
-            { name: "Music", value: "", inline: true },
-            { name: "Admins", value: "", inline: true },
-            { name: "Quality of Life", value: "", inline: true },
-            { name: "Help", value: "", inline: true },
-            { name: "General", value: "", inline: true },
-            { name: "Tutorials", value: "", inline: true },
-            { name: "Bugs/Suggestions", value: "", inline: true },
-        ];
-
-        for (tag of tags) {
-
-            let counter = 0;
-            for (let i = 0; i < Commands.commands.length; i++) {
-
-                if (Commands.subsection[i].includes(tag)) {
-                    counter++;
-                    newEmbed.fields[tag - 1].value += counter + ") " + Commands.commands[i] + "\n"
-                }
-            }
-        }
-
-        return message.channel.send({ embed: newEmbed });
-    }
-
-    if (params.index) {
-
-        let examples = "```md\n";
-
-        for (example of Commands.example[params.index]) {
-
-            let index = example.indexOf(" ");
-            examples += `<${example.slice(0, index)}` + prefix + `${example.slice(index + 1)}>\n\n`;
-        }
-        examples += "```";
-
-        let prompt = `${Commands.explanation[params.index]}` + `${examples}`;
-        return message.channel.send(prompt);
-    }
-    else {
-
-        let promptArray = [];
-        let internalArray = [];
-
-        for (let i = 0; i < Commands.commands.length; i++) {
-
-            promptArray.push(Commands.commands[i]);
-            internalArray.push({ index: i });
-        }
-        let query = args;
-        console.log(args)
-        return generalMatcher(message, query, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
-    }
-}
-
-function gameHelp(message, params, user) {
-
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` Game Commands`;
-    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(1))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i], inline: true });
-
-    message.channel.send({ embed: newEmbed });
-}
 
 //TRIPLE CHECK THISSSS
 async function countTalk() {
@@ -1069,56 +651,6 @@ function updateMessage(message, user) {
             }
             if (res) Client.guilds.cache.get(guildID).channels.cache.get(logID).send(res.toString())
         });
-}
-
-function setNotifyUpdate(message, params, user) {
-
-    if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[27] + "** *true/false*");
-        return -1;
-    }
-    let bool = message.content.split(" ")[1].toUpperCase().trim();
-    if (bool == "TRUE") {
-
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyUpdate: true } }, function (err, doc, res) { });
-        message.channel.send(mention(message.author.id) + " will be notified of new feature releases.");
-        return 1;
-    }
-    else if (bool == "FALSE") {
-
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyUpdate: false } }, function (err, doc, res) { });
-        message.channel.send(mention(message.author.id) + " will be excluded from any new feature releases.");
-        return 0;
-    }
-    else {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[27] + "** *true/false*");
-        return -1;
-    }
-}
-
-function setNotifyTutorials(message, params, user) {
-
-    if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[28] + "** *true/false*");
-        return -1;
-    }
-    let bool = message.content.split(" ")[1].toUpperCase().trim();
-    if (bool == "TRUE") {
-
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyTutorial: true } }, function (err, doc, res) { });
-        message.channel.send(mention(message.author.id) + " will be notified of new/incomplete tutorials.");
-        return 1;
-    }
-    else if (bool == "FALSE") {
-
-        User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyTutorial: false } }, function (err, doc, res) { });
-        message.channel.send(mention(message.author.id) + " will be excluded from any new/incomplete tutorials.");
-        return 0;
-    }
-    else {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[28] + "** *true/false*");
-        return -1;
-    }
 }
 
 function getDate() {
@@ -1252,27 +784,6 @@ async function checkExistance(member) {
         await createUser(member);
         return false;
     }
-}
-
-async function initialiseUsers(message) {
-    if (message.channel.type == 'dm') return -1;
-    let newUsers = 0;
-    let existingUsers = 0;
-
-    for (let MEMBER of message.channel.guild.members.cache) {
-
-        let member = MEMBER[1];
-
-        if (await (checkExistance(member))) {//User exists with a matching guild in the DB
-            existingUsers++;
-        }
-        else {
-
-            (await createUser(member));
-            newUsers++;
-        }
-    }
-    message.channel.send("The server's users are now tracked!");
 }
 
 function hmsToSecondsOnly(str) {
