@@ -129,7 +129,7 @@ async function forward(message, params) {
 
         let newSkip = !isNaN(params) ? Number(params) : MAIN.hmsToSecondsOnly(params);
         let current = song.paused ? song.offset - song.timePaused + ((Math.floor(new Date() - song.start - ((new Date() - song.paused)))) / 1000)
-        : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
+            : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
 
         if (newSkip + current > song.duration || newSkip + current < 0) return message.channel.send("You can't go beyond the song's duration!")
         else {
@@ -167,7 +167,7 @@ async function rewind(message, params) {
 
         let newSkip = !isNaN(params) ? Number(params) : MAIN.hmsToSecondsOnly(params);
         let current = song.paused ? song.offset - song.timePaused + ((Math.floor(new Date() - song.start - ((new Date() - song.paused)))) / 1000)
-        : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
+            : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
 
         if (current - newSkip > song.duration || current - newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
         else {
@@ -193,10 +193,11 @@ async function seek(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
-    let song = guildQueue.songs[guildQueue.index];
+
 
     if (guildQueue) {
 
+        let song = guildQueue.songs[guildQueue.index];
         if (Array.isArray(params)) params = params[0];
         if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid seek format!");
         let newSkip = isNaN(params) ? MAIN.hmsToSecondsOnly(params) : Number(params);
@@ -318,6 +319,7 @@ async function play(message, params, user) {
     if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You have to provide a link or title of song to play!");
 
     const voiceChannel = message.member.voice.channel;
 
@@ -656,6 +658,9 @@ async function addSong(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
 
+    const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You have to provide a link or title of song to play!");
+
     let serverQueue = queue.get(message.guild.id);
     let song;
 
@@ -988,6 +993,8 @@ function createPlaylist(message, params, user) {
     if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
 
     if (user.playlists.length >= 25) return message.channel.send("You have reached the maximum number of allowed playlists!");
+
+    if(newName.length > 200) return message.channel.send(`${newName} is too loong!`);
     user.playlists.push({ title: newName, songs: [] })
     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
 

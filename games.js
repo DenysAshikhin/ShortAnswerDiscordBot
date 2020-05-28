@@ -429,7 +429,6 @@ async function gameStats(message, params, user) {
     else
         return -1;
 
-
     let game = Array.isArray(params) ? params[0].trim() : params;
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
     if (!args) return message.channel.send("You have to provide the name of a game whose stats you wish to see!");
@@ -441,8 +440,8 @@ async function gameStats(message, params, user) {
 
     if (check == -1) {
 
-        message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-        return 0;
+        message.channel.send(`I could not find any game match for ${params}`);
+        return check;
     }
     else if (check.result[0].score != 0) {
 
@@ -524,8 +523,11 @@ async function topGames(message, params) {
     gameMap = [...gameMap.entries()].sort(function (a, b) { return b[1] - a[1] });
 
     let maxResults = 5;
-    if (!(isNaN(params[0])))
-        maxResults = params[0] <= 0 ? 5 : params[0];
+
+    if (Array.isArray(params)) params = Math.floor(Number(params[0]));
+
+    if (!(isNaN(params)))
+        maxResults = params <= 0 ? 5 : Math.floor(Number(params));
     if (maxResults > 25) {
         maxResults = 25;
         message.channel.send("Search results are limited to a max of 25 games!");
@@ -535,15 +537,18 @@ async function topGames(message, params) {
         message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
         return;
     }
-
     else if (maxResults > gameMap.length && maxResults) {
 
         maxResults = gameMap.length;
         finalEmbed.description = `There are only ${maxResults} games people signed up for on ${message.guild.name}`;
     }
     else {
-        finalEmbed.description = `You did not specify a valid number of games to display, as such, I will display the top ${maxResults}`
-            + ` games people signed up for on the ${message.guild.name} server:`;
+
+        if (params <= 0)
+            finalEmbed.description = `You did not specify a valid number of games to display, as such, I will display the top ${maxResults}`
+                + ` games people signed up for on the ${message.guild.name} server:`;
+        else
+            finalEmbed.description = `Displaying the top *${maxResults}* games people signed up for on the ${message.guild.name} server:`;
     }
 
     for (let i = 0; i < maxResults; i++) {

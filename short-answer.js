@@ -154,7 +154,7 @@ var commandTracker = new Map();
 var config = null;
 
 
-var timers = new Map();
+
 var defaultPrefix = "sa!";
 global.prefix;
 
@@ -782,6 +782,7 @@ async function checkExistance(member) {
         return false;
     }
 }
+exports.checkExistance = checkExistance;
 
 function hmsToSecondsOnly(str) {
 
@@ -1037,21 +1038,8 @@ async function minuteCount() {
     countTalk();
 }
 
-async function timerTrack() {
-    for (timer of timers.entries()) {
-
-        timer[1].time -= 2;
-        timer[1].message.edit(`Set a timer to go off in ${timeConvert(timer[1].time)}`);
-        if (timer[1].time <= 0) {
-            timer[1].author.send("Your timer has finished!");
-            timers.delete(timer[0]);
-            timer[1].message.edit(":alarm_clock: *Ring* **Ring** *Ring* :alarm_clock:");
-        }
-    }
-}
-
 setInterval(minuteCount, 60 * 1000);
-setInterval(timerTrack, 2000);
+
 
 //add proper listing to games list and personal playlists, whichever summon you wanna join prompt
 //shake user # of times -> have to check for move user perms

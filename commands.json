@@ -120,7 +120,7 @@
         "Removes all the games from your games list.",
         "Shows the number of players (and optionally the list of players) signed up for a specific game.",
         "Shows the top games for the server (by number of players signed up for them). Default length is 5, can be set manually.",
-        "Sets a custom prefix for this server that only applies to *you*. This prefix the highest priority.", 
+        "Sets a custom prefix for this server that only applies to *you*. This prefix has the highest priority.", 
         "Sets a custom prefix that will be used when DM'ing me, or if the there are no other prefixes set.",
  
         "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission.",

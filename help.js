@@ -86,7 +86,7 @@ function generalHelp(message, params, user) {
         return message.channel.send({ embed: newEmbed });
     }
 
-    if (params.index) {
+    if (params.index != null) {
 
         let examples = "```md\n";
 
@@ -111,7 +111,6 @@ function generalHelp(message, params, user) {
             internalArray.push({ index: i });
         }
         let query = args;
-        console.log(args)
         return MAIN.generalMatcher(message, query, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
     }
 }

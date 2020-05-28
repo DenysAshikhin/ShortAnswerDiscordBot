@@ -9,7 +9,7 @@ async function initialiseUsers(message) {
 
         let member = MEMBER[1];
 
-        if (await (checkExistance(member))) {//User exists with a matching guild in the DB
+        if (await (MAIN.checkExistance(member))) {//User exists with a matching guild in the DB
             existingUsers++;
         }
         else {
@@ -37,10 +37,14 @@ function setDefaultServerPrefix(message, params, user) {
     if (Array.isArray(params))
         params = params[0];
 
-    let index = user.guilds.indexOf(message.guild.id);
-    user.prefix[index] = params;
+    // let index = user.guilds.indexOf(message.guild.id);
+    // user.prefix[index] = params;
 
+    if (params == -1) return message.channel.send(`You can't set your prefix to ${params}`);
+    
     message.channel.send(`This server's default prefix is: "${params}"`);
+    
+    if(params == "sa!") params = -1;    
 
     Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { prefix: params } }, function (err, doc, res) { });
     return 1;
