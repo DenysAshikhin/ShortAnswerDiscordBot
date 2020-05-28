@@ -34,31 +34,32 @@ async function searchForUser(message, params, user) {
 
         let goal = message.mentions.members.values().next().value.id;
 
-        for (guild of MAIN.Client.guilds.cache.values()) {
+        for (guild of Client.guilds.cache.values()) {
             for (channel of guild.channels.cache.values()) {
                 if (channel.type == "voice") {
                     if (channel.members.size > 0)
                         for (member of channel.members.values()) {
                             if (member.id == goal)
-                                message.channel.send("```diff\n" + `${member.displayName} was found in:\n+Server: ${guild.name}\n-Channel: ${channel.name}` + "```");
+                                return message.channel.send("```diff\n" + `${member.displayName} was found in:\n+Server: ${guild.name}\n-Channel: ${channel.name}` + "```");
                         }
                 }
             }
         }
     }
     else {
-        for (guild of MAIN.Client.guilds.cache.values()) {
+        for (guild of Client.guilds.cache.values()) {
             for (channel of guild.channels.cache.values()) {
                 if (channel.type == "voice") {
                     if (channel.members.size > 0)
                         for (member of channel.members.values()) {
                             if (member.displayName == args)
-                                message.channel.send("```diff\n" + `${member.displayName} was found in:\n+Server: ${guild.name}\n-Channel: ${channel.name}` + "```");
+                                return message.channel.send("```diff\n" + `${member.displayName} was found in:\n+Server: ${guild.name}\n-Channel: ${channel.name}` + "```");
                         }
                 }
             }
         }
     }
+    return message.channel.send("I didn't find the user in any of my servers!");
 }
 exports.searchForUser = searchForUser;
 
@@ -99,6 +100,9 @@ exports.flipCoin = flipCoin;
 async function roll(message, params, user) {
 
     const args = message.content.split(" ").slice(1).join(" ");
+    if(isNaN(args) || (args.length < 1)) return message.channel.send("You need to enter a number.");
+    if (Number.MAX_SAFE_INTEGER < Number(args)) return message.channel.send("That number is too large.");
+
     if (args)
         return message.channel.send(`${user.displayName} rolled a ${Math.floor((Math.random() * args) + 1)}`);
     return message.channel.send(`${user.displayName} rolled a ${Math.floor((Math.random() * 20) + 1)}`);

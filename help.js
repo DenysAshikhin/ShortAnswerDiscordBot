@@ -1,12 +1,13 @@
 const MAIN = require('./short-answer.js');
+const Commands = require('./commands.json');
 
 
 function helpStats(message, params, user) {
 
 
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` Stats Commands`;
+    newEmbed.title = MAIN.Embed.title + ` Stats Commands`;
     newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
     for (let i = 0; i < Commands.commands.length; i++)
@@ -19,9 +20,9 @@ exports.helpStats = helpStats;
 
 function helpMusic(message, params, user) {
 
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` Music Commands`;
+    newEmbed.title = MAIN.Embed.title + ` Music Commands`;
     newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
     for (let i = 0; i < Commands.commands.length; i++)
@@ -34,9 +35,9 @@ exports.helpMusic = helpMusic;
 
 function gameHelp(message, params, user) {
 
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` Game Commands`,
+    newEmbed.title = MAIN.Embed.title + ` Game Commands`,
         newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
     for (let i = 0; i < Commands.commands.length; i++)
@@ -53,9 +54,9 @@ function generalHelp(message, params, user) {
 
     if (!args) {
 
-        let newEmbed = JSON.parse(JSON.stringify(Embed));
+        let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
         newEmbed.timestamp = new Date();
-        newEmbed.title = Embed.title + ` General Help`;
+        newEmbed.title = MAIN.Embed.title + ` General Help`;
         newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
         newEmbed.fields = [
             { name: "Games", value: "", inline: true },
@@ -70,7 +71,7 @@ function generalHelp(message, params, user) {
             { name: "Bugs/Suggestions", value: "", inline: true },
         ];
 
-        for (tag of tags) {
+        for (tag of MAIN.tags) {
 
             let counter = 0;
             for (let i = 0; i < Commands.commands.length; i++) {
@@ -111,16 +112,16 @@ function generalHelp(message, params, user) {
         }
         let query = args;
         console.log(args)
-        return generalMatcher(message, query, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
+        return MAIN.generalMatcher(message, query, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
     }
 }
 exports.generalHelp = generalHelp;
 
 function gameHelp(message, params, user) {
 
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     newEmbed.timestamp = new Date();
-    newEmbed.title = Embed.title + ` Game Commands`;
+    newEmbed.title = MAIN.Embed.title + ` Game Commands`;
     newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
 
@@ -134,9 +135,9 @@ exports.gameHelp = gameHelp;
 
 function helpMiscellaneous(message) {
 
-    let miscEmbed = JSON.parse(JSON.stringify(Embed));
+    let miscEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     miscEmbed.timestamp = new Date();
-    miscEmbed.title = Embed.title + ` Miscellaneous Commands`;
+    miscEmbed.title = MAIN.Embed.title + ` Miscellaneous Commands`;
     miscEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
     for (let i = 0; i < Commands.commands.length; i++)

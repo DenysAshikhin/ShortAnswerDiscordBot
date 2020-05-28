@@ -2,6 +2,7 @@ const gameJSON = require('./gameslist.json');
 const MAIN = require('./short-answer.js');
 const Fuse = require('fuse.js');
 const User = require('./User.js');
+const Commands = require('./commands.json');
 
 var games = new Array();
 var guildSquads = new Map();
@@ -57,7 +58,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             removeEmbed.fields.push({ name: suggestion, value: "** **" });
 
         message.channel.send({ embed: removeEmbed });
-        specificCommandCreator(pingUsers, [message, -1, user], check.result, user);
+        MAIN.specificCommandCreator(pingUsers, [message, -1, user], check.result, user);
         return -11;
     }
     else {
@@ -119,7 +120,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         let finalEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
         finalEmbed.timestamp = new Date();
         finalEmbed.description = message.member.displayName + " has summoned " + signedUp + " for some " + game
-            + "```fix\n" + `To accept the summons type ${MAIN.prefix}q` + "```";
+            + "```fix\n" + `To accept the summons type ${prefix}q` + "```";
 
         if (signedUp.length > 3) {
 
@@ -258,12 +259,12 @@ function search(message, searches) {
 
     if (searches == undefined || searches == null || searches.length < 1) {
 
-        message.channel.send("You didn't provide a search criteria, try again - i.e. " + MAIN.prefix + Commands.commands[1] + " counter");
+        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + Commands.commands[1] + " counter");
         return -1;
     }
-    if (searches.length == 1 && (searches[0].toUpperCase() == (MAIN.prefix.toUpperCase() + Commands.commands[1]))) {
+    if (searches.length == 1 && (searches[0].toUpperCase() == (prefix.toUpperCase() + Commands.commands[1]))) {
 
-        message.channel.send("You didn't provide a search criteria, try again - i.e. " + MAIN.prefix + Commands.commands[1] + " counter");
+        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + Commands.commands[1] + " counter");
         return -1;
     }
 
@@ -309,7 +310,7 @@ exports.search = search;
 function excludePing(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + MAIN.prefix + Commands.commands[5] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
         return -1;
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
@@ -327,7 +328,7 @@ function excludePing(message, params, user) {
         return 0;
     }
     else {
-        message.channel.send("You must enter either true or false: **" + MAIN.prefix + Commands.commands[5] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
         return -1;
     }
 }
@@ -336,7 +337,7 @@ exports.excludePing = excludePing;
 function excludeDM(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + MAIN.prefix + Commands.commands[6] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
         return -1;
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
@@ -362,7 +363,7 @@ function excludeDM(message, params, user) {
         return 0;
     }
     else {
-        message.channel.send("You must enter either true or false: **" + MAIN.prefix + Commands.commands[6] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
         return -1;
     }
 }
@@ -447,7 +448,7 @@ async function gameStats(message, params, user) {
             removeEmbed.fields.push({ name: suggestion, value: "** **" });
 
         message.channel.send({ embed: removeEmbed });
-        specificCommandCreator(gameStats, [message, -1, user], check.result, user);
+        MAIN.specificCommandCreator(gameStats, [message, -1, user], check.result, user);
         return -11;
     }
     else {
@@ -716,7 +717,7 @@ function removeGame(message, game, user) {
 
     if (user.games.length < 1 && !game.mass) {
 
-        message.channel.send(`You have no games in your games list, please sign up for some with ${MAIN.prefix}` + Commands.commands[2]);
+        message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2]);
         return;
     }
     else {
@@ -767,7 +768,7 @@ function removeGame(message, game, user) {
                     removeEmbed.fields.push({ name: suggestion, value: "** **" });
 
                 message.channel.send({ embed: removeEmbed });
-                specificCommandCreator(removeGame, [message, -1, user], check.result, user);
+                MAIN.specificCommandCreator(removeGame, [message, -1, user], check.result, user);
                 return -11;
             }
             else {
@@ -1019,7 +1020,7 @@ async function updateGames(message, game, user) {
                 removeEmbed.fields.push({ name: suggestion, value: "** **" });
 
             message.channel.send({ embed: removeEmbed });
-            specificCommandCreator(updateGames, [message, -1, user], check.result, user);
+            MAIN.specificCommandCreator(updateGames, [message, -1, user], check.result, user);
             return -11;
         }
         else {
@@ -1095,7 +1096,7 @@ async function updateGames(message, game, user) {
     if (!mass)
         message.channel.send({ embed: finalEmbed });
 
-    let length = finalGameArray.length;
+    let length = finalGameArray.length == 0 ? -1 : finalGameArray.length;
     if (user.games)
         finalGameArray = finalGameArray.concat(user.games).filter(v => (v));//removing nulls or undefined
 

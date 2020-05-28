@@ -143,11 +143,12 @@ const tags = [
     9,// - tutorials
     10,// - bugs/suggestions/improvements
 ]
+exports.tags = tags;
 
 
 //FAT NOTE: (true >= false) is TRUE
-var Client = new Discord.Client();
-exports.Client = Client;
+global.Client = new Discord.Client();
+
 var commandMap = new Map();
 var commandTracker = new Map();
 var config = null;
@@ -155,8 +156,8 @@ var config = null;
 
 var timers = new Map();
 var defaultPrefix = "sa!";
-var prefix;
-exports.prefix = prefix;
+global.prefix;
+
 var uri = "";
 var token = "";
 var lastMessage;
@@ -230,7 +231,6 @@ connectDB.once('open', async function () {
     Client.on("message", async (message) => {
 
         if (message.author.bot) return;
-
         let user = await findUser({ id: message.author.id });
 
         if (message.channel.type != 'dm') {
@@ -445,7 +445,6 @@ async function commandMatcher(message, command, params, user) {
 
 //-1 invalid input, 0 don't delete (passed to command matcher) - need it next time, 1 handled - delete
 async function handleCommandTracker(specificCommand, message, user, skipSearch) {
-
     //console.log(specificCommand)
     let params = message.content;
     let tutorialResult;
@@ -490,6 +489,7 @@ function specificCommandCreator(command, defaults, choices, user) {
         choices: choices
     });
 }
+exports.specificCommandCreator = specificCommandCreator;
 
 async function checkCommands(params, user) {
 
@@ -828,6 +828,7 @@ exports.shuffleArray = shuffleArray;
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
     console.log("message.content: ", message.content,
+        "PARAMS: ", params,
         "ORGINI COMMAND:  ", originalCommand,
         "FLAVY:  ", flavourText);
 

@@ -51,9 +51,13 @@ async function skip(message, params) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
     let skipy = lastSkip.get(message.guild.id);
+    const args = Number(message.content.split(" ").slice(1).join(" "));
+
+    if (isNaN(args)) return message.channel.send("You have entered an invalid number!");
+    if (Number(params) == 0) return message.channel.send("0 is not a valid number!");
+
     if (guildQueue) {
 
-        console.log(((new Date()) - skipy) <= 200)
         if (!skipy) lastSkip.set(message.guild.id, new Date());
         if (((new Date()) - skipy) <= 1000) {
             console.log("Chill corner")
@@ -61,14 +65,13 @@ async function skip(message, params) {
         }
         lastSkip.set(message.guild.id, new Date());
 
-        if (!isNaN(params))
-            if ((guildQueue.index + Number(params)) >= guildQueue.songs.length || (guildQueue.index + Number(params)) < 0)
-                return message.channel.send(`You're trying to skip too many songs!`);
-            else { guildQueue.index += Number(params); }
-        else if (params == prefix + 'skip')
+        if ((args == 0) && (guildQueue.index != (guildQueue.songs.length - 1)))
             guildQueue.index++;
+        else if (args == 0) return message.channel.send(`You're trying to skip too many songs!`);
+        else if ((guildQueue.index + args) >= guildQueue.songs.length || (guildQueue.index + args) < 0)
+            return message.channel.send(`You're trying to skip too many songs!`);
+        else { guildQueue.index += args; }
 
-        console.log(`after: ${guildQueue.index}`)
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
         resetSong(guildQueue.songs[guildQueue.index]);
         playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
@@ -80,17 +83,20 @@ async function reverse(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
+    const args = Number(message.content.split(" ").slice(1).join(" "));
+
+    if (isNaN(args)) return message.channel.send("You have entered an invalid number!");
+    if (Number(params) == 0) return message.channel.send("0 is not a valid number!");
 
     if (guildQueue) {
 
-        if (!isNaN(params))
-            if ((guildQueue.index - Number(params)) >= guildQueue.songs.length || (guildQueue.index - Number(params)) < 0)
-                return message.channel.send(`You're trying to reverse too many songs!`);
-            else { guildQueue.index -= Number(params); }
-        else if (params == prefix + 'skip')
+        if ((args == 0) && (guildQueue.index != 0))
             guildQueue.index--;
+        else if (args == 0) return message.channel.send(`You're trying to reverse too many songs!`);
+        else if ((guildQueue.index - args) >= guildQueue.songs.length || (guildQueue.index - args) < 0)
+            return message.channel.send(`You're trying to reverse too many songs!`);
+        else { guildQueue.index -= args; }
 
-        console.log(`after: ${guildQueue.index}`)
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
         resetSong(guildQueue.songs[guildQueue.index]);
         playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
@@ -232,7 +238,7 @@ async function goTo(message, params, user) {
 
     if (!args || isNaN(args)) return message.channel.send("You have to provide the number of the song to go to!");
 
-    if ((guildQueue.songs.length < args) || (args < 0)) return message.channel.send("You must enter a valid song number!");
+    if ((guildQueue.songs.length < args) || (args <= 0)) return message.channel.send("You must enter a valid song number!");
 
     guildQueue.index = args - 1;
 
