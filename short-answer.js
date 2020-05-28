@@ -310,11 +310,6 @@ connectDB.once('open', async function () {
         }
     });
 
-    Client.on('presenceUpdate', (oldMember, newMember) => {
-
-        //console.log("hopefuly this traffic keeps it awake?");
-    });//
-
     Client.on("guildCreate", async guild => {
 
         let searchedGuild = await findGuild({ id: guild.id });
@@ -373,7 +368,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[41], MUSIC.createPlaylist)
     commandMap.set(Commands.commands[42], MUSIC.myPlayLists)
     commandMap.set(Commands.commands[43], MUSIC.removeSong)
-    commandMap.set(Commands.commands[44], MUSIC.playlist)
+    commandMap.set(Commands.commands[44], MUSIC.playUserPlayList)
     commandMap.set(Commands.commands[45], MUSIC.savePlayList)
     commandMap.set(Commands.commands[46], MUSIC.removePlayList)
     commandMap.set(Commands.commands[47], GAMES.Queue)
@@ -805,7 +800,6 @@ function timeConvert(time) {
     if ((seconds + "").length < 2) seconds = '0' + seconds;
     let minutes = Math.floor(time / 60 % 60);
     if ((minutes + "").length < 2) minutes = '0' + minutes;
-    console.log((minutes + "").length)
     let hours = Math.floor(time / 60 / 60);
     if (("" + hours).length < 2) hours = '0' + hours;
 
@@ -858,6 +852,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 
         if (result[0])
             if (result[0].score == 0) {
+                console.log("ORIGIN:::", originalCommand);
                 return originalCommand.apply(null, [message, internalArray[result[0].refIndex], user]);
             }
 

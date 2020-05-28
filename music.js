@@ -5,6 +5,7 @@ const ytpl = require('ytpl');
 const ytsr = require('ytsr');
 const readline = require('readline');
 var mv = require('mv');
+const User = require('./User.js');
 const fs = require('fs');
 const fsPromises = fs.promises;
 
@@ -51,7 +52,7 @@ async function skip(message, params) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
     let skipy = lastSkip.get(message.guild.id);
-    const args = Number(message.content.split(" ").slice(1).join(" "));
+    const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
     if (isNaN(args)) return message.channel.send("You have entered an invalid number!");
     if (Number(params) == 0) return message.channel.send("0 is not a valid number!");
@@ -60,7 +61,6 @@ async function skip(message, params) {
 
         if (!skipy) lastSkip.set(message.guild.id, new Date());
         if (((new Date()) - skipy) <= 1000) {
-            console.log("Chill corner")
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
         lastSkip.set(message.guild.id, new Date());
@@ -83,7 +83,7 @@ async function reverse(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
-    const args = Number(message.content.split(" ").slice(1).join(" "));
+    const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
     if (isNaN(args)) return message.channel.send("You have entered an invalid number!");
     if (Number(params) == 0) return message.channel.send("0 is not a valid number!");
@@ -128,9 +128,10 @@ async function forward(message, params) {
             if (!/^[:0-9]+$/.test((params + '').substr(1))) return message.channel.send("You have entered an invalid forward format!");
 
         let newSkip = !isNaN(params) ? Number(params) : MAIN.hmsToSecondsOnly(params);
+        let current = song.paused ? song.offset - song.timePaused + ((Math.floor(new Date() - song.start - ((new Date() - song.paused)))) / 1000)
+        : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
 
-
-        if (newSkip + song.offset > song.duration || newSkip + song.offset < 0) return message.channel.send("You can't go beyond the song's duration!")
+        if (newSkip + current > song.duration || newSkip + current < 0) return message.channel.send("You can't go beyond the song's duration!")
         else {
 
             if (song.start)
@@ -165,8 +166,10 @@ async function rewind(message, params) {
         if (!/^[:0-9]+$/.test(params.substr(1))) return message.channel.send("You have entered an invalid rewind format!");
 
         let newSkip = !isNaN(params) ? Number(params) : MAIN.hmsToSecondsOnly(params);
+        let current = song.paused ? song.offset - song.timePaused + ((Math.floor(new Date() - song.start - ((new Date() - song.paused)))) / 1000)
+        : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
 
-        if (song.offset - newSkip > song.duration || song.offset - newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
+        if (current - newSkip > song.duration || current - newSkip < 0) return message.channel.send("You can't go beyond the song's duration!")
         else {
             if (song.start)
                 if (!song.paused)
@@ -234,7 +237,7 @@ async function goTo(message, params, user) {
     let guildQueue = queue.get(message.guild.id);
     if (!guildQueue) return message.channel.send("There needs to be a song playing!");
 
-    const args = message.content.split(" ").slice(1).join(" ");
+    const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
     if (!args || isNaN(args)) return message.channel.send("You have to provide the number of the song to go to!");
 
@@ -246,6 +249,7 @@ async function goTo(message, params, user) {
 
     resetSong(guildQueue.songs[guildQueue.index]);
     playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
+    return message.channel.send(`Skipping to song #${args}!`);
 }
 exports.goTo = goTo;
 
@@ -517,7 +521,7 @@ async function playSong(guild, sonG, skip, message) {
         console.log(`toDownload ${percentageToDownload} || toSkip ${percentageToSkip}`);
 
         if ((percentageToSkip > percentageToDownload) && (download.get(guild.id).songToDownload.id == song.id)) {
-            console.log(console.log("chose to wait"));
+            console.log("chose to wait");
 
             return setTimeout(playSong, 1000, guild, song, skip, message);
         }
@@ -733,9 +737,6 @@ async function savePlayList(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
 
-
-    console.log(message);
-
     let serverQueue = queue.get(message.guild.id);
     let song;
 
@@ -786,11 +787,17 @@ async function removeSong(message, params, user) {
             if (err) {
                 console.log(err);
                 Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+                return -1;
+            }
+            else {
+                message.channel.send(`Succesfully removed ${params.song.title}`);
             }
         });
         return 100;
     }
     else if (params.playlist) {
+
+        //if(params.playlist.songs.length == 0) return message.channel.send
 
         let promptArray = [];
         let internalArray = [];
@@ -815,7 +822,8 @@ async function removeSong(message, params, user) {
 }
 exports.removeSong = removeSong;
 
-async function playlist(message, params, user) {
+async function playUserPlayList(message, params, user) {
+    console.log("START: ", playUserPlayList);
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
@@ -854,10 +862,8 @@ async function playlist(message, params, user) {
             queue.set(message.guild.id, queueConstruct);
             serverQueue = queueConstruct;
             callPlay = true;
-        } else {
-
+        } else
             queueConstruct = serverQueue;
-        }
 
         for (video of params.playlist.songs) {
             if (video.duration) {
@@ -893,10 +899,11 @@ async function playlist(message, params, user) {
             internalArray.push({ playlist: user.playlists[i] });
         }
         let query = params ? params : -23;
-        return MAIN.generalMatcher(message, query, user, promptArray, internalArray, playlist, `Enter the number of the playlist you wish to load the songs from!`)
+        console.log("REIGHT BEFORE::::", playUserPlayList);
+        return MAIN.generalMatcher(message, query, user, promptArray, internalArray, playUserPlayList, `Enter the number of the playlist you wish to load the songs from!`)
     }
 }
-exports.playlist = playlist;
+exports.playUserPlayList = playUserPlayList;
 
 async function removePlayList(message, params, user) {
 
@@ -918,7 +925,7 @@ async function removePlayList(message, params, user) {
         for (let i = 0; i < user.playlists.length; i++) {
 
             promptArray.push(user.playlists[i].title);
-            internalArray.push({ playlist: user.playlists[i] });
+            internalArray.push({ playlist: user.playlists[i], index: i });
         }
         let query = params ? params : -23;
         return MAIN.generalMatcher(message, query, user, promptArray, internalArray, removePlayList, `Enter the number of the playlist you wish to delete!`)
@@ -1043,8 +1050,6 @@ exports.currentPlaylist = currentPlaylist;
 function skippingNotification(message, songID, step) {
 
     if (activeSkips.get(songID)) {
-
-        console.log(activeSkips)
 
         if (step == 1) {
             message.edit(message.content + " :musical_note:");
