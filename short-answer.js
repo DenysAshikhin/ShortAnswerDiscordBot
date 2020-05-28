@@ -445,7 +445,9 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
     let tutorialResult;
     if (!skipSearch) {
         if (!isNaN(params) && params.length > 0) {
-            params = Math.floor(params);
+
+            params = Math.floor(Number(params));
+            if (params > Math.Max_Safe_INTEGER) return message.channel.send("You have entered an invalid option, please try again!");
             if (params >= specificCommand.choices.length || params < 0) {
                 message.channel.send("You have entered an invalid number, please try again. Or type *-1* to quit the suggestion.");
                 return -1;
@@ -897,6 +899,48 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
     }
 }
 exports.generalMatcher = generalMatcher;
+
+async function prettyEmbed(description, array, part) {
+
+    let runningString = "";
+    let groupNumber = 1;
+    let tally = 1;
+    let field = { name: "", value: [], inline: true };
+    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
+    newEmbed.description = description;
+    newEmbed.fields = [];
+
+    for (element of array) {
+
+        if (runningString.length < 75) {
+
+            runningString += element;
+            field.value.push(`${tally}) ${element}\n`);
+        }
+        else {
+            field.name = `${part} ${groupNumber}`;
+            newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+            runningString = "";
+            groupNumber++;
+            field = { name: "", value: [], inline: true };
+
+            if (((groupNumber % 25) == 1) && (groupNumber > 25)) {
+                await message.channel.send({ embed: newEmbed });
+                newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
+                newEmbed.description = description;
+                newEmbed.fields = [];
+            }
+
+            runningString += song;
+            field.value.push(`${tally}) ${element}\n`);
+        }
+        tally++;
+    }
+
+    field.name = `${part} ${groupNumber}`;
+    newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+    return message.channel.send({ embed: newEmbed });
+}
 //do this check for all the other files afterwards
 
 async function graphs() {
@@ -1009,7 +1053,7 @@ async function timerTrack() {
 setInterval(minuteCount, 60 * 1000);
 setInterval(timerTrack, 2000);
 
-
+//add proper listing to games list and personal playlists, whichever summon you wanna join prompt
 //shake user # of times -> have to check for move user perms
 //volume control
 //sptofiy playlist
@@ -1035,12 +1079,12 @@ setInterval(timerTrack, 2000);
 //seal idan easter eggs
 process.on('unhandledRejection', (reason, promise) => {
     console.log("FFFFFF   ", reason);
-    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
+     Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
 });
 
 process.on('unhandledException', (reason, p) => {
     console.log(";;;;;;;;;;; ", reason);
-    if (prefix != "##") Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
+    Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
 });
 
 //DM quality of life (for now its just prefixes?) - prefix tutorial

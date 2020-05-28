@@ -32,7 +32,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     if (sizeLimit)
         sizeLimit.trim();
     let squadSize = !isNaN(sizeLimit) && sizeLimit.length > 0 ? Number(sizeLimit) : 5;
-    squadSize = squadSize < 0 ? 5 : squadSize;
+    squadSize = squadSize <= 0 ? 5 : squadSize;
 
     if (game.length > 1 && Array.isArray(game)) {
         game = game[0];
@@ -42,8 +42,8 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     if (check == -1) {
 
-        message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-        return 0;
+        message.channel.send(`I couldn't find any match for ${game}! Try a different game?`);
+        return check;
     }
     else if (check.result[0].score != 0) {
 
@@ -116,7 +116,6 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             }
         }//Each user for loop
 
-        console.log(MAIN.Embed)
         let finalEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
         finalEmbed.timestamp = new Date();
         finalEmbed.description = message.member.displayName + " has summoned " + signedUp + " for some " + game
@@ -126,10 +125,19 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
             //into players put yourSELF!!!! NOTE note
             let squads = guildSquads.get(message.guild.id);
+
+            if (squads) {
+                let squad = squads.find(element => element.summonerID == user.id);
+                if (squad) {
+                    squads.splice(squads.indexOf(squad), 1);
+                    message.channel.send("Overwriting your old summon!");
+                }
+            }
+
             if (squads)
-                squads.push({ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName });
+                squads.push({ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id });
             else
-                guildSquads.set(message.guild.id, [{ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName }])
+                guildSquads.set(message.guild.id, [{ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id }])
             message.channel.send({ embed: finalEmbed });
         }
         else
@@ -468,7 +476,7 @@ async function gameStats(message, params, user) {
 
         if (signedUp.length > 0) {
             //message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
-            return generalMatcher(message, -23, user, ['Yes', 'No'], [{ userList: signedUp, gameTitle: game }, null], gameStats, `There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up?`);
+            return MAIN.generalMatcher(message, -23, user, ['Yes', 'No'], [{ userList: signedUp, gameTitle: game }, null], gameStats, `There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up?`);
         }
         else
             message.channel.send(`There are ${signedUp.length} users signed up for ${game}.`);
@@ -554,7 +562,9 @@ async function Queue(message, params, user) {
 
     let squads = guildSquads.get(message.guild.id);
 
-    if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+    if (!squads) return message.channel.send("There are no active summons in the server to queue for!");
+
+    if (squads.length == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let ETA;
     if (message.content.includes(','))
@@ -568,7 +578,7 @@ async function Queue(message, params, user) {
     if (finalETA < 0)
         finalETA = -1;
 
-    if (squads.size == 1 || params.summon) {
+    if (squads.length == 1 || params.summon) {
         let squad = params.summon ? params.summon : squads.values().next().value;
         if (squad.displayNames.length < squad.size - 1) {
 
@@ -585,13 +595,13 @@ async function Queue(message, params, user) {
     }
     else if (message.mentions.members.size > 0) {
 
-        let squad = squads.get(message.mentions.members.values().next().value.id);
+        let squad = squads.find(element => element.summonerID == message.mentions.members.values().next().value.id);
         if (!squad) return message.channel.send("That user does not have any active summoninings!");
         if (squad.displayNames.length < squad.size - 1) {
 
             if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
+            squad.displayNames.push(user.displayName);
 
-            //squad.players.push(MAIN.mention(user.id));
             let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
             newEmbed.description = (finalETA == -1) ? `${MAIN.mention(user.id)} has joined the summon!` : `${MAIN.mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
             newEmbed.fields = [{ name: `Current squad members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
@@ -609,7 +619,7 @@ async function Queue(message, params, user) {
             internalArray.push({ summon: squad[1] });
         }
 
-        return generalMatcher(message, -23, user, searchArray, internalArray, Queue, "There are more than one active summon, please enter the number whose summon you wish to answer!");
+        return MAIN.generalMatcher(message, -23, user, searchArray, internalArray, Queue, "There are more than one active summon, please enter the number whose summon you wish to answer!");
     }
 }
 exports.Queue = Queue;
@@ -620,31 +630,37 @@ async function deQueue(message, params, user) {
 
     let squads = guildSquads.get(message.guild.id);
 
-    if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+    if (!squads) return message.channel.send("There are no active summons in the server to deQueue from!");
+
+    if (squads.length == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let mentionID = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
 
     if (mentionID != -1) {
 
-        let squad = squads.get(mentionID);
+        let squad = squads.find(element => element.summonerID == mentionID);
         if (!squad) return message.channel.send(`${MAIN.mention(mentionID)} doesn't have a summon!`);
         if (squad.summoner == user.displayName) {
             message.channel.send("You have cancelled your summon!");
-            return squads.clear();
+            return squads.splice(squads.indexOf(squad), 1);
         }
+
+        if (!squad.displayNames.includes(user.displayName)) return message.channel.send("You have not joined this summon to leave it yet!");
+
         message.channel.send(`Left ${squad.summoner}'s summon!`);
         return squad.displayNames.splice(squad.displayNames.indexOf(user.displayName), 1);
         //return squad.players.splice(squad.players.indexOf(mentionID), 1);
     }
     else {
-        for (let squad of squads.entries())
-            if (squad[1].summoner == user.displayName)
-                squads.splice(squads.indexOf(squad[0]), 1);
-            else if (squad[1].players.includes(MAIN.mention(user.id))) {
-                console.log(squad[1]);
-                squad[1].displayNames.splice(squad[1].displayNames.indexOf(user.displayName), 1);//cannot splice on undefined
-                //squad[1].players.splice(squad[1].players.indexOf(MAIN.mention(user.id)), 1);
-            }
+        for (let squad of squads) {
+            if (squad.summonerID == user.id)
+                squads[squads.indexOf(squad)] = -1;
+            else if (squad.displayNames.includes(user.displayName))
+                squad.displayNames.splice(squad.displayNames.indexOf(user.displayName), 1);//cannot splice on undefined
+        }
+
+        while (squads.includes(-1))
+            squads.splice(squads.indexOf(-1), 1);
 
         return message.channel.send("You have destroyed any of your active summons!");
     }
@@ -656,17 +672,21 @@ async function viewActiveSummons(message, params, user) {
     if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     let squads = guildSquads.get(message.guild.id);
+    if (!squads) return message.channel.send("There are no active summons in the server to view!");
 
-    if (squads.size == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+    if (squads.length == 0) return message.channel.send("There are no active summons in the server to view!");
+    if (squads.length == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
     let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-    newEmbed.description = `There are ${squads.size} active summons!`;
+    newEmbed.description = `There are ${squads.length} active summons!`;
 
     for (let squad of squads.entries()) {
         newEmbed.fields.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames, inline: true });
     }
 
     message.channel.send({ embed: newEmbed });
+
+    //MAIN.prettyEmbed(description, array, part);
 }
 exports.viewActiveSummons = viewActiveSummons;
 
@@ -675,22 +695,24 @@ async function banish(message, params, user) {
     if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
     let squads = guildSquads.get(message.guild.id);
+    if (!squads) return message.channel.send("There are no active summons in the server to banish from!");
 
-    if (!squads.get(user.id)) return message.channel.send("You don't have any active summons to kick from!");
-    let squad = squads.get(user.id);
     let mentionID = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
+    let squad = squads.find(element => element.summonerID == user.id);
+
+    if (!squad) return message.channel.send("You don't have any active summons to kick from!");
 
     if (mentionID != -1) {
-
         if (mentionID == user.id) return message.channel.send("You can't banish yourself from the summon, use the dq command instead!");
-        for (let squad of squads.entries())
-            if (squad[1].summoner == user.displayName)
-                return message.channel.send(`${squad[1].players.splice(squad[1].players.indexOf(MAIN.mention(mentionID)), 1)} has been banished from your summon!`);
-        message.channel.send("Either you don't have an active summon or such player wasn't part of it!");
+        for (let squad of squads)
+            if (squad.summoner == user.displayName) {
+                if (squad.displayNames.indexOf(message.mentions.members.values().next().value.displayName) != -1)
+                    return message.channel.send(`${squad.displayNames.splice(squad.displayNames.indexOf(message.mentions.members.values().next().value.displayName), 1)} has been banished from your summon!`);
+            }
+        return message.channel.send("Either you don't have an active summon or such player wasn't part of it!");
     }
     else if (params.player) {
 
-        squad.displayNames.splice(squad.displayNames.indexOf(params.player), 1);
         return message.channel.send(`${squad.displayNames.splice(squad.displayNames.indexOf(params.player), 1)} has been banished from your summon!`);
     }
     else {
@@ -698,7 +720,7 @@ async function banish(message, params, user) {
         let searchArray = [];
         let internalArray = [];
 
-        for (let i = 0; i < squad.players.length; i++) {
+        for (let i = 0; i < squad.displayNames.length; i++) {
 
             if (squad.displayNames[i] != user.displayName) {
                 searchArray.push(squad.displayNames[i]);
@@ -708,7 +730,7 @@ async function banish(message, params, user) {
 
         if (searchArray.length == 0) return message.channel.send("There is no one to banish from your summon!");
 
-        return generalMatcher(message, -23, user, searchArray, internalArray, banish, "Enter the number of the player you wish to banish from your summon!");
+        return MAIN.generalMatcher(message, -23, user, searchArray, internalArray, banish, "Enter the number of the player you wish to banish from your summon!");
     }
 }
 exports.banish = banish;
@@ -747,12 +769,11 @@ function removeGame(message, game, user) {
         if (game.length == 1) {
 
             let check = checkGame(user.games, game, user);
-            console.log("WO   ", check);
             if ((check == -1)) {
 
                 if (!mass)
-                    message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-                return 0;
+                    message.channel.send("No such game exists in you playlist, try again?");
+                return check;
             }
             else if ((check.result[0].score != 0) && !mass) {
 
@@ -860,7 +881,7 @@ async function removeGameFromAllUsers(message, game, user) {
 
         for (GAME of games)
             internalArray.push({ valid: true, game: GAME });
-        return generalMatcher(message, game, user, games, internalArray, removeGameFromUsers, "Select the number of the game you wish to remove from every server member's games list");
+        return MAIN.generalMatcher(message, game, user, games, internalArray, removeGameFromUsers, "Select the number of the game you wish to remove from every server member's games list");
     }
 
 
@@ -896,7 +917,7 @@ async function removeGameFromSpecificUser(message, game, user) {
 
         for (GAME of games)
             internalArray.push({ valid: true, game: GAME });
-        return generalMatcher(message, args[0], user, games, internalArray, removeGameFromSpecificUser, "Select the number of the game you wish to remove from the specified member's games list");
+        return MAIN.generalMatcher(message, args[0], user, games, internalArray, removeGameFromSpecificUser, "Select the number of the game you wish to remove from the specified member's games list");
     }
 
     let finalList = [];
@@ -928,7 +949,7 @@ async function signUpSpecificUser(message, game, user) {
 
         for (GAME of games)
             internalArray.push({ valid: true, game: GAME });
-        return generalMatcher(message, args[0], user, games, internalArray, signUpSpecificUser, "Select the number of the game you wish to signUp to the specified member's games list");
+        return MAIN.generalMatcher(message, args[0], user, games, internalArray, signUpSpecificUser, "Select the number of the game you wish to signUp to the specified member's games list");
     }
 
     let finalList = [];
@@ -988,8 +1009,6 @@ async function updateGames(message, game, user) {
     else
         game = [game];
 
-
-
     const args = message.content.split(" ").slice(1).join(" ");
     if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
 
@@ -1005,8 +1024,8 @@ async function updateGames(message, game, user) {
 
         if (check == -1) {
 
-            message.channel.send("You have entered an invalid option please try again or enter **-1** to exit the suggestion.");
-            return 0;
+            message.channel.send("I could not find any matching games, try again?");
+            return check;
         }
         else if (check.result[0].score != 0) {
 

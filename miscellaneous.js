@@ -82,7 +82,7 @@ async function flipCoin(message, params, user) {
             message.edit(message.content + "\n/");
             break;
         case 4:
-            message.edit(message.content + "\n---");
+            message.edit(message.content + "\n__");
             break;
         case 5:
 

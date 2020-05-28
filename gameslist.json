@@ -47272,53 +47272,6 @@
         "slug": null
     },
     {
-        "id": "474298936228708372",
-        "name": "140",
-        "icon": "53a6e759755aac8bdc7411e311c212a4",
-        "splash": "f289cc23d7dea45b7e60af63242a7685",
-        "overlay": false,
-        "overlayWarn": false,
-        "overlayCompatibilityHook": false,
-        "aliases": [],
-        "publishers": [
-            {
-                "id": "521816776561131526",
-                "name": "Carlsen Games"
-            }
-        ],
-        "developers": [
-            {
-                "id": "521816776561131526",
-                "name": "Carlsen Games"
-            }
-        ],
-        "primarySkuId": "475000062167089152",
-        "guildId": null,
-        "thirdPartySkus": [
-            {
-                "distributor": "discord",
-                "id": "475000062167089152",
-                "sku": "475000062167089152"
-            },
-            {
-                "distributor": "steam",
-                "id": "242820",
-                "sku": "242820"
-            }
-        ],
-        "executables": [
-            {
-                "name": "140/140.exe",
-                "os": "win32"
-            }
-        ],
-        "hashes": [],
-        "description": null,
-        "youtubeTrailerVideoId": null,
-        "eulaId": null,
-        "slug": "140"
-    },
-    {
         "id": "474431535291039754",
         "name": "RaceRoom Racing Experience",
         "icon": "c9335f64e32134204c61c531f746e8cd",

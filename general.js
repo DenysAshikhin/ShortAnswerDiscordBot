@@ -8,7 +8,7 @@ async function Delete(message, params) {
         return message.channel.send("You do not have the required permissions to delete messages!")
 
 
-    let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
+    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.botID));
     if (!permission.has("MANAGE_MESSAGES"))
         return message.channel.send("I do not have the required permissions to delete messages!")
 
