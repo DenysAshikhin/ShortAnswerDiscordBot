@@ -25,7 +25,7 @@ const fs = require('fs');
 const fsPromises = fs.promises;
 
 
-
+const STATS = require('./stats.js');
 const MISCELLANEOUS = require('./miscellaneous.js')
 const GAMES = require('./games.js');
 
@@ -174,7 +174,6 @@ var token = "";
 
 var lastMessage;
 
-
 try {
     config = require('./config.json');
 }
@@ -287,10 +286,10 @@ connectDB.once('open', async function () {
     removeTempSongs();
 
 
-    for(let i = 0; i < commandMap.size; i++){
+    for (let i = 0; i < commandMap.size; i++) {
 
-        if(Commands.subsection[i] == 3)
-        console.log(Commands.commands[i])
+        if (Commands.subsection[i].includes(2))
+            console.log(Commands.commands[i])
     }
 
 
@@ -421,10 +420,10 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[13], GAMES.pingUsers)
     commandMap.set(Commands.commands[14], initialiseUsers)
     commandMap.set(Commands.commands[15], Delete)
-    commandMap.set(Commands.commands[16], personalStats)
-    commandMap.set(Commands.commands[17], guildStats)
-    commandMap.set(Commands.commands[18], specificStats)
-    commandMap.set(Commands.commands[19], topStats)
+    commandMap.set(Commands.commands[16], STATS.personalStats)
+    commandMap.set(Commands.commands[17], STATS.guildStats)
+    commandMap.set(Commands.commands[18], STATS.specificStats)
+    commandMap.set(Commands.commands[19], STATS.topStats)
     commandMap.set(Commands.commands[20], play)
     commandMap.set(Commands.commands[21], stop)
     commandMap.set(Commands.commands[22], pause)
@@ -467,7 +466,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[59], goTo)
     commandMap.set(Commands.commands[60], shuffle)
     commandMap.set(Commands.commands[61], repeat)
-    commandMap.set(Commands.commands[62], decider)
+    commandMap.set(Commands.commands[62], MISCELLANEOUS.decider)
     commandMap.set(Commands.commands[63], MISCELLANEOUS.roll)
     commandMap.set(Commands.commands[64], setTimer)
     commandMap.set(Commands.commands[65], MISCELLANEOUS.shakeUser)
@@ -493,12 +492,18 @@ async function setTimer(message, params, user) {
     return timers.set(user.id, { time: args, author: author, message: message });
 }
 
-async function decider(message, params, user) {
+function helpMiscellaneous(message) {
 
-    const args = message.content.split(" ").slice(1).join(" ").split(",");
+    let miscEmbed = JSON.parse(JSON.stringify(Embed));
+    miscEmbed.timestamp = new Date();
+    miscEmbed.title = Embed.title + ` Miscellaneous Commands`;
+    miscEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
 
-    if (!args) return message.channel.send("You have to provide at least 1 option!");
-    return message.channel.send(`I have chosen: ${args[Math.floor(Math.random() * args.length)]}`)
+    for (let i = 0; i < Commands.commands.length; i++)
+        if (Commands.subsection[i].includes(3))
+            miscEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
+
+    message.channel.send({ embed: miscEmbed });
 }
 
 function setServerPrefix(message, params, user) {
@@ -932,218 +937,7 @@ function findFurthestDate(date1, date2) {
         return date1;
     return date2;
 }
-
-async function topStats(message) {
-    //create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
-    if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
-    let allUsers = await getUsers();
-    let guild = message.guild;
-    let silentType;
-    let silentTypeIndex;
-
-    let loudMouth;
-    let loudMouthIndex;
-
-    let ghost;
-    let ghostIndex;
-
-    let MIA;
-    let MIAIndex;
-
-    let summoner;
-    let summonerIndex;
-
-    let user = null;
-
-    for (let i = 0; i < allUsers.length; i++) {
-
-        if (allUsers[i].guilds.includes(guild.id)) {
-            user = allUsers[i];
-            let userIndex = user.guilds.indexOf(guild.id);
-
-            if (!user.kicked[userIndex]) {
-                if (!silentType) {
-                    silentType = user;
-                    silentTypeIndex = user.guilds.indexOf(guild.id);
-                }
-                if (!loudMouth) {
-                    loudMouth = user;
-                    loudMouthIndex = user.guilds.indexOf(guild.id);
-                }
-                if (!ghost) {
-                    ghost = user;
-                    ghostIndex = user.guilds.indexOf(guild.id);
-                }
-                if (!MIA) {
-                    MIA = user;
-                    MIAIndex = user.guilds.indexOf(guild.id);
-                }
-                if (!summoner) {
-                    summoner = user;
-                    summonerIndex = user.guilds.indexOf(guild.id);
-                }
-
-                if (Number(silentType.messages[silentTypeIndex]) < Number(user.messages[userIndex])) {
-                    silentType = user;
-                    silentTypeIndex = userIndex;
-                }
-
-                if (Number(loudMouth.timeTalked[loudMouthIndex]) < Number(user.timeTalked[userIndex])) {
-                    loudMouth = user;
-                    loudMouthIndex = userIndex;
-                }
-
-                if (Number(ghost.timeAFK[ghostIndex]) < Number(user.timeAFK[userIndex])) {
-                    ghost = user;
-                    ghostIndex = userIndex;
-                }
-
-                if (summoner.summoner[summonerIndex] < user.summoner[userIndex]) {
-                    summoner = user;
-                    summonerIndex = userIndex;
-                }
-
-                let userDate = findFurthestDate(user.lastMessage[userIndex], user.lastTalked[userIndex]);
-                let MIADate = findFurthestDate(MIA.lastMessage[MIAIndex], MIA.lastTalked[MIAIndex]);
-
-                if (userDate == findFurthestDate(userDate, MIADate) && userDate != "0-0-0") {
-                    MIA = user;
-                    MIAIndex = userIndex;
-                }
-                else if (MIADate == "0-0-0" && userDate != "0-0-0") {
-                    MIA = user;
-                    MIAIndex = userIndex;
-                }
-            }
-        }
-    }
-
-
-    let statsEmbed = JSON.parse(JSON.stringify(Embed));
-    statsEmbed.date = new Date();
-    statsEmbed.title = Embed.title + ` - Top Stats for ${message.guild.name}!`;
-    statsEmbed.thumbnail.url = message.guild.iconURL();
-    statsEmbed.fields = [
-        { name: `The Silent Type: ${silentType.displayName}`, value: `${silentType.messages[silentTypeIndex]} messages sent.` },
-        { name: `The Loud Mouth: ${loudMouth.displayName}`, value: `${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.` },
-        { name: `The Ghost: ${ghost.displayName}`, value: `${ghost.timeAFK[ghostIndex]} minutes spent AFK.` },
-        { name: `The MIA: ${MIA.displayName}`, value: findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date." },
-        { name: `The Summoner: ${summoner.displayName}`, value: `${summoner.summoner[summonerIndex]} summoning rituals completed.` }
-    ];
-
-
-    message.channel.send({ embed: statsEmbed });
-}
-
-async function specificStats(message) {
-    if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
-    if (message.mentions.members.size < 1)
-        message.channel.send("You have to @someone properly!");
-    else if (message.mentions.members.first().id == botID)
-        message.channel.send("My stats are private!");
-    else {
-
-        let specificEmbed = await getStats(message.mentions.members.first());
-        specificEmbed.description = message.mentions.members.first().displayName + ", *" + message.member.displayName + "* requested your stats:";
-        specificEmbed.thumbnail.url = message.mentions.members.first().user.avatarURL();
-
-        message.channel.send({ embed: specificEmbed });
-    }
-}
-
-async function getStats(member, user) {
-
-    if (!user)
-        user = await findUser({ id: member.id });
-
-    let index = user.guilds.indexOf(member.guild.id);
-
-    if (!user.kicked[index]) {
-        let stats = "";
-
-
-        let statsEmbed = JSON.parse(JSON.stringify(Embed));
-        statsEmbed.date = new Date();
-        statsEmbed.fields = [
-            { name: "Total number of messages sent: ", value: user.messages[index], inline: true },
-            { name: "Last message sent: ", value: user.lastMessage[index], inline: true },
-            { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: true },
-            { name: "Last time you talked was: ", value: user.lastTalked[index], inline: true },
-            { name: "Number of games you are signed up for: ", value: user.games.length, inline: true },
-            { name: "Number of saved playlists: ", value: user.playlists.length, inline: true },
-            { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: true },
-            { name: "You joined this server on: ", value: user.dateJoined[index], inline: true },
-            { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: true },
-            { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: true },
-            { name: "Number of succesful summons: ", value: user.summoner[index], inline: true },
-        ];
-
-        return statsEmbed;
-    }
-    return -1;
-}
-
-async function personalStats(message, params, user) {
-
-    if (message.channel.type != 'dm') {
-        let statResult = await getStats(message.member, user);
-        statResult.title = Embed.title + ` ${message.member.displayName}'s stats:`
-        if (!user.kicked[user.guilds.indexOf(message.guild.id)]) {
-            message.channel.send({ embed: statResult });
-        }
-    }
-    else {
-
-
-        let statsEmbed = JSON.parse(JSON.stringify(Embed));
-        statsEmbed.date = new Date();
-        statsEmbed.description = ` ${message.author.username} Here Are Your General Stats!`;
-        statsEmbed.fields = [
-            { name: "The games you are signed up for: ", value: user.games },
-            { name: "Whether you are excluded from pings: ", value: user.excludePing },
-            { name: "Whether you are excluded from DMs: ", value: user.excludeDM }
-        ];
-
-        message.channel.send({ embed: statsEmbed });
-
-        for (let i = 0; i < user.guilds.length; i++) {
-
-            if (!user.kicked[i]) {
-                let stats = "";
-
-                let statsEmbed = JSON.parse(JSON.stringify(Embed));
-                statsEmbed.date = new Date();
-                statsEmbed.description = `Here Are Your Stats For ${message.client.guilds.cache.get(user.guilds[i]).name} Server!`;
-                statsEmbed.thumbnail.url = message.client.guilds.cache.get(user.guilds[i]).iconURL();
-                statsEmbed.fields = [
-                    { name: "Total number of messages sent: ", value: user.messages[i], inline: false },
-                    { name: "Last message sent: ", value: user.lastMessage[i], inline: false },
-                    { name: "Total time spent talking (in minutes): ", value: user.timeTalked[i], inline: false },
-                    { name: "Last time you talked was: ", value: user.lastTalked[i], inline: false },
-                    { name: "Time spent AFK (in minutes): ", value: user.timeAFK[i], inline: false },
-                    { name: "You joined this server on: ", value: user.dateJoined[i], inline: false },
-                    { name: "Number of succesful summons: ", value: user.summoner[i], inline: false },
-                ];
-
-                message.channel.send({ embed: statsEmbed });
-            }
-        }
-    }
-}
-
-function helpMiscellaneous(message) {
-
-    let miscEmbed = JSON.parse(JSON.stringify(Embed));
-    miscEmbed.timestamp = new Date();
-    miscEmbed.title = Embed.title + ` Miscellaneous Commands`;
-    miscEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(3))
-            miscEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
-
-    message.channel.send({ embed: miscEmbed });
-}
+exports.findFurthestDate = findFurthestDate;
 
 function helpStats(message, params, user) {
 
@@ -1269,30 +1063,6 @@ function gameHelp(message, params, user) {
             newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i], inline: true });
 
     message.channel.send({ embed: newEmbed });
-}
-
-async function guildStats(message, params, user) {
-
-    if (message.channel.type == 'dm') return -1;
-
-    if (!message.channel.permissionsFor(message.member).has("ADMINISTRATOR"))
-        return message.channel.send("You do not have the administrator permission to view all member stats!")
-
-    let memberArray = message.guild.members.cache.array();
-
-    for (let i = 0; i < memberArray.length; i++) {
-
-        if (memberArray[i].id != botID) {
-            let specificStats = await getStats(memberArray[i]);
-            specificStats.description = memberArray[i].displayName + "'s stats.";
-            specificStats.thumbnail.url = memberArray[i].user.avatarURL();
-
-            if (specificStats != -1) {
-                message.channel.send({ embed: specificStats });
-            }
-        }
-    }
-    message.channel.send("```DONE!```");
 }
 
 //TRIPLE CHECK THISSSS
@@ -1444,6 +1214,7 @@ function getDate() {
 
     return dayNumber + "-" + monthNumber + "-" + today.getFullYear();
 }
+exports.getDate = getDate;
 
 function mention(id) {
     return "<@" + id + ">"
@@ -1580,8 +1351,6 @@ async function initialiseUsers(message) {
     message.channel.send("The server's users are now tracked!");
 }
 
-
-
 function hmsToSecondsOnly(str) {
 
     str = String(str).trim();
@@ -1593,6 +1362,7 @@ function hmsToSecondsOnly(str) {
     }
     return s;
 }
+exports.hmsToSecondsOnly = hmsToSecondsOnly;
 
 function timeConvert(time) {
 
@@ -1610,6 +1380,7 @@ function timeConvert(time) {
     if ((minutes == '00') && (hours == '00')) finalTime = `00:${finalTime}`;
     return finalTime;
 }
+exports.timeConvert = timeConvert;
 
 async function pause(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
@@ -1813,6 +1584,7 @@ function shuffleArray(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
 }
+exports.shuffleArray = shuffleArray;
 
 async function goTo(message, params, user) {
 

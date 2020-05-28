@@ -1,9 +1,8 @@
 
 const Fuse = require('fuse.js');
 const studyJSON = require('./medstudy.json');
-const studyArray = new Array();
 const MAIN = require('./short-answer.js');
-
+const studyArray = new Array();
 
 for (let element of studyJSON)
     studyArray.push(element);
@@ -237,6 +236,17 @@ function study(message, query) {
     }
 }
 exports.study = study;
+
+async function decider(message, params, user) {
+
+    const args = message.content.split(" ").slice(1).join(" ").split(",");
+
+    if (!args) return message.channel.send("You have to provide at least 1 option!");
+    return message.channel.send(`I have chosen: ${args[Math.floor(Math.random() * args.length)]}`)
+}
+exports.decider = decider;
+
+
 
 async function reactAnswers(message) {
 
