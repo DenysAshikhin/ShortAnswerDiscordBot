@@ -892,7 +892,6 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         message.channel.send({ embed: newEmbed })
         specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
         return 0;
-
     }
     else {
         message.channel.send(`You have entered an invalid suggestion number/input please try again.`);
@@ -901,17 +900,18 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 }
 exports.generalMatcher = generalMatcher;
 
-async function prettyEmbed(message, description, array, part, name) {
+async function prettyEmbed(message, description, array, part, startTally) {
 
     let runningString = "";
     let groupNumber = 1;
-    let tally = 1;
+    let tally = startTally == 0 ? startTally : 1;
     let field = { name: "", value: [], inline: true };
+    let fieldArray = [];
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = description;
     newEmbed.fields = [];
 
-    for (element of array.value) {
+    for (element of array) {
 
         if (runningString.length < 75) {
 
@@ -920,18 +920,14 @@ async function prettyEmbed(message, description, array, part, name) {
         }
         else {
 
-            field.name = name = -1 ? '** **' : `${part} ${groupNumber}`;
+            field.name = part == -1 ? '** **' : `${part} ${groupNumber}`;
             newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+
+            fieldArray.push(JSON.parse(JSON.stringify(field)));
+
             runningString = "";
             groupNumber++;
             field = { name: "", value: [], inline: true };
-
-            if (((groupNumber % 25) == 1) && (groupNumber > 25)) {
-                await message.channel.send({ embed: newEmbed });
-                newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-                newEmbed.description = description;
-                newEmbed.fields = [];
-            }
 
             runningString += element;
             field.value.push(`${tally}) ${element}\n`);
@@ -940,11 +936,48 @@ async function prettyEmbed(message, description, array, part, name) {
 
     }
 
-    field.name = name ? name : `${part} ${groupNumber}`;
+    field.name = part == -1 ? '** **' : `${part} ${groupNumber}`;
     newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
-    return message.channel.send({ embed: newEmbed });
+    fieldArray.push(JSON.parse(JSON.stringify(field)));
+
+    testy(0, fieldArray.length, fieldArray, description, message);
 }
 exports.prettyEmbed = prettyEmbed;
+
+function testy(start, limit, ARR, description, message) {
+
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.description = description;
+
+    let x = (start + 25) < limit ? start + 25 : limit;
+
+    let rows = Math.floor((x - start) / 3);
+
+    if ((x - start) == 4) rows++;
+    else if ((((x - start) % 3) != 0) || (x - start) == 25) rows++;
+
+
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < 3; j++) {
+
+            if ((x - start) == 4) {
+                newEmbed.fields.push(ARR[0 + start]);
+                newEmbed.fields.push(ARR[2 + start]);
+                newEmbed.fields.push(ARR[3 + start]);
+                newEmbed.fields.push(ARR[4 + start]);
+            }
+            else if ((start + i + (rows * j)) < x) {
+                newEmbed.fields.push(ARR[(start + i + (rows * j))]);
+            }
+            else{
+                newEmbed.fields.push({name: "** **", value: "** **", inline: true});
+            }
+        }
+    }
+
+    message.channel.send({embed: newEmbed});
+    if ((start + 25) < limit) testy((start + 25), limit);
+}
 //do this check for all the other files afterwards
 
 async function graphs() {
@@ -1044,7 +1077,7 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
-//add proper listing to games list and personal playlists, whichever summon you wanna join prompt
+//add proper listing to personal playlists, whichever summon you wanna join prompt
 //shake user # of times -> have to check for move user perms
 //volume control
 //sptofiy playlist

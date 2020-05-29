@@ -216,20 +216,18 @@ async function personalGames(message, params, user) {
 
     if (!user.games)
         user = await MAIN.findUser({ id: message.author.id })
-    let games = user.games;
-    let fieldArray = new Array();
     let display = message.author.username;
     if (message.member != null)
         display = message.member.displayName;
-    let left = false;
 
-    MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", { value: games }, 'Part', -1);
+    if(user.games.length == 0) return message.channel.send("You haven't signed up for any games!");
+
+    MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", user.games , -1);
 
     if (games.length <= 0)
         message.channel.send("You are not signed up for any games.");
 
     return 0;
-
 }
 exports.personalGames = personalGames;
 

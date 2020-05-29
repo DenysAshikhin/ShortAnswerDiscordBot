@@ -119,7 +119,7 @@ async function forward(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
-   
+
     if (guildQueue) {
 
         let song = guildQueue.songs[guildQueue.index];
@@ -962,17 +962,12 @@ async function myPlayLists(message, params, user) {
     }
     else if (params.title) {
 
-        let fields = [];
-
-        for (let i = 0; i < params.songs.length; i++) {
-
-            fields.push({ name: `${i}) ${params.songs[i].title}`, value: "** **" });
-        }
-
-        playListEmbed.fields = fields;
-        playListEmbed.description = `Here are the songs for **${params.title}**`;
-        return message.channel.send({ embed: playListEmbed });
-    } else {
+        let fieldArray = new Array();
+        for (song of params.songs)
+            fieldArray.push(song.title);
+        MAIN.prettyEmbed(message, `Here are the songs for **${params.title}**`, fieldArray, -1, 1);
+    }
+    else {
 
         let playlists = [];
         for (playlist of user.playlists)
@@ -995,7 +990,7 @@ function createPlaylist(message, params, user) {
 
     if (user.playlists.length >= 25) return message.channel.send("You have reached the maximum number of allowed playlists!");
 
-    if(newName.length > 200) return message.channel.send(`${newName} is too loong!`);
+    if (newName.length > 200) return message.channel.send(`${newName} is too loong!`);
     user.playlists.push({ title: newName, songs: [] })
     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
 
@@ -1010,48 +1005,18 @@ async function currentPlaylist(message, params, user) {
     let songQueue = queue.get(message.guild.id);
 
     if (!songQueue) return message.channel.send(`There aren't any songs playing!`);
+    if (!songQueue.songs) return message.channel.send(`There aren't any songs playing!`);
 
     let totalDuration = songQueue.songs.reduce((total, num) => { return total + Number(num.duration) }, 0);
-    let runningString = "";
-    let groupNumber = 1;
-    let tally = 1;
-    let field = { name: "", value: [], inline: true };
-    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-    newEmbed.description = `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`;
-    newEmbed.fields = [];
+    let fieldArray = new Array();
 
     for (song of songQueue.songs) {
-
-        if (runningString.length < 75) {
-
-            runningString += song;
-            if (song == songQueue.songs[songQueue.index]) field.value.push("```md\n#" + `${tally}) ${song.title}` + "```");
-            else field.value.push(`${tally}) ${song.title}\n`);
-        }
-        else {
-            field.name = `Part ${groupNumber}`;
-            newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
-            runningString = "";
-            groupNumber++;
-            field = { name: "", value: [], inline: true };
-
-            if (((groupNumber % 25) == 1) && (groupNumber > 25)) {
-                await message.channel.send({ embed: newEmbed });
-                newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-                newEmbed.description = `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`;
-                newEmbed.fields = [];
-            }
-
-            runningString += song;
-            if (song == songQueue.songs[songQueue.index]) field.value.push("```md\n#" + `${tally}) ${song.title}` + "```");
-            else field.value.push(`${tally}) ${song.title}\n`);
-        }
-        tally++;
+        if (song == songQueue.songs[songQueue.index]) fieldArray.push("```md\n#" + ` ${song.title}` + "```");
+        else fieldArray.push(`${song.title}`);
     }
 
-    field.name = `Part ${groupNumber}`;
-    newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
-    return message.channel.send({ embed: newEmbed });
+    MAIN.prettyEmbed(message, `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`,
+        fieldArray, -1);
 }
 exports.currentPlaylist = currentPlaylist;
 
