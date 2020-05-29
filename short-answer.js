@@ -882,14 +882,10 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         let fieldArray = new Array();
 
         for (let i = 0; i < promptArray.length; i++)
-            fieldArray.push({ name: `${i}) ` + promptArray[i].item, value: "** **", inline: false })
+            fieldArray.push(promptArray[i].item);
 
-        let newEmbed = JSON.parse(JSON.stringify(Embed));
-        newEmbed.timestamp = new Date();
-        newEmbed.description = flavourText;
-        newEmbed.fields = fieldArray;
+        prettyEmbed(message, flavourText, fieldArray, -1, 0);
 
-        message.channel.send({ embed: newEmbed })
         specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
         return 0;
     }
@@ -903,25 +899,42 @@ exports.generalMatcher = generalMatcher;
 async function prettyEmbed(message, description, array, part, startTally) {
 
     let runningString = "";
+    let previousName = "";
     let groupNumber = 1;
     let tally = startTally == 0 ? startTally : 1;
-    let field = { name: "", value: [], inline: true };
+    let field = null;
     let fieldArray = [];
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
-    newEmbed.description = description;
-    newEmbed.fields = [];
 
-    for (element of array) {
+    for (item of array) {
 
-        if (runningString.length < 75) {
+        element = item.value ? item.value : item;
+        element = element ? element : '** **';
+        element = Array.isArray(element) ? element.join("\n") : element;
+        let itemName = item.name ? item.name : "";
+
+        if ((runningString.length < 75) && (previousName == itemName) || (field == null) || (runningString.length > 900)) {//add a running string check for 900 characters?
 
             runningString += element;
-            field.value.push(`${tally}) ${element}\n`);
+            field = field == null ? { name: "", value: [], inline: true } : field;
+
+            if (startTally == -1)
+                field.value.push(`${element}`);
+            else
+                field.value.push(`${tally}) ${element}`);
+
+            if (item.name) {
+                field.name = item.name;
+                previousName = item.name;
+            }
         }
         else {
 
-            field.name = part == -1 ? '** **' : `${part} ${groupNumber}`;
-            newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+            if (field.name != '')
+                field.name = field.name;
+            else if (part == -1)
+                field.name = '** **';
+            else
+                field.name = `${part} ${groupNumber}`;
 
             fieldArray.push(JSON.parse(JSON.stringify(field)));
 
@@ -930,16 +943,22 @@ async function prettyEmbed(message, description, array, part, startTally) {
             field = { name: "", value: [], inline: true };
 
             runningString += element;
-            field.value.push(`${tally}) ${element}\n`);
+            if (startTally == -1)
+                field.value.push(`${element}`);
+            else
+                field.value.push(`${tally}) ${element}`);
+            if (item.name) field.name = item.name;
         }
         tally++;
-
     }
 
-    field.name = part == -1 ? '** **' : `${part} ${groupNumber}`;
-    newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
+    if (field.name != '')
+        field.name = field.name;
+    else if (part == -1)
+        field.name = '** **';
+    else
+        field.name = `${part} ${groupNumber}`;
     fieldArray.push(JSON.parse(JSON.stringify(field)));
-
     testy(0, fieldArray.length, fieldArray, description, message);
 }
 exports.prettyEmbed = prettyEmbed;
@@ -964,19 +983,21 @@ function testy(start, limit, ARR, description, message) {
                 newEmbed.fields.push(ARR[0 + start]);
                 newEmbed.fields.push(ARR[2 + start]);
                 newEmbed.fields.push(ARR[3 + start]);
-                newEmbed.fields.push(ARR[4 + start]);
+                newEmbed.fields.push(ARR[1 + start]);
+                j = 99;
+                i = 99;
             }
             else if ((start + i + (rows * j)) < x) {
                 newEmbed.fields.push(ARR[(start + i + (rows * j))]);
             }
-            else{
-                newEmbed.fields.push({name: "** **", value: "** **", inline: true});
+            else {
+                newEmbed.fields.push({ name: "** **", value: "** **", inline: true });
             }
         }
     }
 
-    message.channel.send({embed: newEmbed});
-    if ((start + 25) < limit) testy((start + 25), limit);
+    message.channel.send({ embed: newEmbed });
+    if ((start + 25) < limit) testy((start + 25), limit, ARR, description, message);
 }
 //do this check for all the other files afterwards
 

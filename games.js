@@ -123,16 +123,15 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
         if (signedUp.length > 3) {
 
-            //into players put yourSELF!!!! NOTE note
             let squads = guildSquads.get(message.guild.id);
 
-            if (squads) {
-                let squad = squads.find(element => element.summonerID == user.id);
-                if (squad) {
-                    squads.splice(squads.indexOf(squad), 1);
-                    message.channel.send("Overwriting your old summon!");
-                }
-            }
+            // if (squads) {
+            //     let squad = squads.find(element => element.summonerID == user.id);
+            //     if (squad) {
+            //         squads.splice(squads.indexOf(squad), 1);
+            //         message.channel.send("Overwriting your old summon!");
+            //     }
+            // }
 
             if (squads)
                 squads.push({ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id });
@@ -220,9 +219,9 @@ async function personalGames(message, params, user) {
     if (message.member != null)
         display = message.member.displayName;
 
-    if(user.games.length == 0) return message.channel.send("You haven't signed up for any games!");
+    if (user.games.length == 0) return message.channel.send("You haven't signed up for any games!");
 
-    MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", user.games , -1);
+    MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", user.games, -1);
 
     if (games.length <= 0)
         message.channel.send("You are not signed up for any games.");
@@ -246,33 +245,27 @@ function search(message, searches) {
 
     let foundOne = false;
 
-
-    let gameEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-
     for (let i = 0; i < searches.length; i++) {
 
         let query = searches[i];
         if (query.length > 0) {
 
-            let gameEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-            gameEmbed.date = new Date();
-            gameEmbed.description = `Here are the results for: ${query}`;
+            let fieldArray = new Array();
 
             let fuse = new Fuse(games, MAIN.options);
             let result = fuse.search(query);
 
-
-            let maxResults = 25 < result.length ? 25 : result.length;
+            let maxResults = 75 < result.length ? 75 : result.length;
 
             for (let i = 0; i < maxResults; i++) {
 
-                gameEmbed.fields.push({ value: "** **", name: result[i].refIndex + ") " + result[i].item });
+                fieldArray.push(result[i].refIndex + ") " + result[i].item);
                 foundOne = true;
             }
             if (result.length < 1)
                 message.channel.send(`No matching games were found for: ${query}`)
             else
-                message.channel.send({ embed: gameEmbed })
+                MAIN.prettyEmbed(message, `Here are the results for: ${query}`, fieldArray, -1, -1);
         }
 
     }//for loop
@@ -415,14 +408,9 @@ async function gameStats(message, params, user) {
 
         let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
-        let removeEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-        removeEmbed.timestamp = new Date();
-        removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+        MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`, prettyArray,
+            -1, -1);
 
-        for (suggestion of prettyArray)
-            removeEmbed.fields.push({ name: suggestion, value: "** **" });
-
-        message.channel.send({ embed: removeEmbed });
         MAIN.specificCommandCreator(gameStats, [message, -1, user], check.result, user);
         return -11;
     }
@@ -442,7 +430,6 @@ async function gameStats(message, params, user) {
         }
 
         if (signedUp.length > 0) {
-            //message.channel.send(`There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up? Y/N (In Dev.)`);
             return MAIN.generalMatcher(message, -23, user, ['Yes', 'No'], [{ userList: signedUp, gameTitle: game }, null], gameStats, `There are ${signedUp.length} users signed up for ${game}. Would you like to see a list of the members who signed up?`);
         }
         else
@@ -458,6 +445,8 @@ async function topGames(message, params) {
 
     let users = await MAIN.getUsers();
     let gameMap = new Map();
+    let description = '';
+    let fieldArray = new Array();
 
     let finalEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     finalEmbed.timestamp = new Date();
@@ -496,10 +485,6 @@ async function topGames(message, params) {
 
     if (!(isNaN(params)))
         maxResults = params <= 0 ? 5 : Math.floor(Number(params));
-    if (maxResults > 25) {
-        maxResults = 25;
-        message.channel.send("Search results are limited to a max of 25 games!");
-    }
 
     if (gameMap.length == 0) {
         message.channel.send(`No one has signed up for any games in ${message.guild.name}, be the first!`);
@@ -508,23 +493,22 @@ async function topGames(message, params) {
     else if (maxResults > gameMap.length && maxResults) {
 
         maxResults = gameMap.length;
-        finalEmbed.description = `There are only ${maxResults} games people signed up for on ${message.guild.name}`;
+        description = `There are only ${maxResults} games people signed up for on ${message.guild.name}`;
     }
     else {
-
         if (params <= 0)
-            finalEmbed.description = `You did not specify a valid number of games to display, as such, I will display the top ${maxResults}`
+            description = `You did not specify a valid number of games to display, as such, I will display the top ${maxResults}`
                 + ` games people signed up for on the ${message.guild.name} server:`;
         else
-            finalEmbed.description = `Displaying the top *${maxResults}* games people signed up for on the ${message.guild.name} server:`;
+            description = `Displaying the top *${maxResults}* games people signed up for on the ${message.guild.name} server:`;
     }
 
     for (let i = 0; i < maxResults; i++) {
 
-        finalEmbed.fields.push({ name: `${i + 1}) ${gameMap[i][0]} has ${gameMap[i][1]} user(s) signed up for it.`, value: "** **" })
+        fieldArray.push("```diff\n" + `+${gameMap[i][1]} User(s)\n${gameMap[i][0]}` + "```");
     }
 
-    message.channel.send({ embed: finalEmbed });
+    MAIN.prettyEmbed(message, description, fieldArray, -1, -1);
     return gameMap.length;
 }
 exports.topGames = topGames;
@@ -553,9 +537,9 @@ async function Queue(message, params, user) {
 
     if (squads.length == 1 || params.summon) {
         let squad = params.summon ? params.summon : squads.values().next().value;
-        if (squad.displayNames.length < squad.size - 1) {
+        if (squad.displayNames.length < squad.size) {
 
-            if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
+            //if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
 
             //squad.players.push(MAIN.mention(user.id));
             squad.displayNames.push(user.displayName);
@@ -570,7 +554,7 @@ async function Queue(message, params, user) {
 
         let squad = squads.find(element => element.summonerID == message.mentions.members.values().next().value.id);
         if (!squad) return message.channel.send("That user does not have any active summoninings!");
-        if (squad.displayNames.length < squad.size - 1) {
+        if (squad.displayNames.length < squad.size) {
 
             if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
             squad.displayNames.push(user.displayName);
@@ -653,13 +637,18 @@ async function viewActiveSummons(message, params, user) {
     let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     newEmbed.description = `There are ${squads.length} active summons!`;
 
+    let fieldArray = new Array();
+
+    let counter = 0;
+
     for (let squad of squads.entries()) {
+        counter ++;
+        fieldArray.push({name: `${squad[1].summoner}${counter}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames });
         newEmbed.fields.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames, inline: true });
     }
 
-    message.channel.send({ embed: newEmbed });
-
-    //MAIN.prettyEmbed(description, array, part);
+    //message.channel.send({ embed: newEmbed });
+    MAIN.prettyEmbed(message, `There are ${squads.length} active summons!`, fieldArray, -1, -1);
 }
 exports.viewActiveSummons = viewActiveSummons;
 

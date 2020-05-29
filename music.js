@@ -223,7 +223,7 @@ async function shuffle(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("This command must be called from a server text channel!");
     let guildQueue = queue.get(message.guild.id);
-    if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the progress!");
+    if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the shuffling!");
 
     MAIN.shuffleArray(guildQueue.songs);
     guildQueue.index = 0;
@@ -962,6 +962,8 @@ async function myPlayLists(message, params, user) {
     }
     else if (params.title) {
 
+        if(params.songs.length == 0) return message.channel.send(`${params.title} does not have any songs!`);
+
         let fieldArray = new Array();
         for (song of params.songs)
             fieldArray.push(song.title);
@@ -987,8 +989,6 @@ function createPlaylist(message, params, user) {
     if (newName.length == 0) return message.channel.send("You can't have a blank for the playlist name!");
 
     if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
-
-    if (user.playlists.length >= 25) return message.channel.send("You have reached the maximum number of allowed playlists!");
 
     if (newName.length > 200) return message.channel.send(`${newName} is too loong!`);
     user.playlists.push({ title: newName, songs: [] })
