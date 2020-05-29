@@ -901,17 +901,17 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 }
 exports.generalMatcher = generalMatcher;
 
-async function prettyEmbed(description, array, part) {
+async function prettyEmbed(message, description, array, part, name) {
 
     let runningString = "";
     let groupNumber = 1;
     let tally = 1;
     let field = { name: "", value: [], inline: true };
-    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
+    let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = description;
     newEmbed.fields = [];
 
-    for (element of array) {
+    for (element of array.value) {
 
         if (runningString.length < 75) {
 
@@ -919,7 +919,8 @@ async function prettyEmbed(description, array, part) {
             field.value.push(`${tally}) ${element}\n`);
         }
         else {
-            field.name = `${part} ${groupNumber}`;
+
+            field.name = name = -1 ? '** **' : `${part} ${groupNumber}`;
             newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
             runningString = "";
             groupNumber++;
@@ -932,16 +933,18 @@ async function prettyEmbed(description, array, part) {
                 newEmbed.fields = [];
             }
 
-            runningString += song;
+            runningString += element;
             field.value.push(`${tally}) ${element}\n`);
         }
         tally++;
+
     }
 
-    field.name = `${part} ${groupNumber}`;
+    field.name = name ? name : `${part} ${groupNumber}`;
     newEmbed.fields.push(JSON.parse(JSON.stringify(field)));
     return message.channel.send({ embed: newEmbed });
 }
+exports.prettyEmbed = prettyEmbed;
 //do this check for all the other files afterwards
 
 async function graphs() {
@@ -1054,20 +1057,12 @@ setInterval(minuteCount, 60 * 1000);
 
 //play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 
-
-
-
 //https://dev.twitch.tv/docs/api/reference/#get-streams
-
-
-
-
-
 
 //seal idan easter eggs
 process.on('unhandledRejection', (reason, promise) => {
     console.log("FFFFFF   ", reason);
-     Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
+    Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
 });
 
 process.on('unhandledException', (reason, p) => {

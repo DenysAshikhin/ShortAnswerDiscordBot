@@ -223,39 +223,9 @@ async function personalGames(message, params, user) {
         display = message.member.displayName;
     let left = false;
 
+    MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", { value: games }, 'Part', -1);
 
-    for (let i = 0; i < games.length; i++) {
-        left = true;
-
-        fieldArray.push({ name: `${i}) ` + games[i], value: "** **", inline: false })
-
-        if (i % 24 == 0 && i > 0) {
-
-            let gameEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-            gameEmbed.date = new Date();
-            gameEmbed.description = display + " here are the games you are signed up for:";
-            gameEmbed.fields = fieldArray;
-
-            await message.channel.send({ embed: gameEmbed });
-            fieldArray = new Array();
-            left = false;
-        }
-    }
-
-    if (games.length > 0) {
-        if (left) {
-
-            let gameEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-            gameEmbed.date = new Date();
-            gameEmbed.description = display + " here are the games you are signed up for:";
-            gameEmbed.fields = fieldArray;
-
-            message.channel.send({ embed: gameEmbed });
-        }
-
-        return 1;
-    }
-    else
+    if (games.length <= 0)
         message.channel.send("You are not signed up for any games.");
 
     return 0;

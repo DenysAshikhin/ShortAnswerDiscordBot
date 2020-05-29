@@ -119,9 +119,10 @@ async function forward(message, params) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
-    let song = guildQueue.songs[guildQueue.index];
-
+   
     if (guildQueue) {
+
+        let song = guildQueue.songs[guildQueue.index];
 
         if (Array.isArray(params)) params = params[0];
         if (isNaN(params))
