@@ -31,39 +31,7 @@ const guildID = '97354142502092800';
 exports.guildID = guildID;
 
 
-const GameTutorial = {
-    expectedCommand: [
-        Commands.commands[1],//"SEARCH"
-        Commands.commands[2],//"SIGNUP"
-        Commands.commands[2],//"SIGNUP"
-        Commands.commands[3],//"MYGAMES"
-        Commands.commands[4],//"REMOVEGAME"
-        Commands.commands[13],//"PING"
-        Commands.commands[5],//"EXCLUDEPING"
-        Commands.commands[6]//"EXCLUDEDM"
-    ],
-    specificCommand: [
-        GAMES.search,
-        GAMES.updateGames,
-        GAMES.updateGames,
-        GAMES.personalGames,
-        GAMES.removeGame,
-        GAMES.pingUsers,
-        GAMES.excludePing,
-        GAMES.excludeDM
-    ],
-    expectedOutput: [
-        1,
-        1,
-        2,
-        0,
-        1,
-        0,
-        0,
-        0
-    ],
-    steps: []
-};
+
 const options = {
     isCaseSensitive: false,
     findAllMatches: true,
@@ -390,6 +358,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[63], MISCELLANEOUS.roll)
     commandMap.set(Commands.commands[64], QOF.setTimer)
     commandMap.set(Commands.commands[65], MISCELLANEOUS.shakeUser)
+
+    exports.commandMap = commandMap;
 }
 
 async function triggerCommandHandler(message, user, skipSearch) {
@@ -537,9 +507,9 @@ async function tutorialHandler(message, command, params, user) {
 
     switch (user.activeTutorial) {
         case 0:
-            if (command == GameTutorial.specificCommand[user.tutorialStep] || command == gameTutorial) {
+            if (command == TUTORIAL.GameTutorial.specificCommand[user.tutorialStep] || command == TUTORIAL.gameTutorial) {
 
-                return await gameTutorial(message, params, command);
+                return await TUTORIAL.gameTutorial(message, params, command);
             }
         case 1:
 
@@ -896,7 +866,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 }
 exports.generalMatcher = generalMatcher;
 
-async function prettyEmbed(message, description, array, part, startTally) {
+async function prettyEmbed(message, description, array, part, startTally, modifier) {
 
     let runningString = "";
     let previousName = "";
@@ -904,27 +874,88 @@ async function prettyEmbed(message, description, array, part, startTally) {
     let tally = startTally == 0 ? startTally : 1;
     let field = null;
     let fieldArray = [];
+    let maxLength = 190;
 
     for (item of array) {
 
+        let BIGSPLIT = false;
+
         element = item.value ? item.value : item;
         element = element ? element : '** **';
+        if (element == '** **') continue;
         element = Array.isArray(element) ? element.join("\n") : element;
         let itemName = item.name ? item.name : "";
 
-        if ((runningString.length < 75) && (previousName == itemName) || (field == null) || (runningString.length > 900)) {//add a running string check for 900 characters?
+        if ((runningString.length < maxLength) && (previousName == itemName) || (field == null)) {//add a running string check for 900 characters?
 
-            runningString += element;
-            field = field == null ? { name: "", value: [], inline: true } : field;
+            if (((runningString.length + element.length) > maxLength)) {
 
-            if (startTally == -1)
-                field.value.push(`${element}`);
-            else
-                field.value.push(`${tally}) ${element}`);
+                let tempItem = JSON.parse(JSON.stringify(item));
 
-            if (item.name) {
-                field.name = item.name;
-                previousName = item.name;
+                tempElement = tempItem.value ? tempItem.value : tempItem;
+                tempElement = tempElement ? tempElement : '** **';
+                tempElement = Array.isArray(tempElement) ? tempElement.join("\n") : tempElement;
+
+                if (runningString.length == 0)
+                    if (tempElement.includes('\n')) {
+
+                        let tempRun = '';
+                        for (newSplit of tempElement.split('\n')) {
+                            if (newSplit.length > maxLength) {
+                                message.channel.send(`${newSplit} is too long to be included in the embeds. If this occured from normal use, please notify the creator with the **suggest** command!`);
+                            }
+                            else
+                                tempRun += newSplit + "\n";
+                            if (tempRun.length > maxLength) break;
+                        }
+
+                        tempElement = tempElement.substring(tempRun.length);
+                        element = element.substring(0, tempRun.length);
+                    }
+                    else
+                        message.channel.send("Found an unsplittable message body, odds of that happening naturally are next-to-none so stop testing me D:< However, if this is indeed from normal use, please notify the creator with the **suggest** command.");
+                else {
+
+                    tempElement = '';
+                }
+
+                if (tempItem.value)
+                    tempItem.value = tempElement;
+                else
+                    tempItem = tempElement;
+
+                array.splice(array.indexOf(item) + 1, 0, tempItem)
+                BIGSPLIT = true;
+            }
+            {
+                runningString += element;
+
+                field = field == null ? { name: "", value: [], inline: true } : field;
+
+                if (startTally == -1)
+                    field.value.push(`${element}`);
+                else
+                    field.value.push(`${tally}) ${element}`);
+
+                if (item.name) {
+                    field.name = item.name;
+                    previousName = item.name;
+                }
+            }
+
+            if (BIGSPLIT) {
+
+                if (field.name != '')
+                    field.name = field.name;
+                else if (part == -1)
+                    field.name = '** **';
+                else
+                    field.name = `${part} ${groupNumber}`;
+                fieldArray.push(JSON.parse(JSON.stringify(field)));
+
+                runningString = "";
+                groupNumber++;
+                field = { name: "", value: [], inline: true };
             }
         }
         else {
@@ -941,13 +972,6 @@ async function prettyEmbed(message, description, array, part, startTally) {
             runningString = "";
             groupNumber++;
             field = { name: "", value: [], inline: true };
-
-            runningString += element;
-            if (startTally == -1)
-                field.value.push(`${element}`);
-            else
-                field.value.push(`${tally}) ${element}`);
-            if (item.name) field.name = item.name;
         }
         tally++;
     }
@@ -959,11 +983,16 @@ async function prettyEmbed(message, description, array, part, startTally) {
     else
         field.name = `${part} ${groupNumber}`;
     fieldArray.push(JSON.parse(JSON.stringify(field)));
-    testy(0, fieldArray.length, fieldArray, description, message);
+    for (let i = 0; i < fieldArray.length; i++) {
+        if (fieldArray[i].value.length == 0)
+            fieldArray.splice(i, 1);
+    }
+
+    testy(0, fieldArray.length, fieldArray, description, message, modifier);
 }
 exports.prettyEmbed = prettyEmbed;
 
-function testy(start, limit, ARR, description, message) {
+function testy(start, limit, ARR, description, message, modifier) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = description;
@@ -975,11 +1004,18 @@ function testy(start, limit, ARR, description, message) {
     if ((x - start) == 4) rows++;
     else if ((((x - start) % 3) != 0) || (x - start) == 25) rows++;
 
-
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < 3; j++) {
 
             if ((x - start) == 4) {
+
+                if (modifier) {
+                    ARR[0 + start].value = "```" + modifier + "\n" + ARR[0 + start].value.join('\n') + "```";
+                    ARR[2 + start].value = "```" + modifier + "\n" + ARR[2 + start].value.join('\n') + "```";
+                    ARR[3 + start].value = "```" + modifier + "\n" + ARR[3 + start].value.join('\n') + "```";
+                    ARR[1 + start].value = "```" + modifier + "\n" + ARR[1 + start].value.join('\n') + "```";
+                }
+
                 newEmbed.fields.push(ARR[0 + start]);
                 newEmbed.fields.push(ARR[2 + start]);
                 newEmbed.fields.push(ARR[3 + start]);
@@ -988,6 +1024,8 @@ function testy(start, limit, ARR, description, message) {
                 i = 99;
             }
             else if ((start + i + (rows * j)) < x) {
+                if (modifier)
+                    ARR[(start + i + (rows * j))].value = "```" + modifier + "\n" + ARR[(start + i + (rows * j))].value.join('\n') + "```";
                 newEmbed.fields.push(ARR[(start + i + (rows * j))]);
             }
             else {
@@ -1000,6 +1038,25 @@ function testy(start, limit, ARR, description, message) {
     if ((start + 25) < limit) testy((start + 25), limit, ARR, description, message);
 }
 //do this check for all the other files afterwards
+
+
+function sendHelpMessage(Index, message) {
+
+    let examples = "```md\n";
+
+    examples += Commands.explanation[Index] + "\n\n";
+
+    for (example of Commands.example[Index]) {
+
+        let index = example.indexOf(" ");
+        examples += `<${example.slice(0, index)}` + prefix + `${example.slice(index + 1)}>\n\n`;
+    }
+    examples += "```";
+    return message.channel.send(examples);
+}
+exports.sendHelpMessage = sendHelpMessage;
+
+
 
 async function graphs() {
 
@@ -1098,6 +1155,9 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
+//fix tutorial!!!!!
+//give people ability to choose how their menus are skinned!
+//fix squad deletions, fix personal playlists
 //add proper listing to personal playlists, whichever summon you wanna join prompt
 //shake user # of times -> have to check for move user perms
 //volume control

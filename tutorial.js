@@ -1,9 +1,46 @@
 const MAIN = require('./short-answer.js');
+const User = require('./User.js');
+const Commands = require('./commands.json');
+const GAMES = require('./games.js');
 
+const GameTutorial = {
+    expectedCommand: [
+        Commands.commands[1],//"SEARCH"
+        Commands.commands[2],//"SIGNUP"
+        Commands.commands[2],//"SIGNUP"
+        Commands.commands[3],//"MYGAMES"
+        Commands.commands[4],//"REMOVEGAME"
+        Commands.commands[13],//"PING"
+        Commands.commands[5],//"EXCLUDEPING"
+        Commands.commands[6]//"EXCLUDEDM"
+    ],
+    specificCommand: [
+        GAMES.search,
+        GAMES.updateGames,
+        GAMES.updateGames,
+        GAMES.personalGames,
+        GAMES.removeGame,
+        GAMES.pingUsers,
+        GAMES.excludePing,
+        GAMES.excludeDM
+    ],
+    expectedOutput: [
+        1,
+        1,
+        2,
+        0,
+        1,
+        0,
+        0,
+        0
+    ],
+    steps: []
+};
+exports.GameTutorial = GameTutorial;
 
 async function gameTutorial(message, params, command) {
 
-    let user = await findUser({ id: message.author.id });
+    let user = await MAIN.findUser({ id: message.author.id });
 
     GameTutorial.steps = [
         `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`,
@@ -39,7 +76,10 @@ async function gameTutorial(message, params, command) {
     if (user.tutorialStep == -1) {
 
         //newEmbed.description = GameTutorial.steps[0];
-        message.channel.send({ embed: createTutorialEmbed(0) })
+        //message.channel.send({ embed: createTutorialEmbed(0) })
+
+        message.channel.send(GameTutorial.steps[0]);
+        MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[0]), message);
 
         await User.findOneAndUpdate({ id: user.id },
             {
@@ -54,17 +94,20 @@ async function gameTutorial(message, params, command) {
     else {
         if (user.activeTutorial == 0 || user.activeTutorial == -1) {
 
-            if (command == commandMap.get(Commands.commands[25])) {
+            if (command == MAIN.commandMap.get(Commands.commands[25])) {
 
-                message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
+                message.channel.send(GameTutorial.steps[user.tutorialStep]);
+                let Index = Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]);
+                MAIN.sendHelpMessage(Index, message);
                 return 1;
             }
             else if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
 
                 if (user.tutorialStep != GameTutorial.steps.length - 1) {
 
-                    message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
-
+                    // message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
+                    message.channel.send(GameTutorial.steps[user.tutorialStep]);
+                    MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
                     await User.findOneAndUpdate({ id: user.id },
                         {
                             $set: {
@@ -75,7 +118,9 @@ async function gameTutorial(message, params, command) {
                 }
                 else {//Tutorial over!!!!!
                     //Need to add the recommend and something else commands
-                    message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
+                    //message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
+                    message.channel.send(GameTutorial.steps[user.tutorialStep]);
+                    MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
                     if (!user.completedTutorials.includes(0)) {
                         user.completedTutorials.push(0);
                     }
@@ -143,13 +188,13 @@ function setNotifyTutorials(message, params, user) {
     if (bool == "TRUE") {
 
         User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyTutorial: true } }, function (err, doc, res) { });
-        message.channel.send(mention(message.author.id) + " will be notified of new/incomplete tutorials.");
+        message.channel.send(MAIN.mention(message.author.id) + " will be notified of new/incomplete tutorials.");
         return 1;
     }
     else if (bool == "FALSE") {
 
         User.findOneAndUpdate({ id: message.author.id }, { $set: { notifyTutorial: false } }, function (err, doc, res) { });
-        message.channel.send(mention(message.author.id) + " will be excluded from any new/incomplete tutorials.");
+        message.channel.send(MAIN.mention(message.author.id) + " will be excluded from any new/incomplete tutorials.");
         return 0;
     }
     else {
@@ -177,7 +222,7 @@ function createTutorialEmbed(tutorialStep) {
 
     }
 
-    let newEmbed = JSON.parse(JSON.stringify(Embed));
+    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     newEmbed.date = new Date();
     newEmbed.title += " Game Tutorial";
     newEmbed.description = prompt;
@@ -185,3 +230,21 @@ function createTutorialEmbed(tutorialStep) {
 
     return newEmbed;
 }
+
+//-22 meaning no matching tutorial was found
+async function tutorialHandler(message, command, params, user) {
+
+    switch (user.activeTutorial) {
+        case 0:
+            if (command == GameTutorial.specificCommand[user.tutorialStep] || command == gameTutorial) {
+
+                return await gameTutorial(message, params, command);
+            }
+        case 1:
+
+            break;
+    }
+
+    return -22;
+}
+exports.tutorialHandler = tutorialHandler;

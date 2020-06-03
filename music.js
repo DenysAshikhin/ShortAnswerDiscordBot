@@ -966,7 +966,7 @@ async function myPlayLists(message, params, user) {
 
         let fieldArray = new Array();
         for (song of params.songs)
-            fieldArray.push(song.title);
+            fieldArray.push(song.title + "\n");
         MAIN.prettyEmbed(message, `Here are the songs for **${params.title}**`, fieldArray, -1, 1);
     }
     else {
@@ -1010,13 +1010,14 @@ async function currentPlaylist(message, params, user) {
     let totalDuration = songQueue.songs.reduce((total, num) => { return total + Number(num.duration) }, 0);
     let fieldArray = new Array();
 
-    for (song of songQueue.songs) {
-        if (song == songQueue.songs[songQueue.index]) fieldArray.push("```md\n#" + ` ${song.title}` + "```");
-        else fieldArray.push(`${song.title}`);
+    for (let i = 0; i < songQueue.songs.length; i++){
+        let song = songQueue.songs[i];
+        if (song == songQueue.songs[songQueue.index]) fieldArray.push(`#${i+1})${song.title}\n`);
+        else fieldArray.push(`${i+1})${song.title}\n`);
     }
 
     MAIN.prettyEmbed(message, `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`,
-        fieldArray, -1);
+        fieldArray, -1, -1, 'md');
 }
 exports.currentPlaylist = currentPlaylist;
 

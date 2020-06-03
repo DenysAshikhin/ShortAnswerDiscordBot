@@ -88,17 +88,8 @@ function generalHelp(message, params, user) {
 
     if (params.index != null) {
 
-        let examples = "```md\n";
-
-        for (example of Commands.example[params.index]) {
-
-            let index = example.indexOf(" ");
-            examples += `<${example.slice(0, index)}` + prefix + `${example.slice(index + 1)}>\n\n`;
-        }
-        examples += "```";
-
-        let prompt = `${Commands.explanation[params.index]}` + `${examples}`;
-        return message.channel.send(prompt);
+ 
+        return MAIN.sendHelpMessage(params.index, message);
     }
     else {
 

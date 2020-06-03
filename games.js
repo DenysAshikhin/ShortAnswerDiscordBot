@@ -125,13 +125,13 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
             let squads = guildSquads.get(message.guild.id);
 
-            // if (squads) {
-            //     let squad = squads.find(element => element.summonerID == user.id);
-            //     if (squad) {
-            //         squads.splice(squads.indexOf(squad), 1);
-            //         message.channel.send("Overwriting your old summon!");
-            //     }
-            // }
+            if (squads) {
+                let squad = squads.find(element => element.summonerID == user.id);
+                if (squad) {
+                    squads.splice(squads.indexOf(squad), 1);
+                    message.channel.send("Overwriting your old summon!");
+                }
+            }
 
             if (squads)
                 squads.push({ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id });
@@ -221,7 +221,14 @@ async function personalGames(message, params, user) {
 
     if (user.games.length == 0) return message.channel.send("You haven't signed up for any games!");
 
-    MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", user.games, -1);
+    let gameArr = [];
+
+    for (let i = 0; i < user.games.length; i++) {
+
+        gameArr.push(`[${i+1}](${user.games[i]})`);
+    }
+
+    MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", gameArr, -1, -1, 'md');
 
     if (games.length <= 0)
         message.channel.send("You are not signed up for any games.");
@@ -505,10 +512,10 @@ async function topGames(message, params) {
 
     for (let i = 0; i < maxResults; i++) {
 
-        fieldArray.push("```diff\n" + `+${gameMap[i][1]} User(s)\n${gameMap[i][0]}` + "```");
+        fieldArray.push(`<${gameMap[i][1]} User(s) signed up for ${gameMap[i][0]}>\n`);
     }
 
-    MAIN.prettyEmbed(message, description, fieldArray, -1, -1);
+    MAIN.prettyEmbed(message, description, fieldArray, -1, 1, 'md');
     return gameMap.length;
 }
 exports.topGames = topGames;
@@ -539,7 +546,7 @@ async function Queue(message, params, user) {
         let squad = params.summon ? params.summon : squads.values().next().value;
         if (squad.displayNames.length < squad.size) {
 
-            //if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
+            if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
 
             //squad.players.push(MAIN.mention(user.id));
             squad.displayNames.push(user.displayName);
@@ -642,8 +649,17 @@ async function viewActiveSummons(message, params, user) {
     let counter = 0;
 
     for (let squad of squads.entries()) {
-        counter ++;
-        fieldArray.push({name: `${squad[1].summoner}${counter}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames });
+        counter++;
+
+        reduced = '';
+        do {
+
+            reduced = squad[1].displayNames.reduce((total, element) => { return total += element; })
+            //console.log(reduced.length)
+            squad[1].displayNames.push('the last spark' + reduced.length);
+        } while (reduced.length < 2200);
+
+        fieldArray.push({ name: `${squad[1].summoner}${counter}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames });
         newEmbed.fields.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames, inline: true });
     }
 
