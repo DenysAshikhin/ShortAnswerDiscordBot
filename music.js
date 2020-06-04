@@ -1012,8 +1012,8 @@ async function currentPlaylist(message, params, user) {
 
     for (let i = 0; i < songQueue.songs.length; i++){
         let song = songQueue.songs[i];
-        if (song == songQueue.songs[songQueue.index]) fieldArray.push(`#${i+1})${song.title}\n`);
-        else fieldArray.push(`${i+1})${song.title}\n`);
+        if (song == songQueue.songs[songQueue.index]) fieldArray.push(`#${i+1}) ${song.title}\n`);
+        else fieldArray.push(`${i+1}) ${song.title}\n`);
     }
 
     MAIN.prettyEmbed(message, `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`,

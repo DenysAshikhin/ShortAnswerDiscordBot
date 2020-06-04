@@ -854,7 +854,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         for (let i = 0; i < promptArray.length; i++)
             fieldArray.push(promptArray[i].item);
 
-        prettyEmbed(message, flavourText, fieldArray, -1, 0);
+        prettyEmbed(message, flavourText, fieldArray, -1, 0, 1);
 
         specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
         return 0;
@@ -874,7 +874,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     let tally = startTally == 0 ? startTally : 1;
     let field = null;
     let fieldArray = [];
-    let maxLength = 190;
+    let maxLength = 100;
 
     for (item of array) {
 
@@ -886,7 +886,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
         element = Array.isArray(element) ? element.join("\n") : element;
         let itemName = item.name ? item.name : "";
 
-        if ((runningString.length < maxLength) && (previousName == itemName) || (field == null)) {//add a running string check for 900 characters?
+        if ((runningString.length < maxLength) || (field == null)) {//add a running string check for 900 characters?
 
             if (((runningString.length + element.length) > maxLength)) {
 
@@ -914,10 +914,8 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                     }
                     else
                         message.channel.send("Found an unsplittable message body, odds of that happening naturally are next-to-none so stop testing me D:< However, if this is indeed from normal use, please notify the creator with the **suggest** command.");
-                else {
-
+                else
                     tempElement = '';
-                }
 
                 if (tempItem.value)
                     tempItem.value = tempElement;
@@ -936,6 +934,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                     field.value.push(`${element}`);
                 else
                     field.value.push(`${tally}) ${element}`);
+
 
                 if (item.name) {
                     field.name = item.name;
@@ -959,7 +958,6 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
             }
         }
         else {
-
             if (field.name != '')
                 field.name = field.name;
             else if (part == -1)
@@ -983,61 +981,110 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     else
         field.name = `${part} ${groupNumber}`;
     fieldArray.push(JSON.parse(JSON.stringify(field)));
+
+
     for (let i = 0; i < fieldArray.length; i++) {
         if (fieldArray[i].value.length == 0)
             fieldArray.splice(i, 1);
     }
 
-    testy(0, fieldArray.length, fieldArray, description, message, modifier);
+    testy(fieldArray, description, message, modifier);
 }
 exports.prettyEmbed = prettyEmbed;
 
-function testy(start, limit, ARR, description, message, modifier) {
+function createThreeQueue(array) {
+
+    let threeQueue = {
+        queue: [[], [], []],
+        index: 0
+    };
+
+    let rows = Math.floor(array.length / 3);
+    if ((array.length % 3) > 0) rows++;
+
+    if (rows < 4) {
+        for (let j = 0; j < rows; j++) {
+
+            if (array.length == 4) {
+
+                threeQueue.queue[0] = [array[0], array[1]];
+                threeQueue.queue[1] = [array[2], array[3]];
+                break;
+            }
+            else {
+                threeQueue.queue[0].push(array[j]);
+
+                if (!array[j + (rows)])
+                    threeQueue.queue[1].push({ name: "** **", value: "** **", inline: true });
+                else
+                    threeQueue.queue[1].push(array[j + (rows)]);
+
+                if (!array[j + (2 * rows)])
+                    threeQueue.queue[2].push({ name: "** **", value: "** **", inline: true });
+                else
+                    threeQueue.queue[2].push(array[j + (2 * rows)]);
+            }
+        }
+    }
+    else {
+        for (let x = 0; x < array.length; x += 3) {
+
+            threeQueue.queue[0].push(array[x]);
+
+            if (!array[x + 1])
+                threeQueue.queue[1].push({ name: "** **", value: "** **", inline: true });
+            else
+                threeQueue.queue[1].push(array[x + 1]);
+
+            if (!array[x + 2])
+                threeQueue.queue[2].push({ name: "** **", value: "** **", inline: true });
+            else
+                threeQueue.queue[2].push(array[x + 2]);
+        }
+    }
+    return threeQueue;
+}
+
+function testy(ARR, description, message, modifier) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = description;
 
-    let x = (start + 25) < limit ? start + 25 : limit;
+    let amount = ARR.length > 24 ? 24 : ARR.length;
 
-    let rows = Math.floor((x - start) / 3);
+    let threeQueue = createThreeQueue(ARR.splice(0, amount))
+    threeQueue.index = 0;
 
-    if ((x - start) == 4) rows++;
-    else if ((((x - start) % 3) != 0) || (x - start) == 25) rows++;
+    for (let i = 0; i < 25; i++) {
 
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < 3; j++) {
-
-            if ((x - start) == 4) {
-
-                if (modifier) {
-                    ARR[0 + start].value = "```" + modifier + "\n" + ARR[0 + start].value.join('\n') + "```";
-                    ARR[2 + start].value = "```" + modifier + "\n" + ARR[2 + start].value.join('\n') + "```";
-                    ARR[3 + start].value = "```" + modifier + "\n" + ARR[3 + start].value.join('\n') + "```";
-                    ARR[1 + start].value = "```" + modifier + "\n" + ARR[1 + start].value.join('\n') + "```";
-                }
-
-                newEmbed.fields.push(ARR[0 + start]);
-                newEmbed.fields.push(ARR[2 + start]);
-                newEmbed.fields.push(ARR[3 + start]);
-                newEmbed.fields.push(ARR[1 + start]);
-                j = 99;
-                i = 99;
-            }
-            else if ((start + i + (rows * j)) < x) {
-                if (modifier)
-                    ARR[(start + i + (rows * j))].value = "```" + modifier + "\n" + ARR[(start + i + (rows * j))].value.join('\n') + "```";
-                newEmbed.fields.push(ARR[(start + i + (rows * j))]);
+        let field = threeQueue.queue[threeQueue.index].shift();
+        if (!field) {
+            if (threeQueue.index == 0) {
+                break;
             }
             else {
-                newEmbed.fields.push({ name: "** **", value: "** **", inline: true });
+                newEmbed.fields.push({ name: "** **", value: "** **", inline: true })
+                threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
+                continue;
             }
         }
+
+
+        if (!Array.isArray(field.value)) {
+        }
+        else if (modifier === 1) {
+            field.value = "```" + "\n" + field.value.join('\n') + "```";
+        }
+        else if (modifier) {
+            field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
+        }
+        newEmbed.fields.push(field);
+        threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
     }
 
     message.channel.send({ embed: newEmbed });
-    if ((start + 25) < limit) testy((start + 25), limit, ARR, description, message);
+    if (threeQueue.queue[0].length > 0) testy(ARR, description, message);
 }
-//do this check for all the other files afterwards
 
 
 function sendHelpMessage(Index, message) {
@@ -1154,7 +1201,7 @@ async function minuteCount() {
 
 setInterval(minuteCount, 60 * 1000);
 
-
+//cant signup bots for games
 //fix tutorial!!!!!
 //give people ability to choose how their menus are skinned!
 //fix squad deletions, fix personal playlists

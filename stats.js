@@ -1,8 +1,5 @@
 const MAIN = require('./short-answer.js');
 
-
-
-
 async function topStats(message) {
     //create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
     if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
