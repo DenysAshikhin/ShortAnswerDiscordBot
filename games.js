@@ -138,21 +138,6 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             else
                 guildSquads.set(message.guild.id, [{ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id }])
             message.channel.send({ embed: finalEmbed });
-
-            for (let i = 0; i < 25; i++) {
-
-                let tempPlayers = [];
-
-                for (let j = 0; j < 25; j++) {
-
-                    tempPlayers.push(`${user.displayName} ${i}-${j}`);
-                }
-                let squads = guildSquads.get(message.guild.id);
-                squads.push({ game: game, displayNames: JSON.parse(JSON.stringify(tempPlayers)), size: squadSize, created: new Date(), summoner: user.displayName + i, summonerID: user.id });
-            }
-
-
-
         }
         else
             message.channel.send("No one has signed up for " + game + ".");
@@ -617,18 +602,19 @@ async function viewActiveSummons(message, params, user) {
     if (squads.length == 0) return message.channel.send("There are no active summons in the server to view!");
     if (squads.length == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
 
-
-
     let fieldArray = new Array();
 
     for (let squad of squads.entries()) {
 
-        fieldArray.push({ name: `${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames });
+        fieldArray.push({
+            name: `${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`, value: squad[1].displayNames.reduce((acc, current, index) => {
+                acc.push(`${index}) ${current}`);
+                return acc;
+            }, [])
+        });
     }
 
-    //message.channel.send({ embed: newEmbed });
-    // console.log(fieldArray)
-    MAIN.prettyEmbed(message, `There are ${squads.length} active summons!`, fieldArray, -1, -1, 1);
+    MAIN.prettyEmbed(message, `There are ${squads.length} active summon(s)!`, fieldArray, -1, -1, 1);
 }
 exports.viewActiveSummons = viewActiveSummons;
 

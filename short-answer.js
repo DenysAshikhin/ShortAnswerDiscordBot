@@ -891,7 +891,6 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
         if ((previousName != itemName) && (field != null)) {
 
             if (item.name) {
-                field.name = previousName;
                 previousName = '';
             }
 
@@ -901,6 +900,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                 field.name = '** **';
             else
                 field.name = `${part} ${groupNumber}`;
+
             fieldArray.push(JSON.parse(JSON.stringify(field)));
 
             runningString = "";
@@ -908,7 +908,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
             field = { name: "", value: [], inline: true };
         }
 
-        if ((runningString.length < maxLength) || (field == null)) {//add a running string check for 900 characters?
+        if ((runningString.length < maxLength) || (field == null)) {
 
             if (((runningString.length + element.length) > maxLength)) {
 
@@ -947,8 +947,17 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                 BIGSPLIT = true;
             }
             {
+
                 runningString += element;
+
                 field = field == null ? { name: "", value: [], inline: true } : field;
+                if (itemName != '')
+                    field.name = itemName;
+                else if (part == -1) {
+                    field.name = '** **';
+                }
+                else
+                    field.name = `${part} ${groupNumber}`;
 
                 if (startTally == -1)
                     field.value.push(`${element}`);
@@ -963,12 +972,6 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                     previousName = item.name;
                 }
 
-                if (field.name != '')
-                    field.name = field.name;
-                else if (part == -1)
-                    field.name = '** **';
-                else
-                    field.name = `${part} ${groupNumber}`;
                 fieldArray.push(JSON.parse(JSON.stringify(field)));
 
                 runningString = "";
@@ -981,8 +984,9 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
 
     if (field.name != '')
         field.name = field.name;
-    else if (part == -1)
+    else if (part == -1) {
         field.name = '** **';
+    }
     else
         field.name = `${part} ${groupNumber}`;
     fieldArray.push(JSON.parse(JSON.stringify(field)));
@@ -1075,7 +1079,6 @@ function testy(ARR, description, message, modifier) {
             }
         }
 
-
         if (!Array.isArray(field.value)) {
         }
         else if (modifier === 1) {
@@ -1089,7 +1092,7 @@ function testy(ARR, description, message, modifier) {
     }
 
     message.channel.send({ embed: newEmbed });
-    if (threeQueue.queue[0].length > 0) testy(ARR, description, message);
+    if (ARR.length > 0) testy(ARR, description, message, modifier);
 }
 
 
@@ -1207,6 +1210,9 @@ async function minuteCount() {
 
 setInterval(minuteCount, 60 * 1000);
 
+
+
+//add ADMINISTRATOR checks for comamnds allowing mass spam -> i.e. topgames 1000
 //cant signup bots for games
 //fix tutorial!!!!!
 //give people ability to choose how their menus are skinned!
