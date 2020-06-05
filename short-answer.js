@@ -880,11 +880,33 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
 
         let BIGSPLIT = false;
 
+        if (item.value == '') continue;
+
         element = item.value ? item.value : item;
         element = element ? element : '** **';
         if (element == '** **') continue;
         element = Array.isArray(element) ? element.join("\n") : element;
         let itemName = item.name ? item.name : "";
+
+        if ((previousName != itemName) && (field != null)) {
+
+            if (item.name) {
+                field.name = previousName;
+                previousName = '';
+            }
+
+            if (field.name != '')
+                field.name = field.name;
+            else if (part == -1)
+                field.name = '** **';
+            else
+                field.name = `${part} ${groupNumber}`;
+            fieldArray.push(JSON.parse(JSON.stringify(field)));
+
+            runningString = "";
+            groupNumber++;
+            field = { name: "", value: [], inline: true };
+        }
 
         if ((runningString.length < maxLength) || (field == null)) {//add a running string check for 900 characters?
 
@@ -896,7 +918,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                 tempElement = tempElement ? tempElement : '** **';
                 tempElement = Array.isArray(tempElement) ? tempElement.join("\n") : tempElement;
 
-                if (runningString.length == 0)
+                if (runningString.length == 0) {
                     if (tempElement.includes('\n')) {
 
                         let tempRun = '';
@@ -914,8 +936,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                     }
                     else
                         message.channel.send("Found an unsplittable message body, odds of that happening naturally are next-to-none so stop testing me D:< However, if this is indeed from normal use, please notify the creator with the **suggest** command.");
-                else
-                    tempElement = '';
+                }
 
                 if (tempItem.value)
                     tempItem.value = tempElement;
@@ -927,22 +948,20 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
             }
             {
                 runningString += element;
-
                 field = field == null ? { name: "", value: [], inline: true } : field;
 
                 if (startTally == -1)
                     field.value.push(`${element}`);
                 else
                     field.value.push(`${tally}) ${element}`);
+            }
 
+            if (BIGSPLIT) {
 
                 if (item.name) {
                     field.name = item.name;
                     previousName = item.name;
                 }
-            }
-
-            if (BIGSPLIT) {
 
                 if (field.name != '')
                     field.name = field.name;
@@ -956,20 +975,6 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                 groupNumber++;
                 field = { name: "", value: [], inline: true };
             }
-        }
-        else {
-            if (field.name != '')
-                field.name = field.name;
-            else if (part == -1)
-                field.name = '** **';
-            else
-                field.name = `${part} ${groupNumber}`;
-
-            fieldArray.push(JSON.parse(JSON.stringify(field)));
-
-            runningString = "";
-            groupNumber++;
-            field = { name: "", value: [], inline: true };
         }
         tally++;
     }
@@ -1053,6 +1058,7 @@ function testy(ARR, description, message, modifier) {
     let amount = ARR.length > 24 ? 24 : ARR.length;
 
     let threeQueue = createThreeQueue(ARR.splice(0, amount))
+
     threeQueue.index = 0;
 
     for (let i = 0; i < 25; i++) {

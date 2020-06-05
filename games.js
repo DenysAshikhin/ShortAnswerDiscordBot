@@ -627,8 +627,8 @@ async function viewActiveSummons(message, params, user) {
     }
 
     //message.channel.send({ embed: newEmbed });
-   // console.log(fieldArray)
-    MAIN.prettyEmbed(message, `There are ${squads.length} active summons!`, fieldArray, -1, -1);
+    // console.log(fieldArray)
+    MAIN.prettyEmbed(message, `There are ${squads.length} active summons!`, fieldArray, -1, -1, 1);
 }
 exports.viewActiveSummons = viewActiveSummons;
 
