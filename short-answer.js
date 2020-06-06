@@ -901,7 +901,8 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
             else
                 field.name = `${part} ${groupNumber}`;
 
-            fieldArray.push(JSON.parse(JSON.stringify(field)));
+            if (field.value.length != 0)
+                fieldArray.push(JSON.parse(JSON.stringify(field)));
 
             runningString = "";
             groupNumber++;
@@ -937,13 +938,18 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                     else
                         message.channel.send("Found an unsplittable message body, odds of that happening naturally are next-to-none so stop testing me D:< However, if this is indeed from normal use, please notify the creator with the **suggest** command.");
                 }
+                else {
+                    tempElement = -1;
+                }
 
-                if (tempItem.value)
-                    tempItem.value = tempElement;
-                else
-                    tempItem = tempElement;
+                if (tempElement != -1) {
+                    if (tempItem.value)
+                        tempItem.value = tempElement;
+                    else
+                        tempItem = tempElement;
 
-                array.splice(array.indexOf(item) + 1, 0, tempItem)
+                    array.splice(array.indexOf(item) + 1, 0, tempItem)
+                }
                 BIGSPLIT = true;
             }
             {
@@ -989,13 +995,8 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     }
     else
         field.name = `${part} ${groupNumber}`;
-    fieldArray.push(JSON.parse(JSON.stringify(field)));
-
-
-    for (let i = 0; i < fieldArray.length; i++) {
-        if (fieldArray[i].value.length == 0)
-            fieldArray.splice(i, 1);
-    }
+    if (field.value.length != 0)
+        fieldArray.push(JSON.parse(JSON.stringify(field)));
 
     testy(fieldArray, description, message, modifier);
 }
@@ -1055,6 +1056,8 @@ function createThreeQueue(array) {
 }
 
 function testy(ARR, description, message, modifier) {
+
+
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = description;

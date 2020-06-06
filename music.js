@@ -967,7 +967,8 @@ async function myPlayLists(message, params, user) {
         let fieldArray = new Array();
         for (song of params.songs)
             fieldArray.push(song.title + "\n");
-        MAIN.prettyEmbed(message, `Here are the songs for **${params.title}**`, fieldArray, -1, 1);
+
+        MAIN.prettyEmbed(message, `Here are the songs for **${params.title}**`, fieldArray, -1, 1, 1);
     }
     else {
 

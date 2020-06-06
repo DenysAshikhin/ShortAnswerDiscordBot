@@ -138,6 +138,22 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             else
                 guildSquads.set(message.guild.id, [{ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id }])
             message.channel.send({ embed: finalEmbed });
+
+
+            for (let i = 0; i < 25; i++) {
+
+                let tempPlayers = [];
+
+                for (let j = 0; j < 7; j++) {
+
+                    tempPlayers.push(`${user.displayName} ${i}-${j}`);
+                }
+                let squads = guildSquads.get(message.guild.id);
+                squads.push({ game: game, displayNames: JSON.parse(JSON.stringify(tempPlayers)), size: squadSize, created: new Date(), summoner: user.displayName + i, summonerID: user.id });
+            }
+
+
+
         }
         else
             message.channel.send("No one has signed up for " + game + ".");
