@@ -85,19 +85,17 @@ async function topStats(message) {
         }
     }
 
-
     let statsEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     statsEmbed.date = new Date();
     statsEmbed.title = MAIN.Embed.title + ` - Top Stats for ${message.guild.name}!`;
     statsEmbed.thumbnail.url = message.guild.iconURL();
     statsEmbed.fields = [
-        { name: `The Silent Type: ${silentType.displayName}`, value: `${silentType.messages[silentTypeIndex]} messages sent.` },
-        { name: `The Loud Mouth: ${loudMouth.displayName}`, value: `${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.` },
-        { name: `The Ghost: ${ghost.displayName}`, value: `${ghost.timeAFK[ghostIndex]} minutes spent AFK.` },
-        { name: `The MIA: ${MIA.displayName}`, value: MAIN.findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex]) + " last seen date." },
-        { name: `The Summoner: ${summoner.displayName}`, value: `${summoner.summoner[summonerIndex]} summoning rituals completed.` }
+        { name: '** **', value: "```md\n" + `The Silent Type:\n#${silentType.displayName}\n` + `<${silentType.messages[silentTypeIndex]} messages sent.>` + "```" },
+        { name: '** **', value: "```md\n" + `The Loud Mouth:\n#${loudMouth.displayName}\n` + `<${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.>` + "```" },
+        { name: '** **', value: "```md\n" + `The Ghost:\n#${ghost.displayName}\n` + `<${ghost.timeAFK[ghostIndex]} minutes spent AFK.>` + "```" },
+        { name: '** **', value: "```md\n" + `The MIA:\n#${MIA.displayName}\n` + `<${MAIN.findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex])} last seen date.>` + "```" },
+        { name: '** **', value: "```md\n" + `The Summoner:\n#${summoner.displayName}\n` + `<${summoner.summoner[summonerIndex]} summoning rituals completed.>` + "```" }
     ];
-
 
     message.channel.send({ embed: statsEmbed });
 }
@@ -134,17 +132,17 @@ async function getStats(member, user) {
         let statsEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
         statsEmbed.date = new Date();
         statsEmbed.fields = [
-            { name: "Total number of messages sent: ", value: user.messages[index], inline: true },
-            { name: "Last message sent: ", value: user.lastMessage[index], inline: true },
-            { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: true },
-            { name: "Last time you talked was: ", value: user.lastTalked[index], inline: true },
-            { name: "Number of games you are signed up for: ", value: user.games.length, inline: true },
-            { name: "Number of saved playlists: ", value: user.playlists.length, inline: true },
-            { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: true },
-            { name: "You joined this server on: ", value: user.dateJoined[index], inline: true },
-            { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: true },
-            { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: true },
-            { name: "Number of succesful summons: ", value: user.summoner[index], inline: true },
+            { name: "Total number of messages sent: ", value: user.messages[index], inline: false },
+            { name: "Last message sent: ", value: user.lastMessage[index], inline: false },
+            { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: false },
+            { name: "Last time you talked was: ", value: user.lastTalked[index], inline: false },
+            { name: "Number of games you are signed up for: ", value: user.games.length, inline: false },
+            { name: "Number of saved playlists: ", value: user.playlists.length, inline: false },
+            { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: false },
+            { name: "You joined this server on: ", value: user.dateJoined[index], inline: false },
+            { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: false },
+            { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: false },
+            { name: "Number of succesful summons: ", value: user.summoner[index], inline: false },
         ];
 
         return statsEmbed;

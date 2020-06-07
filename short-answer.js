@@ -391,7 +391,7 @@ async function commandMatcher(message, command, params, user) {
         for (let i = 0; i < check.result.length; i++) {
 
             //fieldArray.push({ name: check.result[i].item, value: i, inline: false })
-            fieldArray.push({ name: `${i+1} - ` + check.result[i].item, value: "** **", inline: false })
+            fieldArray.push({ name: `${i + 1} - ` + check.result[i].item, value: "** **", inline: false })
         }
         let newEmbed = JSON.parse(JSON.stringify(Embed));
         newEmbed.date = new Date();
@@ -867,7 +867,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 }
 exports.generalMatcher = generalMatcher;
 
-async function prettyEmbed(message, description, array, part, startTally, modifier) {
+async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title) {
 
     let runningString = "";
     let previousName = "";
@@ -877,10 +877,12 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     let fieldArray = [];
     let maxLength = 100;
 
+
+    let tester = 1;
+
     for (item of array) {
 
         let BIGSPLIT = false;
-
         if (item.value == '') continue;
 
         element = item.value ? item.value : item;
@@ -902,8 +904,11 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
             else
                 field.name = `${part} ${groupNumber}`;
 
-            if (field.value.length != 0)
+            if (field.value.length != 0) {
+
                 fieldArray.push(JSON.parse(JSON.stringify(field)));
+
+            }
 
             runningString = "";
             groupNumber++;
@@ -912,7 +917,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
 
         if ((runningString.length < maxLength) || (field == null)) {
 
-            if (((runningString.length + element.length) > maxLength)) {
+            if (((runningString.length + element.length) >= maxLength)) {
 
                 let tempItem = JSON.parse(JSON.stringify(item));
 
@@ -999,7 +1004,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     if (field.value.length != 0)
         fieldArray.push(JSON.parse(JSON.stringify(field)));
 
-    testy(fieldArray, description, message, modifier);
+    testy(fieldArray, description, message, modifier, URL, title);
 }
 exports.prettyEmbed = prettyEmbed;
 
@@ -1056,12 +1061,12 @@ function createThreeQueue(array) {
     return threeQueue;
 }
 
-function testy(ARR, description, message, modifier) {
-
-
+function testy(ARR, description, message, modifier, URL, title) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = description;
+    newEmbed.title = title;
+    newEmbed.thumbnail.url = URL;
 
     let amount = ARR.length > 24 ? 24 : ARR.length;
 
@@ -1209,7 +1214,7 @@ async function createBackUp() {
 }//
 
 async function minuteCount() {
-    countTalk();
+    if (defaultPrefix != '##') countTalk();
 }
 
 setInterval(minuteCount, 60 * 1000);

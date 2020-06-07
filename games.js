@@ -398,7 +398,6 @@ async function gameStats(message, params, user) {
     else {
 
         game = check.result[0].item;
-        console.log(params)
         let users = await MAIN.getUsers();
         let signedUp = new Array();
 
