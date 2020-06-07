@@ -348,10 +348,12 @@ async function play(message, params, user) {
             volume: 5,
             playing: true,
             dispatcher: null,
-            repeat: -1
+            repeat: -1,
+            originMessage: message
         };
         queue.set(message.guild.id, queueConstruct);
         serverQueue = queueConstruct;
+
     } else {
 
         queueConstruct = serverQueue;
@@ -863,7 +865,9 @@ async function playUserPlayList(message, params, user) {
                 index: 0,
                 volume: 5,
                 playing: true,
-                dispatcher: null
+                dispatcher: null,
+                repeat: -1,
+                originMessage: message
             };
             queue.set(message.guild.id, queueConstruct);
             serverQueue = queueConstruct;
@@ -962,7 +966,7 @@ async function myPlayLists(message, params, user) {
     }
     else if (params.title) {
 
-        if(params.songs.length == 0) return message.channel.send(`${params.title} does not have any songs!`);
+        if (params.songs.length == 0) return message.channel.send(`${params.title} does not have any songs!`);
 
         let fieldArray = new Array();
         for (song of params.songs)
@@ -1011,10 +1015,10 @@ async function currentPlaylist(message, params, user) {
     let totalDuration = songQueue.songs.reduce((total, num) => { return total + Number(num.duration) }, 0);
     let fieldArray = new Array();
 
-    for (let i = 0; i < songQueue.songs.length; i++){
+    for (let i = 0; i < songQueue.songs.length; i++) {
         let song = songQueue.songs[i];
-        if (song == songQueue.songs[songQueue.index]) fieldArray.push(`#${i+1}) ${song.title}\n`);
-        else fieldArray.push(`${i+1}) ${song.title}\n`);
+        if (song == songQueue.songs[songQueue.index]) fieldArray.push(`#${i + 1}) ${song.title}\n`);
+        else fieldArray.push(`${i + 1}) ${song.title}\n`);
     }
 
     MAIN.prettyEmbed(message, `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`,
@@ -1083,3 +1087,18 @@ async function removeTempSongs() {
     });
 }
 removeTempSongs();
+
+async function checkEmptyChannel() {
+
+    if (queue.size > 0)
+        for (server of queue.entries()) {
+            if (server[1].connection.channel.members.size == 1) {
+                server[1].originMessage.channel.send("Leaving because there is no one listening!");
+                await server[1].voiceChannel.leave();
+                download.delete(server[1].originMessage.guild.id);
+                queue.delete(server[0]);
+            }
+        }
+}
+
+setInterval(checkEmptyChannel, 60 * 1000);
