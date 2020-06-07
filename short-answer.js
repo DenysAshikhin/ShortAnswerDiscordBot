@@ -391,7 +391,7 @@ async function commandMatcher(message, command, params, user) {
         for (let i = 0; i < check.result.length; i++) {
 
             //fieldArray.push({ name: check.result[i].item, value: i, inline: false })
-            fieldArray.push({ name: `${i} - ` + check.result[i].item, value: "** **", inline: false })
+            fieldArray.push({ name: `${i+1} - ` + check.result[i].item, value: "** **", inline: false })
         }
         let newEmbed = JSON.parse(JSON.stringify(Embed));
         newEmbed.date = new Date();
@@ -417,6 +417,7 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch) 
         if (!isNaN(params) && params.length > 0) {
 
             params = Math.floor(Number(params));
+            params--;
             if (params > Math.Max_Safe_INTEGER) return message.channel.send("You have entered an invalid option, please try again!");
             if (params >= specificCommand.choices.length || params < 0) {
                 message.channel.send("You have entered an invalid number, please try again. Or type *-1* to quit the suggestion.");
@@ -488,7 +489,7 @@ async function checkCommands(params, user) {
 
     for (let i = 0; i < maxResults; i++) {
 
-        finalList += i + ") " + result[i].item + "\n";
+        finalList += (i + 1) + ") " + result[i].item + "\n";
         finalArray.push(result[i]);
     }
 
@@ -854,7 +855,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         for (let i = 0; i < promptArray.length; i++)
             fieldArray.push(promptArray[i].item);
 
-        prettyEmbed(message, flavourText, fieldArray, -1, 0, 1);
+        prettyEmbed(message, flavourText, fieldArray, -1, 1, 1);
 
         specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
         return 0;
@@ -1214,7 +1215,7 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
-
+//make the bot quit of there is no one else in the voice chat
 //add ADMINISTRATOR checks for comamnds allowing mass spam -> i.e. topgames 1000
 //cant signup bots for games
 //fix tutorial!!!!!

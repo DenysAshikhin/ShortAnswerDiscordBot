@@ -48,16 +48,12 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     else if (check.result[0].score != 0) {
 
         let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
-
-        let removeEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-        removeEmbed.timestamp = new Date();
-        removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
-
+        let tempArray = [];
 
         for (suggestion of prettyArray)
-            removeEmbed.fields.push({ name: suggestion, value: "** **" });
+            tempArray.push(suggestion)
 
-        message.channel.send({ embed: removeEmbed });
+        MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`, tempArray, -1, -1, 1);
         MAIN.specificCommandCreator(pingUsers, [message, -1, user], check.result, user);
         return -11;
     }
@@ -140,23 +136,23 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             message.channel.send({ embed: finalEmbed });
 
 
-            for (let i = 0; i < 25; i++) {
+            // for (let i = 0; i < 25; i++) {
 
-                let tempPlayers = [];
+            //     let tempPlayers = [];
 
-                for (let j = 0; j < 7; j++) {
+            //     for (let j = 0; j < 7; j++) {
 
-                    tempPlayers.push(`${user.displayName} ${i}-${j}`);
-                }
-                let squads = guildSquads.get(message.guild.id);
-                squads.push({ game: game, displayNames: JSON.parse(JSON.stringify(tempPlayers)), size: squadSize, created: new Date(), summoner: user.displayName + i, summonerID: user.id });
-            }
+            //         tempPlayers.push(`${user.displayName} ${i}-${j}`);
+            //     }
+            //     let squads = guildSquads.get(message.guild.id);
+            //     squads.push({ game: game, displayNames: JSON.parse(JSON.stringify(tempPlayers)), size: squadSize, created: new Date(), summoner: user.displayName + i, summonerID: user.id });
+            // }
 
 
 
         }
         else
-            message.channel.send("No one has signed up for " + game + ".");
+            message.channel.send("No one else has signed up for " + game + ".");
         let index = user.guilds.indexOf(message.guild.id);
         user.summoner[index] += 1;
         User.findOneAndUpdate({ id: user.id }, { $set: { summoner: user.summoner } }, function (err, doc, res) { });
@@ -198,7 +194,7 @@ function checkGame(gameArray, params, user) {
 
     for (let i = 0; i < maxResults; i++) {
 
-        finalList += i + ") " + result[i].item + "\n";
+        finalList += (i+1) + ") " + result[i].item + "\n";
         finalArray.push(result[i]);
     }
 
