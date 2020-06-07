@@ -111,7 +111,7 @@ async function specificStats(message) {
 
         let specificEmbed = await getStats(message.mentions.members.first());
         specificEmbed.description = message.mentions.members.first().displayName + ", *" + message.member.displayName + "* requested your stats:";
-        specificEmbed.thumbnail.url = message.mentions.members.first().user.avatarURL();
+        specificEmbed.thumbnail.url = message.mentions.users.first().avatarURL();
 
         message.channel.send({ embed: specificEmbed });
     }
@@ -126,23 +126,19 @@ async function getStats(member, user) {
     let index = user.guilds.indexOf(member.guild.id);
 
     if (!user.kicked[index]) {
-        let stats = "";
-
 
         let statsEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
         statsEmbed.date = new Date();
         statsEmbed.fields = [
-            { name: "Total number of messages sent: ", value: user.messages[index], inline: false },
-            { name: "Last message sent: ", value: user.lastMessage[index], inline: false },
-            { name: "Total time spent talking (in minutes): ", value: user.timeTalked[index], inline: false },
-            { name: "Last time you talked was: ", value: user.lastTalked[index], inline: false },
-            { name: "Number of games you are signed up for: ", value: user.games.length, inline: false },
-            { name: "Number of saved playlists: ", value: user.playlists.length, inline: false },
-            { name: "Time spent AFK (in minutes): ", value: user.timeAFK[index], inline: false },
-            { name: "You joined this server on: ", value: user.dateJoined[index], inline: false },
-            { name: "Whether you are excluded from pings: ", value: user.excludePing, inline: false },
-            { name: "Whether you are excluded from DMs: ", value: user.excludeDM, inline: false },
-            { name: "Number of succesful summons: ", value: user.summoner[index], inline: false },
+            { name: "** **", value: "```md\n" + `You joined this server on:\n#${user.dateJoined[index]}` + "```", inline: true },
+            { name: "** **", value: "```md\n" + `Total number of messages sent:\n#${user.messages[index]}\n\n` +  `Last message sent:\n#${user.lastMessage[index]}` + "```", inline: true },
+            { name: "** **", value: "```md\n" + `Last time you talked was:\n#${user.lastTalked[index]}\n\n` + `Total time spent talking (in minutes):\n#${user.timeTalked[index]}\n\n` 
+            + `Time spent AFK (in minutes):\n#${user.timeAFK[index]}` + "```", inline: true },
+            { name: "** **", value: "```md\n" + `Number of games you are signed up for:\n#${user.games.length}\n\n` + `Number of saved playlists:\n#${user.playlists.length}` + "```", 
+            inline: true },
+            { name: "** **", value: "```md\n" + `Whether you are excluded from pings:\n#${user.excludePing}\n\n` + `Whether you are excluded from DMs:\n#${user.excludeDM}` + "```", 
+            inline: true },
+            { name: "** **", value: "```md\n" + `Number of succesful summons:\n#${user.summoner[index]}` + "```", inline: true }
         ];
 
         return statsEmbed;
@@ -156,12 +152,12 @@ async function personalStats(message, params, user) {
     if (message.channel.type != 'dm') {
         let statResult = await getStats(message.member, user);
         statResult.title = MAIN.Embed.title + ` ${message.member.displayName}'s stats:`
+        statResult.thumbnail.url = message.author.avatarURL();
         if (!user.kicked[user.guilds.indexOf(message.guild.id)]) {
             message.channel.send({ embed: statResult });
         }
     }
     else {
-
 
         let statsEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
         statsEmbed.date = new Date();
