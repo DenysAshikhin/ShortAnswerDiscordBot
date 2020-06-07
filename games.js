@@ -194,7 +194,7 @@ function checkGame(gameArray, params, user) {
 
     for (let i = 0; i < maxResults; i++) {
 
-        finalList += (i+1) + ") " + result[i].item + "\n";
+        finalList += (i + 1) + ") " + result[i].item + "\n";
         finalArray.push(result[i]);
     }
 
@@ -1072,9 +1072,10 @@ exports.updateGames = updateGames;
 
 async function squadTrack() {
 
-    for (guildSq of guildSquads.entries())
-        for (squad of guildSq[1])
-            if ((new Date() - squad.created) >= 1, 800, 000)
-                guildSquads.delete(guildSq[0]);
+    if (guildSquads.size > 0)
+        for (guildSq of guildSquads.entries())
+            for (squad of guildSq[1])
+                if ((new Date() - squad.created) >= 1800000)
+                    guildSquads.delete(guildSq[0]);
 }
 setInterval(squadTrack, 1000);
