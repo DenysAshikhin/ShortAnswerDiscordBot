@@ -51,26 +51,21 @@ async function gameTutorial(message, params, command) {
         `You can also sign up for as many games at once as you would like by seperating each entry by a comma - you can mix both words and numbers.`
         + ` Try signing up for **at least two new games** at once.`,
 
-        `Now that we have some games tracked for you, let's view your complete game list by typing **${prefix}` + Commands.commands[3] + `**`,
+        `Now that we have some games tracked for you, let's view your complete game list!`,
 
-        `Now try removing any of the games in your games list by typing **${prefix}` + Commands.commands[4] + `** *game#*.`
-        + ` Just a heads up that the GAME# is the number from your games list.`,
+        `Now try removing any of the games in your games list using the command below!`,
 
-        `Now if you want to play a game, but not sure who is up for it, you can simple type **${prefix}` + Commands.commands[13]
-        + `** *nameOfGame*/*#ofGame* and anyone who has this game will be notified.`,
+        `Onto the fun stuff, if you want to play a game but not sure who is up for it, you can ping and anyone who has this game will be notified.`,
 
         `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
-        + ` an @mention in the text channel it was sent from. To disable/enable @mentions simply type`
-        + ` **${prefix}` + Commands.commands[5] + `** *true/false*. *False* = you will be pinged, *True* = you will not be pinged.`,
+        + ` an @mention in the text channel it was sent from. To disable/enable @mentions use the command below - *False* = you will be pinged, *True* = you will not be pinged.`,
 
-        `The second notification is a direct message. To disable/enable direct messages from pings simply type`
-        + ` **${prefix}` + Commands.commands[6] + `** *true/false*. *False* = you will be DMed, *True* = you will not be DMed.`,
+        `The second notification is a direct message. To disable/enable direct messages from pings - *False* = you will be DMed, *True* = you will not be DMed.`,
 
         `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
-        + ` **${prefix}` + Commands.commands[26] + `** *any suggestion here* and I'll forward the message to the creator. For a more general help,`
-        + ` type **${prefix}` + Commands.commands[7] + `**`
+        + ` **${prefix}` + Commands.commands[26] + `** and I'll forward the message to the creator.`
         + `\nAs a final note, this bot is being rapidly developed with new features constantly being added,`
-        + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + Commands.commands[27] + `** *true/false*.`
+        + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + Commands.commands[27] + `**.`
     ]
 
     if (user.tutorialStep == -1) {
@@ -118,7 +113,8 @@ async function gameTutorial(message, params, command) {
                     //Need to add the recommend and something else commands
                     message.channel.send(GameTutorial.steps[user.tutorialStep]);
 
-                   // MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
+                   MAIN.sendHelpMessage(Commands.commands.indexOf('UPDATEME'), message);
+                   MAIN.sendHelpMessage(Commands.commands.indexOf('SUGGEST'), message);
                     if (!user.completedTutorials.includes(0)) {
                         user.completedTutorials.push(0);
                     }
