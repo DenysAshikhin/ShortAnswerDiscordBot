@@ -704,38 +704,41 @@ function removeGame(message, game, user) {
         let removedGames = new Array();
 
         games.sort();
-
         if (game.length == 1) {
 
-            let check = checkGame(user.games, game, user);
-            if ((check == -1)) {
+            if (isNaN(game[0]) && (game[0].length > 0)) {
+                let check = checkGame(user.games, game, user);
+                console.log(check);
+                if ((check == -1)) {
 
-                if (!mass)
-                    message.channel.send("No such game exists in you playlist, try again?");
-                return check;
-            }
-            else if ((check.result[0].score != 0) && !mass) {
+                    if (!mass)
+                        message.channel.send("No such game exists in you playlist, try again?");
+                    return check;
+                }
+                else if ((check.result[0].score != 0) && !mass) {
 
-                let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
+                    let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
-                let removeEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-                removeEmbed.timestamp = new Date();
-                removeEmbed.title = MAIN.Embed.title + ` Game Commands`;
-                removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+                    let removeEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
+                    removeEmbed.timestamp = new Date();
+                    removeEmbed.title = MAIN.Embed.title + ` Game Commands`;
+                    removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
 
-                for (suggestion of prettyArray)
-                    removeEmbed.fields.push({ name: suggestion, value: "** **" });
+                    for (suggestion of prettyArray)
+                        removeEmbed.fields.push({ name: suggestion, value: "** **" });
 
-                message.channel.send({ embed: removeEmbed });
-                MAIN.specificCommandCreator(removeGame, [message, -1, user], check.result, user);
-                return -11;
-            }
-            else {
+                    message.channel.send({ embed: removeEmbed });
+                    MAIN.specificCommandCreator(removeGame, [message, -1, user], check.result, user);
+                    return -11;
+                }
+                else {
 
-                game[0] = check.result[0].item;
+                    game[0] = check.result[0].item;
+                }
             }
         }
+
 
         //game.forEach(async gameTitle => {make it for...of loop!
         let gameTitle = mass ? game : game[0];
@@ -751,6 +754,7 @@ function removeGame(message, game, user) {
         }
         else {
             gameTitle = Math.floor(gameTitle);
+            gameTitle--;
             if (gameTitle < gameArr.length && gameTitle >= 0) {
                 removedGames.push(gameArr[gameTitle]);
                 gameArr.splice(gameTitle, 1)
@@ -894,12 +898,19 @@ async function signUpSpecificUser(message, game, user) {
     let finalList = [];
 
     for (member of message.mentions.members.values()) {
+        if (member.user.bot) {
+
+            message.channel.send(`${member.displayName} is a bot and cannot be signed up for games!`);
+            continue;
+        }
         let tempUser = await MAIN.findUser({ id: member.id });
         finalList.push(tempUser.displayName);
         updateGames(message, { game: game.game, mass: true }, tempUser);
     }
 
-    return message.channel.send(`Succesfully signedUp ${game.game} for: *${finalList}*`);
+    if (finalList.length > 0)
+        return message.channel.send(`Succesfully signedUp ${game.game} for: *${finalList}*`);
+    return message.channel.send(`There was no valid member to signUp for ${game.game}`);
 }
 exports.signUpSpecificUser = signUpSpecificUser;
 
@@ -925,7 +936,9 @@ async function signUpAllUsers(message, game, user) {
 
     for (currUser of users) {
 
-        if (message.guild.members.cache.get(currUser.id)) {
+        let member = message.guild.members.cache.get(currUser.id);
+
+        if (member && !member.user.bot) {
             updateGames(message, { game: game, mass: true }, currUser);
             tally++;
             console.log(currUser.displayName);

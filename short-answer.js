@@ -1220,13 +1220,9 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 
-//make the bot quit of there is no one else in the voice chat
-//add ADMINISTRATOR checks for comamnds allowing mass spam -> i.e. topgames 1000
-//cant signup bots for games
+
+//release 1
 //fix tutorial!!!!!
-//give people ability to choose how their menus are skinned!
-//fix squad deletions, fix personal playlists
-//add proper listing to personal playlists, whichever summon you wanna join prompt
 //shake user # of times -> have to check for move user perms
 //volume control
 //sptofiy playlist
@@ -1237,7 +1233,10 @@ setInterval(minuteCount, 60 * 1000);
 //video game stats
 
 
-//play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
+
+
+
+
 
 //https://dev.twitch.tv/docs/api/reference/#get-streams
 
@@ -1252,6 +1251,8 @@ process.on('unhandledException', (reason, p) => {
     Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
 });
 
+//release 2
+//give people ability to choose how their menus are skinned!
 //DM quality of life (for now its just prefixes?) - prefix tutorial
 //Stats Tutorial
 //for the game tutorial add a continuation showing the remaining extra commands, they can either cover them or skip them - make it Y/N
@@ -1260,8 +1261,8 @@ process.on('unhandledException', (reason, p) => {
 //Then make a tutorial for the above commands...
 
 
-//youtube live streams are broken 
-
+//release 3
+//play https://www.youtube.com/watch?v=cKzFsVfRn-A when sean joins, then kick everyone.
 //poker, texas hold em, war, gold fish, 
 
 //Make a vote system for the next feature to focus on

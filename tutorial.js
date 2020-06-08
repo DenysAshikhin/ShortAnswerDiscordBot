@@ -75,9 +75,6 @@ async function gameTutorial(message, params, command) {
 
     if (user.tutorialStep == -1) {
 
-        //newEmbed.description = GameTutorial.steps[0];
-        //message.channel.send({ embed: createTutorialEmbed(0) })
-
         message.channel.send(GameTutorial.steps[0]);
         MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[0]), message);
 
@@ -90,7 +87,7 @@ async function gameTutorial(message, params, command) {
                 }
             }, function (err, doc, res) { });
         return 1;
-    }//
+    }
     else {
         if (user.activeTutorial == 0 || user.activeTutorial == -1) {
 
@@ -118,7 +115,6 @@ async function gameTutorial(message, params, command) {
                 }
                 else {//Tutorial over!!!!!
                     //Need to add the recommend and something else commands
-                    //message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
                     message.channel.send(GameTutorial.steps[user.tutorialStep]);
                     MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
                     if (!user.completedTutorials.includes(0)) {
@@ -142,6 +138,9 @@ async function gameTutorial(message, params, command) {
 
                 if (command == GameTutorial.specificCommand[user.tutorialStep]) {
                     let result = await GameTutorial.specificCommand[user.tutorialStep].call(null, message, params, user);
+                    console.log("result: ", result)
+                    console.log("expected: ", GameTutorial.expectedOutput[user.tutorialStep])
+                    console.log()
                     if (result >= GameTutorial.expectedOutput[user.tutorialStep]) {
                         User.findOneAndUpdate({ id: user.id }, { $set: { tutorialStep: user.tutorialStep + 1 } }, function (err, doc, res) { });
                         setTimeout(gameTutorial, 1000, message, params, command);
