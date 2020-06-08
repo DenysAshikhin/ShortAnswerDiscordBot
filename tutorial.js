@@ -95,6 +95,8 @@ async function gameTutorial(message, params, command) {
 
                 message.channel.send(GameTutorial.steps[user.tutorialStep]);
                 let Index = Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]);
+
+                console.log(GameTutorial.expectedCommand[user.tutorialStep])
                 MAIN.sendHelpMessage(Index, message);
                 return 1;
             }
@@ -102,7 +104,6 @@ async function gameTutorial(message, params, command) {
 
                 if (user.tutorialStep != GameTutorial.steps.length - 1) {
 
-                    // message.channel.send({ embed: createTutorialEmbed(user.tutorialStep) })
                     message.channel.send(GameTutorial.steps[user.tutorialStep]);
                     MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
                     await User.findOneAndUpdate({ id: user.id },
@@ -116,7 +117,8 @@ async function gameTutorial(message, params, command) {
                 else {//Tutorial over!!!!!
                     //Need to add the recommend and something else commands
                     message.channel.send(GameTutorial.steps[user.tutorialStep]);
-                    MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
+
+                   // MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
                     if (!user.completedTutorials.includes(0)) {
                         user.completedTutorials.push(0);
                     }
@@ -138,9 +140,6 @@ async function gameTutorial(message, params, command) {
 
                 if (command == GameTutorial.specificCommand[user.tutorialStep]) {
                     let result = await GameTutorial.specificCommand[user.tutorialStep].call(null, message, params, user);
-                    console.log("result: ", result)
-                    console.log("expected: ", GameTutorial.expectedOutput[user.tutorialStep])
-                    console.log()
                     if (result >= GameTutorial.expectedOutput[user.tutorialStep]) {
                         User.findOneAndUpdate({ id: user.id }, { $set: { tutorialStep: user.tutorialStep + 1 } }, function (err, doc, res) { });
                         setTimeout(gameTutorial, 1000, message, params, command);

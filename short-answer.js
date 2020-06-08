@@ -1111,6 +1111,8 @@ function sendHelpMessage(Index, message) {
 
     examples += Commands.explanation[Index] + "\n\n";
 
+    console.log(`INDEX: ${Index}`)
+
     for (example of Commands.example[Index]) {
 
         let index = example.indexOf(" ");
