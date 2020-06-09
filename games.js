@@ -679,7 +679,7 @@ function removeGame(message, game, user) {
     if (user.games.length < 1 && !game.mass) {
 
         message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2]);
-        return;
+        return -1;
     }
     else {
 
@@ -739,65 +739,65 @@ function removeGame(message, game, user) {
             }
         }
 
+        for (currGame of game) {
+            let gameTitle = currGame;
 
-        //game.forEach(async gameTitle => {make it for...of loop!
-        let gameTitle = mass ? game : game[0];
+            if (isNaN(gameTitle)) {
+                gameTitle = gameTitle.trim();
 
-        if (isNaN(gameTitle)) {
-
-            if (gameArr.includes(gameTitle)) {
-                removedGames.push(gameTitle);
-                gameArr.splice(gameArr.indexOf(gameTitle), 1);
+                if (gameArr.includes(gameTitle)) {
+                    removedGames.push(gameTitle);
+                    gameArr[gameArr.indexOf(gameTitle)] = -1;
+                }
+                else
+                    invalidGames.push(gameTitle);
             }
-            else
-                invalidGames.push(gameTitle);
-        }
-        else {
-            gameTitle = Math.floor(gameTitle);
-            gameTitle--;
-            if (gameTitle < gameArr.length && gameTitle >= 0) {
-                removedGames.push(gameArr[gameTitle]);
-                gameArr.splice(gameTitle, 1)
+            else {
+                gameTitle = Math.floor(gameTitle);
+                gameTitle--;
+                if (gameTitle < gameArr.length && gameTitle >= 0) {
+                    removedGames.push(gameArr[gameTitle]);
+                    gameArr[gameTitle] = -1;
+                }
+                else
+                    invalidGames.push(gameTitle);
             }
-            else
-                invalidGames.push(gameTitle);
         }
-        //});
+
+        while (gameArr.includes(-1)) {
+            gameArr.splice(gameArr.indexOf(-1), 1);
+        }
 
         gameArr.sort();
 
-
-        let finalEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-        finalEmbed.timestamp = new Date();
+        let fieldArray = [];
 
 
         if (invalidGames.length > 0) {
             invalidGames.sort();
             let invalidGameField = { name: "Invalid Game(s)", value: "" };
             for (let i = 0; i < invalidGames.length; i++) {
-                invalidGameField.value += (i + 1) + ") " + invalidGames[i];
+                invalidGameField.value += (i + 1) + ") " + invalidGames[i] + "\n";
             }
-            finalEmbed.fields.push(invalidGameField);
+            fieldArray.push(invalidGameField);
         }
 
         if (removedGames.length > 0) {
             removedGames.sort();
             let removedGameField = { name: "Removed Game(s)", value: "" };
             for (let i = 0; i < removedGames.length; i++) {
-                removedGameField.value += (i + 1) + ") " + removedGames[i];
+                removedGameField.value += (i + 1) + ") " + removedGames[i] + "\n";
             }
-            finalEmbed.fields.push(removedGameField);
+            fieldArray.push(removedGameField);
         }
 
         if (!mass)
-            message.channel.send({ embed: finalEmbed });
+            MAIN.prettyEmbed(message, '', fieldArray, -1, -1, 1);
 
 
         gameArr.sort();
-        User.findOneAndUpdate({ id: user.id },
-            {
-                $set: { games: gameArr }
-            }, function (err, doc, res) {
+        User.findOneAndUpdate({ id: user.id }, { $set: { games: gameArr } },
+            function (err, doc, res) {
                 //console.log(doc);
             });
 

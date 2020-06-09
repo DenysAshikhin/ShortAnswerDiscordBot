@@ -1221,12 +1221,12 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //release 1
-//volume control
-//sptofiy playlist
-//twitch
+
 //make remove game array - it is but broken - ez fix, mark all the spots with -1, then splice out all of them
 //make custom 'command prefixes' possible
 //moment.js for converting time zones???
+//sptofiy playlist
+//twitch
 //video game stats
 
 
