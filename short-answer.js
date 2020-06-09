@@ -1111,8 +1111,6 @@ function sendHelpMessage(Index, message) {
 
     examples += Commands.explanation[Index] + "\n\n";
 
-    console.log(`INDEX: ${Index}`)
-
     for (example of Commands.example[Index]) {
 
         let index = example.indexOf(" ");
@@ -1122,8 +1120,6 @@ function sendHelpMessage(Index, message) {
     return message.channel.send(examples);
 }
 exports.sendHelpMessage = sendHelpMessage;
-
-
 
 async function graphs() {
 
@@ -1224,7 +1220,6 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //release 1
-//fix tutorial!!!!!
 //shake user # of times -> have to check for move user perms
 //volume control
 //sptofiy playlist
@@ -1233,8 +1228,6 @@ setInterval(minuteCount, 60 * 1000);
 //make custom 'command prefixes' possible
 //moment.js for converting time zones???
 //video game stats
-
-
 
 
 

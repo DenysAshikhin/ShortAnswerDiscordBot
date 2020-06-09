@@ -241,7 +241,7 @@
         ["1) roll", "2) roll 6"],
         ["1) setTimer 1:30", "2) setTimer 30"],
 
-        ["1) shakeUser @TheLastSpark"]
+        ["1) shakeUser @TheLastSpark 5"]
     ],
     "subsection": [
         [3],

@@ -9,7 +9,44 @@ for (let element of studyJSON)
 
 async function shakeUser(message, params, user) {
 
+    if (message.channel.type == 'dm') return message.reply("You must be in a server voice channel and send the command from a server!");
 
+    let targetMember = message.mentions.members.first();
+    if (message.member.roles.highest.comparePositionTo(targetMember.roles.highest) < 0) return message.channel.send("You can't shake a user with a higher role than yours!");
+
+    let startingChannel = targetMember.voice.channel;
+    if (!startingChannel) return message.channel.send("The user needs to be in this server's voice channel!");
+
+
+    let voiceChannels = message.guild.channels.cache.filter(channel => channel.type == 'voice').filter(channel => channel.permissionsFor(targetMember).has('CONNECT')).array();
+    if (voiceChannels.length == 1) return message.channel.send(`There are no other voice channels that ${targetMemeber.displayName} can be moved to!`);
+
+    let args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+
+    while (args.includes('<')) {
+        args = args.substring(0, args.indexOf('<')) + args.substring(args.indexOf('>') + 1);
+    }
+
+    args = Math.floor(Number(args));
+
+    if ((args <= 0) || (args > 20)) return message.channel.send("You can shake a user a max of 20 times, and at least once!");
+
+    let previousChannel = startingChannel;
+    let newChannel = startingChannel;
+
+    for (let i = 0; i < args; i++) {
+
+        while (previousChannel == newChannel) {
+
+            newChannel = voiceChannels[Math.floor(Math.random() * args)];
+        }
+
+        targetMember.voice.setChannel(newChannel);
+        previousChannel = newChannel;
+        await new Promise(resolve => setTimeout(resolve, 1500));
+    }
+
+    targetMember.voice.setChannel(startingChannel);
 }
 exports.shakeUser = shakeUser;
 
@@ -100,7 +137,7 @@ exports.flipCoin = flipCoin;
 async function roll(message, params, user) {
 
     const args = message.content.split(" ").slice(1).join(" ");
-    if(isNaN(args) || (args.length < 1)) return message.channel.send("You need to enter a number.");
+    if (isNaN(args) || (args.length < 1)) return message.channel.send("You need to enter a number.");
     if (Number.MAX_SAFE_INTEGER < Number(args)) return message.channel.send("That number is too large.");
 
     if (args)
