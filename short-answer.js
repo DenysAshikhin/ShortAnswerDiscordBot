@@ -358,6 +358,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[63], MISCELLANEOUS.roll)
     commandMap.set(Commands.commands[64], QOF.setTimer)
     commandMap.set(Commands.commands[65], MISCELLANEOUS.shakeUser)
+    commandMap.set(Commands.commands[66], MUSIC.volume)
 
     exports.commandMap = commandMap;
 }
@@ -1220,7 +1221,6 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //release 1
-//shake user # of times -> have to check for move user perms
 //volume control
 //sptofiy playlist
 //twitch

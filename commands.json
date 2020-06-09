@@ -78,7 +78,8 @@
         "ROLL",
         "SETTIMER",
 
-        "SHAKEUSER"
+        "SHAKEUSER",
+        "VOLUME"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -159,7 +160,8 @@
         "Rolls any number-sided die. Default is 20.",
         "Sets a timer that once finished, will send you a message.",
 
-        "Randomly moves a user across voice channels x times, and returns them to the starting channel at start."
+        "Randomly moves a user across voice channels x times, and returns them to the starting channel at start.",
+        "Sets the music volume out of 100."
     ],
         
     "example": [
@@ -241,7 +243,8 @@
         ["1) roll", "2) roll 6"],
         ["1) setTimer 1:30", "2) setTimer 30"],
 
-        ["1) shakeUser @TheLastSpark 5"]
+        ["1) shakeUser @TheLastSpark 5"],
+        ["1) volume 30"]
     ],
     "subsection": [
         [3],
@@ -322,6 +325,7 @@
         [3],
         [6, 8],
 
-        [3]
+        [3],
+        [4]
     ]
 }

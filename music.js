@@ -15,8 +15,24 @@ var activeSkips = new Map();
 var lastSkip = new Map();
 
 
+async function volume(message, params, user){
+
+    if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
+    const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
+
+    if(args < 0) return message.channel.send("The volume cannot be set to 0!");
+    if(args > 100) return message.channel.send("The max volume is 100!");
+
+    let guildQueue = queue.get(message.guild.id);
+    if(guildQueue){
+        guildQueue.dispatcher.setVolumeLogarithmic(args/100);
+    }
+
+}
+exports.volume = volume;
+
 async function pause(message) {
-    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
 
     let guildQueue = queue.get(message.guild.id);
     if (guildQueue) {
@@ -31,7 +47,7 @@ async function pause(message) {
 exports.pause = pause;
 
 async function resume(message) {
-    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
     let guildQueue = queue.get(message.guild.id);
 
     if (guildQueue) {
@@ -49,7 +65,7 @@ exports.resume = resume;
 
 async function skip(message, params) {
 
-    if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+    if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
     let guildQueue = queue.get(message.guild.id);
     let skipy = lastSkip.get(message.guild.id);
     const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
