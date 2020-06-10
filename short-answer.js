@@ -394,7 +394,7 @@ async function triggerCommandHandler(message, user, skipSearch) {
 
 async function commandMatcher(message, command, params, user) {
 
-    let check = await checkCommands(command);
+    let check = await checkCommands(command, user);
 
     if (check == -1) {
         message.channel.send(`I didn't recognize that command, please try again?`);
@@ -496,8 +496,16 @@ async function checkCommands(params, user) {
         findAllMatches: false,
         includeScore: true,
     }
-    //
-    let fuse = new Fuse(Commands.commands, newOptions);
+
+    let searchArray = Commands.commands;
+
+    if (user.commands) {
+
+        let reducedCommands = user.commands.reduce((accum, current) => { accum.push(current[1]); return accum }, []);
+        searchArray = searchArray.concat(reducedCommands);
+    }
+
+    let fuse = new Fuse(searchArray, newOptions);
     let result = fuse.search(params);
     let maxResults = 5;
     if (maxResults > result.length)

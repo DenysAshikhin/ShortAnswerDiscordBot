@@ -10,14 +10,14 @@ async function setCommand(message, params, user) {
     if (!params.loop) {
         let args = message.content.split(" ").slice(1).join(" ").split(',');
         if (!args[0]) return message.channel.send("You first have to provide the original command you wish to create a monkier for!");
-        args[0] = args[0].trim();
+        args[0] = args[0].trim().toUpperCase();
         if (!args[1]) return message.channel.send("You have to provide the moniker for the original command, **seperated by a comma**.");
-        args[1] = args[1].trim();
+        args[1] = args[1].trim().toUpperCase();
 
-        if (Commands.commands.includes(args[0].toUpperCase())) {
+        if (Commands.commands.includes(args[0])) {
 
             for (combo of user.commands) {
-                if (combo[1] == args[1])
+                if ((combo[1] == args[1]) && (combo[0] != args[0]))
                     return message.channel.send(`Aborting the process as the command ${combo[0]} already has the moniker of ${args[1]}!`);
             }
             //Broke into two loops, to check the whole thing for duplicate monikers first!
@@ -29,7 +29,7 @@ async function setCommand(message, params, user) {
                 }
             }
 
-            user.commands.push([args[0].toUpperCase(), args[1].toUpperCase()]);
+            user.commands.push([args[0], args[1]]);
             User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
             return message.channel.send(`The command ${args[0]} now has the moniker of ${args[1]}`);
         }
