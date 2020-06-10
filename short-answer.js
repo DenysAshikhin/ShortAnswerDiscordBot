@@ -243,18 +243,12 @@ connectDB.once('open', async function () {
 
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
 
-
-            console.log(!!user.commands)
-
             if (user.commands) {
                 for (combo of user.commands) {
-                    console.log(combo)
                     if (combo[1] == command)
                         command = combo[0];
                 }
             }
-
-            console.log("THE COMMAND IS: ", command);
 
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
@@ -374,6 +368,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[65], MISCELLANEOUS.shakeUser)
     commandMap.set(Commands.commands[66], MUSIC.volume)
     commandMap.set(Commands.commands[67], QOF.setCommand)
+    commandMap.set(Commands.commands[68], QOF.commandMonikers)
+    commandMap.set(Commands.commands[69], QOF.removeMoniker)
 
     exports.commandMap = commandMap;
 }
@@ -405,8 +401,6 @@ async function commandMatcher(message, command, params, user) {
         let fieldArray = new Array();
 
         for (let i = 0; i < check.result.length; i++) {
-
-            //fieldArray.push({ name: check.result[i].item, value: i, inline: false })
             fieldArray.push({ name: `${i + 1} - ` + check.result[i].item, value: "** **", inline: false })
         }
         let newEmbed = JSON.parse(JSON.stringify(Embed));
@@ -419,7 +413,11 @@ async function commandMatcher(message, command, params, user) {
         return -11;
     }
     else {
-        specificCommandCreator(commandMap.get(check.result[0].item), [message, params, user], null, user);
+
+        let match = user.commands.find(element => element[1] == check.result[0].item);
+        match = match ? commandMap.get(match[0]) : commandMap.get(check.result[0].item);
+
+        specificCommandCreator(match, [message, params, user], null, user);
         return await triggerCommandHandler(message, user, true);
     }
 }
@@ -820,11 +818,6 @@ exports.shuffleArray = shuffleArray;
 
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
-    console.log("message.content: ", message.content,
-        "PARAMS: ", params,
-        "ORGINI COMMAND:  ", originalCommand,
-        "FLAVY:  ", flavourText);
-
     if (Array.isArray(params)) {
         params = params[0].trim();
     }
@@ -1090,7 +1083,7 @@ function testy(ARR, description, message, modifier, URL, title) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = description;
-    newEmbed.title = title;
+    newEmbed.title = title ? title : newEmbed.title;
     newEmbed.thumbnail.url = URL;
 
     let amount = ARR.length > 24 ? 24 : ARR.length;
@@ -1162,68 +1155,15 @@ async function updateAll() {
 
     // let users = await getUsers();
 
-    // let nameArray = new Array();
-
     // for (let user of users) {
 
-    //     // for(let i = 0; i < user.dateJoined.length; i++){
-
-    //     //     let splity = user.dateJoined[i].split('-');
-    //     //     splity[1] = splity[1].length == 1 ? "0" + splity[1] : splity[1];
-    //     //     user.dateJoined[i] = splity.join("-");
-    //     // }
-
-    //     // console.log(user.dateJoined);
-    //     // await User.findOneAndUpdate({id: user.id}, {$set: {dateJoined: user.dateJoined}}, function(err, doc, res){});
-
-    //     // if (!nameArray.includes(user.displayName))
-    //     //     nameArray.push(user.displayName)
-    //     // else
-    //     //     console.log("DUPIcLATE: " + user.displayName)
-
-
-    //     // let messageArray = element.messages.split("|").filter(element => element.length > 0);
-    //     // let lastMessageArray = element.lastMessage.split("|").filter(element => element.length > 0);
-    //     // let timeTalkedeArray = element.timeTalked.split("|").filter(element => element.length > 0);
-    //     // let lastTalkedArray = element.lastTalked.split("|").filter(element => element.length > 0);
-    //     // let gamesArray = element.games.split("|").filter(element => element.length > 0);
-    //     // let timeAFKArray = element.timeAFK.split("|").filter(element => element.length > 0);
-    //     // let dateJoinedArray = element.dateJoined.split("|").filter(element => element.length > 0);
-    //     // let guildsArray = element.guilds.split("|").filter(element => element.length > 0);
-
-    //     // await User.findOneAndUpdate({ id: element.id },
-    //     //     {
-    //     //         $set: { games: gamesArray,
-    //     //                 messages: messageArray,
-    //     //                 lastMessage: lastMessageArray,
-    //     //                 timeTalked: timeTalkedeArray,
-    //     //                 lastTalked: lastTalkedArray,
-    //     //                 timeAFK: timeAFKArray,
-    //     //                 dateJoined: dateJoinedArray,
-    //     //                 guilds: guildsArray
-
-    //     //         }
-    //     //     });
-
-
-    //     // let tempArr = [];
-
-    //     // for(let i = 0; i < user.guilds.length; i++){
-
-    //     //     tempArr.push("-1");
-    //     // }
-
-
-    //     // await User.findOneAndUpdate({id: user.id}, {$set: {prefix: tempArr}, defaultPrefix: "-1"}, function(err, doc, res){});
+    //     User.findOneAndUpdate({ id: user.id }, { $set: { commands: [] } }, () => { });
 
     // }//for user loop
 
-    // // fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
-    // //     if (err) console.log('error', err);
-    // // });
 
     // console.log("CALLED UPDATE ALL");
-    //createBackUp();
+    // createBackUp();
 }
 async function createBackUp() {
 
@@ -1245,7 +1185,6 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //release 1
-//make custom 'command prefixes' possible
 //moment.js for converting time zones???
 //sptofiy playlist
 //twitch

@@ -5,35 +5,87 @@ const User = require('./User.js');
 var timers = new Map();
 
 
+async function commandMonikers(message, params, user) {
+
+    if (!user.commands.length) return message.channel.send("You have no command monikers!");
+
+    let fieldArray = [];
+
+    for (combo of user.commands) {
+
+        fieldArray.push({ name: '', value: `<${combo[0]} ${combo[1]}>\n` })
+    }
+
+    MAIN.prettyEmbed(message, "```md\n" + 'The monikers will take the format of:\n<originalCommand commandMoniker>' + "```", fieldArray, -1, 1, 'md');
+}
+exports.commandMonikers = commandMonikers;
+
+async function removeMoniker(message, params, user) {
+
+    if (!user.commands.length) return message.channel.send("You have no command monikers!");
+
+    const args = params.loop ? params.moniker : message.content.split(" ").slice(1).join(" ").toUpperCase();
+
+    for (combo of user.commands) {
+
+        if (combo[1] == args) {
+            message.channel.send(`Removing the moniker ${args} for the command ${combo[0]}!`);
+            user.commands.splice(user.commands.indexOf(combo), 1);
+            return User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
+        }
+    }
+
+    return MAIN.generalMatcher(message, args, user, user.commands.reduce((accum, current) => {accum.push(current[1]); return accum;}, []), 
+        user.commands.reduce((accum, current) => {
+            accum.push({loop: true, moniker: current[1]});
+            return accum; 
+        }, []), 
+        removeMoniker, "Choose which moniker you meant to remove:");
+
+}
+exports.removeMoniker = removeMoniker;
+
 async function setCommand(message, params, user) {
+    
+    let args = message.content.split(" ").slice(1).join(" ").split(',');
 
     if (!params.loop) {
-        let args = message.content.split(" ").slice(1).join(" ").split(',');
+        
         if (!args[0]) return message.channel.send("You first have to provide the original command you wish to create a monkier for!");
         args[0] = args[0].trim().toUpperCase();
         if (!args[1]) return message.channel.send("You have to provide the moniker for the original command, **seperated by a comma**.");
         args[1] = args[1].trim().toUpperCase();
 
-        if (Commands.commands.includes(args[0])) {
+        if (!Commands.commands.includes(args[0])) {
 
-            for (combo of user.commands) {
-                if ((combo[1] == args[1]) && (combo[0] != args[0]))
-                    return message.channel.send(`Aborting the process as the command ${combo[0]} already has the moniker of ${args[1]}!`);
-            }
-            //Broke into two loops, to check the whole thing for duplicate monikers first!
-            for (combo of user.commands) {
-                if (combo[0] == args[0]) {
-                    message.channel.send(`Overwriting your old moniker (${combo[1]}) for ${args[0]} with ${args[1]}`);
-                    combo[1] = args[1];
-                    return User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
-                }
+            let internalArray = [];
+
+            for (comm of Commands.commands) {
+                internalArray.push({ loop: true, args: [comm, args[1]] });
             }
 
-            user.commands.push([args[0], args[1]]);
-            User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
-            return message.channel.send(`The command ${args[0]} now has the moniker of ${args[1]}`);
+            return MAIN.generalMatcher(message, args[0], user, Commands.commands, internalArray, setCommand, "Select which command you meant to create a moniker for: ");
         }
     }
+
+    args = params.loop ? params.args : args;
+
+    for (combo of user.commands) {
+        if ((combo[1] == args[1]) && (combo[0] != args[0]))
+            return message.channel.send(`Aborting the process as the command ${combo[0]} already has the moniker of ${args[1]}!`);
+    }
+    //Broke into two loops, to check the whole thing for duplicate monikers first!
+    for (combo of user.commands) {
+        if (combo[0] == args[0]) {
+            message.channel.send(`Overwriting your old moniker (${combo[1]}) for ${args[0]} with ${args[1]}`);
+            combo[1] = args[1];
+            return User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
+        }
+    }
+
+    user.commands.push([args[0], args[1]]);
+    User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
+    return message.channel.send(`The command ${args[0]} now has the moniker of ${args[1]}`);
 }
 exports.setCommand = setCommand;
 
