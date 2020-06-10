@@ -9,9 +9,11 @@ for (let element of studyJSON)
 
 async function shakeUser(message, params, user) {
 
-    if (message.channel.type == 'dm') return message.reply("You must be in a server voice channel and send the command from a server!");
+    if (message.channel.type == 'dm') return message.channel.send("You must be in a server voice channel and send the command from a server!");
+    if(message.mentions.members.size != 1) return message.channel.send("You must mention only/at least one user!");
 
     let targetMember = message.mentions.members.first();
+    if(targetMemeber.id == MAIN.botID) return message.channel.send("I'm not going to shake myself!");
     if (message.member.roles.highest.comparePositionTo(targetMember.roles.highest) < 0) return message.channel.send("You can't shake a user with a higher role than yours!");
 
     let startingChannel = targetMember.voice.channel;

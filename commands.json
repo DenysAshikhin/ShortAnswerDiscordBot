@@ -79,7 +79,8 @@
         "SETTIMER",
 
         "SHAKEUSER",
-        "VOLUME"
+        "VOLUME",
+        "SETCOMMAND"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -161,7 +162,8 @@
         "Sets a timer that once finished, will send you a message.",
 
         "Randomly moves a user across voice channels x times, and returns them to the starting channel at start.",
-        "Sets the music volume out of 100."
+        "Sets the music volume out of 100.",
+        "Sets a new moniker for an existing command. Make sure to seperate the original command and the moniker by a single comma!"
     ],
         
     "example": [
@@ -244,7 +246,8 @@
         ["1) setTimer 1:30", "2) setTimer 30"],
 
         ["1) shakeUser @TheLastSpark 5"],
-        ["1) volume 30"]
+        ["1) volume 30"],
+        ["1) setCommand ping, summon", "2) setCommand dq, deque"]
     ],
     "subsection": [
         [3],
@@ -326,6 +329,7 @@
         [6, 8],
 
         [3],
-        [4]
+        [4],
+        [6]
     ]
 }

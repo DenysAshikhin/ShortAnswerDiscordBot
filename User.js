@@ -82,7 +82,8 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: "-1"
     },
-    playlists: []
+    playlists: [],
+    commands: []
 });
 
 module.exports = mongoose.model('User', UserSchema);

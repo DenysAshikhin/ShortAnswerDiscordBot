@@ -242,6 +242,20 @@ connectDB.once('open', async function () {
             }
 
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
+
+
+            console.log(!!user.commands)
+
+            if (user.commands) {
+                for (combo of user.commands) {
+                    console.log(combo)
+                    if (combo[1] == command)
+                        command = combo[0];
+                }
+            }
+
+            console.log("THE COMMAND IS: ", command);
+
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
             if (!params[0])
@@ -359,6 +373,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[64], QOF.setTimer)
     commandMap.set(Commands.commands[65], MISCELLANEOUS.shakeUser)
     commandMap.set(Commands.commands[66], MUSIC.volume)
+    commandMap.set(Commands.commands[67], QOF.setCommand)
 
     exports.commandMap = commandMap;
 }
@@ -678,7 +693,8 @@ async function createUser(member) {
         summoner: [0],
         kicked: [false],
         prefix: ["-1"],
-        defaultPrefix: "-1"
+        defaultPrefix: "-1",
+        commands: []
     }
 
     let userModel = new User(newUser);
@@ -1221,8 +1237,6 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //release 1
-
-//make remove game array - it is but broken - ez fix, mark all the spots with -1, then splice out all of them
 //make custom 'command prefixes' possible
 //moment.js for converting time zones???
 //sptofiy playlist
