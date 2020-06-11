@@ -118,6 +118,7 @@ global.Client = new Discord.Client();
 var commandMap = new Map();
 var commandTracker = new Map();
 var config = null;
+var spotifyClientID;
 
 
 

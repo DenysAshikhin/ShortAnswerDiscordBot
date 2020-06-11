@@ -171,7 +171,7 @@
         "Shows you a list of all your command monikers.",
         "Removes a specified moniker from your personal list.",
 
-        "Converts a specified/current time to a different timezone."
+        "Converts a specified time to a different timezone. Time is used in 12hour format!"
     ],
         
     "example": [
@@ -258,7 +258,7 @@
         ["1) setCommand ping, summon", "2) setCommand dq, deque"],
         ["1) monikers"],
         ["1) removeMoniker deque"],
-        ["1) TODO lmao"]
+        ["1) timeZone acst, 8:00, est"]
     ],
     "subsection": [
         [3],

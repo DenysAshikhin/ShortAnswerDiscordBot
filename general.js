@@ -36,7 +36,6 @@ function populateTimeZones() {
     return finalList;
 }
 
-
 async function timeZone(message, params, user) {
 
     let args = message.content.split(" ").slice(1).join(" ").split(',');

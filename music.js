@@ -6,26 +6,78 @@ const ytsr = require('ytsr');
 const readline = require('readline');
 var mv = require('mv');
 const User = require('./User.js');
+const config = require('./config.json');
 const fs = require('fs');
 const fsPromises = fs.promises;
 
+
+var Spotify = require('enhanced-spotify-api');
 var queue = new Map();
 var download = new Map();
 var activeSkips = new Map();
 var lastSkip = new Map();
+var needle = require('needle');
+
+async function authoriseSpotify() {
+
+    let basy = Buffer.from(config.spotifyClient + ':' + config.spotifySecret).toString('base64');
+
+    let options = {
+        headers: { 'Authorization': 'Basic ' + basy }
+    };
+
+    needle.post('https://accounts.spotify.com/api/token', 'grant_type=client_credentials', options, function (err, resp) {
+        if (err) console.log(err);
+        if (resp) {
+            Spotify.setAccessToken(resp.body.access_token);
+            spotifyPlaylist();
+        }
+    })
+}
+
+authoriseSpotify();
 
 
-async function volume(message, params, user){
+async function spotifyPlaylist(message, params, user) {
+
+    //if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
+
+    //let args = message.content.split(" ").slice(1).join(" ");
+
+    let args = '37i9dQZF1DWYMfG0Phlxx8';
+
+    let playlistTracks = await Spotify.Tracks.getPlaylistTracks(args);
+
+    for (track in playlistTracks.items) {
+        console.log("TRACK TITLE: ", playlistTracks.items[track].name)
+        for(arty of playlistTracks.items[track].artists)
+        console.log("ARTIST: ", arty.name)
+    }
+
+
+
+    // tracks = Object.entries(playlistTracks.items)
+
+    // for (id of playlistTracks.order) {
+    //     console.log(tracks.get(id));
+    // }
+
+    // for(let [id, track] of playlistTracks.items){
+    //     console.log(track);
+    // }
+}
+
+async function volume(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
     const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
-    if(args < 0) return message.channel.send("The volume cannot be set to 0!");
-    if(args > 100) return message.channel.send("The max volume is 100!");
+    if (args < 0) return message.channel.send("The volume cannot be set to 0!");
+    if (args > 100) return message.channel.send("The max volume is 100!");
 
     let guildQueue = queue.get(message.guild.id);
-    if(guildQueue){
-        guildQueue.dispatcher.setVolumeLogarithmic(args/100);
+    if (guildQueue) {
+        guildQueue.dispatcher.setVolumeLogarithmic(args / 100);
     }
 
 }
@@ -1117,4 +1169,5 @@ async function checkEmptyChannel() {
         }
 }
 
+setInterval(authoriseSpotify, 50 * 60 * 1000);
 setInterval(checkEmptyChannel, 60 * 1000);
