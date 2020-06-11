@@ -50,8 +50,8 @@ async function spotifyPlaylist(message, params, user) {
 
     for (track in playlistTracks.items) {
         console.log("TRACK TITLE: ", playlistTracks.items[track].name)
-        for(arty of playlistTracks.items[track].artists)
-        console.log("ARTIST: ", arty.name)
+        for (arty of playlistTracks.items[track].artists)
+            console.log("ARTIST: ", arty.name)
     }
 
 
@@ -429,9 +429,21 @@ async function play(message, params, user) {
 
     let songInfo;
 
+
+
     if (await ytpl.validateURL(args)) {
+
         //ytpl
-        let playlist = await ytpl(args, { limit: 0 });
+        let playlist = '';
+
+        try {
+            playlist = await ytpl(args, { limit: 0 })
+        }
+        catch (err) {
+            return message.channel.send("This playlist is private!");
+        }
+
+        console.log("HELL")
         for (Video of playlist.items) {
             if (Video.duration) {
                 let video = JSON.parse(JSON.stringify(Video))
