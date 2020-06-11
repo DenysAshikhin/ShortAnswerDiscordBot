@@ -429,21 +429,19 @@ async function play(message, params, user) {
 
     let songInfo;
 
-
-
     if (await ytpl.validateURL(args)) {
 
-        //ytpl
         let playlist = '';
 
         try {
             playlist = await ytpl(args, { limit: 0 })
         }
         catch (err) {
-            return message.channel.send("This playlist is private!");
+            message.channel.send("This playlist is private!");
+            queue.delete(message.guild.id);
+            return -1;
         }
 
-        console.log("HELL")
         for (Video of playlist.items) {
             if (Video.duration) {
                 let video = JSON.parse(JSON.stringify(Video))
