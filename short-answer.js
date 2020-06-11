@@ -30,8 +30,6 @@ exports.botID = botID;
 const guildID = '97354142502092800';
 exports.guildID = guildID;
 
-
-
 const options = {
     isCaseSensitive: false,
     findAllMatches: true,
@@ -370,6 +368,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[67], QOF.setCommand)
     commandMap.set(Commands.commands[68], QOF.commandMonikers)
     commandMap.set(Commands.commands[69], QOF.removeMoniker)
+    commandMap.set(Commands.commands[70], GENERAL.timeZone)
 
     exports.commandMap = commandMap;
 }

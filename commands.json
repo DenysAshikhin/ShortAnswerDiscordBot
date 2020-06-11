@@ -82,7 +82,9 @@
         "VOLUME",
         "SETCOMMAND",
         "MONIKERS",
-        "REMOVEMONIKER"
+        "REMOVEMONIKER",
+
+        "TIMEZONE"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -167,7 +169,9 @@
         "Sets the music volume out of 100.",
         "Sets a new moniker for an existing command, the original command names will still work. Make sure to seperate the original command and the moniker by a single comma!",
         "Shows you a list of all your command monikers.",
-        "Removes a specified moniker from your personal list."
+        "Removes a specified moniker from your personal list.",
+
+        "Converts a specified/current time to a different timezone."
     ],
         
     "example": [
@@ -253,7 +257,8 @@
         ["1) volume 30"],
         ["1) setCommand ping, summon", "2) setCommand dq, deque"],
         ["1) monikers"],
-        ["1) removeMoniker deque"]
+        ["1) removeMoniker deque"],
+        ["1) TODO lmao"]
     ],
     "subsection": [
         [3],
@@ -338,6 +343,8 @@
         [4],
         [6],
         [6],
-        [6]
+        [6],
+
+        [8]
     ]
 }
