@@ -13,7 +13,7 @@ async function shakeUser(message, params, user) {
     if(message.mentions.members.size != 1) return message.channel.send("You must mention only/at least one user!");
 
     let targetMember = message.mentions.members.first();
-    if(targetMemeber.id == MAIN.botID) return message.channel.send("I'm not going to shake myself!");
+    if(targetMember.id == MAIN.botID) return message.channel.send("I'm not going to shake myself!");
     if (message.member.roles.highest.comparePositionTo(targetMember.roles.highest) < 0) return message.channel.send("You can't shake a user with a higher role than yours!");
 
     let startingChannel = targetMember.voice.channel;
@@ -21,7 +21,7 @@ async function shakeUser(message, params, user) {
 
 
     let voiceChannels = message.guild.channels.cache.filter(channel => channel.type == 'voice').filter(channel => channel.permissionsFor(targetMember).has('CONNECT')).array();
-    if (voiceChannels.length == 1) return message.channel.send(`There are no other voice channels that ${targetMemeber.displayName} can be moved to!`);
+    if (voiceChannels.length == 1) return message.channel.send(`There are no other voice channels that ${targetMember.displayName} can be moved to!`);
 
     let args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
 

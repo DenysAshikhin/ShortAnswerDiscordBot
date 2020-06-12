@@ -8,6 +8,7 @@ var mv = require('mv');
 const User = require('./User.js');
 const config = require('./config.json');
 const fs = require('fs');
+const Fuse = require('fuse.js');
 const fsPromises = fs.promises;
 
 
@@ -30,7 +31,6 @@ async function authoriseSpotify() {
         if (err) console.log(err);
         if (resp) {
             Spotify.setAccessToken(resp.body.access_token);
-            spotifyPlaylist();
         }
     })
 }
@@ -40,31 +40,100 @@ authoriseSpotify();
 
 async function spotifyPlaylist(message, params, user) {
 
-    //if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
+    if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
 
-    //let args = message.content.split(" ").slice(1).join(" ");
+    let args = message.content.split(" ").slice(1).join(" ");
+    let id;
+    let playlistTracks = { items: [] };
+    if (args.includes('https://open.spotify.com/playlist/')) {
 
-    let args = '37i9dQZF1DWYMfG0Phlxx8';
+        if (args.includes('?si='))
+            id = args.substring(args.indexOf("/playlist/") + 10, args.indexOf('?si'));
+        else
+            id = args.substring(args.indexOf("/playlist/") + 10);
 
-    let playlistTracks = await Spotify.Tracks.getPlaylistTracks(args);
+        try {
+            playlistTracks = await Spotify.Tracks.getPlaylistTracks(id);
+        }
+        catch (err) {
+            console.log("Not spotify!")
+            return -1;
+        }
+    }
+    else if (args.includes('https://open.spotify.com/track/')) {
 
-    for (track in playlistTracks.items) {
-        console.log("TRACK TITLE: ", playlistTracks.items[track].name)
-        for (arty of playlistTracks.items[track].artists)
-            console.log("ARTIST: ", arty.name)
+        if (args.includes('?si='))
+            id = args.substring(args.indexOf("/track/") + 7, args.indexOf('?si'));
+        else
+            id = args.substring(args.indexOf("/track/") + 7);
+
+
+        try {
+            let tracky = await new Spotify.Track(id).getFullObject();
+            playlistTracks.items.push(tracky);
+        }
+        catch (err) {
+            console.log("Not spotify!")
+            return -1;
+        }
     }
 
 
+    let notifMess = await message.channel.send("Parsing the spotify playlist...longer playlists may take a bit of time.");
 
-    // tracks = Object.entries(playlistTracks.items)
 
-    // for (id of playlistTracks.order) {
-    //     console.log(tracks.get(id));
-    // }
+    let found = [];
+    let missed = [];
 
-    // for(let [id, track] of playlistTracks.items){
-    //     console.log(track);
-    // }
+    for (track in playlistTracks.items) {
+        // console.log("TRACK TITLE: ", playlistTracks.items[track].name)
+        // for (arty of playlistTracks.items[track].artists) {
+        //     console.log("ARTIST: ", arty.name)
+        // }
+
+        let name = playlistTracks.items[track].artists[0].name + " - " + playlistTracks.items[track].name;
+        console.log("NAME: ", name)
+
+        let newOptions = JSON.parse(JSON.stringify(MAIN.options));
+        newOptions = {
+            ...newOptions,
+            minMatchCharLength: name.length / 2,
+            findAllMatches: false,
+            includeScore: true,
+            isCaseSensitive: true,
+            includeMatches: true,
+            keys: ['title']
+        }
+
+        let searchResult = await ytsr(name, { limit: 20 });
+
+        searchResult.items.filter(element => { return element.type == 'video' });
+
+        let fuse = new Fuse(searchResult.items, newOptions);
+        let result = fuse.search(name);
+
+        if (result[0].score <= 0.1) {
+            await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+        }
+        else {
+            let searchResult = await ytsr(playlistTracks.items[track].name, { limit: 20 });
+            searchResult.items.filter(element => { return element.type == 'video' });
+
+            let fuse = new Fuse(searchResult.items, newOptions);
+            let result = fuse.search(playlistTracks.items[track].name);
+            if (result[0].score <= 0.1) {
+                await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+            }
+            else {
+                missed.push({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link })
+            }
+        }
+    }
+
+    if (missed.length > 0)
+        MAIN.prettyEmbed(message, "Unfortunately I could not find proper matches for the following songs:",
+            missed.reduce((accum, current) => { accum.push(current.original); return accum; }, []), -1, 1, 1);
+    notifMess.delete();
 }
 
 async function volume(message, params, user) {
@@ -388,6 +457,7 @@ async function play(message, params, user) {
     if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+    console.log(args)
     if (!args) return message.channel.send("You have to provide a link or title of song to play!");
 
     const voiceChannel = message.member.voice.channel;
@@ -429,7 +499,10 @@ async function play(message, params, user) {
 
     let songInfo;
 
-    if (await ytpl.validateURL(args)) {
+    if (!params.custom && ((await spotifyPlaylist(message, args, user)) != -1)) {
+
+    }
+    else if (await ytpl.validateURL(args)) {
 
         let playlist = '';
 
@@ -489,11 +562,15 @@ async function play(message, params, user) {
             queueConstruct.songs.push(song);
             cacheSong(song, message.guild.id);
 
-            if (queueConstruct.songs.length > 1) message.channel.send(`${songInfo.title} has been added to the queue!`)
+
+            if ((queueConstruct.songs.length > 1))
+                if (!params.spoti) message.channel.send(`${songInfo.title} has been added to the queue!`)
+                else { }
             else {
                 message.channel.send(`Now playing ${songInfo.title}!`)
                 callPlay = true;
             }
+
         }
         else
             message.channel.send("I can't access that video, please try another!");

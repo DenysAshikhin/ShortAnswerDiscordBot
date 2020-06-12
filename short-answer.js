@@ -34,7 +34,7 @@ const options = {
     isCaseSensitive: false,
     findAllMatches: true,
     includeMatches: false,
-    includeScore: false,
+    includeScore: true,
     useExtendedSearch: false,
     minMatchCharLength: 3,
     shouldSort: true,
@@ -1084,6 +1084,7 @@ function testy(ARR, description, message, modifier, URL, title) {
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.description = description;
     newEmbed.title = title ? title : newEmbed.title;
+    newEmbed.title = title == '' ? Embed.title : title;
     newEmbed.thumbnail.url = URL;
 
     let amount = ARR.length > 24 ? 24 : ARR.length;
@@ -1185,7 +1186,7 @@ setInterval(minuteCount, 60 * 1000);
 
 
 //release 1
-//moment.js for converting time zones???
+//check for full channels, prioritise empty channels -> snapshot of empty, then not full then error out, make admin ignore restrictions
 //sptofiy playlist
 //twitch
 //video game stats
