@@ -18,6 +18,7 @@ const GENERAL = require('./general.js');
 const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
 const ffmpeg = require('fluent-ffmpeg');
+const main = require('ytsr');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 
@@ -910,7 +911,8 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
         let itemName = item.name ? item.name : "";
 
         if ((previousName != itemName) && (field != null)) {
-
+            console.log(previousName)
+            console.log(item.name)
             if (item.name) {
                 previousName = '';
             }
@@ -977,18 +979,21 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                 BIGSPLIT = true;
             }
             {
-
                 runningString += element;
 
                 field = field == null ? { name: "", value: [], inline: true } : field;
-                if (itemName != '')
+                if (itemName != '') {
                     field.name = itemName;
+                    previousName = itemName;
+                }
                 else if (part == -1) {
                     field.name = '** **';
+                    previousName = '';
                 }
-                else
+                else {
                     field.name = `${part} ${groupNumber}`;
-
+                    previousName = `${part} ${groupNumber}`;
+                }
                 if (startTally == -1)
                     field.value.push(`${element}`);
                 else
@@ -1183,6 +1188,14 @@ async function minuteCount() {
 
 setInterval(minuteCount, 60 * 1000);
 
+
+
+var testCase = [{ name: "Possibly Wrong Song(s)", value: 'Don’t Matter To Me (with Michael Jackson)' },
+{ name: "Possibly Wrong Song(s)", value: 'Don’t Matter To Me (with Michael Jackson)2' },
+{ name: "Possibly Wrong Song(s)", value: 'Don’t Matter To Me (with Michael Jackson)3' },
+{ name: "Possibly Wrong Song(s)", value: 'Don’t Matter To Me (with Michael Jackson)4' }]
+
+exports.testCase = testCase;
 
 
 //release 1

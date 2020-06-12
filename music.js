@@ -84,15 +84,12 @@ async function spotifyPlaylist(message, params, user) {
 
     let found = [];
     let missed = [];
+    let numFound = 0;
+    let numSongs = 0;
 
     for (track in playlistTracks.items) {
-        // console.log("TRACK TITLE: ", playlistTracks.items[track].name)
-        // for (arty of playlistTracks.items[track].artists) {
-        //     console.log("ARTIST: ", arty.name)
-        // }
 
         let name = playlistTracks.items[track].artists[0].name + " - " + playlistTracks.items[track].name;
-        console.log("NAME: ", name)
 
         let newOptions = JSON.parse(JSON.stringify(MAIN.options));
         newOptions = {
@@ -114,6 +111,7 @@ async function spotifyPlaylist(message, params, user) {
 
         if (result[0].score <= 0.1) {
             await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+            numFound++;
         }
         else {
             let searchResult = await ytsr(playlistTracks.items[track].name, { limit: 20 });
@@ -123,16 +121,50 @@ async function spotifyPlaylist(message, params, user) {
             let result = fuse.search(playlistTracks.items[track].name);
             if (result[0].score <= 0.1) {
                 await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+                numFound++;
             }
             else {
-                missed.push({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link })
+                console.log("getting desperate... .-.")
+                console.log({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link })
+
+                let counter = 0;
+                for (word of playlistTracks.items[track].name.split(" ")) {
+
+                    if (result[0].item.title.replace(/([(){}-])/g, '').includes(word.replace(/([(){}-])/g, '').replace('’', "'"))) {
+                        console.log(true)
+                        counter++;
+                    }
+                    else
+                        console.log(false)
+                }
+
+                console.log(`counter: ${counter}`)
+                console.log(`Totol: ${playlistTracks.items[track].name.split(" ").length}`)
+                console.log(`Math: ${(counter / playlistTracks.items[track].name.split(" ").length)}`)
+
+                if ((counter / playlistTracks.items[track].name.split(" ").length) > 0.8) {
+                    await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+                    found.push({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                }
+                else
+                    missed.push({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
             }
         }
+    numSongs++;
     }
 
+    let finalReport = [];
+
     if (missed.length > 0)
-        MAIN.prettyEmbed(message, "Unfortunately I could not find proper matches for the following songs:",
-            missed.reduce((accum, current) => { accum.push(current.original); return accum; }, []), -1, 1, 1);
+        finalReport = finalReport.concat(missed.reduce((accum, current, index) => { accum.push({ name: "Not Found Song(s)", value: `${index}) ` + current.original }); return accum; }, []));
+    if (found.length > 0)
+        finalReport = finalReport.concat(found.reduce((accum, current, index) => { accum.push({ name: "Possibly Wrong Song(s)", value: `${index}) ` + current.original }); return accum; }, []));
+
+    if (finalReport.length > 0)
+        MAIN.prettyEmbed(message,
+            `I found ${numFound}/${numSongs} song for sure, ${found.length}/${numSongs} I wasn't sure about and ${missed.length} song were omitted.`,
+            finalReport, -1, -1, 1);
+
     notifMess.delete();
 }
 
@@ -457,7 +489,6 @@ async function play(message, params, user) {
     if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
-    console.log(args)
     if (!args) return message.channel.send("You have to provide a link or title of song to play!");
 
     const voiceChannel = message.member.voice.channel;
@@ -694,7 +725,7 @@ async function playSong(guild, sonG, skip, message) {
 
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
 
-        let streamResolve = await ytdl(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 });
+        let streamResolve = await ytdl(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
 
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
@@ -773,7 +804,7 @@ async function cacheSong(song, guild) {
             console.log("interesting")
 
             let downloadYTDL = require('ytdl-core');
-            let youtubeResolve = downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
+            let youtubeResolve = downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
             let writeStream = fs.createWriteStream(tempAudio);
             writeStream.on('finish', () => {
                 console.log("FINISHED: WRITE STREAM " + song.title);
