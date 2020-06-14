@@ -1,5 +1,6 @@
 const MAIN = require('./short-answer.js');
 
+
 async function initialiseUsers(message) {
     if (message.channel.type == 'dm') return -1;
     let newUsers = 0;
@@ -41,10 +42,10 @@ function setDefaultServerPrefix(message, params, user) {
     // user.prefix[index] = params;
 
     if (params == -1) return message.channel.send(`You can't set your prefix to ${params}`);
-    
+
     message.channel.send(`This server's default prefix is: "${params}"`);
-    
-    if(params == "sa!") params = -1;    
+
+    if (params == "sa!") params = -1;
 
     Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { prefix: params } }, function (err, doc, res) { });
     return 1;

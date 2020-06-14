@@ -18,6 +18,7 @@ const GENERAL = require('./general.js');
 const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
 const ffmpeg = require('fluent-ffmpeg');
+const TwitchClient = require('twitch').default;
 const main = require('ytsr');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -116,6 +117,7 @@ exports.tags = tags;
 //FAT NOTE: (true >= false) is TRUE
 global.Client = new Discord.Client();
 
+var twitchClient;
 var commandMap = new Map();
 var commandTracker = new Map();
 var config = null;
@@ -132,6 +134,8 @@ var lastMessage;
 
 try {
     config = require('./config.json');
+    twitchClient = TwitchClient.withClientCredentials(config.twitchClient, config.twitchSecret);
+    exports.twitchClient = twitchClient;
 }
 catch (err) {
     console.log("config.json doesn't exist - probably running on heroku?");
@@ -894,8 +898,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     let tally = startTally == 0 ? startTally : 1;
     let field = null;
     let fieldArray = [];
-    let maxLength = 100;
-
+    let maxLength = 100;    
 
     let tester = 1;
 
@@ -911,8 +914,6 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
         let itemName = item.name ? item.name : "";
 
         if ((previousName != itemName) && (field != null)) {
-            console.log(previousName)
-            console.log(item.name)
             if (item.name) {
                 previousName = '';
             }
@@ -1199,6 +1200,7 @@ exports.testCase = testCase;
 
 
 //release 1
+//add spotify support for addSong
 //check for full channels, prioritise empty channels -> snapshot of empty, then not full then error out, make admin ignore restrictions
 //sptofiy playlist
 //twitch

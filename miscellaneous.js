@@ -2,18 +2,42 @@
 const Fuse = require('fuse.js');
 const studyJSON = require('./medstudy.json');
 const MAIN = require('./short-answer.js');
+const config = require('./config.json');
 const studyArray = new Array();
 
 for (let element of studyJSON)
     studyArray.push(element);
 
+
+
+async function isStreamLive(userName) {
+    const user = await MAIN.twitchClient.helix.users.getUserByName(userName);
+    if (!user) {
+        return false;
+    }
+    console.log(user.id);
+    console.log(user.displayName)
+    return await user.getStream() !== null;
+}
+
+
+async function updateTwitchFollows(message, params, user) {
+
+    let args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+
+    if (!args) return message.channel.send("You have to write the name of the streamer you wish to follow!");
+}
+
+
+
+
 async function shakeUser(message, params, user) {
 
     if (message.channel.type == 'dm') return message.channel.send("You must be in a server voice channel and send the command from a server!");
-    if(message.mentions.members.size != 1) return message.channel.send("You must mention only/at least one user!");
+    if (message.mentions.members.size != 1) return message.channel.send("You must mention only/at least one user!");
 
     let targetMember = message.mentions.members.first();
-    if(targetMember.id == MAIN.botID) return message.channel.send("I'm not going to shake myself!");
+    if (targetMember.id == MAIN.botID) return message.channel.send("I'm not going to shake myself!");
     if (message.member.roles.highest.comparePositionTo(targetMember.roles.highest) < 0) return message.channel.send("You can't shake a user with a higher role than yours!");
 
     let startingChannel = targetMember.voice.channel;

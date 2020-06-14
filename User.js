@@ -83,7 +83,8 @@ const UserSchema = new mongoose.Schema({
         default: "-1"
     },
     playlists: [],
-    commands: []
+    commands: [],
+    twitchFollows: []
 });
 
 module.exports = mongoose.model('User', UserSchema);

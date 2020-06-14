@@ -84,7 +84,8 @@
         "MONIKERS",
         "REMOVEMONIKER",
 
-        "TIMEZONE"
+        "TIMEZONE",
+        "FOLLOWTWITCH"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -111,7 +112,7 @@
         "Shows the stats of a specific user who has been mentioned (@user).",
         "Shows the top stats of this server.",
 
-        "Plays a song from a specified URL or search result from youtube.",    
+        "Plays a song from a specified URL or search result from youtube. **Supports spotify links as well!**",    
         "Empties the queue and makes the bot leave the voice channel.",
         "Pauses the current song.",
         "Resumes playing the current song.",
@@ -139,7 +140,7 @@
         "Creates a new playlist with the provided name - playlists cannot have the same names.",
         "Shows you all of your playlists by default, if you provide a number or the name of a playlist it will display the specific playlist.",
         "Removes a song from a playlist. You can either specify the exact playlist to remove a song from, or use the suggestion prompt.",
-        "Loads one of your playlists into the the queue. If you provide a name of a playlist it, otherwise a suggestion prompt will appear.",
+        "Loads one of your playlists into the the queue. If you provide a name of a playlist it will automaticlly be chosen, otherwise a suggestion prompt will appear.",
 
         "Saves the current playing playlist into one of your playlists.",
         "Removes a specified playlist.",
@@ -171,7 +172,8 @@
         "Shows you a list of all your command monikers.",
         "Removes a specified moniker from your personal list.",
 
-        "Converts a specified time to a different timezone. Time is used in 12hour format!"
+        "Converts a specified time to a different timezone. Time is used in 12hour format!",
+        "Adds a twitch channel to follow! This will send you a DM when they go live!"
     ],
         
     "example": [
@@ -199,7 +201,7 @@
         ["1) userStats @Short Answer Bot"],
         ["1) topStats"],
 
-        ["1) play https://www.youtube.com/watch?v=mMMRGJCFsQE&list=RDmMMRGJCFsQE&start_radio=1", "2) play PegboardNerds Hero"],
+        ["1) play https://www.youtube.com/watch?v=mMMRGJCFsQE&list=RDmMMRGJCFsQE&start_radio=1", "2) play https://open.spotify.com/playlist/37i9dQZF1E35lgRsCHRsxa?si=AF5wfKXFTm2T8qfB4S-enQ", "3) play PegboardNerds Hero"],
         ["1) stop"],
         ["1) pause"],
         ["1) resume"],
@@ -258,7 +260,8 @@
         ["1) setCommand ping, summon", "2) setCommand dq, deque"],
         ["1) monikers"],
         ["1) removeMoniker deque"],
-        ["1) timeZone acst, 8:00, est"]
+        ["1) timeZone acst, 8:00, est"],
+        ["1) followTwitch summit1g"]
     ],
     "subsection": [
         [3],
@@ -345,6 +348,7 @@
         [6],
         [6],
 
-        [8]
+        [8],
+        [3]
     ]
 }
