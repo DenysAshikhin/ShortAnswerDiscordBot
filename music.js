@@ -163,7 +163,7 @@ async function spotifyPlaylist(message, params, user) {
         let result = fuse.search(name.replace(/([(){}&,\-])/g, '').replace(/\s{2,}/g, ' '));
 
         if (result[0].score <= 0.2) {//artist + name fuzzy
-            let topScores = result.filter(element => element.score <= 0.25);
+            let topScores = result.filter(element => element.score <= 0.2);
             topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
             await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
             numFound++;
@@ -194,7 +194,7 @@ async function spotifyPlaylist(message, params, user) {
                 let result = fuse.search(playlistTracks.items[track].name);
 
 
-                if (result[0].score <= 0.25) {
+                if ((result[0].score <= 0.2) && (result.length > 0)) {
                     let topScores = result.filter(element => element.score <= 0.2);
                     topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
                     await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);

@@ -1129,7 +1129,6 @@ function testy(ARR, description, message, modifier, URL, title) {
     if (ARR.length > 0) testy(ARR, description, message, modifier);
 }
 
-
 function sendHelpMessage(Index, message) {
 
     let examples = "```md\n";
@@ -1190,7 +1189,6 @@ async function minuteCount() {
 setInterval(minuteCount, 60 * 1000);
 
 //release 1
-//add spotify support for addSong
 //check for full channels, prioritise empty channels -> snapshot of empty, then not full then error out, make admin ignore restrictions
 //sptofiy playlist
 //twitch

@@ -34,8 +34,8 @@ async function linkTwitch(message, params, user) {
 
     if (params.looped) {
 
-        if (user.linkedTwitch){
-            
+        if (user.linkedTwitch) {
+
         }
     }
 
@@ -53,13 +53,31 @@ async function shakeUser(message, params, user) {
 
     let targetMember = message.mentions.members.first();
     if (targetMember.id == MAIN.botID) return message.channel.send("I'm not going to shake myself!");
-    if (message.member.roles.highest.comparePositionTo(targetMember.roles.highest) < 0) return message.channel.send("You can't shake a user with a higher role than yours!");
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        if (message.member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
+            return message.channel.send("You can't shake a user with a higher role than yours (unless you're an admin)!");
 
     let startingChannel = targetMember.voice.channel;
     if (!startingChannel) return message.channel.send("The user needs to be in this server's voice channel!");
 
 
     let voiceChannels = message.guild.channels.cache.filter(channel => channel.type == 'voice').filter(channel => channel.permissionsFor(targetMember).has('CONNECT')).array();
+    voiceChannels = voiceChannels.filter(channel => !channel.full);
+
+    let backUpVoiceChannels = [];
+
+    for (channel of voiceChannels) {
+        if (channel.members.size != 0)
+            backUpVoiceChannels.push(channel);
+    }
+
+    voiceChannels = voiceChannels.filter(channel => channel.members.size == 0);
+
+    if ((voiceChannels.size == 0) && (backUpVoiceChannels.length == 0)) return message.channel.send("There are no other possible channels to move the user to!");
+
+    if (voiceChannels.size == 0)
+        voiceChannels = backUpVoiceChannels;
+
     if (voiceChannels.length == 1) return message.channel.send(`There are no other voice channels that ${targetMember.displayName} can be moved to!`);
 
     let args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
