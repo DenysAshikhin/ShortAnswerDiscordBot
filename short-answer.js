@@ -373,6 +373,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[72], MISCELLANEOUS.unlinkTwitch)
     commandMap.set(Commands.commands[73], MISCELLANEOUS.viewTwitchFollows)
     commandMap.set(Commands.commands[74], MISCELLANEOUS.unfollowTwitchChannel)
+    commandMap.set(Commands.commands[75], MISCELLANEOUS.followTwitchChannel)
 
     exports.commandMap = commandMap;
 }

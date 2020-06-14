@@ -88,7 +88,9 @@
         "LINKTWITCH",
         "UNLINKTWITCH",
         "VIEWTWITCHFOLLOWS",
-        "UNFOLLOWTWITCHCHANNEL"
+        "UNFOLLOWTWITCHCHANNEL",
+
+        "FOLLOWTWITCHCHANNEL"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -179,7 +181,9 @@
         "Link a twitch account (using just a name) to automatically add any channels you follow for the bot to notify you!",
         "Unlinks a twitch account and optionally all associated follows.",
         "Shows you a list of all the twitch channels you are following.",
-        "Unfollows a specific twitch channel."
+        "Unfollows a specific twitch channel.",
+
+        "Follows a specific twitch channel"
     ],
         
     "example": [
@@ -271,7 +275,9 @@
         ["1) linkTwitch TheLastSpark"],
         ["1) unlinkTwitch"],
         ["1) viewTwitchFollows"],
-        ["1) unfollowTwitchChannel TheLastSpark"]
+        ["1) unfollowTwitchChannel TheLastSpark"],
+
+        ["1) followTwitchChannel TheLastSpark"]
     ],
     "subsection": [
         [3],
@@ -362,6 +368,8 @@
         [3],
         [3],
         [3],
+        [3],
+
         [3]
     ]
 }

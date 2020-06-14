@@ -28,6 +28,23 @@ async function getTwitchChannelByID(id) {
     return user;
 }
 
+async function followTwitchChannel(message, params, user) {
+
+    if (!user.twitchFollows) user.twitchFollow = [];
+    let args = message.content.split(" ").slice(1).join(" ");
+
+    let targetChannel = await getTwitchChannel(args);
+    if (!targetChannel) return message.channel.send("I could not find such a channel, try again?");
+
+    if (user.twitchFollows.includes(targetChannel._data.id)) return message.channel.send("You are already following that channel!");
+    if (user.linkedTwitch == (targetChannel._data.id)) return message.channel.send("You can't follow your own linked twitch!");
+
+    user.twitchFollows.push(targetChannel._data.id);
+    User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: user.twitchFollows } }, function (err, doc, res) { });
+    return message.channel.send(`Succesfully added ${targetChannel._data.display_name} to your follow list!`);
+}
+exports.followTwitchChannel = followTwitchChannel;
+
 async function unfollowTwitchChannel(message, params, user) {
 
     if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");
@@ -77,6 +94,7 @@ async function viewTwitchFollows(message, params, user) {
         promiseArray.push(getTwitchChannelByID(follow));
 
     let finishedPromises = await Promise.all(promiseArray);
+    finishedPromises.sort((a,b) => {return b._data.view_count - a._data.view_count});
 
     MAIN.prettyEmbed(message, `You are following ${promiseArray.length} channels!`,
         finishedPromises.reduce((accum, current) => {
