@@ -3,6 +3,7 @@ const Fuse = require('fuse.js');
 const studyJSON = require('./medstudy.json');
 const MAIN = require('./short-answer.js');
 const config = require('./config.json');
+const User = require('./User.js');
 const studyArray = new Array();
 
 for (let element of studyJSON)
@@ -11,13 +12,7 @@ for (let element of studyJSON)
 
 
 async function isStreamLive(userName) {
-    const user = await MAIN.twitchClient.helix.users.getUserByName(userName);
-    if (!user) {
-        return false;
-    }
-    console.log(user.id);
-    console.log(user.displayName)
-    return await user.getStream() !== null;
+
 }
 
 
@@ -28,21 +23,49 @@ async function updateTwitchFollows(message, params, user) {
     if (!args) return message.channel.send("You have to write the name of the streamer you wish to follow!");
 }
 
+async function getTwitchChannel(streamer) {
+
+    const user = await MAIN.twitchClient.helix.users.getUserByName(streamer);
+    console.log(user.id);
+    console.log(user.displayName)
+    return user;
+}
+
 async function linkTwitch(message, params, user) {
 
     let args = message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You did not provide the name of the channel you wish to link to!");
+    let streamer = await getTwitchChannel(args);
+    if (!streamer) return message.channel.send("I could not find a channel with that name, try again?");
 
-    if (params.looped) {
+    if (!params.looped) {
 
-        if (user.linkedTwitch) {
+        let follows = await streamer.getFollows();
+        let followIDs = [];
+        if (follows)
+            for (chan of follows.data)
+                followIDs.push(chan._data.to_id);
 
+        if (user.linkedTwitch && user.twitchFollows) {
+
+            if (user.twitchFollows)
+                return MAIN.generalMatcher(message, -23, user, ['Combine', 'Remove'],
+                    [{ looped: true, keep: true, followArr: followIDs.concat(user.twitchFollows.filter(item => !followIDs.includes(item))) },
+                    { looped: true, keep: false, followArr: followIDs }],
+                    linkTwitch, "You already have a linked twitch account or channels you have followed, would you like to combine the old follows, or remove them?");
+        }
+        else {
+            return linkTwitch(message, { looped: true, followArr: followIDs }, user);
         }
     }
 
-
-
+    console.log(`TRYING TO LINK: ${streamer.id}`);
+    User.findOneAndUpdate({ id: user.id }, { $set: { linkedTwitch: streamer.id, twitchFollows: params.followArr } }, function (err, doc, res) { });
+    message.channel.send(`Succesfully linked ${streamer.displayName} to your account, you now have ${params.followArr.length} channels you are following!`);
+    return -1;
 }
 
+exports.linkTwitch = linkTwitch;
 
 
 

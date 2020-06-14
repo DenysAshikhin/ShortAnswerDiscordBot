@@ -85,7 +85,7 @@
         "REMOVEMONIKER",
 
         "TIMEZONE",
-        "FOLLOWTWITCH"
+        "LINKTWITCH"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -173,7 +173,7 @@
         "Removes a specified moniker from your personal list.",
 
         "Converts a specified time to a different timezone. Time is used in 12hour format!",
-        "Adds a twitch channel to follow! This will send you a DM when they go live!"
+        "Link a twitch account (using just a name) to automatically add any channels you follow for the bot to notify you!"
     ],
         
     "example": [
@@ -260,8 +260,9 @@
         ["1) setCommand ping, summon", "2) setCommand dq, deque"],
         ["1) monikers"],
         ["1) removeMoniker deque"],
+
         ["1) timeZone acst, 8:00, est"],
-        ["1) followTwitch summit1g"]
+        ["1) linkTwitch TheLastSpark"]
     ],
     "subsection": [
         [3],

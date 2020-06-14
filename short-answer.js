@@ -376,6 +376,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[69], QOF.removeMoniker)
     commandMap.set(Commands.commands[70], GENERAL.timeZone)
 
+    commandMap.set(Commands.commands[71], MISCELLANEOUS.linkTwitch)
+
     exports.commandMap = commandMap;
 }
 
@@ -421,7 +423,6 @@ async function commandMatcher(message, command, params, user) {
 
         let match = user.commands.find(element => element[1] == check.result[0].item);
         match = match ? commandMap.get(match[0]) : commandMap.get(check.result[0].item);
-
         specificCommandCreator(match, [message, params, user], null, user);
         return await triggerCommandHandler(message, user, true);
     }
