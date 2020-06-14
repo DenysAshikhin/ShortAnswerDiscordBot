@@ -87,7 +87,8 @@
         "TIMEZONE",
         "LINKTWITCH",
         "UNLINKTWITCH",
-        "VIEWTWITCHFOLLOWS"
+        "VIEWTWITCHFOLLOWS",
+        "UNFOLLOWTWITCHCHANNEL"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -177,7 +178,8 @@
         "Converts a specified time to a different timezone. Time is used in 12hour format!",
         "Link a twitch account (using just a name) to automatically add any channels you follow for the bot to notify you!",
         "Unlinks a twitch account and optionally all associated follows.",
-        "Shows you a list of all the twitch channels you are following."
+        "Shows you a list of all the twitch channels you are following.",
+        "Unfollows a specific twitch channel."
     ],
         
     "example": [
@@ -268,7 +270,8 @@
         ["1) timeZone acst, 8:00, est"],
         ["1) linkTwitch TheLastSpark"],
         ["1) unlinkTwitch"],
-        ["1) viewTwitchFollows"]
+        ["1) viewTwitchFollows"],
+        ["1) unfollowTwitchChannel TheLastSpark"]
     ],
     "subsection": [
         [3],
@@ -356,6 +359,7 @@
         [6],
 
         [8],
+        [3],
         [3],
         [3],
         [3]

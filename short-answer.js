@@ -372,6 +372,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[71], MISCELLANEOUS.linkTwitch)
     commandMap.set(Commands.commands[72], MISCELLANEOUS.unlinkTwitch)
     commandMap.set(Commands.commands[73], MISCELLANEOUS.viewTwitchFollows)
+    commandMap.set(Commands.commands[74], MISCELLANEOUS.unfollowTwitchChannel)
 
     exports.commandMap = commandMap;
 }
@@ -845,7 +846,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 
         if (result[0])
             if (result[0].score == 0) {
-                console.log("ORIGIN:::", originalCommand);
+              // console.log("ORIGIN:::", originalCommand);
                 return originalCommand.apply(null, [message, internalArray[result[0].refIndex], user]);
             }
 

@@ -28,6 +28,44 @@ async function getTwitchChannelByID(id) {
     return user;
 }
 
+async function unfollowTwitchChannel(message, params, user) {
+
+    if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");
+    if (user.twitchFollows.length == 0) return message.channel.send("You do not have twitch channels being followed!");
+    let args = message.content.split(" ").slice(1).join(" ");
+    if (!args) return message.channel.send("You have to specify the name of the channel you wish to unfollow!");
+
+    if (!params.looped) {
+        let promiseArray = [];
+
+        for (follow of user.twitchFollows)
+            promiseArray.push(getTwitchChannelByID(follow));
+
+        let finishedPromises = await Promise.all(promiseArray);
+
+        let found = finishedPromises.find(element => element._data.display_name == args);
+
+        let channelNames = [];
+        let internalArray = [];
+
+        for (channel of finishedPromises) {
+            channelNames.push(channel._data.display_name);
+            internalArray.push({ looped: true, channel: channel.id, name: channel._data.display_name });
+        }
+
+        if (!found) {
+            return MAIN.generalMatcher(message, args, user, channelNames, internalArray, unfollowTwitchChannel, "Select which channel you meant to remove:");
+        }
+        else
+            return unfollowTwitchChannel(message, { looped: true, channel: found.id, name: found._data.display_name }, user);
+    }
+
+    user.twitchFollows.splice(user.twitchFollows.indexOf(params.channel), 1);
+    User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: user.twitchFollows } }, function (err, doc, res) { });
+    return message.channel.send(`Successfully removed ${params.name} from your follows!`);
+}
+exports.unfollowTwitchChannel = unfollowTwitchChannel;
+
 async function viewTwitchFollows(message, params, user) {
 
     if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");

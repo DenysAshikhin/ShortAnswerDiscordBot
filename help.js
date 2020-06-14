@@ -96,8 +96,7 @@ function generalHelp(message, params, user) {
         let promptArray = [];
         let internalArray = [];
 
-        let command = message.content.split(' ')[0].substr(MAIN.prefix.length).toUpperCase();
-
+        let command = args;
         if (user.commands) {
             for (combo of user.commands) {
                 if (combo[1] == args)
@@ -110,7 +109,6 @@ function generalHelp(message, params, user) {
             promptArray.push(Commands.commands[i]);
             internalArray.push({ index: i });
         }
-        let query = args;
         return MAIN.generalMatcher(message, command, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
     }
 }
