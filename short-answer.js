@@ -898,7 +898,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     let tally = startTally == 0 ? startTally : 1;
     let field = null;
     let fieldArray = [];
-    let maxLength = 100;    
+    let maxLength = 100;
 
     let tester = 1;
 
@@ -1088,9 +1088,9 @@ function createThreeQueue(array) {
 function testy(ARR, description, message, modifier, URL, title) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
+    newEmbed.timestamp = new Date();
     newEmbed.description = description;
     newEmbed.title = title ? title : newEmbed.title;
-    newEmbed.title = title == '' ? Embed.title : title;
     newEmbed.thumbnail.url = URL;
 
     let amount = ARR.length > 24 ? 24 : ARR.length;
@@ -1188,16 +1188,6 @@ async function minuteCount() {
 }
 
 setInterval(minuteCount, 60 * 1000);
-
-
-
-var testCase = [{ name: "Possibly Wrong Song(s)", value: 'Don’t Matter To Me (with Michael Jackson)' },
-{ name: "Possibly Wrong Song(s)", value: 'Don’t Matter To Me (with Michael Jackson)2' },
-{ name: "Possibly Wrong Song(s)", value: 'Don’t Matter To Me (with Michael Jackson)3' },
-{ name: "Possibly Wrong Song(s)", value: 'Don’t Matter To Me (with Michael Jackson)4' }]
-
-exports.testCase = testCase;
-
 
 //release 1
 //add spotify support for addSong
