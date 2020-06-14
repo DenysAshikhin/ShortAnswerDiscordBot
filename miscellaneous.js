@@ -19,12 +19,36 @@ async function updateTwitchFollows(message, params, user) {
 }
 
 async function getTwitchChannel(streamer) {
-
     const user = await MAIN.twitchClient.helix.users.getUserByName(streamer);
-    console.log(user.id);
-    console.log(user.displayName)
     return user;
 }
+
+async function getTwitchChannelByID(id) {
+    const user = await MAIN.twitchClient.helix.users.getUserById(id);
+    return user;
+}
+
+async function viewTwitchFollows(message, params, user) {
+
+    if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");
+    if (user.twitchFollows.length == 0) return message.channel.send("You do not have twitch channels being followed!");
+
+    let promiseArray = [];
+
+    for (follow of user.twitchFollows)
+        promiseArray.push(getTwitchChannelByID(follow));
+
+    let finishedPromises = await Promise.all(promiseArray);
+
+    MAIN.prettyEmbed(message, `You are following ${promiseArray.length} channels!`,
+        finishedPromises.reduce((accum, current) => {
+            console.log(current._data)
+            accum.push({ name: '', value: `<${current._data.display_name} Views=${current._data.view_count}>\n` });
+            return accum;
+        }, []),
+        -1, 1, 'md');
+}
+exports.viewTwitchFollows = viewTwitchFollows;
 
 async function unlinkTwitch(message, params, user) {
 
@@ -61,20 +85,27 @@ async function linkTwitch(message, params, user) {
             for (chan of follows.data)
                 followIDs.push(chan._data.to_id);
 
+        let goodArray = [];
+
+        for (channy of followIDs) {
+            let tester = await getTwitchChannelByID(channy);
+
+            if (tester)
+                goodArray.push(channy)
+        }
+
         if (user.linkedTwitch && user.twitchFollows) {
 
             if (user.twitchFollows)
                 return MAIN.generalMatcher(message, -23, user, ['Combine', 'Remove'],
-                    [{ looped: true, keep: true, followArr: followIDs.concat(user.twitchFollows.filter(item => !followIDs.includes(item))) },
-                    { looped: true, keep: false, followArr: followIDs }],
+                    [{ looped: true, keep: true, followArr: goodArray.concat(user.twitchFollows.filter(item => !followIDs.includes(item))) },
+                    { looped: true, keep: false, followArr: goodArray }],
                     linkTwitch, "You already have a linked twitch account or channels you have followed, would you like to combine the old follows, or remove them?");
         }
         else {
-            return linkTwitch(message, { looped: true, followArr: followIDs }, user);
+            return linkTwitch(message, { looped: true, followArr: goodArray }, user);
         }
     }
-
-    console.log(`TRYING TO LINK: ${streamer.id}`);
     User.findOneAndUpdate({ id: user.id }, { $set: { linkedTwitch: streamer.id, twitchFollows: params.followArr } }, function (err, doc, res) { });
     message.channel.send(`Succesfully linked ${streamer.displayName} to your account, you now have ${params.followArr.length} channels you are following!`);
     return -1;
@@ -380,7 +411,6 @@ async function decider(message, params, user) {
     return message.channel.send(`I have chosen: ${args[Math.floor(Math.random() * args.length)]}`)
 }
 exports.decider = decider;
-
 
 
 async function reactAnswers(message) {

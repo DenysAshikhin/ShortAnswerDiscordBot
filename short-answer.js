@@ -246,13 +246,7 @@ connectDB.once('open', async function () {
             }
 
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
-
-            if (user.commands) {
-                for (combo of user.commands) {
-                    if (combo[1] == command)
-                        command = combo[0];
-                }
-            }
+            exports.prefix = prefix;
 
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
@@ -377,6 +371,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[70], GENERAL.timeZone)
     commandMap.set(Commands.commands[71], MISCELLANEOUS.linkTwitch)
     commandMap.set(Commands.commands[72], MISCELLANEOUS.unlinkTwitch)
+    commandMap.set(Commands.commands[73], MISCELLANEOUS.viewTwitchFollows)
 
     exports.commandMap = commandMap;
 }

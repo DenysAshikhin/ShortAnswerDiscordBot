@@ -35,25 +35,26 @@ async function removeMoniker(message, params, user) {
         }
     }
 
-    return MAIN.generalMatcher(message, args, user, user.commands.reduce((accum, current) => {accum.push(current[1]); return accum;}, []), 
+    return MAIN.generalMatcher(message, args, user, user.commands.reduce((accum, current) => { accum.push(current[1]); return accum; }, []),
         user.commands.reduce((accum, current) => {
-            accum.push({loop: true, moniker: current[1]});
-            return accum; 
-        }, []), 
+            accum.push({ loop: true, moniker: current[1] });
+            return accum;
+        }, []),
         removeMoniker, "Choose which moniker you meant to remove:");
 
 }
 exports.removeMoniker = removeMoniker;
 
 async function setCommand(message, params, user) {
-    
+
     let args = message.content.split(" ").slice(1).join(" ").split(',');
 
     if (!params.loop) {
-        
-        if (!args[0]) return message.channel.send("You first have to provide the original command you wish to create a monkier for!");
+
+        if (!args[0].trim()) return message.channel.send("You first have to provide the original command you wish to create a monkier for!");
         args[0] = args[0].trim().toUpperCase();
         if (!args[1]) return message.channel.send("You have to provide the moniker for the original command, **seperated by a comma**.");
+        if (!args[1].trim() || (args[1].trim().length < 1)) return message.channel.send("You have to provide the moniker for the original command, **seperated by a comma**.");
         args[1] = args[1].trim().toUpperCase();
 
         if (!Commands.commands.includes(args[0])) {

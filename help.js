@@ -88,7 +88,7 @@ function generalHelp(message, params, user) {
 
     if (params.index != null) {
 
- 
+
         return MAIN.sendHelpMessage(params.index, message);
     }
     else {
@@ -96,13 +96,22 @@ function generalHelp(message, params, user) {
         let promptArray = [];
         let internalArray = [];
 
+        let command = message.content.split(' ')[0].substr(MAIN.prefix.length).toUpperCase();
+
+        if (user.commands) {
+            for (combo of user.commands) {
+                if (combo[1] == args)
+                    command = combo[0];
+            }
+        }
+
         for (let i = 0; i < Commands.commands.length; i++) {
 
             promptArray.push(Commands.commands[i]);
             internalArray.push({ index: i });
         }
         let query = args;
-        return MAIN.generalMatcher(message, query, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
+        return MAIN.generalMatcher(message, command, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
     }
 }
 exports.generalHelp = generalHelp;
