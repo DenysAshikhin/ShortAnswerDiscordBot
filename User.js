@@ -84,7 +84,11 @@ const UserSchema = new mongoose.Schema({
     },
     playlists: [],
     commands: [],
-    twitchFollows: []
+    twitchFollows: [],
+    linkedTwitch: {
+        type: String,
+        default: ''
+    }
 });
 
 module.exports = mongoose.model('User', UserSchema);

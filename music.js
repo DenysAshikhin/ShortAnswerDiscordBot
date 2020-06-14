@@ -227,12 +227,10 @@ async function spotifyPlaylist(message, params, user) {
 
         if ((numSongs / totalNumber) > (steps * 0.05)) {
             steps++;
-            notifMess.edit(`Parsing the spotify playlist...each song is automatically added to the queue in order, don't worry!.`
-                + "```md\n<" + `${Math.floor((numSongs / totalNumber)*100)}% Complete!>` + "```");
+            notifMess.edit(`Parsing the spotify playlist...the playlist is loaded in the background while the first songs play!`
+                + "```md\n<" + `${Math.floor((numSongs / totalNumber) * 100)}% Complete!>` + "```");
         }
-
     }
-
 
     let finalReport = [];
 
@@ -246,7 +244,7 @@ async function spotifyPlaylist(message, params, user) {
     if (found.length > 0)
         finalReport = finalReport.concat(found.reduce(
             (accum, current, index) => {
-                accum.push({ name: "Possibly Wrong Song(s)", value: `${index + 1}) ` + current.original + '\n' });
+                accum.push({ name: "Probably correct song(s)", value: `${index + 1}) ` + current.original + '\n' });
                 return accum;
             }, []));
 
@@ -941,6 +939,41 @@ async function addSong(message, params, user) {
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
 
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+
+
+    if (!params.custom) {
+
+        if (args.includes('https://open.spotify.com/track/')) {
+
+            if (args.includes('?si='))
+                id = args.substring(args.indexOf("/track/") + 7, args.indexOf('?si'));
+            else
+                id = args.substring(args.indexOf("/track/") + 7);
+
+
+            try {
+                let tracky = await new Spotify.Track(id).getFullObject();
+                let artists = "";
+
+                for (arty of tracky.artists) {
+                    artists += " " + arty.name;
+                }
+
+                let name = (artists + " " + tracky.name).trim();
+
+                message.content = message.content.split(" ")[0] + name;
+
+                return (addSong(message, params, user));
+            }
+            catch (err) {
+                console.log(err)
+                console.log("Not spotify!")
+                return -1;
+            }
+        }
+    }
+
+
     if (!args) return message.channel.send("You have to provide a link or title of song to play!");
 
     let serverQueue = queue.get(message.guild.id);

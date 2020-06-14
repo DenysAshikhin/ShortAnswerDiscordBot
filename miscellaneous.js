@@ -28,6 +28,21 @@ async function updateTwitchFollows(message, params, user) {
     if (!args) return message.channel.send("You have to write the name of the streamer you wish to follow!");
 }
 
+async function linkTwitch(message, params, user) {
+
+    let args = message.content.split(" ").slice(1).join(" ");
+
+    if (params.looped) {
+
+        if (user.linkedTwitch){
+            
+        }
+    }
+
+
+
+}
+
 
 
 
