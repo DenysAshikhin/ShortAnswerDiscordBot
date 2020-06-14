@@ -11,11 +11,6 @@ for (let element of studyJSON)
 
 
 
-async function isStreamLive(userName) {
-
-}
-
-
 async function updateTwitchFollows(message, params, user) {
 
     let args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
@@ -30,6 +25,26 @@ async function getTwitchChannel(streamer) {
     console.log(user.displayName)
     return user;
 }
+
+async function unlinkTwitch(message, params, user) {
+
+    if (!user.linkedTwitch) return message.channel.send("You do not have a linked twitch, try linking one first?");
+
+    if (user.twitchFollows && !params.looped) {
+        if (user.twitchFollows.length > 0)
+            if (!params.looped)
+                return MAIN.generalMatcher(message, -23, user, ['Keep', 'Remove'],
+                    [{ looped: true, keep: true, followArr: user.twitchFollows },
+                    { looped: true, keep: false, followArr: [] }],
+                    unlinkTwitch, "Do you want to keep your current follows?");
+    }
+    else {
+
+        User.findOneAndUpdate({ id: user.id }, { $set: { linkedTwitch: null, twitchFollows: params.followArr } }, function (err, doc, res) { });
+        return message.channel.send("Succesfully unlinked your twitch!" + ` You now have ${params.followArr.length} channels still being followed!`);
+    }
+}
+exports.unlinkTwitch = unlinkTwitch;
 
 async function linkTwitch(message, params, user) {
 
@@ -64,10 +79,7 @@ async function linkTwitch(message, params, user) {
     message.channel.send(`Succesfully linked ${streamer.displayName} to your account, you now have ${params.followArr.length} channels you are following!`);
     return -1;
 }
-
 exports.linkTwitch = linkTwitch;
-
-
 
 async function shakeUser(message, params, user) {
 

@@ -375,8 +375,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[68], QOF.commandMonikers)
     commandMap.set(Commands.commands[69], QOF.removeMoniker)
     commandMap.set(Commands.commands[70], GENERAL.timeZone)
-
     commandMap.set(Commands.commands[71], MISCELLANEOUS.linkTwitch)
+    commandMap.set(Commands.commands[72], MISCELLANEOUS.unlinkTwitch)
 
     exports.commandMap = commandMap;
 }
