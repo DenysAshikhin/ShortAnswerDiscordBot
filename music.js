@@ -92,6 +92,8 @@ async function spotifyPlaylist(message, params, user) {
     let missed = [];
     let numFound = 0;
     let numSongs = 0;
+    let steps = 0;
+    let totalNumber = Object.keys(playlistTracks.items).length;
 
     for (track in playlistTracks.items) {
 
@@ -172,7 +174,7 @@ async function spotifyPlaylist(message, params, user) {
 
             let counter = 0;
             let cleanedTitle = (result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase());
-            let cleanedName = cleanedName.replace('’', "'").replace(/\s{2,}/g, ' ');
+            cleanedName = cleanedName.replace('’', "'").replace(/\s{2,}/g, ' ');
             for (word of cleanedName.split(" ")) {
 
                 if (cleanedTitle.includes(word))
@@ -222,6 +224,13 @@ async function spotifyPlaylist(message, params, user) {
             }
         }
         numSongs++;
+
+        if ((numSongs / totalNumber) > (steps * 0.05)) {
+            steps++;
+            notifMess.edit(`Parsing the spotify playlist...each song is automatically added to the queue in order, don't worry!.`
+                + "```md\n<" + `${Math.floor((numSongs / totalNumber)*100)}% Complete!>` + "```");
+        }
+
     }
 
 
@@ -243,7 +252,8 @@ async function spotifyPlaylist(message, params, user) {
 
     if (finalReport.length > 0)
         MAIN.prettyEmbed(message,
-            `I found ${numFound}/${numSongs} song for sure.\n${found.length}/${numSongs} I wasn't sure about **but should be accurate**.\n${missed.length} songs had no matches.`,
+            `I found ${numFound}/${numSongs} song for sure.\n${found.length}/${numSongs} I wasn't sure about **but should be accurate**.\n${missed.length} songs had no matches.`
+            + "```fix\nUse the currentPlaylist command to view the whole **loaded** playlist!```",
             finalReport, -1, -1, 1);
 
     notifMess.delete();
