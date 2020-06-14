@@ -102,7 +102,6 @@ async function spotifyPlaylist(message, params, user) {
         }
 
         let name = (artists + " " + playlistTracks.items[track].name).trim();
-        console.log(numSongs + ") " + name);
 
         let newOptions = JSON.parse(JSON.stringify(MAIN.options));
         newOptions = {
@@ -125,46 +124,41 @@ async function spotifyPlaylist(message, params, user) {
             accum.push(current); return accum;
         }, []);
 
-        if (!name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes("live")) {
+        let cleanedName = name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase();
+
+        if (!cleanedName.includes("live")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("live"))
         }
-
-        if (!name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes("hour version")) {
+        if (!cleanedName.includes("hour version")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("hour version"))
         }
-
-        if (!name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes("hours version")) {
+        if (!cleanedName.includes("hours version")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("hours version"))
         }
-
-        if (!name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes("boosted")) {
+        if (!cleanedName.includes("boosted")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("boosted"))
         }
-
-        if (!name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes("shorter")) {
+        if (!cleanedName.includes("shorter")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("shorter"))
         }
-
-        if (!name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes("extended")) {
+        if (!cleanedName.includes("extended")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("extended"))
         }
-
-        if (!name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes("version")) {
+        if (!cleanedName.includes("version")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("version"))
         }
-
-        if (!name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes("remix")) {
+        if (!cleanedName.includes("remix")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("remix"))
+        }
+        if (!cleanedName.includes("nightcore")) {
+            searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("nightcore"))
+        }
+        if (!cleanedName.includes("daycore")) {
+            searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("daycore"))
         }
 
         let fuse = new Fuse(searchyArray, newOptions);
         let result = fuse.search(name.replace(/([(){}&,\-])/g, '').replace(/\s{2,}/g, ' '));
-
-        if (numSongs == 0) {
-            console.log(name)
-            console.log(result)
-        }
-
 
         if (result[0].score <= 0.2) {//artist + name fuzzy
             let topScores = result.filter(element => element.score <= 0.25);
@@ -176,29 +170,18 @@ async function spotifyPlaylist(message, params, user) {
         }
         else {//artist + name wordy match
 
-            //let max =
-
             let counter = 0;
-            for (word of name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().split(" ")) {
+            let cleanedTitle = (result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase());
+            let cleanedName = cleanedName.replace('’', "'").replace(/\s{2,}/g, ' ');
+            for (word of cleanedName.split(" ")) {
 
-
-                // console.log(result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' '))
-
-                // console.log(word.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' '))
-
-                // console.log((result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes(word.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' '))))
-
-                if ((result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase().includes(word.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' '))))
+                if (cleanedTitle.includes(word))
                     counter++;
             }
 
-            console.log((counter / name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').split(" ").length))
-
-            if ((counter / name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').split(" ").length) > 0.65) {
+            if ((counter / cleanedName.split(" ").length) > 0.65) {
                 await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
                 numFound++;
-                // console.log("artist + name wordy match")
-                // console.log({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
             }
             else {//name + fuzzy
 
@@ -215,21 +198,19 @@ async function spotifyPlaylist(message, params, user) {
                     await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
                     found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
                     console.log("name + fuzzy")
-                    // console.log({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
                 }
                 else {
 
                     let counter = 0;
-                    for (word of playlistTracks.items[track].name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').split(" ")) {
+                    let cleanedName = playlistTracks.items[track].name.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ');
+                    let cleanedTitle = result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ');
+                    for (word of cleanedName.split(" ")) {
 
-
-
-
-                        if (result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').includes(word.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ')))
+                        if (cleanedTitle.includes(word))
                             counter++;
                     }
 
-                    if ((counter / playlistTracks.items[track].name.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').split(" ").length) > 0.8) {
+                    if ((counter / cleanedName.split(" ").length) > 0.8) {
                         await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
                         found.push({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
                         console.log("name word match")
