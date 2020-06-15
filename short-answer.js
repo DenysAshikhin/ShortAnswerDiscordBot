@@ -395,6 +395,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[75], MISCELLANEOUS.followTwitchChannel)
     commandMap.set(Commands.commands[76], MISCELLANEOUS.linkChannelWithTwitch)
     commandMap.set(Commands.commands[77], MISCELLANEOUS.showChannelTwitchLinks)
+    commandMap.set(Commands.commands[78], MISCELLANEOUS.removeChannelTwitchLink)
 
     exports.commandMap = commandMap;
 }

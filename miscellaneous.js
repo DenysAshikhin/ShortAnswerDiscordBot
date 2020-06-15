@@ -128,16 +128,57 @@ async function showChannelTwitchLinks(message, params, user) {
         finishedArray.push({ texty: textChannels[i], streamy: finishedPromises[i] });
     }
 
-    finishedPromises.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
+    finishedArray.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
 
     MAIN.prettyEmbed(message, "Here are the ServerChannel-TwitchStreamer pairs:",
         finishedArray.reduce((accum, current) => {
             accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
             return accum;
-        }, []), -1, -1, 'md');
+        }, []), -1, 1, 'md');
     return -1;
 }
 exports.showChannelTwitchLinks = showChannelTwitchLinks;
+
+async function removeChannelTwitchLink(message, params, user) {
+
+    console.log(message.content)
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only administrators can use this command!");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.channelTwitch || (guild.channelTwitch.length == 0)) return message.channel.send("There are no pairs setup for this server!");
+
+    if (!message.mentions.channels.length != 1) return message.channel.send("You have to mention a channel to remove the twitch notifications from!");
+
+    let args = message.content.split(" ").slice(1);
+
+    if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
+
+    let streamer;
+    try {
+        streamer = await getTwitchChannel(args[0]);
+    }
+    catch{
+
+    }
+    if (!streamer) return message.channel.send("I could not find a channel with that name, try again?");
+
+    if (!guild.channelTwitch) guild.channelTwitch = [];
+
+    for (let i = 0; i < guild.channelTwitch.length; i++) {
+        if (message.mentions.channels.first().id == guild.channelTwitch[i][1]) {
+            if (streamer._data.id == guild.channelTwitch[i][0]) {
+                guild.channelTwitch.splice(i, 1);
+                Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelTwitch: guild.channelTwitch } }, function (err, doc, res) { });
+                return message.channel.send(`Successfully unlinked ${streamer._data.display_name} and <#${message.mentions.channels.first().id}>`)
+            }
+        }
+    }
+    return message.channel.send("No such pair exists for this server, try again?");
+}
+exports.removeChannelTwitchLink = removeChannelTwitchLink;
 
 async function unlinkTwitch(message, params, user) {
 
@@ -204,7 +245,7 @@ exports.linkTwitch = linkTwitch;
 async function linkChannelWithTwitch(message, params, user) {
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("You do not have the required permissions to set the default prefix for the server");
+        return message.channel.send("Only administrators can use this command!");
 
     if (!message.mentions.channels.length != 1) return message.channel.send("You have to mention a channel to put the twitch notifications in!");
 
@@ -222,21 +263,18 @@ async function linkChannelWithTwitch(message, params, user) {
     if (!streamer) return message.channel.send("I could not find a channel with that name, try again?");
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
-    console.log(guild)
-
-    //message.channel.send(`Trying to link 
 
     if (!guild.channelTwitch) guild.channelTwitch = [];
 
     for (channel of guild.channelTwitch) {
-        if (channel[1] == message.channel.id)
-            if (channel[0] == streamer._data.id)
+        if (channel[1] == message.mentions.channels.first().id) {
+            if (channel[0] == streamer._data.id) {
                 return message.channel.send(`${streamer._data.display_name}'s live stream notifications are already posted in ${message.mentions.channels.first()}!`);
+            }
+        }
     }
 
-
-    guild.channelTwitch.push([streamer._data.id, message.channel.id])
-    console.log(guild.id)
+    guild.channelTwitch.push([streamer._data.id, message.mentions.channels.first().id])
     Guild.findOneAndUpdate({ id: guild.id }, { $set: { channelTwitch: guild.channelTwitch } }, function (err, doc, res) { if (err) console.log(err) });
     message.channel.send(`Succesfully linked ${streamer._data.display_name} to ${message.mentions.channels.first()}`);
     return -1;
