@@ -94,11 +94,10 @@ async function viewTwitchFollows(message, params, user) {
         promiseArray.push(getTwitchChannelByID(follow));
 
     let finishedPromises = await Promise.all(promiseArray);
-    finishedPromises.sort((a,b) => {return b._data.view_count - a._data.view_count});
+    finishedPromises.sort((a, b) => { return b._data.view_count - a._data.view_count });
 
     MAIN.prettyEmbed(message, `You are following ${promiseArray.length} channels!`,
         finishedPromises.reduce((accum, current) => {
-            console.log(current._data)
             accum.push({ name: '', value: `<${current._data.display_name} Views=${current._data.view_count}>\n` });
             return accum;
         }, []),
@@ -252,7 +251,7 @@ async function searchForUser(message, params, user) {
 
         let goal = message.mentions.members.values().next().value.id;
 
-        for (guild of Client.guilds.cache.values()) {
+        for (guild of MAIN.Client.guilds.cache.values()) {
             for (channel of guild.channels.cache.values()) {
                 if (channel.type == "voice") {
                     if (channel.members.size > 0)
@@ -265,7 +264,7 @@ async function searchForUser(message, params, user) {
         }
     }
     else {
-        for (guild of Client.guilds.cache.values()) {
+        for (guild of MAIN.Client.guilds.cache.values()) {
             for (channel of guild.channels.cache.values()) {
                 if (channel.type == "voice") {
                     if (channel.members.size > 0)
@@ -467,6 +466,67 @@ async function decider(message, params, user) {
     return message.channel.send(`I have chosen: ${args[Math.floor(Math.random() * args.length)]}`)
 }
 exports.decider = decider;
+
+
+async function checkStreams(users) {
+
+    for (USER of users) {
+        for (channel of USER.twitchFollows) {
+
+            let streamer = await getTwitchChannelByID(channel)
+            let stream = await streamer.getStream();
+
+            if (stream) {
+
+                console.log("IM AT: " + USER.displayName)
+                let streamDate = new Date(stream._data.started_at);
+                let found = false;
+                let index = -1;
+
+                if (!USER.twitchNotifications) USER.twitchNotifications = [];
+
+                for (let i = 0; i < USER.twitchNotifications.length; i++) {
+                    if (USER.twitchNotifications[i][0] == stream._data.user_id) {
+                        index = i;
+
+                        let previousTime = new Date(USER.twitchNotifications[i][1]);
+                        if ((previousTime - streamDate) == 0)
+                            found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+
+                    if (index != -1)
+                        USER.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
+                    else
+                        USER.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
+
+                    User.findOneAndUpdate({ id: USER.id }, { $set: { twitchNotifications: USER.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+
+                    //console.log(MAIN.Client.guilds.cache)
+
+                    for (let guild of MAIN.Client.guilds.cache) {
+                        let messageSent = false;
+
+                        //                                            console.log(guild[1].name)
+                        for (member of guild[1].members.cache) {
+                            console.log(member[1].displayName, " ::: ", USER.displayName)
+                            if (member[1].user.id == USER.id) {
+                                console.log("WWWWTF")
+                                member[1].user.send(`${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`);
+                                messageSent = true;
+                                break;
+                            }
+                        }
+                        if (messageSent) break;
+                    }
+                }
+            }
+        }
+    }
+}
+exports.checkStreams = checkStreams;
 
 
 async function reactAnswers(message) {

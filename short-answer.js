@@ -115,7 +115,7 @@ exports.tags = tags;
 
 
 //FAT NOTE: (true >= false) is TRUE
-global.Client = new Discord.Client();
+var Client = new Discord.Client();
 
 var twitchClient;
 var commandMap = new Map();
@@ -196,6 +196,7 @@ connectDB.once('open', async function () {
     Client.on("ready", () => {
 
         console.log("Ready!");
+        exports.Client = Client;
 
         Client.user.setActivity("sa!help for information");
     });
@@ -204,6 +205,13 @@ connectDB.once('open', async function () {
 
         if (message.author.bot) return;
         let user = await findUser({ id: message.author.id });
+
+
+        {
+
+        }
+
+
 
         if (message.channel.type != 'dm') {
 
@@ -847,7 +855,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 
         if (result[0])
             if (result[0].score == 0) {
-              // console.log("ORIGIN:::", originalCommand);
+                // console.log("ORIGIN:::", originalCommand);
                 return originalCommand.apply(null, [message, internalArray[result[0].refIndex], user]);
             }
 
@@ -1181,22 +1189,20 @@ async function createBackUp() {
 }//
 
 async function minuteCount() {
-    if (defaultPrefix != '##') countTalk();
+    if (defaultPrefix != '##') {
+        countTalk();
+        MISCELLANEOUS.checkStreams(await getUsers());
+    }
 }
 
 setInterval(minuteCount, 60 * 1000);
 
 //release 1
-//check for full channels, prioritise empty channels -> snapshot of empty, then not full then error out, make admin ignore restrictions
-//sptofiy playlist
+//format timezone better
 //twitch
 //video game stats
 
 
-
-
-
-//https://dev.twitch.tv/docs/api/reference/#get-streams
 
 //seal idan easter eggs
 process.on('unhandledRejection', (reason, promise) => {

@@ -67,12 +67,12 @@ const UserSchema = new mongoose.Schema({
         default: false
     },
     summoner: {
-        type:[Number],
-        default:[]
+        type: [Number],
+        default: []
     },
     kicked: {
         type: [Boolean],
-        default:[]
+        default: []
     },
     prefix: {
         type: [String],
@@ -88,7 +88,8 @@ const UserSchema = new mongoose.Schema({
     linkedTwitch: {
         type: String,
         default: ''
-    }
+    },
+    twitchNotifications: []
 });
 
 module.exports = mongoose.model('User', UserSchema);

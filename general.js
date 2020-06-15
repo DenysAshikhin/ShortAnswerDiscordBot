@@ -106,7 +106,7 @@ async function timeZone(message, params, user) {
 
         hourOffset *= -1;
         message.channel.send(`Forwarding ${message.content.split(" ").slice(1).join(" ").split(',')[1].trim()} by **${Math.floor(hourOffset / 60) + ":" + (hourOffset % 60)}**`);
-        if (hourOffset + givenTime >= 720) {
+        if (hourOffset + givenTime >= 780) {
             hourOffset = hourOffset - (720 - givenTime);
             givenTime = 0;
         }
