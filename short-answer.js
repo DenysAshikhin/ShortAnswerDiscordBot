@@ -186,6 +186,17 @@ const findGuild = async function (params) {
 }
 exports.findGuild = findGuild;
 
+const getGuilds = async function () {
+    try {
+        return await Guild.find({})
+    } catch (err) {
+        console.log(err);
+        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+    }
+}
+exports.getGuilds = getGuilds;
+
+
 
 connectDB.once('open', async function () {
 
@@ -208,7 +219,7 @@ connectDB.once('open', async function () {
 
 
         {
-
+            
         }
 
 
@@ -382,6 +393,8 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[73], MISCELLANEOUS.viewTwitchFollows)
     commandMap.set(Commands.commands[74], MISCELLANEOUS.unfollowTwitchChannel)
     commandMap.set(Commands.commands[75], MISCELLANEOUS.followTwitchChannel)
+    commandMap.set(Commands.commands[76], MISCELLANEOUS.linkChannelWithTwitch)
+    commandMap.set(Commands.commands[77], MISCELLANEOUS.showChannelTwitchLinks)
 
     exports.commandMap = commandMap;
 }
@@ -1191,15 +1204,16 @@ async function createBackUp() {
 async function minuteCount() {
     if (defaultPrefix != '##') {
         countTalk();
-        MISCELLANEOUS.checkStreams(await getUsers());
+        MISCELLANEOUS.checkUsersTwitchStreams(await getUsers());
+        MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
     }
 }
 
 setInterval(minuteCount, 60 * 1000);
 
 //release 1
-//format timezone better
 //twitch
+//format timezone better
 //video game stats
 
 

@@ -90,7 +90,9 @@
         "VIEWTWITCHFOLLOWS",
         "UNFOLLOWTWITCHCHANNEL",
 
-        "FOLLOWTWITCHCHANNEL"
+        "FOLLOWTWITCHCHANNEL",
+        "LINKCHANNELWITHTWITCH",
+        "VIEWCHANNELTWITCHLINKS"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -183,7 +185,9 @@
         "Shows you a list of all the twitch channels you are following.",
         "Unfollows a specific twitch channel.",
 
-        "Follows a specific twitch channel"
+        "Follows a specific twitch channel",
+        "Tells the bot to put a notification in the @mentioned channel when the specified twitch streamer goes live!",
+        "Shows you the server channel - twitch streamer pairs."
     ],
         
     "example": [
@@ -277,7 +281,9 @@
         ["1) viewTwitchFollows"],
         ["1) unfollowTwitchChannel TheLastSpark"],
 
-        ["1) followTwitchChannel TheLastSpark"]
+        ["1) followTwitchChannel TheLastSpark"],
+        ["1) linkChannelWithTwitch summit1g #nameOfTextChannel"],
+        ["1) showChannelTwitchLinks"]
     ],
     "subsection": [
         [3],
@@ -370,6 +376,8 @@
         [3],
         [3],
 
+        [3],
+        [3, 5],
         [3]
     ]
 }

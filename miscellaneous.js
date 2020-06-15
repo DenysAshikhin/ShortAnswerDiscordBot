@@ -4,6 +4,7 @@ const studyJSON = require('./medstudy.json');
 const MAIN = require('./short-answer.js');
 const config = require('./config.json');
 const User = require('./User.js');
+const Guild = require('./Guild.js')
 const studyArray = new Array();
 
 for (let element of studyJSON)
@@ -105,6 +106,39 @@ async function viewTwitchFollows(message, params, user) {
 }
 exports.viewTwitchFollows = viewTwitchFollows;
 
+async function showChannelTwitchLinks(message, params, user) {
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.channelTwitch || (guild.channelTwitch.length == 0)) return message.channel.send("There are no pairs setup for this server!");
+
+    let promiseArray = [];
+    let textChannels = [];
+
+    for (follow of guild.channelTwitch) {
+        promiseArray.push(getTwitchChannelByID(follow[0]));
+        textChannels.push(message.guild.channels.cache.get(follow[1]));
+    }
+
+    let finishedPromises = await Promise.all(promiseArray);
+
+    let finishedArray = [];
+
+    for (let i = 0; i < finishedPromises.length; i++) {
+        finishedArray.push({ texty: textChannels[i], streamy: finishedPromises[i] });
+    }
+
+    finishedPromises.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
+
+    MAIN.prettyEmbed(message, "Here are the ServerChannel-TwitchStreamer pairs:",
+        finishedArray.reduce((accum, current) => {
+            accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
+            return accum;
+        }, []), -1, -1, 'md');
+    return -1;
+}
+exports.showChannelTwitchLinks = showChannelTwitchLinks;
+
 async function unlinkTwitch(message, params, user) {
 
     if (!user.linkedTwitch) return message.channel.send("You do not have a linked twitch, try linking one first?");
@@ -166,6 +200,48 @@ async function linkTwitch(message, params, user) {
     return -1;
 }
 exports.linkTwitch = linkTwitch;
+
+async function linkChannelWithTwitch(message, params, user) {
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("You do not have the required permissions to set the default prefix for the server");
+
+    if (!message.mentions.channels.length != 1) return message.channel.send("You have to mention a channel to put the twitch notifications in!");
+
+    let args = message.content.split(" ").slice(1);
+
+    if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
+
+    let streamer;
+    try {
+        streamer = await getTwitchChannel(args[0]);
+    }
+    catch{
+
+    }
+    if (!streamer) return message.channel.send("I could not find a channel with that name, try again?");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+    console.log(guild)
+
+    //message.channel.send(`Trying to link 
+
+    if (!guild.channelTwitch) guild.channelTwitch = [];
+
+    for (channel of guild.channelTwitch) {
+        if (channel[1] == message.channel.id)
+            if (channel[0] == streamer._data.id)
+                return message.channel.send(`${streamer._data.display_name}'s live stream notifications are already posted in ${message.mentions.channels.first()}!`);
+    }
+
+
+    guild.channelTwitch.push([streamer._data.id, message.channel.id])
+    console.log(guild.id)
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { channelTwitch: guild.channelTwitch } }, function (err, doc, res) { if (err) console.log(err) });
+    message.channel.send(`Succesfully linked ${streamer._data.display_name} to ${message.mentions.channels.first()}`);
+    return -1;
+}
+exports.linkChannelWithTwitch = linkChannelWithTwitch;
 
 async function shakeUser(message, params, user) {
 
@@ -467,8 +543,65 @@ async function decider(message, params, user) {
 }
 exports.decider = decider;
 
+async function checkGuildTwitchStreams(guilds) {
 
-async function checkStreams(users) {
+    for (guild of guilds) {
+        for (channel of guild.channelTwitch) {
+
+            let streamer = await getTwitchChannelByID(channel[0])
+            let stream = await streamer.getStream();
+
+            if (stream) {
+
+                let streamDate = new Date(stream._data.started_at);
+                let found = false;
+                let index = -1;
+
+                if (!guild.twitchNotifications) guild.twitchNotifications = [];
+
+                for (let i = 0; i < guild.twitchNotifications.length; i++) {
+                    if (guild.twitchNotifications[i][0] == stream._data.user_id) {
+                        index = i;
+
+                        let previousTime = new Date(guild.twitchNotifications[i][1]);
+                        if ((previousTime - streamDate) == 0)
+                            found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+
+                    if (index != -1)
+                        guild.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
+                    else
+                        guild.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
+
+                    Guild.findOneAndUpdate({ id: guild.id }, { $set: { twitchNotifications: guild.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+
+                    let messageSent = false;
+
+                    for (let guild of MAIN.Client.guilds.cache) {
+
+                        for (channy of guild[1].channels.cache) {
+                            if (channy[1].id == channel[1]) {
+                                const permission = channy[1].permissionsFor(MAIN.Client.user);
+                                if (permission.has('SEND_MESSAGES')) {
+                                    channy[1].send(`${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`);
+                                    messageSent = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (messageSent) break;
+                    }
+                }
+            }
+        }
+    }
+}
+exports.checkGuildTwitchStreams = checkGuildTwitchStreams;
+
+async function checkUsersTwitchStreams(users) {
 
     for (USER of users) {
         for (channel of USER.twitchFollows) {
@@ -526,7 +659,7 @@ async function checkStreams(users) {
         }
     }
 }
-exports.checkStreams = checkStreams;
+exports.checkUsersTwitchStreams = checkUsersTwitchStreams;
 
 
 async function reactAnswers(message) {

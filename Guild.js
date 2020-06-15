@@ -6,7 +6,9 @@ const GuildSchema = new mongoose.Schema({
     prefix: String,
     name: String,
     songs: [String],
-    duration: Number
+    duration: Number,
+    channelTwitch: [],
+    twitchNotifications: []
 });
 
 module.exports = mongoose.model('Guild', GuildSchema);
