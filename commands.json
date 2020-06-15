@@ -93,7 +93,8 @@
         "FOLLOWTWITCHCHANNEL",
         "PAIRCHANNELWITHTWITCH",
         "VIEWCHANNELTWITCHPAIRS",
-        "REMOVECHANNELTWITCHPAIR"
+        "REMOVECHANNELTWITCHPAIR",
+        "LEAGUESTATS"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -189,7 +190,8 @@
         "Follows a specific twitch channel",
         "Tells the bot to put a notification in the @mentioned channel when the specified twitch streamer goes live!",
         "Shows you the server channel - twitch streamer pairs.",
-        "Removes a serverChannel - twitchStreamer pair"
+        "Removes a serverChannel - twitchStreamer pair.",
+        "Shows you your league stats, or the stats of another person. You have to specify the region and their summoner name by a comma! **Default zone is 'na'!**"
     ],
         
     "example": [

@@ -134,8 +134,7 @@ var lastMessage;
 
 try {
     config = require('./config.json');
-    twitchClient = TwitchClient.withClientCredentials(config.twitchClient, config.twitchSecret);
-    exports.twitchClient = twitchClient;
+    setTwitchClient(config.twitchClient, config.twitchSecret);
 }
 catch (err) {
     console.log("config.json doesn't exist - probably running on heroku?");
@@ -219,7 +218,7 @@ connectDB.once('open', async function () {
 
 
         {
-            
+
         }
 
 
@@ -1205,10 +1204,23 @@ async function createBackUp() {
 async function minuteCount() {
     if (defaultPrefix != '##') {
         countTalk();
-        MISCELLANEOUS.checkUsersTwitchStreams(await getUsers());
-        MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
+        try {
+            MISCELLANEOUS.checkUsersTwitchStreams(await getUsers());
+            MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
+        }
+        catch (err) {
+            console.log(err);
+            console.log("Error with twitch checks!");
+        }
     }
 }
+
+async function setTwitchClient(client, tokent) {
+    twitchClient = TwitchClient.withClientCredentials(client, tokent);
+    exports.twitchClient = twitchClient;
+}
+
+setInterval(setTwitchClient, 30 * 60 * 1000, config.TwitchClient, config.twitchSecret);
 
 setInterval(minuteCount, 60 * 1000);
 

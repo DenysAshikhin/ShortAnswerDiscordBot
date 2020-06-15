@@ -1,0 +1,156 @@
+/*{
+    lol: {
+      championMasteryV4: {
+        getAllChampionMasteries: [Object],
+        getChampionMastery: [Object],
+        getChampionMasteryScore: [Object]
+      },
+      championV3: { getChampionInfo: [Object] },
+      clashV1: {
+        getPlayersBySummoner: [Object],
+        getTeamById: [Object],
+        getTournaments: [Object],
+        getTournamentByTeam: [Object],
+        getTournamentById: [Object]
+      },
+      leagueExpV4: { getLeagueEntries: [Object] },
+      leagueV4: {
+        getChallengerLeague: [Object],
+        getLeagueEntriesForSummoner: [Object],
+        getLeagueEntries: [Object],
+        getGrandmasterLeague: [Object],
+        getLeagueById: [Object],
+        getMasterLeague: [Object]
+      },
+      statusV3: { getShardData: [Object] },
+      lorRankedV1: { getLeaderboards: [Object] },
+      matchV4: {
+        getMatchIdsByTournamentCode: [Object],
+        getMatch: [Object],
+        getMatchByTournamentCode: [Object],
+        getMatchlist: [Object],
+        getMatchTimeline: [Object]
+      },
+      spectatorV4: {
+        getCurrentGameInfoBySummoner: [Object],
+        getFeaturedGames: [Object]
+      },
+      summonerV4: {
+        getByAccountId: [Object],
+        getBySummonerName: [Object],
+        getByPUUID: [Object],
+        getBySummonerId: [Object]
+      },
+      thirdPartyCodeV4: { getThirdPartyCodeBySummonerId: [Object] }
+    },
+    tft: {
+      leagueV1: {
+        getChallengerLeague: [Object],
+        getLeagueEntriesForSummoner: [Object],
+        getLeagueEntries: [Object],
+        getGrandmasterLeague: [Object],
+        getLeagueById: [Object],
+        getMasterLeague: [Object]
+      },
+      matchV1: { getMatchIdsByPUUID: [Object], getMatch: [Object], '*': [Object] },
+      summonerV1: {
+        getByAccountId: [Object],
+        getBySummonerName: [Object],
+        getByPUUID: [Object],
+        getBySummonerId: [Object]
+      }
+    },
+    tournament: {
+      stubV4: {
+        createTournamentCode: [Object],
+        getLobbyEventsByCode: [Object],
+        registerProviderData: [Object],
+        registerTournament: [Object]
+      },
+      v4: {
+        createTournamentCode: [Object],
+        getTournamentCode: [Object],
+        updateCode: [Object],
+        getLobbyEventsByCode: [Object],
+        registerProviderData: [Object],
+        registerTournament: [Object]
+      },
+      '*': { regionTable: [Object] }
+    },
+    '*': {
+      regionTable: {
+        br: 'br1',
+        eune: 'eun1',
+        euw: 'euw1',
+        jp: 'jp1',
+        kr: 'kr',
+        lan: 'la1',
+        las: 'la2',
+        na: 'na1',
+        oce: 'oc1',
+        tr: 'tr1',
+        ru: 'ru',
+        pbe: 'pbe1'
+      }
+    }
+  }
+  {
+    championMasteryV4: {
+      getAllChampionMasteries: {
+        path: '/lol/champion-mastery/v4/champion-masteries/by-summoner/{summonerId}'
+      },
+      getChampionMastery: {
+        path: '/lol/champion-mastery/v4/champion-masteries/by-summoner/{summonerId}/by-champion/{championId}'
+      },
+      getChampionMasteryScore: {
+        path: '/lol/champion-mastery/v4/scores/by-summoner/{summonerId}'
+      }
+    },
+    championV3: { getChampionInfo: { path: '/lol/platform/v3/champion-rotations' } },
+    clashV1: {
+      getPlayersBySummoner: { path: '/lol/clash/v1/players/by-summoner/{summonerId}' },
+      getTeamById: { path: '/lol/clash/v1/teams/{teamId}' },
+      getTournaments: { path: '/lol/clash/v1/tournaments' },
+      getTournamentByTeam: { path: '/lol/clash/v1/tournaments/by-team/{teamId}' },
+      getTournamentById: { path: '/lol/clash/v1/tournaments/{tournamentId}' }
+    },
+    leagueExpV4: {
+      getLeagueEntries: { path: '/lol/league-exp/v4/entries/{queue}/{tier}/{division}' }
+    },
+    leagueV4: {
+      getChallengerLeague: { path: '/lol/league/v4/challengerleagues/by-queue/{queue}' },
+      getLeagueEntriesForSummoner: { path: '/lol/league/v4/entries/by-summoner/{summonerId}' },
+      getLeagueEntries: { path: '/lol/league/v4/entries/{queue}/{tier}/{division}' },
+      getGrandmasterLeague: { path: '/lol/league/v4/grandmasterleagues/by-queue/{queue}' },
+      getLeagueById: { path: '/lol/league/v4/leagues/{leagueId}' },
+      getMasterLeague: { path: '/lol/league/v4/masterleagues/by-queue/{queue}' }
+    },
+    statusV3: { getShardData: { path: '/lol/status/v3/shard-data' } },
+    lorRankedV1: { getLeaderboards: { path: '/lor/ranked/v1/leaderboards' } },
+    matchV4: {
+      getMatchIdsByTournamentCode: {
+        path: '/lol/match/v4/matches/by-tournament-code/{tournamentCode}/ids'
+      },
+      getMatch: { path: '/lol/match/v4/matches/{matchId}' },
+      getMatchByTournamentCode: {
+        path: '/lol/match/v4/matches/{matchId}/by-tournament-code/{tournamentCode}'
+      },
+      getMatchlist: { path: '/lol/match/v4/matchlists/by-account/{accountId}' },
+      getMatchTimeline: { path: '/lol/match/v4/timelines/by-match/{matchId}' }
+    },
+    spectatorV4: {
+      getCurrentGameInfoBySummoner: { path: '/lol/spectator/v4/active-games/by-summoner/{summonerId}' },
+      getFeaturedGames: { path: '/lol/spectator/v4/featured-games' }
+    },
+    summonerV4: {
+      getByAccountId: { path: '/lol/summoner/v4/summoners/by-account/{accountId}' },
+      getBySummonerName: { path: '/lol/summoner/v4/summoners/by-name/{summonerName}' },
+      getByPUUID: { path: '/lol/summoner/v4/summoners/by-puuid/{puuid}' },
+      getBySummonerId: { path: '/lol/summoner/v4/summoners/{summonerId}' }
+    },
+    thirdPartyCodeV4: {
+      getThirdPartyCodeBySummonerId: {
+        path: '/lol/platform/v4/third-party-code/by-summoner/{summonerId}'
+      }
+    }
+  }*/

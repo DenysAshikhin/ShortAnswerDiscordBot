@@ -1,23 +1,36 @@
-
 const Fuse = require('fuse.js');
 const studyJSON = require('./medstudy.json');
 const MAIN = require('./short-answer.js');
 const config = require('./config.json');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
+const TeemoJS = require('teemojs');
+const TeemoEnd = require('./teemoJSEnd.txt');
+const api = TeemoJS(config.leagueSecret);
 const studyArray = new Array();
 
 for (let element of studyJSON)
     studyArray.push(element);
 
 
+async function getSummoner(zone, name) {
 
-async function updateTwitchFollows(message, params, user) {
-
-    let args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
-
-    if (!args) return message.channel.send("You have to write the name of the streamer you wish to follow!");
+    let summoner = await api.req(zone, 'lol.summonerV4.getBySummonerName', name);
+    console.log(summoner)
+    return summoner;
 }
+
+async function getChampionMastery(zone, name) {
+
+    let summoner = await getSummoner(zone, name);
+    if (!summoner) return -1;
+    let mastery = await api.req(zone, 'lol.championMasteryV4.getAllChampionMasteries', summoner.id);
+    console.log(mastery)
+    return mastery;
+}
+
+getChampionMastery('na', 'TheLastSpark')
+
 
 async function getTwitchChannel(streamer) {
     const user = await MAIN.twitchClient.helix.users.getUserByName(streamer);
@@ -84,6 +97,11 @@ async function unfollowTwitchChannel(message, params, user) {
 }
 exports.unfollowTwitchChannel = unfollowTwitchChannel;
 
+
+async function isStreamLive(id) {
+    return await MAIN.twitchClient.helix.streams.getStreamByUserId(id);
+}
+
 async function viewTwitchFollows(message, params, user) {
 
     if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");
@@ -96,12 +114,20 @@ async function viewTwitchFollows(message, params, user) {
 
     let finishedPromises = await Promise.all(promiseArray);
     finishedPromises.sort((a, b) => { return b._data.view_count - a._data.view_count });
+    let finalArray = [];
 
-    MAIN.prettyEmbed(message, `You are following ${promiseArray.length} channels!`,
-        finishedPromises.reduce((accum, current) => {
-            accum.push({ name: '', value: `<${current._data.display_name} Views=${current._data.view_count}>\n` });
-            return accum;
-        }, []),
+    for (promisy of finishedPromises) {
+
+        let streamy = await isStreamLive(promisy._data.id);
+        if (streamy)
+            finalArray.push({ name: 'Online', value: `<${promisy._data.display_name} is currently live with= ${streamy._data.viewer_count} Viewers!>\n` });
+        else
+            finalArray.push({ name: 'Offline', value: `<${promisy._data.display_name} - Total Views=${promisy._data.view_count}>\n` });
+    }
+
+    finalArray.sort((a, b) => b.name.localeCompare(a.name));
+
+    MAIN.prettyEmbed(message, `You are following ${promiseArray.length} channels!`, finalArray,
         -1, 1, 'md');
 }
 exports.viewTwitchFollows = viewTwitchFollows;
