@@ -121,6 +121,7 @@ var twitchClient;
 var commandMap = new Map();
 var commandTracker = new Map();
 var config = null;
+var twitchConfig = require('./twitch.json');
 var spotifyClientID;
 
 
@@ -133,10 +134,34 @@ var token = "";
 var lastMessage;
 
 try {
+
     config = require('./config.json');
-    setTwitchClient(config.twitchClient, config.twitchSecret);
+
+    if (defaultPrefix != '##') {
+        let clienty = twitchConfig.twitchClient;
+        let secrety = twitchConfig.twitchSecret;
+        let accessy = twitchConfig.twitchAccess;
+        let refreshy = twitchConfig.twitchRefresh;
+
+        twitchClient = TwitchClient.withCredentials(clienty, accessy, undefined, {
+            secrety,
+            refreshy,
+            onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
+                const newTokenData = {
+                    ...twitchConfig,
+                    twitchAccess: accessToken,
+                    twitchRefresh: refreshToken
+                };
+                await fs.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8')
+            }
+        });
+        exports.twitchClient = twitchClient;
+    }
+
+
 }
 catch (err) {
+    console.log(err)
     console.log("config.json doesn't exist - probably running on heroku?");
 }
 
@@ -395,6 +420,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[76], MISCELLANEOUS.linkChannelWithTwitch)
     commandMap.set(Commands.commands[77], MISCELLANEOUS.showChannelTwitchLinks)
     commandMap.set(Commands.commands[78], MISCELLANEOUS.removeChannelTwitchLink)
+    commandMap.set(Commands.commands[79], MISCELLANEOUS.leagueStats)
 
     exports.commandMap = commandMap;
 }
@@ -1213,14 +1239,23 @@ async function minuteCount() {
             console.log("Error with twitch checks!");
         }
     }
+
 }
 
-async function setTwitchClient(client, tokent) {
-    twitchClient = TwitchClient.withClientCredentials(client, tokent);
-    exports.twitchClient = twitchClient;
+async function setTwitchClient(client, token) {
+
+    console.log("TESTER: ", client, token)
+    try {
+
+        exports.twitchClient = twitchClient;
+    }
+    catch (err) {
+        console.log(err);
+        console.log("AN error occured refreshing the twitch client");
+    }
 }
 
-setInterval(setTwitchClient, 30 * 60 * 1000, config.TwitchClient, config.twitchSecret);
+//setInterval(setTwitchClient, 30 * 60 * 1000, [config.TwitchClient, config.twitchSecret]);
 
 setInterval(minuteCount, 60 * 1000);
 

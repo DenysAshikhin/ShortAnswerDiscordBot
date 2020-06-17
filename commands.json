@@ -288,7 +288,8 @@
         ["1) followTwitchChannel TheLastSpark"],
         ["1) pairChannelWithTwitch summit1g #nameOfTextChannel"],
         ["1) showChannelTwitchPairs"],
-        ["1) removeChannelTwitchPairs summit1g #nameOfTextChannel"]
+        ["1) removeChannelTwitchPairs summit1g #nameOfTextChannel"],
+        ["1) leagueStats", "2) leagueStats TheLastSpark", "3) leageStats TheLastSpark, na"]
     ],
     "subsection": [
         [3],
@@ -384,6 +385,7 @@
         [3],
         [3, 5],
         [3],
-        [3, 5]
+        [3, 5],
+        [3]
     ]
 }

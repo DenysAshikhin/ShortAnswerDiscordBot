@@ -89,7 +89,8 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    twitchNotifications: []
+    twitchNotifications: [],
+    linkedLeague: []
 });
 
 module.exports = mongoose.model('User', UserSchema);

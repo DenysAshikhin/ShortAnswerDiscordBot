@@ -2,12 +2,102 @@ const Fuse = require('fuse.js');
 const studyJSON = require('./medstudy.json');
 const MAIN = require('./short-answer.js');
 const config = require('./config.json');
+const twitchConfig = require('./twitch.json');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
 const TeemoJS = require('teemojs');
 const TeemoEnd = require('./teemoJSEnd.txt');
+const main = require('ytsr');
 const api = TeemoJS(config.leagueSecret);
 const studyArray = new Array();
+
+var needle = require('needle');
+
+//http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
+
+var regionsEZ = ['br', 'eune', 'euw', 'jp', 'kr', 'lan', 'las', 'na', 'oce', 'tr', 'ru', 'pbe'];
+var regionsExact = ['br1', 'eun1', 'euw1', 'jp1', 'kr', 'la1', 'la2', 'na1', 'oc1', 'tr1', 'ru', 'pbe1'];
+var dataDragon = new Map();
+var championKeys = new Map();
+// {
+//     version: '10.12.1',
+//     id: 'Zyra',
+//     key: '143',
+//     name: 'Zyra',
+//     title: 'Rise of the Thorns',
+//     blurb: 'Born in an ancient, sorcerous catastrophe, Zyra is the wrath of nature given form—an alluring hybrid of plant and human, kindling new life with every step. She views the many mortals of Valoran as little more than prey for her seeded progeny, and thinks...',
+//     info: { attack: 4, defense: 3, magic: 8, difficulty: 7 },
+//     image: {
+//       full: 'Zyra.png',
+//       sprite: 'champion4.png',
+//       group: 'champion',
+//       x: 336,
+//       y: 96,
+//       w: 48,
+//       h: 48
+//     },
+//     tags: [ 'Mage', 'Support' ],
+//     partype: 'Mana',
+//     stats: {
+//       hp: 504,
+//       hpperlevel: 79,
+//       mp: 418,
+//       mpperlevel: 25,
+//       movespeed: 340,
+//       armor: 29,
+//       armorperlevel: 3,
+//       spellblock: 30,
+//       spellblockperlevel: 0.5,
+//       attackrange: 575,
+//       hpregen: 5.5,
+//       hpregenperlevel: 0.5,
+//       mpregen: 13,
+//       mpregenperlevel: 0.4,
+//       crit: 0,
+//       critperlevel: 0,
+//       attackdamage: 53.376,
+//       attackdamageperlevel: 3.2,
+//       attackspeedperlevel: 2.11,
+//       attackspeed: 0.625
+//     }
+//   }
+
+async function populateDataDragon() {
+
+    {
+        dataDragon.set("br1", {});
+        dataDragon.set("eun1", {});
+        dataDragon.set("euw1", {});
+        dataDragon.set("jp1", {});
+        dataDragon.set("kr", {});
+        dataDragon.set("la1", {});
+        dataDragon.set("la2", {});
+        dataDragon.set("na1", {});
+        dataDragon.set("oc1", {});
+        dataDragon.set("tr1", {});
+        dataDragon.set("ru", {});
+        dataDragon.set("pbe1", {});
+    }
+
+    for (let i = 0; i < regionsEZ.length; i++) {
+        let region = regionsEZ[i];
+        let I = i;
+        needle('get', `https://ddragon.leagueoflegends.com/realms/${region}.json`)
+            .then(resp => {
+                needle('get', `http://ddragon.leagueoflegends.com/cdn/${resp.body.n.champion}/data/en_US/champion.json`)
+                    .then(resp1 => {
+                        if (I == 0) {
+                            for (let champ in resp1.body.data) {
+                                championKeys.set(Number(resp1.body.data[champ].key), resp1.body.data[champ]);
+                            }
+                        }
+                        dataDragon.set(regionsExact[I], { championInfo: resp1.body.data })
+                    })
+            });
+    }
+}
+populateDataDragon();
+
 
 for (let element of studyJSON)
     studyArray.push(element);
@@ -16,21 +106,65 @@ for (let element of studyJSON)
 async function getSummoner(zone, name) {
 
     let summoner = await api.req(zone, 'lol.summonerV4.getBySummonerName', name);
-    console.log(summoner)
+    //  console.log(summoner)
     return summoner;
 }
 
-async function getChampionMastery(zone, name) {
+async function getChampionMastery(zone, name, topNum) {
 
     let summoner = await getSummoner(zone, name);
     if (!summoner) return -1;
     let mastery = await api.req(zone, 'lol.championMasteryV4.getAllChampionMasteries', summoner.id);
-    console.log(mastery)
-    return mastery;
+    //console.log(mastery)
+    let returnArray = [];
+    // console.log(championKeys)
+    let counter = 1;
+    for (let master in mastery) {
+
+        returnArray.push({
+            name: "Champion Mastery", value: `Champion Name: ${championKeys.get((mastery[master].championId)).name}` +
+                `\nChampion level: ${mastery[master].championLevel}\n`, level: mastery[master].championLevel
+        });
+        counter++;
+    }
+
+    returnArray.sort((a, b) => { return b.level - a.level })
+
+    return returnArray;
 }
 
-getChampionMastery('na', 'TheLastSpark')
+async function leagueStats(message, params, user) {
 
+    //if (!user.twitchFollows) user.twitchFollow = [];
+    let args = message.content.split(" ").slice(1);
+    if (!user.linkedLeague) user.linkedLeague = [];
+
+    if ((args.length == 0) && (user.linkedLeague.length == 0)) return message.channel.send("You don't have a league account linked, or did not provide at least a summoner name!");
+
+    let zone = 'na';
+    if (!params.looped) {
+        if (args.length > 1) {
+            zone = args[1].toLowerCase();
+            if (regionsEZ.includes(zone)) {
+                zone = regionsExact[regionsEZ.indexOf(zone)];
+            }
+            else
+                return MAIN.generalMatcher(message, zone, user, regionsEZ,
+                    regionsExact.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    leagueStats, "Please indicate which region you wanted to search!");
+        }
+    }
+    else
+        zone = params.region;
+
+    let mastery = await getChampionMastery(zone, args[0], 5);
+    //console.log(mastery)
+
+
+    MAIN.prettyEmbed(message, `Here are the League of Legends stats for ${args[0]}`, mastery.slice(0, 6), -1, 1, 1);
+    return -1;
+}
+exports.leagueStats = leagueStats;
 
 async function getTwitchChannel(streamer) {
     const user = await MAIN.twitchClient.helix.users.getUserByName(streamer);
@@ -96,7 +230,6 @@ async function unfollowTwitchChannel(message, params, user) {
     return message.channel.send(`Successfully removed ${params.name} from your follows!`);
 }
 exports.unfollowTwitchChannel = unfollowTwitchChannel;
-
 
 async function isStreamLive(id) {
     return await MAIN.twitchClient.helix.streams.getStreamByUserId(id);
@@ -610,56 +743,59 @@ exports.decider = decider;
 async function checkGuildTwitchStreams(guilds) {
 
     for (guild of guilds) {
-        for (channel of guild.channelTwitch) {
+        for (channel1 of guild.channelTwitch) {
+            let channel = channel1;
+            getTwitchChannelByID(channel[0])
+                .then(async (streamer) => {
+                    let stream = await streamer.getStream();
 
-            let streamer = await getTwitchChannelByID(channel[0])
-            let stream = await streamer.getStream();
+                    if (stream) {
 
-            if (stream) {
+                        let streamDate = new Date(stream._data.started_at);
+                        let found = false;
+                        let index = -1;
 
-                let streamDate = new Date(stream._data.started_at);
-                let found = false;
-                let index = -1;
+                        if (!guild.twitchNotifications) guild.twitchNotifications = [];
 
-                if (!guild.twitchNotifications) guild.twitchNotifications = [];
+                        for (let i = 0; i < guild.twitchNotifications.length; i++) {
+                            if (guild.twitchNotifications[i][0] == stream._data.user_id) {
+                                index = i;
 
-                for (let i = 0; i < guild.twitchNotifications.length; i++) {
-                    if (guild.twitchNotifications[i][0] == stream._data.user_id) {
-                        index = i;
-
-                        let previousTime = new Date(guild.twitchNotifications[i][1]);
-                        if ((previousTime - streamDate) == 0)
-                            found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-
-                    if (index != -1)
-                        guild.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
-                    else
-                        guild.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
-
-                    Guild.findOneAndUpdate({ id: guild.id }, { $set: { twitchNotifications: guild.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
-
-                    let messageSent = false;
-
-                    for (let guild of MAIN.Client.guilds.cache) {
-
-                        for (channy of guild[1].channels.cache) {
-                            if (channy[1].id == channel[1]) {
-                                const permission = channy[1].permissionsFor(MAIN.Client.user);
-                                if (permission.has('SEND_MESSAGES')) {
-                                    channy[1].send(`${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`);
-                                    messageSent = true;
-                                    break;
-                                }
+                                let previousTime = new Date(guild.twitchNotifications[i][1]);
+                                if ((previousTime - streamDate) == 0)
+                                    found = true;
+                                break;
                             }
                         }
-                        if (messageSent) break;
+                        if (!found) {
+
+                            if (index != -1)
+                                guild.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
+                            else
+                                guild.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
+
+                            Guild.findOneAndUpdate({ id: guild.id }, { $set: { twitchNotifications: guild.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+
+                            let messageSent = false;
+
+                            for (let guild of MAIN.Client.guilds.cache) {
+
+                                for (channy of guild[1].channels.cache) {
+                                    if (channy[1].id == channel[1]) {
+                                        const permission = channy[1].permissionsFor(MAIN.Client.user);
+                                        if (permission.has('SEND_MESSAGES')) {
+                                            channy[1].send(`${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`);
+                                            messageSent = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (messageSent) break;
+                            }
+                        }
                     }
-                }
-            }
+                });
+
         }
     }
 }
@@ -667,59 +803,60 @@ exports.checkGuildTwitchStreams = checkGuildTwitchStreams;
 
 async function checkUsersTwitchStreams(users) {
 
-    for (USER of users) {
-        for (channel of USER.twitchFollows) {
+    for (user1 of users) {
+        for (channel of user1.twitchFollows) {
+            let USER = user1;
+            getTwitchChannelByID(channel)
+                .then(async (streamer) => {
+                    let stream = await streamer.getStream();
+                    if (stream) {
 
-            let streamer = await getTwitchChannelByID(channel)
-            let stream = await streamer.getStream();
+                        console.log("IM AT: " + USER.displayName)
+                        let streamDate = new Date(stream._data.started_at);
+                        let found = false;
+                        let index = -1;
 
-            if (stream) {
+                        if (!USER.twitchNotifications) USER.twitchNotifications = [];
 
-                console.log("IM AT: " + USER.displayName)
-                let streamDate = new Date(stream._data.started_at);
-                let found = false;
-                let index = -1;
+                        for (let i = 0; i < USER.twitchNotifications.length; i++) {
+                            if (USER.twitchNotifications[i][0] == stream._data.user_id) {
+                                index = i;
 
-                if (!USER.twitchNotifications) USER.twitchNotifications = [];
-
-                for (let i = 0; i < USER.twitchNotifications.length; i++) {
-                    if (USER.twitchNotifications[i][0] == stream._data.user_id) {
-                        index = i;
-
-                        let previousTime = new Date(USER.twitchNotifications[i][1]);
-                        if ((previousTime - streamDate) == 0)
-                            found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-
-                    if (index != -1)
-                        USER.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
-                    else
-                        USER.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
-
-                    User.findOneAndUpdate({ id: USER.id }, { $set: { twitchNotifications: USER.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
-
-                    //console.log(MAIN.Client.guilds.cache)
-
-                    for (let guild of MAIN.Client.guilds.cache) {
-                        let messageSent = false;
-
-                        //                                            console.log(guild[1].name)
-                        for (member of guild[1].members.cache) {
-                            console.log(member[1].displayName, " ::: ", USER.displayName)
-                            if (member[1].user.id == USER.id) {
-                                console.log("WWWWTF")
-                                member[1].user.send(`${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`);
-                                messageSent = true;
+                                let previousTime = new Date(USER.twitchNotifications[i][1]);
+                                if ((previousTime - streamDate) == 0)
+                                    found = true;
                                 break;
                             }
                         }
-                        if (messageSent) break;
+                        if (!found) {
+
+                            if (index != -1)
+                                USER.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
+                            else
+                                USER.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
+
+                            User.findOneAndUpdate({ id: USER.id }, { $set: { twitchNotifications: USER.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+
+                            //console.log(MAIN.Client.guilds.cache)
+
+                            for (let guild of MAIN.Client.guilds.cache) {
+                                let messageSent = false;
+
+                                //                                            console.log(guild[1].name)
+                                for (member of guild[1].members.cache) {
+                                    console.log(member[1].displayName, " ::: ", USER.displayName)
+                                    if (member[1].user.id == USER.id) {
+                                        console.log("WWWWTF")
+                                        member[1].user.send(`${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`);
+                                        messageSent = true;
+                                        break;
+                                    }
+                                }
+                                if (messageSent) break;
+                            }
+                        }
                     }
-                }
-            }
+                })
         }
     }
 }
