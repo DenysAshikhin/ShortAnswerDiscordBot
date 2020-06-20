@@ -22,6 +22,13 @@ const TwitchClient = require('twitch').default;
 const main = require('ytsr');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
+var os = require('os-utils');
+
+
+
+
+
+
 
 const logID = '712000077295517796';
 exports.logID = logID;
@@ -133,30 +140,39 @@ var uri = "";
 var token = "";
 var lastMessage;
 
+
+async function twitchInitiliasation() {
+
+    let clienty = twitchConfig.twitchClient;
+    let clientSecret = twitchConfig.twitchSecret;
+    let accessy = twitchConfig.twitchAccess;
+    let refreshy = twitchConfig.twitchRefresh;
+    let expiry = twitchConfig.expiryTimestamp;
+
+    twitchClient = TwitchClient.withCredentials(clienty, accessy, undefined, {
+        clientSecret,
+        refreshToken: refreshy,
+        expiry: expiry === null ? null : new Date(expiry),
+        onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
+            const newTokenData = {
+                ...twitchConfig,
+                twitchAccess: accessToken,
+                twitchRefresh: refreshToken,
+                expiryDate: expiryDate === null ? null : expiryDate.getTime()
+            };
+            await fs.promises.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8')
+            //    exports.twitchClient = twitchClient;
+        }
+    });
+    exports.twitchClient = twitchClient;
+}
+
 try {
 
     config = require('./config.json');
 
-    if (defaultPrefix != '##') {
-        let clienty = twitchConfig.twitchClient;
-        let secrety = twitchConfig.twitchSecret;
-        let accessy = twitchConfig.twitchAccess;
-        let refreshy = twitchConfig.twitchRefresh;
-
-        twitchClient = TwitchClient.withCredentials(clienty, accessy, undefined, {
-            secrety,
-            refreshy,
-            onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
-                const newTokenData = {
-                    ...twitchConfig,
-                    twitchAccess: accessToken,
-                    twitchRefresh: refreshToken
-                };
-                await fs.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8')
-            }
-        });
-        exports.twitchClient = twitchClient;
-    }
+    //if (defaultPrefix != '##')
+    twitchInitiliasation();
 
 
 }
@@ -1227,19 +1243,25 @@ async function createBackUp() {
     console.log("CALLED BACKUP");
 }//
 
+async function usages() {
+
+    os.cpuUsage(function (v) {
+        console.log('CPU Usage (%): ' + Math.floor(v*100));
+    });
+
+    os.cpuFree(function (v) {
+        console.log('CPU Free: ' + Math.floor(v*100));
+    });
+    console.log(`Free Memory: ${os.freemem()}`);
+}
+usages();
+
 async function minuteCount() {
     if (defaultPrefix != '##') {
         countTalk();
-        try {
-            MISCELLANEOUS.checkUsersTwitchStreams(await getUsers());
-            MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
-        }
-        catch (err) {
-            console.log(err);
-            console.log("Error with twitch checks!");
-        }
+        checkTwitch();
     }
-
+    usages();
 }
 
 async function setTwitchClient(client, token) {
@@ -1255,9 +1277,22 @@ async function setTwitchClient(client, token) {
     }
 }
 
+
 //setInterval(setTwitchClient, 30 * 60 * 1000, [config.TwitchClient, config.twitchSecret]);
 
+async function checkTwitch() {
+    try {
+        MISCELLANEOUS.checkUsersTwitchStreams(await getUsers());
+        MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
+    }
+    catch (err) {
+        console.log(err);
+        console.log("Error with twitch checks!");
+    }
+}
+
 setInterval(minuteCount, 60 * 1000);
+//setInterval(checkTwitch,  5000);
 
 //release 1
 //twitch

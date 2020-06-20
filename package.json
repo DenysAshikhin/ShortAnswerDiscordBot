@@ -26,8 +26,12 @@
     "needle": "^2.5.0",
     "node-opus": "^0.3.3",
     "nodemon": "^2.0.3",
+    "os-utils": "0.0.14",
+    "puppeteer": "^4.0.0",
+    "puppeteer-extra": "^3.1.9",
     "teemojs": "^2.0.0-alpha.6",
     "twitch": "^4.0.10",
+    "uniqid": "^5.2.0",
     "ytdl-core": "^2.1.2",
     "ytpl": "^0.1.21",
     "ytsr": "^0.1.13"

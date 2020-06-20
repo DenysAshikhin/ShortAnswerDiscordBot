@@ -10,8 +10,336 @@ const TeemoEnd = require('./teemoJSEnd.txt');
 const main = require('ytsr');
 const api = TeemoJS(config.leagueSecret);
 const studyArray = new Array();
-
 var needle = require('needle');
+const puppeteer = require('puppeteer');
+var uniqid = require('uniqid');
+
+const options = {
+    args: [
+        // '--no-sandbox',
+        // '--disable-setuid-sandbox',
+        // '--disable-dev-shm-usage',
+        // '--disable-accelerated-2d-canvas',
+        // '--no-first-run',
+        // '--no-zygote',
+        // //'--single-process', // <- this one doesn't works in Windows
+        // '--disable-gpu',
+    ],
+    headless: true
+}
+
+var puppeteerQueue = {
+    backlog: [],
+    active: new Map(),
+    limit: 2,
+    browser: null
+};
+
+//Need to put this whole thing in a try catch just in case....
+async function crawlOPGG(ZONE, summoner, message, looped) {
+
+    let uniqueID;
+
+    let username;
+    let zone;
+
+    console.log(puppeteerQueue.active.size < puppeteerQueue.limit, puppeteerQueue.active.size)
+
+    if (puppeteerQueue.active.size < puppeteerQueue.limit) {
+
+        uniqueID = uniqid();
+        console.log(puppeteerQueue.backlog)
+
+        if (puppeteerQueue.backlog.length > 0) {
+            console.log("SOMETHING")
+            let activy = puppeteerQueue.backlog.shift();
+            username = activy.username.replace(/\s/g, '+');
+            zone = activy.zone;
+        }
+        else if (!looped) {
+            console.log("SOMEONTHINELSE")
+            username = summoner.replace(/\s/g, '+');
+            zone = ZONE;
+        }
+
+        puppeteerQueue.active.set(uniqueID, { zone: zone, username: username });
+    }
+    else {
+        puppeteerQueue.backlog.push({ zone: ZONE, username: summoner });//later require a message so it can respond better.
+        return 44;
+    }
+    {
+        let summonerTotalInfo = {};
+        let summonerRankedSoloInfo = {};
+        let summonerFlexInfo = {};
+        console.log(username)
+        let url = `https://${zone}.op.gg/summoner/userName=${username}`;
+        let champURL = `https://${zone}.op.gg/summoner/champions/userName=${username}`;
+
+        console.log("BROWSER EXIST?")
+        console.log(!!puppeteerQueue.browser)
+        console.log('----')
+
+        if (puppeteerQueue.active.size > 1)
+            while (!puppeteerQueue.browser) { await new Promise(resolve => setTimeout(resolve, 100)); }
+
+        let browser = puppeteerQueue.browser ? puppeteerQueue.browser : await puppeteer.launch(options);
+        if (!puppeteerQueue.browser) puppeteerQueue.browser = browser;
+
+        const page = await browser.newPage();
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            if (req.resourceType() == 'stylesheet' || req.resourceType() == 'font' || req.resourceType() == 'image') {
+                req.abort();
+            }
+            else {
+                req.continue();
+            }
+        });
+        page.on('dialog', async dialog => {
+            await dialog.dismiss();
+        });
+        await page.goto(url);
+
+        let exists;
+        try {
+            exists = await page.$eval(`div.SummonerNotFoundLayout`, div => div.textContent);
+        } catch (err) {
+            console.log("Summoner exists")
+            //  return -1;
+        }
+
+        if (exists) { console.log("summoner DID NOT EXIST"); return -1; }
+
+        let lastUpdate = await page.$eval(`div.LastUpdate span`, div => div.textContent);
+        if (!lastUpdate.includes('a few seconds'))
+            if (!lastUpdate.includes('a minute'))
+                if (!lastUpdate.includes('2 minute'))
+                    if (!lastUpdate.includes('3 minute')) {
+                        await page.click('#SummonerRefreshButton');
+                        await page.waitFor(2000);
+                    }
+
+
+        const page1 = await browser.newPage();
+        const page2 = await browser.newPage();
+        const page3 = await browser.newPage();
+
+        await page1.setRequestInterception(true);
+        page1.on('request', (req) => {
+            if (req.resourceType() == 'stylesheet' || req.resourceType() == 'font' || req.resourceType() == 'image' || req.resourceType() == 'media') {
+                req.abort();
+            }
+            else {
+                req.continue();
+            }
+        });
+        page1.on('dialog', async dialog => {
+            await dialog.dismiss();
+        });
+        await page2.setRequestInterception(true);
+        page2.on('request', (req) => {
+            if (req.resourceType() == 'stylesheet' || req.resourceType() == 'font' || req.resourceType() == 'image' || req.resourceType() == 'media') {
+                req.abort();
+            }
+            else {
+                req.continue();
+            }
+        });
+        page2.on('dialog', async dialog => {
+            await dialog.dismiss();
+        });
+
+        await page3.setRequestInterception(true);
+        page3.on('request', (req) => {
+            if (req.resourceType() == 'stylesheet' || req.resourceType() == 'font' || req.resourceType() == 'image' || req.resourceType() == 'media') {
+                req.abort();
+            }
+            else {
+                req.continue();
+            }
+        });
+        page3.on('dialog', async dialog => {
+            await dialog.dismiss();
+        });
+
+        let openURL = [];
+        openURL.push(page1.goto(url));
+        openURL.push(page2.goto(url));
+        openURL.push(page3.goto(champURL))
+        await Promise.all(openURL);
+
+        await new Promise(resolve => setTimeout(resolve, 2100));
+        await page1.click('#right_gametype_soloranked a.Link');
+        await page2.click('#right_gametype_flexranked a.Link');
+
+        console.log(1);
+        await Promise.all([loadTotalStats(page, summonerTotalInfo),
+        loadTotalStats(page1, summonerRankedSoloInfo),
+        loadTotalStats(page2, summonerFlexInfo),
+        loadChampionStats(page3, summonerTotalInfo)
+        ]);
+        console.log(2)
+        console.log("TOTAL INFO: ")
+        let finalCollection = {
+            ...summonerTotalInfo,
+            ...summonerRankedSoloInfo,
+            ...summonerFlexInfo
+        }
+        console.log(summonerTotalInfo);
+        console.log("RANKED SOLO: ")
+        console.log(summonerRankedSoloInfo);
+        console.log("FLEX INFO: ");
+        console.log(summonerFlexInfo);
+
+        if ((puppeteerQueue.backlog.length == 0) && (puppeteerQueue.active.size == 1)) {
+            console.log("FIRST")
+            puppeteerQueue.active.delete(uniqueID);
+            puppeteerQueue.browser = null;
+            await browser.close();
+        }
+        else if ((puppeteerQueue.backlog.length == 0) && (puppeteerQueue.active.size == 2)) {
+            console.log("SECOND")
+            puppeteerQueue.active.delete(uniqueID);
+        }
+        else if ((puppeteerQueue.backlog.length > 0)) {
+            console.log("THIRD")
+            puppeteerQueue.active.delete(uniqueID);
+            crawlOPGG(null, null, null, true);
+        }
+    }
+    console.log("FINISHED::   ", uniqueID);
+    return 1;//Return the actual object here.
+}
+
+
+
+async function testCrawl() {
+
+    crawlOPGG('na', 'The Last Spark')
+    crawlOPGG('na', 'KiritoShimon')
+    crawlOPGG('na', 'Blackwolf2662')
+
+ 
+}
+testCrawl();
+
+async function loadTotalStats(page, summonerInfo) {
+
+    for (let i = 0; i < 5; i++) {
+        try {
+            await page.click('div.GameMoreButton.Box a.Button');
+            await page.waitFor(1500);
+        }
+        catch (err) {
+            break;
+        }
+    }
+
+
+    let some = await page.$(`div.WinRatioTitle span.total`)
+    if (!some) return await page.close();
+
+    try {
+
+        let totalGames = await page.$eval(`div.WinRatioTitle span.total`, div => div.innerHTML)
+        summonerInfo.totalGames = Number(totalGames);
+        let totalWins = await page.$eval(`div.WinRatioTitle span.win`, div => div.innerHTML)
+        summonerInfo.totalWins = Number(totalWins);
+
+        let totalLoses = await page.$eval(`div.WinRatioTitle span.lose`, div => div.innerHTML)
+        summonerInfo.totalLoses = Number(totalLoses);
+
+        let namy = await page.$eval(`.Information .Name`, divs => divs.innerHTML);
+        summonerInfo.name = namy;
+
+        let prevy = await page.$$eval(`.PastRankList [Title]`, uls => uls.map(item => item.textContent.trim()));
+        summonerInfo.previousRanks = prevy;
+
+        let killy = await page.$eval(`div.KDA span.Kill`, div => div.innerHTML);
+        summonerInfo.averageKills = Number(killy);
+
+        let deathy = await page.$eval(`div.KDA span.Death`, div => div.innerHTML);
+        summonerInfo.averageDeaths = Number(deathy);
+
+        let assisty = await page.$eval(`div.KDA span.Assist`, div => div.innerHTML);
+        summonerInfo.averageAssists = Number(assisty);
+
+        let champyName = await page.$$eval(`div.Content div.Name`, uls => uls.map(item => item.textContent.trim()));
+        summonerInfo.championNames = champyName.slice(0, 3);
+    }
+    catch (err) {
+        console.log(err)
+        console.log("Error loading one of the totalStats pages???")
+    }
+
+    await page.close();
+    // let champyName = await page.$$eval(`div.Content div.Name`, uls => uls.map(item => item.textContent.trim()));
+    // summonerInfo.championNames = champyName.slice(0, 3);
+    // await page.close();
+}
+
+async function loadChampionStats(page, summonerInfo) {
+
+    { // await page.evaluate(() => {
+        //     document.querySelector('dl.MenuList.tabHeaders dd.Item.tabHeader').click();
+        //   });
+
+        // await page.evaluate(() => {
+        //     document.querySelector('div.FullContent').innerHTML;
+        //   });
+
+
+
+        //  await page.hover('dl.MenuList.tabHeaders dd.Item.tabHeader')
+        // await page.$eval('#left_champion.Item.tabHeader a', elem => elem.click());//this might help later on
+        // await page.click('#left_champion.Item.tabHeader a');
+        // await page.waitFor(1000);
+
+        // await page.click('li.season-15.Item.tabHeader a.Link');
+        // await page.waitFor(1000);
+
+        // await page.click('li#.champion_normal a.Link');
+        // await page.waitFor(1000);
+    }
+
+    let normalChamps = await page.$$eval(`div.tabItem.normal td.ChampionName.Cell`, uls => uls.map(result => result.textContent.trim()));
+    let normalChampsRatio = await page.$$eval(`div.tabItem.normal span.WinRatio`, uls => uls.map(result => result.textContent.trim()));
+    let normalChampsWins = await page.$$eval(`div.tabItem.normal div.Text.Left`, uls => uls.map(result => result.innerHTML.trim()));
+    let normalChampsLoses = await page.$$eval(`div.tabItem.normal div.Text.Right`, uls => uls.map(result => result.innerHTML.trim()));
+    let normalChampsKills = await page.$$eval(`div.tabItem.normal span.Kill`, uls => uls.map(result => result.textContent.trim()));
+    let normalChampsDeaths = await page.$$eval(`div.tabItem.normal span.Death`, uls => uls.map(result => result.textContent.trim()));
+    let normalChampsAssists = await page.$$eval(`div.tabItem.normal span.Assist`, uls => uls.map(result => result.textContent.trim()));
+
+    let finalRatios = [];
+    for (ratio of normalChampsRatio) {
+
+        if (ratio == '100%') {
+            let win = normalChampsWins.shift();
+            finalRatios.push({
+                champion: normalChamps.shift(), wins: Number(win.substring(0, win.indexOf('W'))), losses: 0, ratio: ratio, kills: normalChampsKills.shift(),
+                deaths: normalChampsDeaths.shift(), assists: normalChampsAssists.shift()
+            });
+        }
+        else if (ratio == '0%') {
+            let loose = normalChampsLoses.shift();
+            finalRatios.push({
+                champion: normalChamps.shift(), losses: Number(loose.substring(0, loose.indexOf('L'))), wins: 0, ratio: ratio, kills: normalChampsKills.shift(),
+                deaths: normalChampsDeaths.shift(), assists: normalChampsAssists.shift()
+            });
+        }
+        else {
+            let loose = normalChampsLoses.shift();
+            let win = normalChampsWins.shift();
+            finalRatios.push({
+                champion: normalChamps.shift(), losses: Number(loose.substring(0, loose.indexOf('L'))), wins: Number(win.substring(0, win.indexOf('W'))), ratio: ratio,
+                kills: normalChampsKills.shift(), deaths: normalChampsDeaths.shift(), assists: normalChampsAssists.shift()
+            });
+        }
+    }
+    await page.close();
+    // console.log(finalRatios)
+}
 
 //http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
 
@@ -62,6 +390,9 @@ var championKeys = new Map();
 //     }
 //   }
 
+
+
+
 async function populateDataDragon() {
 
     {
@@ -110,22 +441,45 @@ async function getSummoner(zone, name) {
     return summoner;
 }
 
-async function getChampionMastery(zone, name, topNum) {
+async function getLeagueEntries(zone, summoner) {
 
-    let summoner = await getSummoner(zone, name);
-    if (!summoner) return -1;
+    let entries = await api.req(zone, 'lol.leagueV4.getLeagueEntriesForSummoner', summoner.id);
+    console.log(entries);
+}
+
+async function getMatchInfo(zone, summoner) {
+
+    let matches = await api.req(zone, 'lol.matchV4.getMatchlist', summoner.accountId, { season: [13] });
+    if (!matches) return -1;
+
+    if (matches.totalGames > matches.endIndex) {
+        let numRequests = (matches.endIndex - 100) / 100;
+        let promises = [];
+        for (let i = 1; i <= numRequests; i++) {
+            promises.push(api.req(zone, 'lol.matchV4.getMatchlist', summoner.accountId, { season: [13], beginIndex: 100 * i }));
+        }
+        Promise.all(promises);
+    }
+    console.log(matches);
+    console.log(matches.matches.length)
+}
+
+async function getChampionMastery(zone, summoner, topNum) {
+
+
     let mastery = await api.req(zone, 'lol.championMasteryV4.getAllChampionMasteries', summoner.id);
-    //console.log(mastery)
     let returnArray = [];
-    // console.log(championKeys)
     let counter = 1;
     for (let master in mastery) {
 
         returnArray.push({
             name: "Champion Mastery", value: `Champion Name: ${championKeys.get((mastery[master].championId)).name}` +
-                `\nChampion level: ${mastery[master].championLevel}\n`, level: mastery[master].championLevel
+                `\nChampion level: ${mastery[master].championLevel}\n`, level: mastery[master].championLevel, id: mastery[master].championId
         });
         counter++;
+        if (topNum)
+            if (counter == (topNum + 1))
+                break;
     }
 
     returnArray.sort((a, b) => { return b.level - a.level })
@@ -136,7 +490,7 @@ async function getChampionMastery(zone, name, topNum) {
 async function leagueStats(message, params, user) {
 
     //if (!user.twitchFollows) user.twitchFollow = [];
-    let args = message.content.split(" ").slice(1);
+    let args = message.content.split(" ").slice(1).join(' ').split(',');
     if (!user.linkedLeague) user.linkedLeague = [];
 
     if ((args.length == 0) && (user.linkedLeague.length == 0)) return message.channel.send("You don't have a league account linked, or did not provide at least a summoner name!");
@@ -146,22 +500,27 @@ async function leagueStats(message, params, user) {
         if (args.length > 1) {
             zone = args[1].toLowerCase();
             if (regionsEZ.includes(zone)) {
-                zone = regionsExact[regionsEZ.indexOf(zone)];
+                zone = regionsEZ[regionsEZ.indexOf(zone)];
             }
             else
                 return MAIN.generalMatcher(message, zone, user, regionsEZ,
-                    regionsExact.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    regionsEZ.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
                     leagueStats, "Please indicate which region you wanted to search!");
         }
     }
     else
         zone = params.region;
 
-    let mastery = await getChampionMastery(zone, args[0], 5);
-    //console.log(mastery)
+    let summoner = await getSummoner(zone, args[0]);
+    if (!summoner) { message.channel.send(`${args[0]} in the region *${zone}* does not exist, try again?`); return -1; }
+
+    // let mastery = await getChampionMastery(zone, summoner, 5);
+    // MAIN.prettyEmbed(message, `Here are the League of Legends stats for ${args[0]}`, mastery, -1, 1, 1);
+
+    // getLeagueEntries(zone, summoner);
+    getMatchInfo(zone, summoner);
 
 
-    MAIN.prettyEmbed(message, `Here are the League of Legends stats for ${args[0]}`, mastery.slice(0, 6), -1, 1, 1);
     return -1;
 }
 exports.leagueStats = leagueStats;
@@ -795,7 +1154,6 @@ async function checkGuildTwitchStreams(guilds) {
                         }
                     }
                 });
-
         }
     }
 }
