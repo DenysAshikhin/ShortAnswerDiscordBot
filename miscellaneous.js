@@ -195,14 +195,14 @@ async function leagueStats(message, params, user) {
 
     //crawlOPGG(message, zone, args[0]);
 
-    let start = new Date();
+    let start;
     let socky = new net.Socket();
     socky.on('error', (err) => { console.log("socket error in get stats") });
     let messagy;
     let summonerTotalInfo;
     let summonerRankedInfo;
     let summonerFlexInfo;
-    socky.connect('35011', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
+    socky.connect('44277', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
     socky.on('data', async (data) => {
         let stringed = data.toString();
         let parsed = JSON.parse(stringed);
@@ -211,6 +211,7 @@ async function leagueStats(message, params, user) {
         if (parsed.position) {
 
             if (parsed.position <= -1) {
+                start = new Date();
                 if (!messagy) messagy = await message.channel.send("Now processing your request!");
                 else messagy.edit("Now processing your request!");
             }
