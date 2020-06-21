@@ -187,8 +187,6 @@ try {
         token = config.TesterToken;
         defaultPrefix = "##";
     }
-    HEROKU = false;
-    exports.HEROKU = HEROKU;
 }
 catch (err) {
     console.log(err)
@@ -201,8 +199,6 @@ catch (err) {
     exports.spotifyClient = spotifyClient;
     spotifySecret = process.env.spotifySecret;
     exports.spotifySecret = spotifySecret
-    HEROKU = true;
-    exports.HEROKU = HEROKU;
 }
 
 
@@ -257,12 +253,7 @@ connectDB.once('open', async function () {
 
     await Client.login(token);
     updateAll();
-    // if (HEROKU)
-    //     populateHerokuMap();
-    // else if (defaultPrefix == "##")
-    populateAllCommand();
-    // else
-    //populateCommandMap();
+    populateCommandMap();
 
     Client.on("ready", () => {
 
@@ -325,32 +316,6 @@ connectDB.once('open', async function () {
             }
 
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
-
-            nonHerokuCommands = [
-                "LINKTWITCH",
-                "UNLINKTWITCH",
-                "VIEWTWITCHFOLLOWS",
-                "UNFOLLOWTWITCHCHANNEL",
-
-                "FOLLOWTWITCHCHANNEL",
-                "PAIRCHANNELWITHTWITCH",
-                "VIEWCHANNELTWITCHPAIRS",
-                "REMOVECHANNELTWITCHPAIR",
-                "LEAGUESTATS"
-            ]
-            if (HEROKU) {
-                if (nonHerokuCommands.includes(command)) {
-                    console.log("HERO")
-                    return -1;
-                }
-            }
-            else
-                if (!nonHerokuCommands.includes(command)) {
-                    console.log(nonHerokuCommands.includes(command))
-                    console.log("NON HERO")
-                    return -1;
-                }
-
             exports.prefix = prefix;
 
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
@@ -401,110 +366,8 @@ connectDB.once('open', async function () {
     })
 });
 
-function populateAllCommand() {
-
-    commandMap.set(Commands.commands[0], MISCELLANEOUS.populate)
-    commandMap.set(Commands.commands[1], GAMES.search)
-    commandMap.set(Commands.commands[2], GAMES.updateGames)
-    commandMap.set(Commands.commands[3], GAMES.personalGames)
-    commandMap.set(Commands.commands[4], GAMES.removeGame)
-    commandMap.set(Commands.commands[5], GAMES.excludePing)
-    commandMap.set(Commands.commands[6], GAMES.excludeDM)
-    commandMap.set(Commands.commands[7], HELP.generalHelp)
-    commandMap.set(Commands.commands[8], HELP.gameHelp)
-    commandMap.set(Commands.commands[9], HELP.helpStats)
-    commandMap.set(Commands.commands[10], HELP.helpMiscellaneous)
-    commandMap.set(Commands.commands[11], HELP.helpMusic)
-    commandMap.set(Commands.commands[12], MISCELLANEOUS.study)
-    commandMap.set(Commands.commands[13], GAMES.pingUsers)
-    commandMap.set(Commands.commands[14], ADMINISTRATOR.initialiseUsers)
-    commandMap.set(Commands.commands[15], GENERAL.Delete)
-    commandMap.set(Commands.commands[16], STATS.personalStats)
-    commandMap.set(Commands.commands[17], STATS.guildStats)
-    commandMap.set(Commands.commands[18], STATS.specificStats)
-    commandMap.set(Commands.commands[19], STATS.topStats)
-    commandMap.set(Commands.commands[20], MUSIC.play)
-    commandMap.set(Commands.commands[21], MUSIC.stop)
-    commandMap.set(Commands.commands[22], MUSIC.pause)
-    commandMap.set(Commands.commands[23], MUSIC.resume)
-    commandMap.set(Commands.commands[24], MUSIC.skip)
-    commandMap.set(Commands.commands[25], TUTORIAL.gameTutorial)
-    commandMap.set(Commands.commands[26], BUGS.suggest)
-    commandMap.set(Commands.commands[27], QOF.setNotifyUpdate)
-    commandMap.set(Commands.commands[28], TUTORIAL.setNotifyTutorials)
-    commandMap.set(Commands.commands[29], TUTORIAL.quitTutorial)
-    commandMap.set(Commands.commands[30], GAMES.purgeGamesList)
-    commandMap.set(Commands.commands[31], GAMES.gameStats)
-    commandMap.set(Commands.commands[32], GAMES.topGames)
-    commandMap.set(Commands.commands[33], QOF.setServerPrefix)
-    commandMap.set(Commands.commands[34], QOF.setDefaultPrefix)
-    commandMap.set(Commands.commands[35], ADMINISTRATOR.setDefaultServerPrefix)
-    commandMap.set(Commands.commands[36], MUSIC.forward)
-    commandMap.set(Commands.commands[37], MUSIC.rewind)
-    commandMap.set(Commands.commands[38], MUSIC.seek)
-    commandMap.set(Commands.commands[39], MUSIC.reverse)
-    commandMap.set(Commands.commands[40], MUSIC.addSong)
-    commandMap.set(Commands.commands[41], MUSIC.createPlaylist)
-    commandMap.set(Commands.commands[42], MUSIC.myPlayLists)
-    commandMap.set(Commands.commands[43], MUSIC.removeSong)
-    commandMap.set(Commands.commands[44], MUSIC.playUserPlayList)
-    commandMap.set(Commands.commands[45], MUSIC.savePlayList)
-    commandMap.set(Commands.commands[46], MUSIC.removePlayList)
-    commandMap.set(Commands.commands[47], GAMES.Queue)
-    commandMap.set(Commands.commands[48], GAMES.deQueue)
-    commandMap.set(Commands.commands[49], GAMES.viewActiveSummons)
-    commandMap.set(Commands.commands[50], GAMES.banish)
-    commandMap.set(Commands.commands[51], GAMES.signUpAllUsers)
-    commandMap.set(Commands.commands[52], GAMES.removeGameFromAllUsers)
-    commandMap.set(Commands.commands[53], GAMES.signUpSpecificUser)
-    commandMap.set(Commands.commands[54], GAMES.removeGameFromSpecificUser)
-    commandMap.set(Commands.commands[55], MUSIC.currentSong)
-    commandMap.set(Commands.commands[56], MUSIC.currentPlaylist)
-    commandMap.set(Commands.commands[57], MISCELLANEOUS.searchForUser)
-    commandMap.set(Commands.commands[58], MISCELLANEOUS.flipCoin)
-    commandMap.set(Commands.commands[59], MUSIC.goTo)
-    commandMap.set(Commands.commands[60], MUSIC.shuffle)
-    commandMap.set(Commands.commands[61], MUSIC.repeat)
-    commandMap.set(Commands.commands[62], MISCELLANEOUS.decider)
-    commandMap.set(Commands.commands[63], MISCELLANEOUS.roll)
-    commandMap.set(Commands.commands[64], QOF.setTimer)
-    commandMap.set(Commands.commands[65], MISCELLANEOUS.shakeUser)
-    commandMap.set(Commands.commands[66], MUSIC.volume)
-    commandMap.set(Commands.commands[67], QOF.setCommand)
-    commandMap.set(Commands.commands[68], QOF.commandMonikers)
-    commandMap.set(Commands.commands[69], QOF.removeMoniker)
-    commandMap.set(Commands.commands[70], GENERAL.timeZone)
-    commandMap.set(Commands.commands[7], MISCELLANEOUS.linkTwitch)
-    commandMap.set(Commands.commands[71], MISCELLANEOUS.unlinkTwitch)
-    commandMap.set(Commands.commands[72], MISCELLANEOUS.viewTwitchFollows)
-    commandMap.set(Commands.commands[73], MISCELLANEOUS.unfollowTwitchChannel)
-    commandMap.set(Commands.commands[74], MISCELLANEOUS.followTwitchChannel)
-    commandMap.set(Commands.commands[75], MISCELLANEOUS.linkChannelWithTwitch)
-    commandMap.set(Commands.commands[76], MISCELLANEOUS.showChannelTwitchLinks)
-    commandMap.set(Commands.commands[77], MISCELLANEOUS.removeChannelTwitchLink)
-    commandMap.set(Commands.commands[78], MISCELLANEOUS.leagueStats)
-
-    exports.commandMap = commandMap;
-}
-
 function populateCommandMap() {
 
-
-    commandMap.set(Commands.commands[0], MISCELLANEOUS.linkTwitch)
-    commandMap.set(Commands.commands[1], MISCELLANEOUS.unlinkTwitch)
-    commandMap.set(Commands.commands[2], MISCELLANEOUS.viewTwitchFollows)
-    commandMap.set(Commands.commands[3], MISCELLANEOUS.unfollowTwitchChannel)
-    commandMap.set(Commands.commands[4], MISCELLANEOUS.followTwitchChannel)
-    commandMap.set(Commands.commands[5], MISCELLANEOUS.linkChannelWithTwitch)
-    commandMap.set(Commands.commands[6], MISCELLANEOUS.showChannelTwitchLinks)
-    commandMap.set(Commands.commands[7], MISCELLANEOUS.removeChannelTwitchLink)
-    commandMap.set(Commands.commands[8], MISCELLANEOUS.leagueStats)
-
-    exports.commandMap = commandMap;
-}
-
-function populateHerokuMap() {
-
     commandMap.set(Commands.commands[0], MISCELLANEOUS.populate)
     commandMap.set(Commands.commands[1], GAMES.search)
     commandMap.set(Commands.commands[2], GAMES.updateGames)
@@ -576,6 +439,15 @@ function populateHerokuMap() {
     commandMap.set(Commands.commands[68], QOF.commandMonikers)
     commandMap.set(Commands.commands[69], QOF.removeMoniker)
     commandMap.set(Commands.commands[70], GENERAL.timeZone)
+    commandMap.set(Commands.commands[71], MISCELLANEOUS.linkTwitch)
+    commandMap.set(Commands.commands[72], MISCELLANEOUS.unlinkTwitch)
+    commandMap.set(Commands.commands[73], MISCELLANEOUS.viewTwitchFollows)
+    commandMap.set(Commands.commands[74], MISCELLANEOUS.unfollowTwitchChannel)
+    commandMap.set(Commands.commands[75], MISCELLANEOUS.followTwitchChannel)
+    commandMap.set(Commands.commands[76], MISCELLANEOUS.linkChannelWithTwitch)
+    commandMap.set(Commands.commands[77], MISCELLANEOUS.showChannelTwitchLinks)
+    commandMap.set(Commands.commands[78], MISCELLANEOUS.removeChannelTwitchLink)
+    commandMap.set(Commands.commands[79], MISCELLANEOUS.leagueStats)
 
     exports.commandMap = commandMap;
 }
@@ -587,9 +459,6 @@ async function triggerCommandHandler(message, user, skipSearch, emoji) {
     if (tracky) {
 
         if (message.content == -1) return commandTracker.delete(message.author.id);
-
-
-
 
         let result = await handleCommandTracker(tracky, message, user, skipSearch, emoji);
         console.log("AT THE END: ", result)
@@ -1470,7 +1339,7 @@ exports.usages = usages;
 usages();
 
 async function minuteCount() {
-    if ((defaultPrefix != '##') && (!HEROKU)) {
+    if (defaultPrefix != '##') {
         countTalk();
         checkTwitch();
         usages();
