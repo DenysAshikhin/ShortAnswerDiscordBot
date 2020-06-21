@@ -9,6 +9,7 @@ const TeemoJS = require('teemojs');
 //const MAIN = require('./short-answer.js');
 const api = TeemoJS(config.leagueSecret);
 const studyArray = new Array();
+const net = require('net');
 var needle = require('needle');
 
 const { update } = require('./User.js');
@@ -192,7 +193,60 @@ async function leagueStats(message, params, user) {
     // getLeagueEntries(zone, summoner);
     //getMatchInfo(zone, summoner);
 
-    crawlOPGG(message, zone, args[0]);
+    //crawlOPGG(message, zone, args[0]);
+    let socky = new net.Socket();
+    let messagy;
+    let summonerTotalInfo;
+    let summonerRankedInfo;
+    let summonerFlexInfo;
+    socky.connect('40571', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed);
+
+        if (parsed.status == -1) { console.log("leaguestats: never should happen") }
+        if (parsed.position) {
+
+            if (parsed.position <= -1) {
+                if (!messagy) messagy = await message.channel.send("Now processing your request!");
+                else messagy.edit("Now processing your request!");
+            }
+            else if (parsed.position > 0) {
+                if (!messagy) messagy = await message.channel.send("Wow, this command seems to be really popular, your position in queue is: " + parsed.position);
+                else messagy.edit("Wow, this command seems to be really popular, your position in queue is: " + parsed.position);
+            }
+        }
+
+        if (stringed.includes("totalInfo")) {
+            summonerTotalInfo = JSON.parse(stringed);
+        }
+        if (stringed.includes("rankedSolo")) {
+            summonerRankedInfo = JSON.parse(stringed);
+        }
+        if (stringed.includes("rankedFlex")) {
+            summonerFlexInfo = JSON.parse(stringed);
+
+            MAIN.prettyEmbed(updateMessage, "Here are the Leage of Legends stats for: " + summonerTotalInfo.name,
+                [
+                    {
+                        name: "Previous Ranks", value: `${summonerTotalInfo.previousRanks.reduce((accum, current, index) => { return `${current}\n${accum}`; }, '')}`
+                    },
+                    {
+                        name: `Overall Win Rate: ${((Number(summonerTotalInfo.totalWins) / Number(summonerTotalInfo.totalLoses))).toFixed(2)}`, value: [`Total Games: ${summonerTotalInfo.totalGames}`, `Total Wins: ${summonerTotalInfo.totalWins}`,
+                        `Total Loses: ${summonerTotalInfo.totalLoses}`
+                        ]
+                    },
+                    {
+                        name: `KDA: ${(((Number(summonerTotalInfo.averageAssists) + Number(summonerTotalInfo.averageKills))) / Number(summonerTotalInfo.averageDeaths)).toFixed(2)}`, value: [
+                            `Average Kills: ${summonerTotalInfo.averageKills}`, `Average Deaths: ${summonerTotalInfo.averageDeaths}`, `Average Assists: ${summonerTotalInfo.averageAssists}`,
+                            `K/D Ratio: ${((Number(summonerTotalInfo.averageKills) / Number(summonerTotalInfo.averageDeaths))).toFixed(2)}`
+                        ]
+                    }
+                ], -1, -1, 1);
+
+        }
+    })
+
     return -1;
 }
 exports.leagueStats = leagueStats;

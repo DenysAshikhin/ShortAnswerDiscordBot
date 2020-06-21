@@ -1,18 +1,33 @@
 const puppeteer = require('puppeteer');
 const net = require('net');
+const TeemoJS = require('teemojs');
 
+var config;
+try {
+    config = require('./config.json');
+}
+catch{
+    console.log("prob on heroku")
+}
+
+var api = TeemoJS(config.leagueSecret);
 
 var uniqid = require('uniqid');
 
 
 
-const server = net.createServer((socket) => {
+const server = net.createServer(async (socket) => {
     //socket.end('goodbye\n');
     //socket.write("Hello")
 
-    socket.on('data', data => {
+    socket.on('data', async (data) => {
         console.log("Got data:");
         console.log(data.toString());
+        let daty = data.toString().split(',')
+        let result = await leagueStats(daty[0], daty[1], socket);
+
+        socket.write(JSON.stringify({ status: result }));
+
     })
 
     socket.on('error', (err) => {
@@ -22,15 +37,13 @@ const server = net.createServer((socket) => {
 });
 
 // Grab an arbitrary unused port.
-server.listen(0, '45.63.17.228', () => {
+server.listen(0, '45.63.17.228', '33432', () => {
     console.log('opened server on', server.address());
     console.log(server.is)
 });
 
 
-server.on('connection', (socket) => {console.log("THERE WAS A CONNECTION!")})
-
-
+server.on('connection', (socket) => { console.log("THERE WAS A CONNECTION!") })
 
 const options = {
     args: [
@@ -53,13 +66,37 @@ var puppeteerQueue = {
     browser: null
 };
 
+
+
+async function getSummoner(zone, name) {
+
+    let summoner = await api.req(zone, 'lol.summonerV4.getBySummonerName', name);
+    //  console.log(summoner)
+    return summoner;
+}
+
+async function leagueStats(summoner, zone, socket) {
+
+    let summoneR = await getSummoner(zone, summoner);
+    if (!summoneR) { message.channel.send(`${summoner} in the region *${zone}* does not exist, try again?`); return -1; }
+
+    // let mastery = await getChampionMastery(zone, summoner, 5);
+    // MAIN.prettyEmbed(message, `Here are the League of Legends stats for ${args[0]}`, mastery, -1, 1, 1);
+
+    // getLeagueEntries(zone, summoner);
+    //getMatchInfo(zone, summoner);
+
+    crawlOPGG(socket, zone, summoner);
+    return 1;
+}
+
 //Need to put this whole thing in a try catch just in case....
-async function crawlOPGG(MESSAGE, ZONE, summoner, looped) {
+async function crawlOPGG(SOCKET, ZONE, summoner, looped) {
 
     let uniqueID;
     let username;
     let zone;
-    let message;
+    let socket;
 
     if (puppeteerQueue.active.size < puppeteerQueue.limit) {
 
@@ -68,26 +105,27 @@ async function crawlOPGG(MESSAGE, ZONE, summoner, looped) {
         if (puppeteerQueue.backlog.length > 0) {
             let activy = puppeteerQueue.backlog.shift();
             username = activy.username.replace(/\s/g, '+');
-            message = activy.message;
+            socket = activy.socke;
             zone = activy.zone;
-            puppeteerQueue.active.set(uniqueID, { zone: zone, username: username, notification: activy.notification });
+            puppeteerQueue.active.set(uniqueID, { zone: zone, username: username, socket: activy.socket });
         }
         else if (!looped) {
             username = summoner.replace(/\s/g, '+');
             zone = ZONE;
-            message = MESSAGE;
-            puppeteerQueue.active.set(uniqueID, { zone: zone, username: username });
+            socket = SOCKET;
+            puppeteerQueue.active.set(uniqueID, { zone: zone, username: username, socket: SOCKET });
         }
 
         for (person of puppeteerQueue.backlog) {
-            person.notification.edit(`Looks like this command is really popular! Your position in queue: ${person.position - 1}`);
             person.position--;
+            if (person.position == 0) person.position == -1;
+            person.socket.write(JSON.stringify({ position: person.position }));
         }
 
     }
     else if (!looped) {
-        let notif = await MESSAGE.channel.send(`Looks like this command is really popular! Your position in queue: ${puppeteerQueue.backlog.length + 1}`)
-        puppeteerQueue.backlog.push({ zone: ZONE, username: summoner, message: MESSAGE, notification: notif, position: puppeteerQueue.backlog.length + 1 });//later require a message so it can respond better.
+        SOCKET.write(JSON.stringify({ position: puppeteerQueue.backlog.length + 1 }));
+        puppeteerQueue.backlog.push({ zone: ZONE, username: summoner, socket: SOCKET, position: puppeteerQueue.backlog.length + 1 });//later require a message so it can respond better.
         return 44;
     }
 
@@ -96,14 +134,9 @@ async function crawlOPGG(MESSAGE, ZONE, summoner, looped) {
     let summonerTotalInfo = {};
     let summonerRankedSoloInfo = {};
     let summonerFlexInfo = {};
-    let updateMessage = puppeteerQueue.active.get(uniqueID).notification;
-    if (updateMessage) {
-        console.log("EDITING!")
-        updateMessage.edit("Now retrieving the data you requested!");
-    }
-    else
-        message.channel.send("Now retrieving the data you requested!")
-            .then(mess => { updateMessage = mess });
+    let updateSocket = puppeteerQueue.active.get(uniqueID).socket;
+    updateSocket.write(JSON.stringify({ position: -1 }));
+
 
     let url = `https://${zone}.op.gg/summoner/userName=${username}`;
     let champURL = `https://${zone}.op.gg/summoner/champions/userName=${username}`;
@@ -201,8 +234,6 @@ async function crawlOPGG(MESSAGE, ZONE, summoner, looped) {
     openURL.push(page3.goto(champURL)
         .then(async function (result) { loadStats.push(loadChampionStats(page3, summonerTotalInfo)) }));
 
-    MAIN.usages();
-
     await Promise.all(openURL);
     console.log(`Step 6: ${(new Date() - daty) / 1000}`)
     await Promise.all(loadStats);
@@ -236,24 +267,12 @@ async function crawlOPGG(MESSAGE, ZONE, summoner, looped) {
     }
 
     console.log("FINISHED::   ", uniqueID);
-    updateMessage.edit(`It took ${(new Date() - daty) / 1000} seconds to resolve your request!`)
-    await MAIN.prettyEmbed(updateMessage, "Here are the Leage of Legends stats for: " + summonerTotalInfo.name,
-        [
-            {
-                name: "Previous Ranks", value: `${summonerTotalInfo.previousRanks.reduce((accum, current, index) => { return `${current}\n${accum}`; }, '')}`
-            },
-            {
-                name: `Overall Win Rate: ${((Number(summonerTotalInfo.totalWins) / Number(summonerTotalInfo.totalLoses))).toFixed(2)}`, value: [`Total Games: ${summonerTotalInfo.totalGames}`, `Total Wins: ${summonerTotalInfo.totalWins}`,
-                `Total Loses: ${summonerTotalInfo.totalLoses}`
-                ]
-            },
-            {
-                name: `KDA: ${(((Number(summonerTotalInfo.averageAssists) + Number(summonerTotalInfo.averageKills))) / Number(summonerTotalInfo.averageDeaths)).toFixed(2)}`, value: [
-                    `Average Kills: ${summonerTotalInfo.averageKills}`, `Average Deaths: ${summonerTotalInfo.averageDeaths}`, `Average Assists: ${summonerTotalInfo.averageAssists}`,
-                    `K/D Ratio: ${((Number(summonerTotalInfo.averageKills) / Number(summonerTotalInfo.averageDeaths))).toFixed(2)}`
-                ]
-            }
-        ], -1, -1, 1);
+
+    await socket.write(JSON.stringify({ totalStats: summonerTotalInfo }));
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await socket.write(JSON.stringify({ rankedSolo: summonerRankedSoloInfo }));
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await socket.write(JSON.stringify({ rankedFlex: summonerFlexInfo }));
     return 1;//Return the actual object here.
 }
 
