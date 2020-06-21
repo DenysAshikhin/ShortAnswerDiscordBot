@@ -1,20 +1,14 @@
 const Fuse = require('fuse.js');
 const studyJSON = require('./medstudy.json');
 const MAIN = require('./short-answer.js');
-const config = require('./config.json');
-const twitchConfig = require('./twitch.json');
+//const twitchConfig = require('./twitch.json');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
-const TeemoJS = require('teemojs');
-//const MAIN = require('./short-answer.js');
-const api = TeemoJS(config.leagueSecret);
+//const TeemoJS = require('teemojs');
+//const api = TeemoJS(MAIN.league);
 const studyArray = new Array();
 const net = require('net');
 var needle = require('needle');
-
-const { update } = require('./User.js');
-
-
 
 //http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
 
@@ -184,8 +178,8 @@ async function leagueStats(message, params, user) {
     else
         zone = params.region;
 
-    let summoner = await getSummoner(zone, args[0]);
-    if (!summoner) { message.channel.send(`${args[0]} in the region *${zone}* does not exist, try again?`); return -1; }
+    // let summoner = await getSummoner(zone, args[0]);
+    // if (!summoner) {  }
 
     // let mastery = await getChampionMastery(zone, summoner, 5);
     // MAIN.prettyEmbed(message, `Here are the League of Legends stats for ${args[0]}`, mastery, -1, 1, 1);
@@ -202,12 +196,17 @@ async function leagueStats(message, params, user) {
     let summonerTotalInfo;
     let summonerRankedInfo;
     let summonerFlexInfo;
-    socky.connect('46631', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
+    socky.connect('39923', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
     socky.on('data', async (data) => {
         let stringed = data.toString();
         let parsed = JSON.parse(stringed);
 
-        if (parsed.status == -1) { console.log("leaguestats: never should happen") }
+        if (parsed.status == -1) {
+            message.channel.send(`${args[0]} in the region *${zone}* does not exist, try again?`);
+            socky.destroy();
+            if (messagy) messagy.delete();
+            return -1;
+        }
         if (parsed.position) {
 
             if (parsed.position <= -1) {
@@ -234,7 +233,7 @@ async function leagueStats(message, params, user) {
             console.log(summonerRankedInfo)
             console.log(summonerFlexInfo)
 
-            message.channel.send(`It took ${((new Date() - start)/1000)} seconds to get your request`);
+            message.channel.send(`It took ${((new Date() - start) / 1000)} seconds to get your request`);
 
             MAIN.prettyEmbed(message, "Here are the Leage of Legends stats for: " + summonerTotalInfo.name,
                 [
@@ -253,8 +252,7 @@ async function leagueStats(message, params, user) {
                         ]
                     }
                 ], -1, -1, 1);
-                socky.destroy();
-
+            socky.destroy();
         }
     })
 
