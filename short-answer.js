@@ -257,12 +257,12 @@ connectDB.once('open', async function () {
 
     await Client.login(token);
     updateAll();
-    if (HEROKU)
-        populateHerokuMap();
-    else if (defaultPrefix == "##")
-        populateAllCommand();
-    else
-        populateCommandMap();
+    // if (HEROKU)
+    //     populateHerokuMap();
+    // else if (defaultPrefix == "##")
+    populateAllCommand();
+    // else
+    //populateCommandMap();
 
     Client.on("ready", () => {
 
@@ -563,6 +563,9 @@ async function triggerCommandHandler(message, user, skipSearch, emoji) {
 
         if (message.content == -1) return commandTracker.delete(message.author.id);
 
+
+
+
         let result = await handleCommandTracker(tracky, message, user, skipSearch, emoji);
         console.log("AT THE END: ", result)
         if (result == 1)
@@ -650,6 +653,14 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch, 
 }
 
 function specificCommandCreator(command, defaults, choices, user) {
+
+    if (HEROKU)
+        if ((command == MISCELLANEOUS.linkTwitch) || (command == MISCELLANEOUS.unlinkTwitch) ||
+            (command == MISCELLANEOUS.viewTwitchFollows) || (command == MISCELLANEOUS.unfollowTwitchChannel) ||
+            (command == MISCELLANEOUS.followTwitchChannel) || (command == MISCELLANEOUS.linkChannelWithTwitch) ||
+            (command == MISCELLANEOUS.showChannelTwitchLinks) || (command == MISCELLANEOUS.removeChannelTwitchLink) ||
+            (command == MISCELLANEOUS.leagueStats))
+            return -1;
 
     commandTracker.set(user.id, {
         command: command,

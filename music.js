@@ -11,7 +11,6 @@ const fs = require('fs');
 const Fuse = require('fuse.js');
 const fsPromises = fs.promises;
 
-
 var Spotify = require('enhanced-spotify-api');
 var queue = new Map();
 var download = new Map();
@@ -19,10 +18,13 @@ var activeSkips = new Map();
 var lastSkip = new Map();
 var needle = require('needle');
 const { lookup } = require('dns');
+const main = require('ytsr');
 
 async function authoriseSpotify() {
 
-    let basy = Buffer.from(config.spotifyClient + ':' + config.spotifySecret).toString('base64');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    let basy = Buffer.from(MAIN.spotifyClient + ':' + MAIN.spotifySecret).toString('base64');
 
     let options = {
         headers: { 'Authorization': 'Basic ' + basy }
