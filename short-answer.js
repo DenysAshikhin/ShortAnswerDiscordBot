@@ -654,13 +654,24 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch, 
 
 function specificCommandCreator(command, defaults, choices, user) {
 
-    if (HEROKU)
-        if ((command == MISCELLANEOUS.linkTwitch) || (command == MISCELLANEOUS.unlinkTwitch) ||
-            (command == MISCELLANEOUS.viewTwitchFollows) || (command == MISCELLANEOUS.unfollowTwitchChannel) ||
-            (command == MISCELLANEOUS.followTwitchChannel) || (command == MISCELLANEOUS.linkChannelWithTwitch) ||
-            (command == MISCELLANEOUS.showChannelTwitchLinks) || (command == MISCELLANEOUS.removeChannelTwitchLink) ||
-            (command == MISCELLANEOUS.leagueStats))
+
+    let nonHrokuCommands = [MISCELLANEOUS.linkTwitch, MISCELLANEOUS.unlinkTwitch,
+    MISCELLANEOUS.viewTwitchFollows, MISCELLANEOUS.unfollowTwitchChannel,
+    MISCELLANEOUS.followTwitchChannel, MISCELLANEOUS.linkChannelWithTwitch,
+    MISCELLANEOUS.showChannelTwitchLinks, MISCELLANEOUS.removeChannelTwitchLink,
+    MISCELLANEOUS.leagueStats
+
+    ]
+
+    if (HEROKU) {
+        if (nonHerokuCommands.includes(command)) {
             return -1;
+        }
+    }
+    else {
+        if (!nonHrokuCommands.includes(command))
+            return -1;
+    }
 
     commandTracker.set(user.id, {
         command: command,
