@@ -325,6 +325,32 @@ connectDB.once('open', async function () {
             }
 
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
+
+            nonHerokuCommands = [
+                "LINKTWITCH",
+                "UNLINKTWITCH",
+                "VIEWTWITCHFOLLOWS",
+                "UNFOLLOWTWITCHCHANNEL",
+
+                "FOLLOWTWITCHCHANNEL",
+                "PAIRCHANNELWITHTWITCH",
+                "VIEWCHANNELTWITCHPAIRS",
+                "REMOVECHANNELTWITCHPAIR",
+                "LEAGUESTATS"
+            ]
+            if (HEROKU) {
+                if (nonHerokuCommands.includes(command)) {
+                    console.log("HERO")
+                    return -1;
+                }
+            }
+            else
+                if (!nonHerokuCommands.includes(command)) {
+                    console.log(nonHerokuCommands.includes(command))
+                    console.log("NON HERO")
+                    return -1;
+                }
+
             exports.prefix = prefix;
 
             let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
@@ -376,7 +402,6 @@ connectDB.once('open', async function () {
 });
 
 function populateAllCommand() {
-
 
     commandMap.set(Commands.commands[0], MISCELLANEOUS.populate)
     commandMap.set(Commands.commands[1], GAMES.search)
@@ -653,25 +678,6 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch, 
 }
 
 function specificCommandCreator(command, defaults, choices, user) {
-
-
-    let nonHrokuCommands = [MISCELLANEOUS.linkTwitch, MISCELLANEOUS.unlinkTwitch,
-    MISCELLANEOUS.viewTwitchFollows, MISCELLANEOUS.unfollowTwitchChannel,
-    MISCELLANEOUS.followTwitchChannel, MISCELLANEOUS.linkChannelWithTwitch,
-    MISCELLANEOUS.showChannelTwitchLinks, MISCELLANEOUS.removeChannelTwitchLink,
-    MISCELLANEOUS.leagueStats
-
-    ]
-
-    if (HEROKU) {
-        if (nonHerokuCommands.includes(command)) {
-            return -1;
-        }
-    }
-    else {
-        if (!nonHrokuCommands.includes(command))
-            return -1;
-    }
 
     commandTracker.set(user.id, {
         command: command,
