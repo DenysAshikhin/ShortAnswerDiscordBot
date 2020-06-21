@@ -202,7 +202,7 @@ async function leagueStats(message, params, user) {
     let summonerTotalInfo;
     let summonerRankedInfo;
     let summonerFlexInfo;
-    socky.connect('44277', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
+    socky.connect('46631', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
     socky.on('data', async (data) => {
         let stringed = data.toString();
         let parsed = JSON.parse(stringed);
@@ -234,7 +234,7 @@ async function leagueStats(message, params, user) {
             console.log(summonerRankedInfo)
             console.log(summonerFlexInfo)
 
-            message.channel.send(`It took ${Math.floor((new Date() - start)/1000)} seconds to get your request`);
+            message.channel.send(`It took ${((new Date() - start)/1000)} seconds to get your request`);
 
             MAIN.prettyEmbed(message, "Here are the Leage of Legends stats for: " + summonerTotalInfo.name,
                 [
@@ -253,6 +253,7 @@ async function leagueStats(message, params, user) {
                         ]
                     }
                 ], -1, -1, 1);
+                socky.destroy();
 
         }
     })

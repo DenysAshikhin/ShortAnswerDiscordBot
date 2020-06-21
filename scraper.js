@@ -14,8 +14,6 @@ var api = TeemoJS(config.leagueSecret);
 
 var uniqid = require('uniqid');
 
-
-
 const server = net.createServer(async (socket) => {
     //socket.end('goodbye\n');
     //socket.write("Hello")
@@ -34,6 +32,8 @@ const server = net.createServer(async (socket) => {
         // Handle errors here.
         console.log("Caught socket error");
     });
+
+    socket.on('close', (had_err) => { socket.close(); })
 });
 
 server.on('error', (err) => { console.log("Caught server error") })
@@ -41,7 +41,6 @@ server.on('error', (err) => { console.log("Caught server error") })
 // Grab an arbitrary unused port.
 server.listen(0, '45.63.17.228', '33432', () => {
     console.log('opened server on', server.address());
-    console.log(server.is)
 });
 
 
