@@ -21,11 +21,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const TwitchClient = require('twitch').default;
 const main = require('ytsr');
 ffmpeg.setFfmpegPath(ffmpegPath);
-
 var os = require('os-utils');
-
-
-
 
 
 
@@ -170,11 +166,8 @@ async function twitchInitiliasation() {
 try {
 
     config = require('./config.json');
-
-    //if (defaultPrefix != '##')
-    twitchInitiliasation();
-
-
+    if (defaultPrefix != '##')
+        twitchInitiliasation();
 }
 catch (err) {
     console.log(err)
@@ -441,15 +434,18 @@ function populateCommandMap() {
     exports.commandMap = commandMap;
 }
 
-async function triggerCommandHandler(message, user, skipSearch) {
+async function triggerCommandHandler(message, user, skipSearch, emoji) {
 
-    if (commandTracker.get(message.author.id)) {
+    let tracky = emoji ? commandTracker.get(user.id) : commandTracker.get(message.author.id);
+
+    if (tracky) {
 
         if (message.content == -1) return commandTracker.delete(message.author.id);
 
-        let result = await handleCommandTracker(commandTracker.get(message.author.id), message, user, skipSearch);
+        let result = await handleCommandTracker(tracky, message, user, skipSearch, emoji);
+        console.log("AT THE END: ", result)
         if (result == 1)
-            commandTracker.delete(message.author.id);
+            commandTracker.delete(user.id);
 
         return result;
     }
@@ -468,14 +464,16 @@ async function commandMatcher(message, command, params, user) {
         let fieldArray = new Array();
 
         for (let i = 0; i < check.result.length; i++) {
-            fieldArray.push({ name: `${i + 1} - ` + check.result[i].item, value: "** **", inline: false })
+            fieldArray.push({ value: `${i + 1} - ` + check.result[i].item, name: "** **", inline: false })
         }
         let newEmbed = JSON.parse(JSON.stringify(Embed));
         newEmbed.date = new Date();
         newEmbed.description = `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`;
         newEmbed.fields = fieldArray;
 
-        message.channel.send({ embed: newEmbed })
+        //message.channel.send({ embed: newEmbed })
+        prettyEmbed(message, `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
+            fieldArray, -1, 1, 1, null, null, true);
         specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
         return -11;
     }
@@ -489,15 +487,16 @@ async function commandMatcher(message, command, params, user) {
 }
 
 //-1 invalid input, 0 don't delete (passed to command matcher) - need it next time, 1 handled - delete
-async function handleCommandTracker(specificCommand, message, user, skipSearch) {
+async function handleCommandTracker(specificCommand, message, user, skipSearch, emoji) {
     //console.log(specificCommand)
-    let params = message.content;
+    let params = emoji ? emoji + '' : message.content;
     let tutorialResult;
     if (!skipSearch) {
         if (!isNaN(params) && params.length > 0) {
 
             params = Math.floor(Number(params));
             params--;
+            console.log('params: ' + params);
             if (params > Math.Max_Safe_INTEGER) return message.channel.send("You have entered an invalid option, please try again!");
             if (params >= specificCommand.choices.length || params < 0) {
                 message.channel.send("You have entered an invalid number, please try again. Or type *-1* to quit the suggestion.");
@@ -882,6 +881,60 @@ function shuffleArray(array) {
 }
 exports.shuffleArray = shuffleArray;
 
+
+async function setControlEmoji(message) {
+    await message.react('1️⃣')
+    await message.react('2️⃣')
+    await message.react('3️⃣')
+    await message.react('4️⃣')
+    await message.react('5️⃣')
+    setEmojiCollector(message);
+}
+
+// async function setEmojiCollector() {
+//     for (let messy of commandTracker.values()) {
+//         messy.collector.resetTimer();
+//     }
+// }
+//setInterval(refreshEmojiControls, 20 * 1000);
+
+async function setEmojiCollector(message) {
+
+    let collector = await message.createReactionCollector(function (reaction, user) {
+        return ((reaction.emoji.name === '1️⃣') || (reaction.emoji.name === '2️⃣') ||
+            (reaction.emoji.name === '3️⃣') || (reaction.emoji.name === '4️⃣') || (reaction.emoji.name === '5️⃣')
+            && (user.id != message.author.id))
+    }, { time: 60000 });
+    collector.on('collect', async function (emoji, user) {
+
+        console.log("INSIDE OF NUMBA- ")
+        let choice;
+        let usery = await findUser({ id: user.id });
+        if (emoji.emoji.toString() == '1️⃣') {
+            choice = 1;
+        }
+        else if (emoji.emoji.toString() == '2️⃣') {
+            choice = 2;
+        }
+        else if (emoji.emoji.toString() == '3️⃣') {
+            choice = 3;
+        }
+        else if (emoji.emoji.toString() == '4️⃣') {
+            choice = 4;
+        }
+        else if (emoji.emoji.toString() == '5️⃣') {
+            choice = 5;
+        }
+        //let finy =
+        await triggerCommandHandler(emoji.message, usery, false, choice);
+        // if (finy == 1) {
+        emoji.message.reactions.removeAll();
+        emoji.message.delete();
+        //}
+    });
+}
+
+
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
     if (Array.isArray(params)) {
@@ -939,7 +992,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         for (let i = 0; i < promptArray.length; i++)
             fieldArray.push(promptArray[i].item);
 
-        prettyEmbed(message, flavourText, fieldArray, -1, 1, 1);
+        prettyEmbed(message, flavourText, fieldArray, -1, 1, 1, null, null, true);
 
         specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
         return 0;
@@ -951,8 +1004,8 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 }
 exports.generalMatcher = generalMatcher;
 
-async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title) {
-
+async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title, selector) {
+    console.log(selector)
     let runningString = "";
     let previousName = "";
     let groupNumber = 1;
@@ -964,12 +1017,13 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     let tester = 1;
 
     for (item of array) {
-
+        console.log(item)
         let BIGSPLIT = false;
         if (item.value == '') continue;
 
         element = item.value ? item.value : item;
         element = element ? element : '** **';
+        console.log(element)
         if (element == '** **') continue;
         element = Array.isArray(element) ? element.join("\n") : element;
         let itemName = item.name ? item.name : "";
@@ -1079,6 +1133,9 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
         tally++;
     }
 
+    console.log('--------')
+    console.log(fieldArray)
+    console.log(field)
     if (field.name != '')
         field.name = field.name;
     else if (part == -1) {
@@ -1089,7 +1146,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     if (field.value.length != 0)
         fieldArray.push(JSON.parse(JSON.stringify(field)));
 
-    testy(fieldArray, description, message, modifier, URL, title);
+    return await testy(fieldArray, description, message, modifier, URL, title, selector);
 }
 exports.prettyEmbed = prettyEmbed;
 
@@ -1146,7 +1203,7 @@ function createThreeQueue(array) {
     return threeQueue;
 }
 
-function testy(ARR, description, message, modifier, URL, title) {
+async function testy(ARR, description, message, modifier, URL, title, selector) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.timestamp = new Date();
@@ -1186,8 +1243,19 @@ function testy(ARR, description, message, modifier, URL, title) {
         threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
     }
 
-    message.channel.send({ embed: newEmbed });
-    if (ARR.length > 0) testy(ARR, description, message, modifier);
+
+    if (ARR.length > 0) {
+        message.channel.send({ embed: newEmbed });
+        return testy(ARR, description, message, modifier);
+    }
+
+    if (!selector)
+        return await message.channel.send({ embed: newEmbed });
+    else {
+        let temp = await message.channel.send({ embed: newEmbed });
+        setControlEmoji(temp);
+        return 20;
+    }
 }
 
 function sendHelpMessage(Index, message) {
@@ -1246,39 +1314,39 @@ async function createBackUp() {
 async function usages() {
 
     os.cpuUsage(function (v) {
-        console.log('CPU Usage (%): ' + Math.floor(v*100));
+        console.log('CPU Usage (%): ' + Math.floor(v * 100));
     });
 
     os.cpuFree(function (v) {
-        console.log('CPU Free: ' + Math.floor(v*100));
+        console.log('CPU Free: ' + Math.floor(v * 100));
     });
     console.log(`Free Memory: ${os.freemem()}`);
 }
+exports.usages = usages;
 usages();
 
 async function minuteCount() {
     if (defaultPrefix != '##') {
         countTalk();
         checkTwitch();
-    }
-    usages();
-}
-
-async function setTwitchClient(client, token) {
-
-    console.log("TESTER: ", client, token)
-    try {
-
-        exports.twitchClient = twitchClient;
-    }
-    catch (err) {
-        console.log(err);
-        console.log("AN error occured refreshing the twitch client");
+        usages();
     }
 }
 
+async function sleep(ms) {
+    await new Promise(resolve => setTimeout(resolve, ms));
+}
+exports.sleep = sleep;
 
-//setInterval(setTwitchClient, 30 * 60 * 1000, [config.TwitchClient, config.twitchSecret]);
+async function selfDestructMessage(message, text, seconds, emoji) {
+
+    let temp = await message.channel.send(text);
+    await sleep(seconds * 1000);
+    temp.delete();
+    if (!emoji) message.delete();
+}
+exports.selfDestructMessage = selfDestructMessage;
+
 
 async function checkTwitch() {
     try {
@@ -1311,6 +1379,13 @@ process.on('unhandledException', (reason, p) => {
     console.log(";;;;;;;;;;; ", reason);
     Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
 });
+
+
+
+
+//add a stop to the bot
+//add a shuffle to the bot
+
 
 //release 2
 //give people ability to choose how their menus are skinned!

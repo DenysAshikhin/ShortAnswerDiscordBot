@@ -257,10 +257,10 @@ async function spotifyPlaylist(message, params, user) {
     notifMess.delete();
 }
 
-async function volume(message, params, user) {
+async function volume(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
-    const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
+    const args = emoji ? emoji : Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
     if (args < 0) return message.channel.send("The volume cannot be set to 0!");
     if (args > 100) return message.channel.send("The max volume is 100!");
@@ -305,15 +305,15 @@ async function resume(message) {
 }
 exports.resume = resume;
 
-async function skip(message, params) {
+async function skip(message, params, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
     let guildQueue = queue.get(message.guild.id);
     let skipy = lastSkip.get(message.guild.id);
-    const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
+    const args = emoji ? 1 : Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
-    if (isNaN(args)) return message.channel.send("You have entered an invalid number!");
-    if (Number(params) == 0) return message.channel.send("0 is not a valid number!");
+    if (isNaN(args)) { MAIN.selfDestructMessage(message, "You have entered an invalid number!", 3, emoji); return -1; }
+    if (Number(params) == 0) { MAIN.selfDestructMessage(message, "0 is not a valid number!", 3, emoji); return -1; }
 
     if (guildQueue) {
 
@@ -325,9 +325,14 @@ async function skip(message, params) {
 
         if ((args == 0) && (guildQueue.index != (guildQueue.songs.length - 1)))
             guildQueue.index++;
-        else if (args == 0) return message.channel.send(`You're trying to skip too many songs!`);
-        else if ((guildQueue.index + args) >= guildQueue.songs.length || (guildQueue.index + args) < 0)
-            return message.channel.send(`You're trying to skip too many songs!`);
+        else if (args == 0) {
+            MAIN.selfDestructMessage(message, `You're trying to skip too many songs!`, 3, emoji)
+            return -1;
+        }
+        else if ((guildQueue.index + args) >= guildQueue.songs.length || (guildQueue.index + args) < 0) {
+            MAIN.selfDestructMessage(message, `You're trying to skip too many songs!`, 3, emoji)
+            return -1;
+        }
         else { guildQueue.index += args; }
 
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
@@ -337,22 +342,28 @@ async function skip(message, params) {
 }
 exports.skip = skip;
 
-async function reverse(message, params) {
+async function reverse(message, params, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
-    const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
+    const args = emoji ? 1 : Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
-    if (isNaN(args)) return message.channel.send("You have entered an invalid number!");
-    if (Number(params) == 0) return message.channel.send("0 is not a valid number!");
+    if (isNaN(args)) { MAIN.selfDestructMessage(message, "You have entered an invalid number!", 3, emoji); return -1; }
+    if (Number(params) == 0) { MAIN.selfDestructMessage(message, "0 is not a valid number!", 3, emoji); return -1; }
 
     if (guildQueue) {
 
         if ((args == 0) && (guildQueue.index != 0))
             guildQueue.index--;
-        else if (args == 0) return message.channel.send(`You're trying to reverse too many songs!`);
-        else if ((guildQueue.index - args) >= guildQueue.songs.length || (guildQueue.index - args) < 0)
-            return message.channel.send(`You're trying to reverse too many songs!`);
+        else if (args == 0) {
+            MAIN.selfDestructMessage(message, `You can't reverse 0 songs!`, 3, emoji);
+            return -1;
+        }
+        else if ((guildQueue.index - args) >= guildQueue.songs.length || (guildQueue.index - args) < 0) {
+
+            MAIN.selfDestructMessage(message, `You're trying to reverse too many songs!`, 3, emoji);
+            return -1;
+        }
         else { guildQueue.index -= args; }
 
         if (guildQueue.index == guildQueue.songs.length) guildQueue.songs = [];
@@ -422,7 +433,8 @@ async function rewind(message, params) {
     if (guildQueue) {
 
         if (Array.isArray(params)) params = params[0];
-        if (!/^[:0-9]+$/.test(params.substr(1))) return message.channel.send("You have entered an invalid rewind format!");
+        params = params.trim();
+        if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid rewind format!");
 
         let newSkip = !isNaN(params) ? Number(params) : MAIN.hmsToSecondsOnly(params);
         let current = song.paused ? song.offset - song.timePaused + ((Math.floor(new Date() - song.start - ((new Date() - song.paused)))) / 1000)
@@ -686,10 +698,10 @@ async function play(message, params, user) {
 
 
             if ((queueConstruct.songs.length > 1))
-                if (!params.spoti) message.channel.send(`${songInfo.title} has been added to the queue!`)
+                if (!params.spoti) { await message.channel.send(`${songInfo.title} has been added to the queue!`); }
                 else { }
             else {
-                message.channel.send(`Now playing ${songInfo.title}!`)
+
                 callPlay = true;
             }
 
@@ -749,8 +761,87 @@ async function nextSong(serverQueue, guild, message) {
 }
 exports.nextSong = nextSong;
 
+async function songControlEmoji(message) {
+    await message.react('⏪')
+    await message.react('⏯️')
+    await message.react('⏩')
+    await message.react('🔼')
+    await message.react('🔽')
+    checkControlsEmoji(message);
+}
+
+async function refreshEmojiControls() {
+    for (let messy of queue.values()) {
+        messy.collector.resetTimer();
+    }
+}
+
+setInterval(refreshEmojiControls, 20 * 1000);
+
+async function checkControlsEmoji(message) {
+
+    let collector = await message.createReactionCollector(function (reaction, user) {
+        return ((reaction.emoji.name === '⏪') || (reaction.emoji.name === '⏯️') ||
+            (reaction.emoji.name === '⏩') || (reaction.emoji.name === '🔼') || (reaction.emoji.name === '🔽')
+            && (user.id != message.author.id))
+    }, { time: 60000 });
+    collector.on('collect', function (emoji, user) {
+        console.log(user.id)
+        console.log(MAIN.botID)
+
+        let exactQueue = queue.get(emoji.message.guild.id);
+        if (emoji.emoji.toString() == '⏪') {
+
+            reverse(emoji.message, '1', true);
+        }
+        else if (emoji.emoji.toString() == '⏯️') {
+            console.log(exactQueue.songs[exactQueue.index].paused)
+            if (exactQueue.songs[exactQueue.index].paused) {
+                resume(emoji.message);
+            }
+            else pause(emoji.message);
+        }
+        else if (emoji.emoji.toString() == '⏩') {
+            skip(emoji.message, '1', true)
+        }
+        else if (emoji.emoji.toString() == '🔼') {
+
+            if (exactQueue.volume >= 4.5) {
+                MAIN.selfDestructMessage(emoji.message, "The volume is already maxed!", 3, emoji);
+            }
+            else {
+                exactQueue.volume += 0.5;
+                MAIN.selfDestructMessage(emoji.message, "Increased volume by 5%", 3, emoji);
+                volume(emoji.message, '', null, (exactQueue.volume * 20))
+            }
+
+        }
+        else if (emoji.emoji.toString() == '🔽') {
+            if (exactQueue.volume <= 0.5) {
+                MAIN.selfDestructMessage(emoji.message, "The volume is already minimum!", 3, emoji);
+            }
+            else {
+                exactQueue.volume -= 0.5;
+                MAIN.selfDestructMessage(emoji.message, "Decreased volume by 5%", 3, emoji);
+                volume(emoji.message, '', null, (exactQueue.volume * 20))
+            }
+        }
+        emoji.users.remove(user);
+    });
+
+    let exactQueue = queue.get(message.guild.id);
+    exactQueue.collector = collector;
+}
+
 async function playSong(guild, sonG, skip, message) {
     const serverQueue = queue.get(guild.id);
+
+    if (!serverQueue.message) {
+        serverQueue.message = await message.channel.send(`Now playing ${sonG.title}!`);
+        songControlEmoji(serverQueue.message)
+    }
+    else serverQueue.message.edit(`Now playing ${sonG.title}!`);
+
     let song = sonG;
 
     if (!song) {

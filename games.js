@@ -53,7 +53,8 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         for (suggestion of prettyArray)
             tempArray.push(suggestion)
 
-        MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`, tempArray, -1, -1, 1);
+        MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`, tempArray, -1, -1, 1, null, null, true);
+
         MAIN.specificCommandCreator(pingUsers, [message, -1, user], check.result, user);
         return -11;
     }
@@ -245,7 +246,7 @@ async function personalGames(message, params, user) {
     if (games.length <= 0)
         message.channel.send("You are not signed up for any games.");
 
-    return 0;
+    return 1;
 }
 exports.personalGames = personalGames;
 
@@ -390,7 +391,7 @@ async function gameStats(message, params, user) {
         let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
         MAIN.prettyEmbed(message, `**${game}** is not a valid game, if you meant one of the following, simply type the number you wish to use:`, prettyArray,
-            -1, -1, 1);
+            -1, -1, 1, null, null, true);
 
         MAIN.specificCommandCreator(gameStats, [message, -1, user], check.result, user);
         return -11;
@@ -726,9 +727,11 @@ function removeGame(message, game, user) {
 
 
                     for (suggestion of prettyArray)
-                        removeEmbed.fields.push({ name: suggestion, value: "** **" });
+                        removeEmbed.fields.push({ value: suggestion, name: "** **" });
 
-                    message.channel.send({ embed: removeEmbed });
+                    //message.channel.send({ embed: removeEmbed });
+                    MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                        removeEmbed.fields, -1, 1, 1, null, null, true);
                     MAIN.specificCommandCreator(removeGame, [message, -1, user], check.result, user);
                     return -11;
                 }
@@ -988,9 +991,11 @@ async function updateGames(message, game, user) {
 
 
             for (suggestion of prettyArray)
-                removeEmbed.fields.push({ name: suggestion, value: "** **" });
+                removeEmbed.fields.push({ value: suggestion, name: "** **" });
 
-            message.channel.send({ embed: removeEmbed });
+            //message.channel.send({ embed: removeEmbed });
+            MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                removeEmbed.fields, -1, 1, 1, null, null, true);
             MAIN.specificCommandCreator(updateGames, [message, -1, user], check.result, user);
             return -11;
         }
