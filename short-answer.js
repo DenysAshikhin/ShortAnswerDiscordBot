@@ -464,7 +464,7 @@ async function commandMatcher(message, command, params, user) {
         let fieldArray = new Array();
 
         for (let i = 0; i < check.result.length; i++) {
-            fieldArray.push({ value: `${i + 1} - ` + check.result[i].item, name: "** **", inline: false })
+            fieldArray.push({ value: check.result[i].item, name: "** **", inline: false })
         }
         let newEmbed = JSON.parse(JSON.stringify(Embed));
         newEmbed.date = new Date();
@@ -1017,13 +1017,11 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     let tester = 1;
 
     for (item of array) {
-        console.log(item)
         let BIGSPLIT = false;
         if (item.value == '') continue;
 
         element = item.value ? item.value : item;
         element = element ? element : '** **';
-        console.log(element)
         if (element == '** **') continue;
         element = Array.isArray(element) ? element.join("\n") : element;
         let itemName = item.name ? item.name : "";
@@ -1133,9 +1131,6 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
         tally++;
     }
 
-    console.log('--------')
-    console.log(fieldArray)
-    console.log(field)
     if (field.name != '')
         field.name = field.name;
     else if (part == -1) {
@@ -1385,6 +1380,7 @@ process.on('unhandledException', (reason, p) => {
 
 //add a stop to the bot
 //add a shuffle to the bot
+//add a reset message button
 
 
 //release 2

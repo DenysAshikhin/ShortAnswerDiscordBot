@@ -18,6 +18,7 @@ var download = new Map();
 var activeSkips = new Map();
 var lastSkip = new Map();
 var needle = require('needle');
+const { lookup } = require('dns');
 
 async function authoriseSpotify() {
 
@@ -489,7 +490,7 @@ async function seek(message, params) {
 exports.seek = seek;
 
 //ask how to handle the location of new song
-async function shuffle(message, params, user) {
+async function shuffle(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("This command must be called from a server text channel!");
     let guildQueue = queue.get(message.guild.id);
@@ -498,7 +499,7 @@ async function shuffle(message, params, user) {
     MAIN.shuffleArray(guildQueue.songs);
     guildQueue.index = 0;
     playSong(message.guild, guildQueue.songs[guildQueue.index], null, message);
-    message.channel.send("The playlist has been shuffled!");
+    MAIN.selfDestructMessage(message, "The playlist has been shuffled!", 3, emoji);
 }
 exports.shuffle = shuffle;
 
@@ -525,22 +526,28 @@ async function goTo(message, params, user) {
 }
 exports.goTo = goTo;
 
-async function repeat(message, params, user) {
+async function repeat(message, params, user, emoji) {
 
-    if (!params.mode) {
+    let guildQueue = queue.get(message.guild.id);
+
+    if (emoji) {
+        if (emoji == -1)
+            guildQueue.repeat = null;
+        else
+            guildQueue.repeat = emoji;
+    }
+    else if (!params.mode) {
         if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
 
         let guildQueue = queue.get(message.guild.id);
         if (!guildQueue) return message.channel.send("There needs to be a song playing!");
 
-        const args = message.content.split(" ").slice(1).join(" ");
+        const args = emoji ? emoji : message.content.split(" ").slice(1).join(" ");
         if (!args || !isNaN(args)) return message.channel.send("You have to provide a valid repeat mode!");
 
         MAIN.generalMatcher(message, args, user, ["One", "All", "Off"], [{ mode: "One" }, { mode: "All" }, { mode: "Off" }], repeat, "Enter the number associted with repeat mode you want.");
     }
-    else {
-
-        let guildQueue = queue.get(message.guild.id);
+    else if (!emoji) {
 
         if (params.mode.localeCompare("One") == 0)
             guildQueue.repeat = 1;
@@ -548,12 +555,13 @@ async function repeat(message, params, user) {
             guildQueue.repeat = 100;
         else
             guildQueue.repeat = null;
-        return message.channel.send(`Repeat mode set to ${params.mode}`);
+        message.channel.send(`Repeat mode set to ${params.mode}`);
     }
+    return 111;
 }
 exports.repeat = repeat;
 
-async function currentSong(message, params, user) {
+async function currentSong(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
 
@@ -561,9 +569,12 @@ async function currentSong(message, params, user) {
     if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the progress!");
     let song = guildQueue.songs[guildQueue.index];
 
+    if (isNaN(song.timePaused)) song.timePaused = 0;
     let current = song.paused ? song.offset - song.timePaused + ((Math.floor(new Date() - song.start - ((new Date() - song.paused)))) / 1000)
         : song.offset - song.timePaused + ((Math.floor(new Date() - song.start)) / 1000);
-    return message.channel.send("```md\n#" + song.title + "\n[" + MAIN.timeConvert(current) + "](" + MAIN.timeConvert(Math.floor(song.duration)) + ")```");
+    if (!emoji)
+        message.channel.send("```md\n#" + song.title + "\n[" + MAIN.timeConvert(current) + "](" + MAIN.timeConvert(Math.floor(song.duration)) + ")```");
+    return Math.floor(current);
 }
 exports.currentSong = currentSong;
 
@@ -615,7 +626,7 @@ async function play(message, params, user) {
             connection: null,
             songs: [],
             index: 0,
-            volume: 5,
+            volume: 3,
             playing: true,
             dispatcher: null,
             repeat: -1,
@@ -668,7 +679,7 @@ async function play(message, params, user) {
                 cacheSong(song, message.guild.id);
             }
         } callPlay = true;
-        message.channel.send(`${playlist.items.length} songs have been added to the queue!`);
+        MAIN.selfDestructMessage(message, `${params.playlist.songs.length} songs have been added to the queue!`, 3, false);
     }
     else if (ytdl.validateURL(args)) {
         songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
@@ -767,29 +778,40 @@ async function songControlEmoji(message) {
     await message.react('⏩')
     await message.react('🔼')
     await message.react('🔽')
+    await message.react('⏹️')
+    await message.react('🔀')
+    await message.react('🔁')
+    await message.react('↩️')
     checkControlsEmoji(message);
 }
 
 async function refreshEmojiControls() {
     for (let messy of queue.values()) {
-        messy.collector.resetTimer();
+        if (messy.collector) {
+            messy.collector.resetTimer();
+            messy.message.edit("```md\nNow Playing\n#" + messy.songs[messy.index].title + "\n[" + MAIN.timeConvert(await currentSong(messy.message, null, null, true))
+                + "](" + MAIN.timeConvert(Math.floor(messy.songs[messy.index].duration)) + ")```");
+        }
     }
 }
 
-setInterval(refreshEmojiControls, 20 * 1000);
+setInterval(refreshEmojiControls, 5 * 1000);
 
 async function checkControlsEmoji(message) {
 
     let collector = await message.createReactionCollector(function (reaction, user) {
-        return ((reaction.emoji.name === '⏪') || (reaction.emoji.name === '⏯️') ||
+        return (((reaction.emoji.name === '⏪') || (reaction.emoji.name === '⏯️') ||
             (reaction.emoji.name === '⏩') || (reaction.emoji.name === '🔼') || (reaction.emoji.name === '🔽')
-            && (user.id != message.author.id))
+            || (reaction.emoji.name === '⏹️') || (reaction.emoji.name === '🔀') || (reaction.emoji.name === '↩️')
+            || (reaction.emoji.name === '🔁')) && (!user.bot))
     }, { time: 60000 });
-    collector.on('collect', function (emoji, user) {
-        console.log(user.id)
-        console.log(MAIN.botID)
+    collector.on('collect', async function (emoji, user) {
 
         let exactQueue = queue.get(emoji.message.guild.id);
+        // if (user.bot) {
+        //     emoji.users.remove(user);
+        //     return 111;
+        // }
         if (emoji.emoji.toString() == '⏪') {
 
             reverse(emoji.message, '1', true);
@@ -826,7 +848,40 @@ async function checkControlsEmoji(message) {
                 volume(emoji.message, '', null, (exactQueue.volume * 20))
             }
         }
-        emoji.users.remove(user);
+        else if (emoji.emoji.toString() == '⏹️') {
+
+            stop(emoji.message);
+        }
+        else if (emoji.emoji.toString() == '🔀') {
+
+            shuffle(emoji.message, null, null, true);
+        }
+        else if (emoji.emoji.toString() == '🔁') {
+
+            if (exactQueue.repeat == 1) {
+                repeat(emoji.message, null, null, 100);
+                MAIN.selfDestructMessage(emoji.message, "Will repeat the entire playlist!", 3, true);
+            }
+            else if (exactQueue.repeat == 100) {
+                repeat(emoji.message, null, null, -1);
+                MAIN.selfDestructMessage(emoji.message, "Repeat turned off!", 3, true);
+            }
+            else if (exactQueue.repeat == -1) {
+                repeat(emoji.message, null, null, 1);
+                MAIN.selfDestructMessage(emoji.message, "Will repeat the current song!", 3, true);
+            }
+        }
+        else if (emoji.emoji.toString() == '↩️') {
+            await exactQueue.message.delete();
+            exactQueue.message = null;
+            let newMessage = await emoji.message.channel.send("```md\nNow Playing\n#" + exactQueue.songs[exactQueue.index].title + "\n["
+                + '00:00'
+                + "](" + MAIN.timeConvert(Math.floor(exactQueue.songs[exactQueue.index].duration)) + ")```");
+            exactQueue.message = newMessage;
+            songControlEmoji(newMessage)
+        }
+        if (!(emoji.emoji.toString() == '↩️'))
+            emoji.users.remove(user);
     });
 
     let exactQueue = queue.get(message.guild.id);
@@ -837,10 +892,14 @@ async function playSong(guild, sonG, skip, message) {
     const serverQueue = queue.get(guild.id);
 
     if (!serverQueue.message) {
-        serverQueue.message = await message.channel.send(`Now playing ${sonG.title}!`);
+        serverQueue.message = await message.channel.send("```md\nNow Playing\n#" + sonG.title + "\n["
+            + '00:00'
+            + "](" + MAIN.timeConvert(Math.floor(sonG.duration)) + ")```");
         songControlEmoji(serverQueue.message)
     }
-    else serverQueue.message.edit(`Now playing ${sonG.title}!`);
+    else if (sonG) serverQueue.message.edit("```md\nNow Playing\n#" + sonG.title + "\n["
+        + '00:00'
+        + "](" + MAIN.timeConvert(Math.floor(sonG.duration)) + ")```");
 
     let song = sonG;
 
@@ -1266,7 +1325,7 @@ async function playUserPlayList(message, params, user) {
                 connection: null,
                 songs: [],
                 index: 0,
-                volume: 5,
+                volume: 3,
                 playing: true,
                 dispatcher: null,
                 repeat: -1,
@@ -1287,12 +1346,13 @@ async function playUserPlayList(message, params, user) {
                 cacheSong({ id: video.id, url: video.url });
             }
         }
-        message.channel.send(`${params.playlist.songs.length} songs have been added to the queue!`);
+        MAIN.selfDestructMessage(message, `${params.playlist.songs.length} songs have been added to the queue!`, 3, false);
 
         if (callPlay) {
             try {
                 var connection = await voiceChannel.join();
                 queueConstruct.connection = connection;
+                queueConstruct.songs[0].timePaused = 0;
                 playSong(message.guild, queueConstruct.songs[0], null, message);
             } catch (err) {
                 console.log(err);
