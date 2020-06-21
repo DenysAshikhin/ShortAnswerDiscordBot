@@ -32,9 +32,11 @@ const server = net.createServer(async (socket) => {
 
     socket.on('error', (err) => {
         // Handle errors here.
-        throw err;
+        console.log("Caught socket error");
     });
 });
+
+server.on('error', (err) => { console.log("Caught server error") })
 
 // Grab an arbitrary unused port.
 server.listen(0, '45.63.17.228', '33432', () => {
@@ -105,7 +107,7 @@ async function crawlOPGG(SOCKET, ZONE, summoner, looped) {
         if (puppeteerQueue.backlog.length > 0) {
             let activy = puppeteerQueue.backlog.shift();
             username = activy.username.replace(/\s/g, '+');
-            socket = activy.socke;
+            socket = activy.socket;
             zone = activy.zone;
             puppeteerQueue.active.set(uniqueID, { zone: zone, username: username, socket: activy.socket });
         }

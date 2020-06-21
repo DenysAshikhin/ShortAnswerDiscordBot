@@ -194,12 +194,15 @@ async function leagueStats(message, params, user) {
     //getMatchInfo(zone, summoner);
 
     //crawlOPGG(message, zone, args[0]);
+
+    let start = new Date();
     let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in get stats") });
     let messagy;
     let summonerTotalInfo;
     let summonerRankedInfo;
     let summonerFlexInfo;
-    socky.connect('40571', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
+    socky.connect('35011', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
     socky.on('data', async (data) => {
         let stringed = data.toString();
         let parsed = JSON.parse(stringed);
@@ -217,14 +220,20 @@ async function leagueStats(message, params, user) {
             }
         }
 
-        if (stringed.includes("totalInfo")) {
-            summonerTotalInfo = JSON.parse(stringed);
+        if (stringed.includes("totalStats")) {
+            summonerTotalInfo = JSON.parse(stringed).totalStats;
         }
         if (stringed.includes("rankedSolo")) {
-            summonerRankedInfo = JSON.parse(stringed);
+            summonerRankedInfo = JSON.parse(stringed).rankedSolo;
         }
         if (stringed.includes("rankedFlex")) {
-            summonerFlexInfo = JSON.parse(stringed);
+            summonerFlexInfo = JSON.parse(stringed).rankedFlex;
+
+            console.log(summonerTotalInfo)
+            console.log(summonerRankedInfo)
+            console.log(summonerFlexInfo)
+
+            message.channel.send(`It took ${Math.floor((new Date() - start)/1000)} seconds to get your request`);
 
             MAIN.prettyEmbed(message, "Here are the Leage of Legends stats for: " + summonerTotalInfo.name,
                 [
