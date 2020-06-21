@@ -226,7 +226,7 @@ async function leagueStats(message, params, user) {
         if (stringed.includes("rankedFlex")) {
             summonerFlexInfo = JSON.parse(stringed);
 
-            MAIN.prettyEmbed(updateMessage, "Here are the Leage of Legends stats for: " + summonerTotalInfo.name,
+            MAIN.prettyEmbed(message, "Here are the Leage of Legends stats for: " + summonerTotalInfo.name,
                 [
                     {
                         name: "Previous Ranks", value: `${summonerTotalInfo.previousRanks.reduce((accum, current, index) => { return `${current}\n${accum}`; }, '')}`
