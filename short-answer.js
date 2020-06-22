@@ -1,3 +1,7 @@
+const PORT = '42195';
+const IP = '45.63.17.228';
+exports.IP = IP;
+exports.PORT = PORT;
 const Discord = require('discord.js');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
@@ -101,7 +105,6 @@ const Embed = {
 };
 exports.Embed = Embed;
 
-
 const tags = [
     1,// - games
     2,// - stats
@@ -169,8 +172,8 @@ async function twitchInitiliasation() {
 try {
 
     config = require('./config.json');
-    if (defaultPrefix != '##')
-        twitchInitiliasation();
+    // if (defaultPrefix != '##')
+    //     twitchInitiliasation();
 
     spotifyClient = config.spotifyClient;
     exports.spotifyClient = spotifyClient;
@@ -255,10 +258,12 @@ connectDB.once('open', async function () {
     updateAll();
     populateCommandMap();
 
+
     Client.on("ready", () => {
 
         console.log("Ready!");
         exports.Client = Client;
+        checkTwitch();
 
         Client.user.setActivity("sa!help for information");
     });
@@ -461,10 +466,10 @@ async function triggerCommandHandler(message, user, skipSearch, emoji) {
         if (message.content == -1) return commandTracker.delete(message.author.id);
 
         let result = await handleCommandTracker(tracky, message, user, skipSearch, emoji);
-        console.log("AT THE END: ", result)
-        if (result == 1)
+        if (result == 1) {
             commandTracker.delete(user.id);
-
+            return result;
+        }
         return result;
     }
 }
@@ -514,10 +519,12 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch, 
 
             params = Math.floor(Number(params));
             params--;
-            console.log('params: ' + params);
             if (params > Math.Max_Safe_INTEGER) return message.channel.send("You have entered an invalid option, please try again!");
             if (params >= specificCommand.choices.length || params < 0) {
-                message.channel.send("You have entered an invalid number, please try again. Or type *-1* to quit the suggestion.");
+                if (emoji)
+                    selfDestructMessage(message, "You have entered an invalid number, please try again. Or type *-1* to quit the suggestion.", 3, emoji);
+                else
+                    message.channel.send("You have entered an invalid number, please try again. Or type *-1* to quit the suggestion.");
                 return -1;
             }
 
@@ -943,11 +950,15 @@ async function setEmojiCollector(message) {
         else if (emoji.emoji.toString() == '5️⃣') {
             choice = 5;
         }
-        //let finy =
-        await triggerCommandHandler(emoji.message, usery, false, choice);
-        // if (finy == 1) {
-        emoji.message.reactions.removeAll();
-        emoji.message.delete();
+        let finy = await triggerCommandHandler(emoji.message, usery, false, choice);
+
+        if (finy == 1) {
+            emoji.message.reactions.removeAll();
+            emoji.message.delete();
+        }
+        else {
+            emoji.users.remove(user);
+        }
         //}
     });
 }
@@ -1364,7 +1375,7 @@ exports.selfDestructMessage = selfDestructMessage;
 async function checkTwitch() {
     try {
         MISCELLANEOUS.checkUsersTwitchStreams(await getUsers());
-        MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
+        //MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
     }
     catch (err) {
         console.log(err);
@@ -1395,11 +1406,7 @@ process.on('unhandledException', (reason, p) => {
 
 
 
-
-//add a stop to the bot
-//add a shuffle to the bot
-//add a reset message button
-
+//-1 to stop suggestion prompt/delete it!
 
 //release 2
 //give people ability to choose how their menus are skinned!

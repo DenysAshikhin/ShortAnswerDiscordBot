@@ -178,25 +178,19 @@ async function leagueStats(message, params, user) {
     else
         zone = params.region;
 
-    // let summoner = await getSummoner(zone, args[0]);
-    // if (!summoner) {  }
 
-    // let mastery = await getChampionMastery(zone, summoner, 5);
-    // MAIN.prettyEmbed(message, `Here are the League of Legends stats for ${args[0]}`, mastery, -1, 1, 1);
-
-    // getLeagueEntries(zone, summoner);
-    //getMatchInfo(zone, summoner);
-
-    //crawlOPGG(message, zone, args[0]);
 
     let start;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in get stats") });
-    let messagy;
     let summonerTotalInfo;
     let summonerRankedInfo;
     let summonerFlexInfo;
-    socky.connect('39923', '45.63.17.228', () => { socky.write(`${args[0]},${zone}`) });
+    let messagy;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in get stats") });
+
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+        socky.write(JSON.stringify({ command: 'league_stats', params: [args[0], zone] }))
+    });
     socky.on('data', async (data) => {
         let stringed = data.toString();
         let parsed = JSON.parse(stringed);
@@ -273,89 +267,112 @@ async function getTwitchChannelByID(id) {
 async function followTwitchChannel(message, params, user) {
 
     if (!user.twitchFollows) user.twitchFollow = [];
-    let args = message.content.split(" ").slice(1).join(" ");
+    let args = message.content.split(" ").slice(1).join(" ").trim();
 
-    let targetChannel = await getTwitchChannel(args);
-    if (!targetChannel) return message.channel.send("I could not find such a channel, try again?");
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in get stats") });
 
-    if (user.twitchFollows.includes(targetChannel._data.id)) return message.channel.send("You are already following that channel!");
-    if (user.linkedTwitch == (targetChannel._data.id)) return message.channel.send("You can't follow your own linked twitch!");
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+        socky.write(JSON.stringify({ command: 'follow_twitch_channel', params: [args, user.twitchFollows, user.linkedTwitch] }))
+    });
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed);
 
-    user.twitchFollows.push(targetChannel._data.id);
-    User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: user.twitchFollows } }, function (err, doc, res) { });
-    return message.channel.send(`Succesfully added ${targetChannel._data.display_name} to your follow list!`);
+        if (parsed.status) {
+            status = parsed.status;
+            switch (parsed.status) {
+                case -1:
+                    message.channel.send("I could not find such a channel, try again?");
+                    socky.destroy();
+                    break;
+                case -2:
+                    message.channel.send("You're already following this channel!");
+                    socky.destroy();
+                    break;
+                case -3:
+                    message.channel.send("You can't follow your own linked twitch!");
+                    socky.destroy();
+                    break;
+            }
+        }
+        else if (parsed.result) {
+            User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.result } }, function (err, doc, res) { });
+            return message.channel.send(`Succesfully added ${parsed.targetChannelName} to your follow list!`);
+        }
+    })
+
+    return -1;
 }
 exports.followTwitchChannel = followTwitchChannel;
 
 async function unfollowTwitchChannel(message, params, user) {
+
 
     if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");
     if (user.twitchFollows.length == 0) return message.channel.send("You do not have twitch channels being followed!");
     let args = message.content.split(" ").slice(1).join(" ");
     if (!args) return message.channel.send("You have to specify the name of the channel you wish to unfollow!");
 
-    if (!params.looped) {
-        let promiseArray = [];
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in unfollowtwitch") });
 
-        for (follow of user.twitchFollows)
-            promiseArray.push(getTwitchChannelByID(follow));
-
-        let finishedPromises = await Promise.all(promiseArray);
-
-        let found = finishedPromises.find(element => element._data.display_name == args);
-
-        let channelNames = [];
-        let internalArray = [];
-
-        for (channel of finishedPromises) {
-            channelNames.push(channel._data.display_name);
-            internalArray.push({ looped: true, channel: channel.id, name: channel._data.display_name });
-        }
-
-        if (!found) {
-            return MAIN.generalMatcher(message, args, user, channelNames, internalArray, unfollowTwitchChannel, "Select which channel you meant to remove:");
-        }
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+        if (!params.looped)
+            socky.write(JSON.stringify({ command: 'unfollow_twitch_channel', params: [args, user.twitchFollows] }))
         else
-            return unfollowTwitchChannel(message, { looped: true, channel: found.id, name: found._data.display_name }, user);
-    }
+            socky.write(JSON.stringify({ command: 'unfollow_twitch_channel', params: [params.channel, user.twitchFollows, true] }))
+    });
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed);
 
-    user.twitchFollows.splice(user.twitchFollows.indexOf(params.channel), 1);
-    User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: user.twitchFollows } }, function (err, doc, res) { });
-    return message.channel.send(`Successfully removed ${params.name} from your follows!`);
+        if (parsed.channelNames) {
+
+            console.log('inside of if')
+            MAIN.generalMatcher(message, args, user, parsed.channelNames, parsed.internalArray, unfollowTwitchChannel, "Select which channel you meant to remove:");
+            socky.destroy();
+            status = -1;
+        }
+        else if (parsed.twitchFollows) {
+            console.log('inside of else if')
+            User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.twitchFollows } }, function (err, doc, res) { });
+            message.channel.send(`Successfully removed ${parsed.name} from your follows!`);
+            socky.destroy();
+            status = 1;
+        }
+    });
+
+    return status;
 }
 exports.unfollowTwitchChannel = unfollowTwitchChannel;
-
-async function isStreamLive(id) {
-    return await MAIN.twitchClient.helix.streams.getStreamByUserId(id);
-}
 
 async function viewTwitchFollows(message, params, user) {
 
     if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");
     if (user.twitchFollows.length == 0) return message.channel.send("You do not have twitch channels being followed!");
 
-    let promiseArray = [];
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in unfollowtwitch") });
 
-    for (follow of user.twitchFollows)
-        promiseArray.push(getTwitchChannelByID(follow));
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
 
-    let finishedPromises = await Promise.all(promiseArray);
-    finishedPromises.sort((a, b) => { return b._data.view_count - a._data.view_count });
-    let finalArray = [];
+        socky.write(JSON.stringify({ command: 'view_twitch_follows', params: [user.twitchFollows] }));
+    });
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed).finalArray;
 
-    for (promisy of finishedPromises) {
+        MAIN.prettyEmbed(message, `You are following ${parsed.length} channels!`, parsed,
+            -1, 1, 'md');
+        status = 1;
+        socky.destroy();
+    });
 
-        let streamy = await isStreamLive(promisy._data.id);
-        if (streamy)
-            finalArray.push({ name: 'Online', value: `<${promisy._data.display_name} is currently live with= ${streamy._data.viewer_count} Viewers!>\n` });
-        else
-            finalArray.push({ name: 'Offline', value: `<${promisy._data.display_name} - Total Views=${promisy._data.view_count}>\n` });
-    }
-
-    finalArray.sort((a, b) => b.name.localeCompare(a.name));
-
-    MAIN.prettyEmbed(message, `You are following ${promiseArray.length} channels!`, finalArray,
-        -1, 1, 'md');
+    return status;
 }
 exports.viewTwitchFollows = viewTwitchFollows;
 
@@ -365,36 +382,50 @@ async function showChannelTwitchLinks(message, params, user) {
 
     if (!guild.channelTwitch || (guild.channelTwitch.length == 0)) return message.channel.send("There are no pairs setup for this server!");
 
-    let promiseArray = [];
-    let textChannels = [];
 
-    for (follow of guild.channelTwitch) {
-        promiseArray.push(getTwitchChannelByID(follow[0]));
-        textChannels.push(message.guild.channels.cache.get(follow[1]));
-    }
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in unfollowtwitch") });
 
-    let finishedPromises = await Promise.all(promiseArray);
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
 
-    let finishedArray = [];
+        socky.write(JSON.stringify({ command: 'show_channel_twitch_links', params: [guild.channelTwitch] }));
+    });
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed).promiseArray;
 
-    for (let i = 0; i < finishedPromises.length; i++) {
-        finishedArray.push({ texty: textChannels[i], streamy: finishedPromises[i] });
-    }
+        let promiseArray = [];
+        let textChannels = [];
 
-    finishedArray.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
+        for (follow of guild.channelTwitch) {
+            textChannels.push(message.guild.channels.cache.get(follow[1]));
+        }
 
-    MAIN.prettyEmbed(message, "Here are the ServerChannel-TwitchStreamer pairs:",
-        finishedArray.reduce((accum, current) => {
-            accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
-            return accum;
-        }, []), -1, 1, 'md');
-    return -1;
+
+        let finishedArray = [];
+
+        for (let i = 0; i < parsed.length; i++) {
+            finishedArray.push({ texty: textChannels[i], streamy: parsed[i] });
+        }
+
+        finishedArray.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
+
+        MAIN.prettyEmbed(message, "Here are the ServerChannel-TwitchStreamer pairs:",
+            finishedArray.reduce((accum, current) => {
+                accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
+                return accum;
+            }, []), -1, 1, 'md');
+
+        status = 1;
+        socky.destroy();
+    });
+
+    return status;
 }
 exports.showChannelTwitchLinks = showChannelTwitchLinks;
 
 async function removeChannelTwitchLink(message, params, user) {
-
-    console.log(message.content)
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can use this command!");
@@ -405,31 +436,44 @@ async function removeChannelTwitchLink(message, params, user) {
 
     if (!message.mentions.channels.length != 1) return message.channel.send("You have to mention a channel to remove the twitch notifications from!");
 
-    let args = message.content.split(" ").slice(1);
+    let args = message.content.split(" ").slice(1).join(' ').split(',');
 
     if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
 
-    let streamer;
-    try {
-        streamer = await getTwitchChannel(args[0]);
-    }
-    catch{
 
-    }
-    if (!streamer) return message.channel.send("I could not find a channel with that name, try again?");
 
-    if (!guild.channelTwitch) guild.channelTwitch = [];
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in removeTwitchPair") });
 
-    for (let i = 0; i < guild.channelTwitch.length; i++) {
-        if (message.mentions.channels.first().id == guild.channelTwitch[i][1]) {
-            if (streamer._data.id == guild.channelTwitch[i][0]) {
-                guild.channelTwitch.splice(i, 1);
-                Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelTwitch: guild.channelTwitch } }, function (err, doc, res) { });
-                return message.channel.send(`Successfully unlinked ${streamer._data.display_name} and <#${message.mentions.channels.first().id}>`)
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+
+        socky.write(JSON.stringify({ command: 'remove_channel_twitch_link', params: [args[0]] }));
+    });
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed).streamer;
+
+
+        if (!guild.channelTwitch) guild.channelTwitch = [];
+
+        for (let i = 0; i < guild.channelTwitch.length; i++) {
+            if (message.mentions.channels.first().id == guild.channelTwitch[i][1]) {
+                if (parsed._data.id == guild.channelTwitch[i][0]) {
+                    guild.channelTwitch.splice(i, 1);
+                    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelTwitch: guild.channelTwitch } }, function (err, doc, res) { });
+                    status = 1;
+                    socky.destroy();
+                    message.channel.send(`Successfully unlinked ${parsed._data.display_name} and <#${message.mentions.channels.first().id}>`);
+                    return status;
+                }
             }
         }
-    }
-    return message.channel.send("No such pair exists for this server, try again?");
+        message.channel.send("No such pair exists for this server, try again?");
+        status = 1;
+        socky.destroy();
+    });
+    return status;
 }
 exports.removeChannelTwitchLink = removeChannelTwitchLink;
 
@@ -457,41 +501,54 @@ async function linkTwitch(message, params, user) {
 
     let args = message.content.split(" ").slice(1).join(" ");
     if (!args) return message.channel.send("You did not provide the name of the channel you wish to link to!");
-    let streamer = await getTwitchChannel(args);
-    if (!streamer) return message.channel.send("I could not find a channel with that name, try again?");
 
     if (!params.looped) {
+        let status;
+        let socky = new net.Socket();
+        socky.on('error', (err) => { console.log("socket error in LinkTwitch") });
 
-        let follows = await streamer.getFollows();
-        let followIDs = [];
-        if (follows)
-            for (chan of follows.data)
-                followIDs.push(chan._data.to_id);
+        socky.connect(MAIN.PORT, MAIN.IP, () => {
 
-        let goodArray = [];
+            socky.write(JSON.stringify({ command: 'link_twitch', params: [args, user.twitchLinks] }));
+        });
 
-        for (channy of followIDs) {
-            let tester = await getTwitchChannelByID(channy);
+        socky.on('data', async (data) => {
+            let stringed = data.toString();
+            let parsed = JSON.parse(stringed);
 
-            if (tester)
-                goodArray.push(channy)
+            if (parsed.status) {
+                status = -1;
+                message.channel.send("I could not find a channel with that name, try again?")
+            }
+            else {
+
+                linkTwitch(message, { looped: true, streamer: parsed.streamer, goodArray: parsed.goodArray }, user);
+                status = 1;
+                socky.destroy();
+            }
+        });
+        return status;
+    }
+    else {
+
+        if (params.keep) {
+            console.log(params.streamer)
+            User.findOneAndUpdate({ id: user.id }, { $set: { linkedTwitch: params.streamer._data.id, twitchFollows: params.followArr } }, function (err, doc, res) { });
+            message.channel.send(`Succesfully linked ${params.streamer._data.display_name} to your account, you now have ${params.followArr.length} channels you are following!`);
+            return 1;
         }
+        else if (user.twitchFollows && (user.twitchFollows.length > 0)) {
 
-        if (user.linkedTwitch && user.twitchFollows) {
-
-            if (user.twitchFollows)
+            if (user.twitchFollows.length > 0)
                 return MAIN.generalMatcher(message, -23, user, ['Combine', 'Remove'],
-                    [{ looped: true, keep: true, followArr: goodArray.concat(user.twitchFollows.filter(item => !followIDs.includes(item))) },
-                    { looped: true, keep: false, followArr: goodArray }],
+                    [{ streamer: params.streamer, looped: true, keep: 1, followArr: params.goodArray.concat(user.twitchFollows.filter(item => !params.goodArray.includes(item))) },
+                    { streamer: params.streamer, looped: true, keep: -1, followArr: params.goodArray }],
                     linkTwitch, "You already have a linked twitch account or channels you have followed, would you like to combine the old follows, or remove them?");
         }
         else {
-            return linkTwitch(message, { looped: true, followArr: goodArray }, user);
+            return linkTwitch(message, { looped: true, followArr: params.goodArray, keep: -3, streamer: params.streamer }, user);
         }
     }
-    User.findOneAndUpdate({ id: user.id }, { $set: { linkedTwitch: streamer.id, twitchFollows: params.followArr } }, function (err, doc, res) { });
-    message.channel.send(`Succesfully linked ${streamer.displayName} to your account, you now have ${params.followArr.length} channels you are following!`);
-    return -1;
 }
 exports.linkTwitch = linkTwitch;
 
@@ -502,35 +559,47 @@ async function linkChannelWithTwitch(message, params, user) {
 
     if (!message.mentions.channels.length != 1) return message.channel.send("You have to mention a channel to put the twitch notifications in!");
 
-    let args = message.content.split(" ").slice(1);
+    let args = message.content.split(" ").slice(1).join(' ').split(',');
 
     if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
 
-    let streamer;
-    try {
-        streamer = await getTwitchChannel(args[0]);
-    }
-    catch{
-
-    }
-    if (!streamer) return message.channel.send("I could not find a channel with that name, try again?");
-
     let guild = await MAIN.findGuild({ id: message.guild.id });
-
     if (!guild.channelTwitch) guild.channelTwitch = [];
 
-    for (channel of guild.channelTwitch) {
-        if (channel[1] == message.mentions.channels.first().id) {
-            if (channel[0] == streamer._data.id) {
-                return message.channel.send(`${streamer._data.display_name}'s live stream notifications are already posted in ${message.mentions.channels.first()}!`);
+    let ID = message.mentions.channels.first().id
+
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in link_channel_with_twitch") });
+
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+
+        socky.write(JSON.stringify({ command: 'link_channel_with_twitch', params: [args[0], guild.channelTwitch, ID] }));
+    });
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed);
+
+        if (parsed.status) {
+            if (parsed.status == -1) {
+                message.channel.send("I could not find a streamer with that name, try again?");
+                result = -1;
+                socky.destroy();
+            }
+            else {
+                message.channel.send("Such a ServerChannel - TwitchStreamer pair already exists!");
+                result = -2;
+                socky.destroy();
             }
         }
-    }
-
-    guild.channelTwitch.push([streamer._data.id, message.mentions.channels.first().id])
-    Guild.findOneAndUpdate({ id: guild.id }, { $set: { channelTwitch: guild.channelTwitch } }, function (err, doc, res) { if (err) console.log(err) });
-    message.channel.send(`Succesfully linked ${streamer._data.display_name} to ${message.mentions.channels.first()}`);
-    return -1;
+        else {
+            Guild.findOneAndUpdate({ id: guild.id }, { $set: { channelTwitch: parsed.channelTwitch } }, function (err, doc, res) { if (err) console.log(err) });
+            message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
+            status = 1;
+            socky.destroy();
+        }
+    });
+    return status;
 }
 exports.linkChannelWithTwitch = linkChannelWithTwitch;
 
@@ -835,123 +904,74 @@ async function decider(message, params, user) {
 exports.decider = decider;
 
 async function checkGuildTwitchStreams(guilds) {
-
-    for (guild of guilds) {
-        for (channel1 of guild.channelTwitch) {
-            let channel = channel1;
-            getTwitchChannelByID(channel[0])
-                .then(async (streamer) => {
-                    let stream = await streamer.getStream();
-
-                    if (stream) {
-
-                        let streamDate = new Date(stream._data.started_at);
-                        let found = false;
-                        let index = -1;
-
-                        if (!guild.twitchNotifications) guild.twitchNotifications = [];
-
-                        for (let i = 0; i < guild.twitchNotifications.length; i++) {
-                            if (guild.twitchNotifications[i][0] == stream._data.user_id) {
-                                index = i;
-
-                                let previousTime = new Date(guild.twitchNotifications[i][1]);
-                                if ((previousTime - streamDate) == 0)
-                                    found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-
-                            if (index != -1)
-                                guild.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
-                            else
-                                guild.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
-
-                            Guild.findOneAndUpdate({ id: guild.id }, { $set: { twitchNotifications: guild.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
-
-                            let messageSent = false;
-
-                            for (let guild of MAIN.Client.guilds.cache) {
-
-                                for (channy of guild[1].channels.cache) {
-                                    if (channy[1].id == channel[1]) {
-                                        const permission = channy[1].permissionsFor(MAIN.Client.user);
-                                        if (permission.has('SEND_MESSAGES')) {
-                                            channy[1].send(`${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`);
-                                            messageSent = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (messageSent) break;
-                            }
-                        }
-                    }
-                });
-        }
+    let guildArray = [];
+    for (let guild of guilds) {
+        guildArray.push({ channelTwitch: guild.channelTwitch, twitchNotifications: guild.twitchNotifications, id: guild.id });
     }
+
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in check_guild_twitch_streams") });
+
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+
+        socky.write(JSON.stringify({ command: 'check_guild_twitch_streams', params: [guildArray] }));
+    });
+
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed).completeArray;
+
+        for (entry of parsed) {
+
+            MAIN.Client.guilds.cache.get(entry.guildID).channels.cache.get(entry.channelID).send(entry.alertMessage);
+            Guild.findOneAndUpdate({ id: entry.guildID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+        }
+        status = 1;
+        socky.destroy();
+    });
+    return status;
 }
 exports.checkGuildTwitchStreams = checkGuildTwitchStreams;
 
 async function checkUsersTwitchStreams(users) {
 
-    for (user1 of users) {
-        for (channel of user1.twitchFollows) {
-            let USER = user1;
-            getTwitchChannelByID(channel)
-                .then(async (streamer) => {
-                    let stream = await streamer.getStream();
-                    if (stream) {
-
-                        console.log("IM AT: " + USER.displayName)
-                        let streamDate = new Date(stream._data.started_at);
-                        let found = false;
-                        let index = -1;
-
-                        if (!USER.twitchNotifications) USER.twitchNotifications = [];
-
-                        for (let i = 0; i < USER.twitchNotifications.length; i++) {
-                            if (USER.twitchNotifications[i][0] == stream._data.user_id) {
-                                index = i;
-
-                                let previousTime = new Date(USER.twitchNotifications[i][1]);
-                                if ((previousTime - streamDate) == 0)
-                                    found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-
-                            if (index != -1)
-                                USER.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
-                            else
-                                USER.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
-
-                            User.findOneAndUpdate({ id: USER.id }, { $set: { twitchNotifications: USER.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
-
-                            //console.log(MAIN.Client.guilds.cache)
-
-                            for (let guild of MAIN.Client.guilds.cache) {
-                                let messageSent = false;
-
-                                //                                            console.log(guild[1].name)
-                                for (member of guild[1].members.cache) {
-                                    console.log(member[1].displayName, " ::: ", USER.displayName)
-                                    if (member[1].user.id == USER.id) {
-                                        console.log("WWWWTF")
-                                        member[1].user.send(`${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`);
-                                        messageSent = true;
-                                        break;
-                                    }
-                                }
-                                if (messageSent) break;
-                            }
-                        }
-                    }
-                })
-        }
+    let userArray = [];
+    for (let user of users) {
+        if (user.twitchFollows.length > 0)
+            userArray.push({ twitchFollows: user.twitchFollows, twitchNotifications: user.twitchNotifications, id: user.id });
     }
+
+
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in check_user_twitch_streams") });
+
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+        socky.write(JSON.stringify({ command: 'check_user_twitch_streams', params: [userArray] }));
+    });
+
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed).completeArray;
+        console.log(parsed);
+        for (entry of parsed) {
+            for (let guild of MAIN.Client.guilds.cache.values()) {
+
+                let member = guild.members.cache.get(entry.userID);
+                if (!member) continue;
+                console.log(member.displayName)
+                member.send(entry.alertMessage);
+                User.findOneAndUpdate({ id: entry.userID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+                status = 1;
+                socky.destroy();
+                return status;
+            }
+        }
+        status = -1;
+        socky.destroy();
+    });
+    return status;
 }
 exports.checkUsersTwitchStreams = checkUsersTwitchStreams;
 
