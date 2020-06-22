@@ -54,7 +54,6 @@ async function spotifyPlaylist(message, params, user) {
 
         try {
             playlistTracks = await Spotify.Tracks.getPlaylistTracks(id);
-            console.log("FTW")
         }
         catch (err) {
             console.log("Not spotify!")
@@ -71,7 +70,6 @@ async function spotifyPlaylist(message, params, user) {
 
         try {
             let tracky = await new Spotify.Track(id).getFullObject();
-            console.log("WTF")
             playlistTracks.items.push(tracky);
         }
         catch (err) {
@@ -816,7 +814,6 @@ async function checkControlsEmoji(message) {
             reverse(emoji.message, '1', true);
         }
         else if (emoji.emoji.toString() == '⏯️') {
-            console.log(exactQueue.songs[exactQueue.index].paused)
             if (exactQueue.songs[exactQueue.index].paused) {
                 resume(emoji.message);
             }
@@ -922,7 +919,7 @@ async function playSong(guild, sonG, skip, message) {
 
         const Dispatcher = await serverQueue.connection.play(audioOutput, { seek: song.offset })
             .on('error', error => {
-                console.log("Error inside of dispatcher playing?: ", error);
+                console.log("Error inside of dispatcher playing?: ");
             })
             .on('finish', () => {
 
@@ -949,7 +946,6 @@ async function playSong(guild, sonG, skip, message) {
         let percentageToDownload = 100 - download.get(guild.id).progress;
         let percentageToSkip = (song.offset / song.duration) * 100;
 
-        console.log(`toDownload ${percentageToDownload} || toSkip ${percentageToSkip}`);
 
         if ((percentageToSkip > percentageToDownload) && (download.get(guild.id).songToDownload.id == song.id)) {
             console.log("chose to wait");
@@ -961,7 +957,6 @@ async function playSong(guild, sonG, skip, message) {
         }
     }
     else {
-        console.log("inside of else", song.url, song.title);
 
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
 
@@ -969,7 +964,7 @@ async function playSong(guild, sonG, skip, message) {
 
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
-                console.log("inside of error   ", error);
+                console.log("inside of error   ");
             })
             .on('finish', () => {
 
@@ -1292,7 +1287,6 @@ async function removeSong(message, params, user) {
 exports.removeSong = removeSong;
 
 async function playUserPlayList(message, params, user) {
-    console.log("START: ", playUserPlayList);
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
@@ -1371,7 +1365,6 @@ async function playUserPlayList(message, params, user) {
             internalArray.push({ playlist: user.playlists[i] });
         }
         let query = params ? params : -23;
-        console.log("REIGHT BEFORE::::", playUserPlayList);
         return MAIN.generalMatcher(message, query, user, promptArray, internalArray, playUserPlayList, `Enter the number of the playlist you wish to load the songs from!`)
     }
 }
