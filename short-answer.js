@@ -62,12 +62,13 @@ try {
     }
 }
 catch (err) {
-    console.log(err)
     console.log("config.json doesn't exist - probably running on heroku?");
 
 
     uri = process.env.uri;
+    console.log(uri);
     token = process.env.token;
+    console.log(token)
     spotifyClient = process.env.spotifyClient;
     exports.spotifyClient = spotifyClient;
     spotifySecret = process.env.spotifySecret;
