@@ -1047,7 +1047,7 @@ async function cacheSong(song, guild) {
             let youtubeResolve = downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
             let writeStream = fs.createWriteStream(tempAudio);
             writeStream.on('finish', () => {
-                console.log("FINISHED: WRITE STREAM " + song.title);
+                //console.log("FINISHED: WRITE STREAM " + song.title);
                 mv(tempAudio, audioOutput, function (err) {
                     if (err) {
                         console.log(err);
