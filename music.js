@@ -6,7 +6,6 @@ const ytsr = require('ytsr');
 const readline = require('readline');
 var mv = require('mv');
 const User = require('./User.js');
-const config = require('./config.json');
 const fs = require('fs');
 const Fuse = require('fuse.js');
 const fsPromises = fs.promises;
@@ -17,8 +16,6 @@ var download = new Map();
 var activeSkips = new Map();
 var lastSkip = new Map();
 var needle = require('needle');
-const { lookup } = require('dns');
-const main = require('ytsr');
 
 async function authoriseSpotify() {
 
