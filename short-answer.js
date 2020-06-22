@@ -2,6 +2,77 @@ const PORT = '42195';
 const IP = '45.63.17.228';
 exports.IP = IP;
 exports.PORT = PORT;
+var defaultPrefix = "sa!";
+global.prefix;
+
+var uri = "";
+var token = "";
+var lastMessage;
+
+var spotifyClient;
+var spotifySecret;
+var HEROKU;
+
+async function twitchInitiliasation() {
+
+    let clienty = twitchConfig.twitchClient;
+    let clientSecret = twitchConfig.twitchSecret;
+    let accessy = twitchConfig.twitchAccess;
+    let refreshy = twitchConfig.twitchRefresh;
+    let expiry = twitchConfig.expiryTimestamp;
+
+    twitchClient = TwitchClient.withCredentials(clienty, accessy, undefined, {
+        clientSecret,
+        refreshToken: refreshy,
+        expiry: expiry === null ? null : new Date(expiry),
+        onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
+            const newTokenData = {
+                ...twitchConfig,
+                twitchAccess: accessToken,
+                twitchRefresh: refreshToken,
+                expiryDate: expiryDate === null ? null : expiryDate.getTime()
+            };
+            await fs.promises.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8')
+            //    exports.twitchClient = twitchClient;
+        }
+    });
+    exports.twitchClient = twitchClient;
+}
+
+try {
+
+    config = require('./config.json');
+    // if (defaultPrefix != '##')
+    //     twitchInitiliasation();
+
+    spotifyClient = config.spotifyClient;
+    exports.spotifyClient = spotifyClient;
+    spotifySecret = config.spotifySecret;
+    exports.spotifySecret = spotifySecret
+
+    if (process.argv.length == 3) {
+
+        uri = config.uri;
+        token = config.token;
+    }
+    else {
+        uri = config.uri;
+        token = config.TesterToken;
+        defaultPrefix = "##";
+    }
+}
+catch (err) {
+    console.log(err)
+    console.log("config.json doesn't exist - probably running on heroku?");
+
+
+    uri = process.env.uri;
+    token = process.env.token;
+    spotifyClient = process.env.spotifyClient;
+    exports.spotifyClient = spotifyClient;
+    spotifySecret = process.env.spotifySecret;
+    exports.spotifySecret = spotifySecret
+}
 const Discord = require('discord.js');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
@@ -119,8 +190,6 @@ const tags = [
 ]
 exports.tags = tags;
 
-
-//FAT NOTE: (true >= false) is TRUE
 var Client = new Discord.Client();
 
 var twitchClient;
@@ -132,77 +201,7 @@ var spotifyClientID;
 
 
 
-var defaultPrefix = "sa!";
-global.prefix;
 
-var uri = "";
-var token = "";
-var lastMessage;
-
-var spotifyClient;
-var spotifySecret;
-var HEROKU;
-
-async function twitchInitiliasation() {
-
-    let clienty = twitchConfig.twitchClient;
-    let clientSecret = twitchConfig.twitchSecret;
-    let accessy = twitchConfig.twitchAccess;
-    let refreshy = twitchConfig.twitchRefresh;
-    let expiry = twitchConfig.expiryTimestamp;
-
-    twitchClient = TwitchClient.withCredentials(clienty, accessy, undefined, {
-        clientSecret,
-        refreshToken: refreshy,
-        expiry: expiry === null ? null : new Date(expiry),
-        onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
-            const newTokenData = {
-                ...twitchConfig,
-                twitchAccess: accessToken,
-                twitchRefresh: refreshToken,
-                expiryDate: expiryDate === null ? null : expiryDate.getTime()
-            };
-            await fs.promises.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8')
-            //    exports.twitchClient = twitchClient;
-        }
-    });
-    exports.twitchClient = twitchClient;
-}
-
-try {
-
-    config = require('./config.json');
-    // if (defaultPrefix != '##')
-    //     twitchInitiliasation();
-
-    spotifyClient = config.spotifyClient;
-    exports.spotifyClient = spotifyClient;
-    spotifySecret = config.spotifySecret;
-    exports.spotifySecret = spotifySecret
-
-    if (process.argv.length == 3) {
-
-        uri = config.uri;
-        token = config.token;
-    }
-    else {
-        uri = config.uri;
-        token = config.TesterToken;
-        defaultPrefix = "##";
-    }
-}
-catch (err) {
-    console.log(err)
-    console.log("config.json doesn't exist - probably running on heroku?");
-
-
-    uri = process.env.uri;
-    token = process.env.token;
-    spotifyClient = process.env.spotifyClient;
-    exports.spotifyClient = spotifyClient;
-    spotifySecret = process.env.spotifySecret;
-    exports.spotifySecret = spotifySecret
-}
 
 
 
@@ -263,7 +262,6 @@ connectDB.once('open', async function () {
 
         console.log("Ready!");
         exports.Client = Client;
-        checkTwitch();
 
         Client.user.setActivity("sa!help for information");
     });
@@ -1375,7 +1373,7 @@ exports.selfDestructMessage = selfDestructMessage;
 async function checkTwitch() {
     try {
         MISCELLANEOUS.checkUsersTwitchStreams(await getUsers());
-        //MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
+        MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
     }
     catch (err) {
         console.log(err);
