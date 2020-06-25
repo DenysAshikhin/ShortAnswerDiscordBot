@@ -94,7 +94,9 @@
         "PAIRCHANNELWITHTWITCH",
         "VIEWCHANNELTWITCHPAIRS",
         "REMOVECHANNELTWITCHPAIR",
-        "LEAGUESTATS"
+        "LEAGUESTATS",
+
+        "RLRANKS"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -191,7 +193,9 @@
         "Tells the bot to put a notification in the @mentioned channel when the specified twitch streamer goes live!",
         "Shows you the server channel - twitch streamer pairs.",
         "Removes a serverChannel - twitchStreamer pair.",
-        "Shows you your league stats, or the stats of another person. You have to specify the region and their summoner name by a comma! **Default zone is 'na'!**"
+        "Shows you the League of Legends stats of a summoner. You have to specify the region and their summoner name seperated by a comma! **Default zone is 'na'!**",
+        
+        "Shows you the Rocket League ranks of another person. You have to specify the platform and their name seperated by a comma! **Default platform is 'steam'!**. The others are: ps for playstation and xbox for...xbox"
     ],
         
     "example": [
@@ -289,7 +293,9 @@
         ["1) pairChannelWithTwitch summit1g #nameOfTextChannel"],
         ["1) showChannelTwitchPairs"],
         ["1) removeChannelTwitchPairs summit1g, #nameOfTextChannel"],
-        ["1) leagueStats", "2) leagueStats TheLastSpark", "3) leageStats TheLastSpark, na"]
+        ["1) leagueRank TheLastSpark", "2) leagueRank TheLastSpark, na"],
+
+        ["1) rlStats TheLastSpark", "2) rlStats TheLastSpark, xbox"]
     ],
     "subsection": [
         [3],
@@ -386,6 +392,8 @@
         [3, 5],
         [3],
         [3, 5],
+        [3],
+
         [3]
     ]
 }

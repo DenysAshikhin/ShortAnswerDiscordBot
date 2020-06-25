@@ -158,9 +158,8 @@ async function leagueStats(message, params, user) {
 
     //if (!user.twitchFollows) user.twitchFollow = [];
     let args = message.content.split(" ").slice(1).join(' ').split(',');
-    if (!user.linkedLeague) user.linkedLeague = [];
 
-    if ((args.length == 0) && (user.linkedLeague.length == 0)) return message.channel.send("You don't have a league account linked, or did not provide at least a summoner name!");
+    if ((args.length == 0) && (!user.linkedLeague)) return message.channel.send("You don't have a league account linked, or did not provide at least a summoner name!");
 
     let zone = 'na';
     if (!params.looped) {
@@ -177,8 +176,6 @@ async function leagueStats(message, params, user) {
     }
     else
         zone = params.region;
-
-
 
     let start;
     let summonerTotalInfo;
@@ -254,6 +251,48 @@ async function leagueStats(message, params, user) {
 }
 exports.leagueStats = leagueStats;
 
+const RLRanks = async function (message, params, user) {
+
+    let args = message.content.split(" ").slice(1).join(' ').split(',');
+
+    if ((args.length == 0) && (!user.linkedLeague)) return message.channel.send("You don't have a Rocket League account linked, or did not provide at least a summoner name!");
+
+    let zones = ['steam', 'ps', 'xbox'];
+    let zone = zones[0];
+
+
+    if (!params.looped) {
+        if (args.length > 1) {
+            zone = args[1].toLowerCase();
+            if (zones.includes(zone)) {
+                zone = zones[zones.indexOf(zone)];
+            }
+            else
+                return MAIN.generalMatcher(message, zone, user, zones,
+                    zones.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    RLRanks, "Please indicate which platform you wanted to search!");
+        }
+    }
+    else
+        zone = params.region;
+
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in get stats") });
+
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+        socky.write(JSON.stringify({ command: 'rocket_league_ranks', params: [zone, args[0], message.guild.id, message.channel.id] }))
+    });
+    socky.on('close', (had_error) => {
+        console.log("socket closed");
+        console.log(had_error)
+        socky.destroy();
+        console.log("destroyed the closed socket?");
+    })
+
+    return -1;
+}
+exports.RLRanks = RLRanks;
+
 async function getTwitchChannel(streamer) {
     const user = await MAIN.twitchClient.helix.users.getUserByName(streamer);
     return user;
@@ -268,6 +307,11 @@ async function followTwitchChannel(message, params, user) {
 
     if (!user.twitchFollows) user.twitchFollow = [];
     let args = message.content.split(" ").slice(1).join(" ").trim();
+    if (!args) {
+
+        message.channel.send("Try again with the name of the streamer you want to follow!");
+        return -1;
+    }
 
     let status;
     let socky = new net.Socket();
@@ -335,10 +379,11 @@ async function unfollowTwitchChannel(message, params, user) {
             MAIN.generalMatcher(message, args, user, parsed.channelNames, parsed.internalArray, unfollowTwitchChannel, "Select which channel you meant to remove:");
             socky.destroy();
             status = -1;
-        }
+        }//147711920
         else if (parsed.twitchFollows) {
             console.log('inside of else if')
-            User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.twitchFollows } }, function (err, doc, res) { });
+            console.log(parsed.twitchFollows)
+            User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.twitchFollows } }, function (err, doc, res) { if (err) console.log(err) });
             message.channel.send(`Successfully removed ${parsed.name} from your follows!`);
             socky.destroy();
             status = 1;

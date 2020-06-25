@@ -1,4 +1,5 @@
 const PORT = '33432';
+//const IP = '127.0.0.1';
 const IP = '45.63.17.228';
 /*
 const PORT = '43125';
@@ -82,9 +83,10 @@ async function OSU() {
     console.log(await mem.info());
     console.log(await cpu.usage());
 }
-setInterval(OSU, 10000);
+//setInterval(OSU, 10000);
 
-
+var EMOJI = new Map();
+EMOJI.set('bronze1', '725771774532517948');
 
 const logID = '712000077295517796';
 exports.logID = logID;
@@ -292,6 +294,16 @@ connectDB.once('open', async function () {
         if (defaultPrefix == "##")
             prefix = "##";
 
+
+
+        //testing stuff
+        if (defaultPrefix == "##") {
+
+        }
+
+
+
+
         if (message.content.substr(0, prefix.length) == prefix) {
 
             if (message.channel.type != 'dm') {
@@ -300,6 +312,13 @@ connectDB.once('open', async function () {
                     return message.author.send("I don't have the right permissions to send messages and embed links in that channel!");
                 if (!permission.has("EMBED_LINKS"))
                     await message.channel.send("I don't have the right permissions to embed links in this channel, **some commands may not work!**");
+                if (!permission.has("ADD_REACTIONS"))
+                    await message.channel.send("I don't have the right permissions to add reactions, **some commands may not work!**");
+                if (!permission.has("USE_EXTERNAL_EMOJIS"))
+                    await message.channel.send("I don't have the right permissions to add reactions, **some commands may not work!**");
+
+
+
                 //add can't add custom emojis? and react to messages
             }
 
@@ -436,6 +455,7 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[77], MISCELLANEOUS.showChannelTwitchLinks)
     commandMap.set(Commands.commands[78], MISCELLANEOUS.removeChannelTwitchLink)
     commandMap.set(Commands.commands[79], MISCELLANEOUS.leagueStats)
+    commandMap.set(Commands.commands[80], MISCELLANEOUS.RLRanks)
 
     exports.commandMap = commandMap;
 }
@@ -456,6 +476,12 @@ async function triggerCommandHandler(message, user, skipSearch, emoji) {
         return result;
     }
 }
+
+const getEmoji = function (EMOJI) {
+    let emoji = Client.guilds.cache.get(guildID).emojis.cache.find(emo => emo.name == EMOJI);
+    return `<:${EMOJI}:${emoji.id}>`;
+}
+exports.getEmoji = getEmoji;
 
 async function commandMatcher(message, command, params, user) {
 
@@ -487,6 +513,7 @@ async function commandMatcher(message, command, params, user) {
 
         let match = user.commands.find(element => element[1] == check.result[0].item);
         match = match ? commandMap.get(match[0]) : commandMap.get(check.result[0].item);
+
         specificCommandCreator(match, [message, params, user], null, user);
         return await triggerCommandHandler(message, user, true);
     }
@@ -911,7 +938,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
     if (params != -23) {
         let fuse = new Fuse(searchArray, newOptions);
         let result = fuse.search(params);
-
+        console.log(result)
         if (result[0])
             if (result[0].score == 0) {
                 // console.log("ORIGIN:::", originalCommand);
@@ -1181,7 +1208,10 @@ async function testy(ARR, description, message, modifier, URL, title, selector) 
 
         if (!Array.isArray(field.value)) {
         }
-        else if (modifier === 1) {
+        else if (modifier == -1) {
+            field.value = field.value.join('\n');
+        }
+        else if (modifier == 1) {
             field.value = "```" + "\n" + field.value.join('\n') + "```";
         }
         else if (modifier) {
@@ -1278,6 +1308,7 @@ exports.selfDestructMessage = selfDestructMessage;
 
 
 //release 1
+//make sockets auto kill themselves once the server responds with ok. ({kill: true}) and replace this for functions that have back and forth for no reason. Even sending messages -> scraper can do
 //when adding emojis, check for the proper permission!!
 //format timezone better
 //video game stats

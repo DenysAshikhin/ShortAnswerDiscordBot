@@ -97,7 +97,6 @@ async function checkGuildTwitchStreams(guilds) {
 }
 exports.checkGuildTwitchStreams = checkGuildTwitchStreams;
 
-
 async function checkUsersTwitchStreams(users) {
 
     let sendArray = [];
@@ -280,20 +279,18 @@ async function unfollowTwitchChannel(params, socket) {
             channelNames.push(channel._data.display_name);
             internalArray.push({ looped: true, channel: channel.id, name: channel._data.display_name });
         }
-
-        console.log(!!found)
-        console.log(found)
-
         if (!found) {
             return (JSON.stringify({ channelNames: channelNames, internalArray: internalArray }));
         }
         else {
-            params[1].splice(params[1].indexOf(args), 1);
+            console.log(params[1])
+            console.log(args)
+
+            params[1].splice(params[1].indexOf(found._data.id), 1);
             return JSON.stringify({ twitchFollows: params[1], name: args });
         }
     }
     else {
-        console.log("inside of else?")
         params[1].splice(params[1].indexOf(args), 1);
         return JSON.stringify({ twitchFollows: params[1], name: args });
     }
