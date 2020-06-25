@@ -4,6 +4,7 @@ const Fuse = require('fuse.js');
 const User = require('./User.js');
 const Commands = require('./commands.json');
 
+
 var games = new Array();
 var guildSquads = new Map();
 
@@ -13,6 +14,7 @@ for (let element of gameJSON)
 games.sort();
 
 
+//move this to backup if needed
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
     const args = message.content.split(" ").slice(1).join(" ");
@@ -61,57 +63,26 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     else {
 
         game = check.result[0].item;
-
-        let users = await MAIN.getUsers();
-        let signedUp = "";
-        let defaulted = "";
         let commonUsers = [];
-
+        let signedUp = "";
         const voiceChannel = message.member.voice.channel;
         if (voiceChannel)
             for (member of voiceChannel.members)
                 commonUsers.push(member[0]);
 
+
+        let users = await User.find({ games: game, guilds: message.guild.id });
         for (let user of users) {
-            if ((user.id != message.author.id) && (user.id != MAIN.botID)) {
+            if (!user.kicked[user.guilds.indexOf(message.guild.id)] && !(commonUsers.includes(user.id))) {
+                if ((user.excludePing == false) && !(commonUsers.includes(user.id)))
+                    signedUp += MAIN.mention(user.id) + " ";
+                else
+                    signedUp += `${user.displayName} `;
 
-                if (user.guilds.includes(message.guild.id)) {
-
-                    if (!user.kicked[user.guilds.indexOf(message.guild.id)]) {
-
-                        if (isNaN(game)) {
-
-                            if (user.games.includes(game)) {
-
-                                if ((user.excludePing == false) && !(commonUsers.includes(user.id)))
-                                    signedUp += MAIN.mention(user.id) + " ";
-                                else
-                                    signedUp += `${user.displayName} `;
-
-                                if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
-                                    MAIN.directMessage(message, user.id, game);
-                            }
-                        }
-                        else if (user.games.includes(games[game])) {
-                            if ((user.excludePing == false) && !(commonUsers.includes(user.id)))
-                                signedUp += MAIN.mention(user.id) + " ";
-                            else
-                                signedUp += `${user.displayName} `;
-
-                            if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
-                                MAIN.directMessage(message, user.id, games[game]);
-                        }
-                        else if (user.games.length < 2) {
-
-                            defaulted += MAIN.mention(user.id);
-                        }
-                    }
-                }
+                if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
+                    MAIN.directMessage(message, user.id, game);
             }
-            else if (commonUsers.includes(user.id)) {
-
-            }
-        }//Each user for loop
+        }
 
         let finalEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
         finalEmbed.timestamp = new Date();

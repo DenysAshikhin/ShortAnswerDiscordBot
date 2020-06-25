@@ -13,6 +13,13 @@ const fsPromises = fs.promises;
 var Spotify = require('enhanced-spotify-api');
 var queue = new Map();
 var download = new Map();
+var cachedSongs = new Map();
+var downloadingSongs = new Map();
+var downloadManager = {
+    limit: 5,
+    active: [],
+    backlog: []
+};
 var activeSkips = new Map();
 var lastSkip = new Map();
 var needle = require('needle');
@@ -34,9 +41,19 @@ async function authoriseSpotify() {
         }
     })
 }
-
 authoriseSpotify();
 
+async function loadCachedSongsMap() {
+
+
+    let audioOutput = path.resolve(`songs`, `finished`);
+    fs.readdir(audioOutput, (err, files) => {
+        files.forEach(file => {
+            cachedSongs.set(file.replace('.mp3', ''), true);
+        });
+    });
+}
+loadCachedSongsMap();
 
 async function spotifyPlaylist(message, params, user) {
 
@@ -373,11 +390,15 @@ exports.reverse = reverse;
 
 async function stop(message) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
-    if (queue.get(message.guild.id)) {
+    let temp = queue.get(message.guild.id);
+
+    if (temp) {
         //queue.get(message.guild.id).dispatcher.destroy();
-        await queue.get(message.guild.id).voiceChannel.leave();
+
+        temp.collector.stop();
+        await temp.voiceChannel.leave();
         queue.delete(message.guild.id);
-        download.delete(message.guild.id);
+        // download.delete(message.guild.id);
     }
 }
 exports.stop = stop;
@@ -659,6 +680,7 @@ async function play(message, params, user) {
 
         for (Video of playlist.items) {
             if (Video.duration) {
+
                 let video = JSON.parse(JSON.stringify(Video))
                 let song = {
                     title: video.title,
@@ -673,14 +695,20 @@ async function play(message, params, user) {
                 }
 
                 queueConstruct.songs.push(song);
-                cacheSong(song, message.guild.id);
+                await cacheSong(song, message.guild.id);
             }
         } callPlay = true;
-        MAIN.selfDestructMessage(message, `${params.playlist.songs.length} songs have been added to the queue!`, 3, false);
+        MAIN.selfDestructMessage(message, `${playlist.items.length} songs have been added to the queue!`, 3, false);
     }
     else if (ytdl.validateURL(args)) {
         songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
+
+        //console.log(songInfo)
         if (songInfo.length_seconds) {
+
+            if (!songInfo.player_response.microformat.playerMicroformatRenderer.availableCountries.includes('US'))
+                return message.channel.send("This video is not available here! Please try another one.");
+
             let startTime = args.lastIndexOf('?t=');
             let offset = 0;
 
@@ -702,7 +730,7 @@ async function play(message, params, user) {
                 progress: 0
             };
             queueConstruct.songs.push(song);
-            cacheSong(song, message.guild.id);
+            await cacheSong(song, message.guild.id);
 
 
             if ((queueConstruct.songs.length > 1))
@@ -770,6 +798,8 @@ async function nextSong(serverQueue, guild, message) {
 exports.nextSong = nextSong;
 
 async function songControlEmoji(message) {
+
+    checkControlsEmoji(message);
     await message.react('⏪')
     await message.react('⏯️')
     await message.react('⏩')
@@ -779,7 +809,7 @@ async function songControlEmoji(message) {
     await message.react('🔀')
     await message.react('🔁')
     await message.react('↩️')
-    checkControlsEmoji(message);
+
 }
 
 async function refreshEmojiControls() {
@@ -906,10 +936,7 @@ async function playSong(guild, sonG, skip, message) {
     }
 
     let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
-    let audioOutputExists = false;
-    await fsPromises.access(audioOutput)
-        .then(() => { audioOutputExists = true; })
-        .catch(() => { })
+    let audioOutputExists = cachedSongs.get(song.id);
 
     if (!song.start && (song.offset > 0) && !audioOutputExists && !skip) {
         return forward(message, song.offset)
@@ -960,11 +987,19 @@ async function playSong(guild, sonG, skip, message) {
 
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
 
-        let streamResolve = await ytdl(song.url, { format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
-
+        let streamResolve = await ytdl(song.url, {
+            format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 }
+        });
+        streamResolve.on('info', (info) => { console.log(); console.log('yeeeee') })
+        streamResolve.on('error', (err) => {
+            console.log("RESOLVE ERROR")
+            //message.channel.send(`${song.title} is no longer availabe, I suggest removing it with the removeSong command. Skipping it for now...`);
+            skip(message, 1, true);
+        })
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
                 console.log("inside of error   ");
+                console.log(error)
             })
             .on('finish', () => {
 
@@ -993,81 +1028,127 @@ exports.playSong = playSong;
  * 
  * @param {id: link id, url: youtubelink} song 
  */
-async function cacheSong(song, guild) {
+async function cacheSong(song, GUILD, MESSAGE) {
 
-    if (!download.get(guild) && song) {
+    console.log(`There are ${downloadManager.active.length + downloadManager.backlog.length} servers downloading songs! ${GUILD}`);
 
-        download.set(guild,
-            {
-                songToDownload: null,
-                progress: 0,
-                leftOver: [JSON.parse(JSON.stringify(song))]
+    let guild;
+    let serverDownload;
+    let message;
+    if (!song)
+        if (downloadManager.active.length == downloadManager.limit) return -1;
+        else if ((downloadManager.backlog.length == 0)) return -1;
+        else {
+            guild = downloadManager.backlog.shift();
+            downloadManager.active.push(guild);
+            serverDownload = download.get(guild);
+            message = serverDownload.message;
+        }
+    else {
+        if (cachedSongs.get(song.id)) {
+            return 21; //Song is already cached
+        }
+
+        serverDownload = download.get(GUILD);
+        if (!serverDownload) {
+            download.set(GUILD,
+                {
+                    songToDownload: null,
+                    progress: 0,
+                    leftOver: [JSON.parse(JSON.stringify(song))],
+                    message: MESSAGE
+                }
+            );
+            serverDownload = download.get(GUILD);
+
+            if (downloadManager.active.length == downloadManager.limit) {
+                downloadManager.backlog.push(GUILD);
+                serverDownload.leftOver.push(JSON.parse(JSON.stringify(song)));
+                return -1;
             }
-        );
-    }
-
-    let serverDownload = download.get(guild);
-
-    if (!serverDownload) return -1;
-    if (!serverDownload.songToDownload && serverDownload.leftOver.length > 0) {
-
-        serverDownload.songToDownload = serverDownload.leftOver.shift();
-        song = serverDownload.songToDownload;
-
-        let tempAudio = path.resolve(`songs`, song.id + '.mp3');
-        let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
-
-        let audioExists = false;
-        let tempAudioExists = false;
-
-        await fsPromises.access(audioOutput)
-            .then(() => { audioExists = true; })
-            .catch(() => { })
-
-        await fsPromises.access(tempAudioExists)
-            .then(() => { tempAudioExists = true; })
-            .catch(() => { })
-
-        if (audioExists) {
-            serverDownload.songToDownload = null;
-            serverDownload.progress = 0;
-            cacheSong(null, guild);
-            return;
+            else {
+                guild = GUILD;
+                downloadManager.active.push(guild);
+                message = MESSAGE;
+            }
         }
-
-        if (!tempAudioExists && !audioExists) {
-            console.log("interesting")
-
-            let downloadYTDL = require('ytdl-core');
-            let youtubeResolve = downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
-            let writeStream = fs.createWriteStream(tempAudio);
-            writeStream.on('finish', () => {
-                //console.log("FINISHED: WRITE STREAM " + song.title);
-                mv(tempAudio, audioOutput, function (err) {
-                    if (err) {
-                        console.log(err);
-                        Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
-                    }
-                    serverDownload.songToDownload = null;
-                    serverDownload.progress = 0;
-                    cacheSong(null, guild);
-                });
-            });
-
-            youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
-                const percent = downloaded / total;
-                readline.cursorTo(process.stdout, 0);
-                song.progress = Math.floor((percent * 100).toFixed(2));
-                if (download.get(guild))
-                    download.get(guild).progress = song.progress;
-            });
-            youtubeResolve.pipe(writeStream);
+        else {
+            serverDownload.leftOver.push(JSON.parse(JSON.stringify(song)));
+            return -1;
         }
     }
-    else if (song) {
-        serverDownload.leftOver.push(JSON.parse(JSON.stringify(song)));
+
+    if (!serverDownload) {
+        console.log("IT WAS MISSING")
+        console.log(serverDownload)
+        console.log(song)
+        console.log(GUILD)
+        console.log(guild)
     }
 
+    if (serverDownload.leftOver.length == 0) {
+
+        download.delete(guild);
+        downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
+        cacheSong(null, null);
+        return 1;
+    }
+
+
+    serverDownload.songToDownload = serverDownload.leftOver.shift();//songToDownload also used for checking in skip ahead logic
+    song = serverDownload.songToDownload;
+
+    let tempAudio = path.resolve(`songs`, song.id + '.mp3');
+    let audioOutput = path.resolve(`songs`, `finished`, song.id + '.mp3');
+
+    let audioExists = cachedSongs.get(song.id);
+    let tempAudioExists = downloadingSongs.get(song.id);
+
+    if (!tempAudioExists && !audioExists) {
+
+        let downloadYTDL = require('ytdl-core');
+        downloadingSongs.set(song.id, true);
+
+        /*
+player_response": {
+    "playabilityStatus": {
+      "status": "OK
+        */
+        let youtubeResolve = await downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
+
+
+        let writeStream = fs.createWriteStream(tempAudio);
+        let currentSongsQueue = queue.get(guild);
+        currentSongsQueue.ytdl = youtubeResolve;
+        currentSongsQueue.writeStream = writeStream;
+
+        writeStream.on('finish', () => {
+            //console.log("FINISHED: WRITE STREAM " + song.title);
+            mv(tempAudio, audioOutput, function (err) {
+                if (err) {
+                    console.log(err);
+                    MAIN.Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+                }
+                serverDownload.songToDownload = null;
+                serverDownload.progress = 0;
+                cachedSongs.set(song.id, true);
+                downloadingSongs.delete(song.id);
+                downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
+                downloadManager.backlog.push(guild);
+                cacheSong(null, guild);
+            });
+        });
+
+        youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+            currentSongsQueue.songs[currentSongsQueue.index].totalSize = (total - 50000);
+            const percent = downloaded / total;
+            readline.cursorTo(process.stdout, 0);
+            song.progress = Math.floor((percent * 100).toFixed(2));
+            if (download.get(guild))
+                download.get(guild).progress = song.progress;
+        });
+        youtubeResolve.pipe(writeStream);
+    }
 }
 exports.cacheSong = cacheSong;
 
@@ -1137,6 +1218,9 @@ async function addSong(message, params, user) {
             songInfo = await ytdl.getInfo(params, { quality: 'highestaudio' });
 
             if (songInfo.length_seconds) {
+                //On version 3 its info.videoDetails.availableCountries
+                if (!songInfo.player_response.microformat.playerMicroformatRenderer.availableCountries.includes('US'))
+                    return message.channel.send("This video is not available here! Please try another one.");
                 let startTime = params.lastIndexOf('?t=');
                 let offset = 0;
 
@@ -1287,7 +1371,6 @@ async function removeSong(message, params, user) {
 exports.removeSong = removeSong;
 
 async function playUserPlayList(message, params, user) {
-
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
     let serverQueue = queue.get(message.guild.id);
@@ -1330,13 +1413,17 @@ async function playUserPlayList(message, params, user) {
         } else
             queueConstruct = serverQueue;
 
+
         for (video of params.playlist.songs) {
             if (video.duration) {
                 queueConstruct.songs.push({
                     ...video,
                     start: null,
+                    offset: 0,
+                    timePaused: 0,
+                    progress: 0
                 });
-                cacheSong({ id: video.id, url: video.url });
+                await cacheSong({ id: video.id, url: video.url }, message.guild.id);
             }
         }
         MAIN.selfDestructMessage(message, `${params.playlist.songs.length} songs have been added to the queue!`, 3, false);

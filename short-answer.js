@@ -1,5 +1,9 @@
+const PORT = '33432';
+const IP = '45.63.17.228';
+/*
 const PORT = '43125';
 const IP = '45.63.17.228';
+*/
 exports.IP = IP;
 exports.PORT = PORT;
 var defaultPrefix = "sa!";
@@ -11,33 +15,6 @@ var lastMessage;
 
 var spotifyClient;
 var spotifySecret;
-var HEROKU;
-
-async function twitchInitiliasation() {
-
-    let clienty = twitchConfig.twitchClient;
-    let clientSecret = twitchConfig.twitchSecret;
-    let accessy = twitchConfig.twitchAccess;
-    let refreshy = twitchConfig.twitchRefresh;
-    let expiry = twitchConfig.expiryTimestamp;
-
-    twitchClient = TwitchClient.withCredentials(clienty, accessy, undefined, {
-        clientSecret,
-        refreshToken: refreshy,
-        expiry: expiry === null ? null : new Date(expiry),
-        onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
-            const newTokenData = {
-                ...twitchConfig,
-                twitchAccess: accessToken,
-                twitchRefresh: refreshToken,
-                expiryDate: expiryDate === null ? null : expiryDate.getTime()
-            };
-            await fs.promises.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8')
-            //    exports.twitchClient = twitchClient;
-        }
-    });
-    exports.twitchClient = twitchClient;
-}
 
 try {
 
@@ -94,11 +71,18 @@ const GENERAL = require('./general.js');
 const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
 const ffmpeg = require('fluent-ffmpeg');
-const TwitchClient = require('twitch').default;
-const main = require('ytsr');
 ffmpeg.setFfmpegPath(ffmpegPath);
-var os = require('os-utils');
 
+
+var osu = require('node-os-utils')
+var cpu = osu.cpu;
+var mem = osu.mem;
+
+async function OSU() {
+    console.log(await mem.info());
+    console.log(await cpu.usage());
+}
+setInterval(OSU, 10000);
 
 
 
@@ -193,15 +177,9 @@ exports.tags = tags;
 
 var Client = new Discord.Client();
 
-var twitchClient;
 var commandMap = new Map();
 var commandTracker = new Map();
 var config = null;
-var twitchConfig = require('./twitch.json');
-var spotifyClientID;
-
-
-
 
 
 
@@ -250,6 +228,17 @@ const getGuilds = async function () {
 }
 exports.getGuilds = getGuilds;
 
+const getUsersInGuild = async function (guildID) {
+    try {
+        return await User.find({ guilds: guildID });
+    }
+    catch (err) {
+        console.log(err);
+        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+    }
+}
+exports.getUsersInGuild = getUsersInGuild;
+
 
 
 connectDB.once('open', async function () {
@@ -271,12 +260,6 @@ connectDB.once('open', async function () {
 
         if (message.author.bot) return;
         let user = await findUser({ id: message.author.id });
-
-
-        {
-
-        }
-
 
 
         if (message.channel.type != 'dm') {
@@ -317,6 +300,7 @@ connectDB.once('open', async function () {
                     return message.author.send("I don't have the right permissions to send messages and embed links in that channel!");
                 if (!permission.has("EMBED_LINKS"))
                     await message.channel.send("I don't have the right permissions to embed links in this channel, **some commands may not work!**");
+                //add can't add custom emojis? and react to messages
             }
 
             let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
@@ -651,64 +635,6 @@ function findFurthestDate(date1, date2) {
 }
 exports.findFurthestDate = findFurthestDate;
 
-//TRIPLE CHECK THISSSS
-async function countTalk() {
-
-    for (let GUILD of Client.guilds.cache) {
-
-        let guild = Client.guilds.cache.get(GUILD[0]);
-        let channels = guild.channels.cache;
-
-        for (let CHANNEL of channels) {
-
-            let channel = CHANNEL[1];
-
-            if (channel.type == "voice") {
-
-                for (let MEMBER of channel.members) {
-
-                    let member = MEMBER[1];
-                    let user = await findUser({ id: member.id });
-                    if (!user) {
-                        console.log("found the null user: " + member.displayName + " || From: " + guild.name);
-                        await checkExistance(member);
-                        user = await findUser({ id: member.id });
-                        console.log("AFTER CREATE: " + user);
-                    }
-
-                    let index = user.guilds.indexOf(guild.id);
-
-                    if (channel.id == guild.afkChannelID) {
-
-                        let timeAFK = user.timeAFK;
-                        timeAFK[index] += 1;
-
-                        User.findOneAndUpdate({ id: member.id },
-                            {
-                                $set: { timeAFK: timeAFK }
-                            }, function (err, doc, res) {
-                                //console.log(doc);
-                            });
-                    } else {
-
-                        let timeTalked = user.timeTalked;
-                        timeTalked[index] += 1;
-
-                        let lastTalked = user.lastTalked;
-                        lastTalked[index] = getDate();
-
-                        User.findOneAndUpdate({ id: member.id },
-                            {
-                                $set: { timeTalked: timeTalked, lastTalked: lastTalked }
-                            }, function (err, doc, res) {
-                                //console.log(doc);
-                            });
-                    }
-                }
-            }
-        }
-    }
-}
 
 function updateMessage(message, user) {
 
@@ -762,7 +688,6 @@ function directMessage(message, memberID, game) {
         + message.guild.name + "!");
 }
 exports.directMessage = directMessage;
-
 
 async function createUser(member) {
 
@@ -921,7 +846,6 @@ async function setControlEmoji(message) {
 //     }
 // }
 //setInterval(refreshEmojiControls, 20 * 1000);
-
 async function setEmojiCollector(message) {
 
     let collector = await message.createReactionCollector(function (reaction, user) {
@@ -961,7 +885,6 @@ async function setEmojiCollector(message) {
         //}
     });
 }
-
 
 async function generalMatcher(message, params, user, searchArray, internalArray, originalCommand, flavourText) {
 
@@ -1032,6 +955,8 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 }
 exports.generalMatcher = generalMatcher;
 
+
+//If it ever gets bad enough, move the embed construction to backup - all it needs is guild + channel id's and all the other parameters
 async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title, selector) {
     console.log(selector)
     let runningString = "";
@@ -1311,6 +1236,7 @@ async function graphs() {
 
 async function updateAll() {
 
+
     // let users = await getUsers();
 
     // for (let user of users) {
@@ -1334,27 +1260,6 @@ async function createBackUp() {
     console.log("CALLED BACKUP");
 }//
 
-async function usages() {
-
-    os.cpuUsage(function (v) {
-        console.log('CPU Usage (%): ' + Math.floor(v * 100));
-    });
-
-    os.cpuFree(function (v) {
-        console.log('CPU Free: ' + Math.floor(v * 100));
-    });
-    console.log(`Free Memory: ${os.freemem()}`);
-}
-exports.usages = usages;
-usages();
-
-async function minuteCount() {
-    if (defaultPrefix != '##') {
-        countTalk();
-        checkTwitch();
-        usages();
-    }
-}
 
 async function sleep(ms) {
     await new Promise(resolve => setTimeout(resolve, ms));
@@ -1371,22 +1276,9 @@ async function selfDestructMessage(message, text, seconds, emoji) {
 exports.selfDestructMessage = selfDestructMessage;
 
 
-async function checkTwitch() {
-    try {
-        MISCELLANEOUS.checkUsersTwitchStreams(await getUsers());
-        MISCELLANEOUS.checkGuildTwitchStreams(await getGuilds());
-    }
-    catch (err) {
-        console.log(err);
-        console.log("Error with twitch checks!");
-    }
-}
-
-setInterval(minuteCount, 60 * 1000);
-//setInterval(checkTwitch,  5000);
 
 //release 1
-//twitch
+//when adding emojis, check for the proper permission!!
 //format timezone better
 //video game stats
 

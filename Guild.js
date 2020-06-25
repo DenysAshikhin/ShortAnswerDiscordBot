@@ -7,6 +7,7 @@ const GuildSchema = new mongoose.Schema({
     name: String,
     songs: [String],
     duration: Number,
+    Users: [],
     channelTwitch: [],
     twitchNotifications: []
 });
