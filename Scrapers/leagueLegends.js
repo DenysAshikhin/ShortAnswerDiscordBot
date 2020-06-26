@@ -35,20 +35,53 @@ async function leagueStats(params, socket) {
     }
 
 
-    let complete = {};
+    let soloRank = {};
+    let flexRank = {};
+    let total = {};
 
     const $ = cheerio.load(resp.body);
     // const tester = $('div.txt.mainRankingDescriptionText div.leagueTier')
     // console.log(tester.text().trim());
-
-
+    let DDD = new Date();
+    let daty = new Date();
     var tester = $('div.txt.mainRankingDescriptionText').children().first();
-    complete.soloRank = tester.text().trim();
+
+    soloRank.soloRank = tester.text().trim();
+    console.log(((new Date() - daty) / 1000));
+    daty = new Date();
     tester = tester.next().next();
-    complete.top = tester.children().first().next().children().first().text().trim() + ` in ${params[0].toUpperCase()}`;
+
+    soloRank.top = tester.children().first().next().children().first().text().trim() + ` in ${params[0].toUpperCase()}`;
+    console.log(((new Date() - daty) / 1000));
+    daty = new Date();
+    tester = tester.next();
+
+    soloRank.lp = `Current LP: ${tester.children().first().text().trim()}`
+    console.log(((new Date() - daty) / 1000));
+    daty = new Date();
+    tester = tester.next().children().first();
+
+    soloRank.wins = `Wins: ${tester.text().trim().split(' ')[1]}`
+    console.log(((new Date() - daty) / 1000));
+    daty = new Date();
+    tester = tester.next().next();
+
+    soloRank.losses = `Losses: ${tester.text().trim().split(' ')[1]}`
+    console.log(((new Date() - daty) / 1000));
+    daty = new Date();
+    tester = tester.next().next();
 
 
-    console.log(tester.children().first().next().children().first().text().trim());
+
+//medium-11 small-24 columns
+    tester = $('div.row div.medium-11.small-24.columns');
+    let champs = tester;
+
+
+
+    console.log(tester.html());
+    //soloRank.winRatio
+
 
 
 
@@ -56,8 +89,8 @@ async function leagueStats(params, socket) {
     //console.log(CompleteTable.html())
 
 
-
-    console.log(complete)
+    console.log(((new Date() - DDD) / 1000));
+    console.log(soloRank)
     return 1;
 }
 exports.leagueStats = leagueStats;
