@@ -216,9 +216,6 @@ setInterval(minuteCount, 60 * 1000);
 
 
 
-
-
-
 const getEmoji = function (EMOJI) {
     EMOJI = EMOJI.trim().replace(' ', '');
     let emoji = client.guilds.cache.get(guildID).emojis.cache.find(emo => { return emo.name == EMOJI });
@@ -228,6 +225,16 @@ const getEmoji = function (EMOJI) {
     return `<:${EMOJI}:${emoji.id}>`;
 }
 exports.getEmoji = getEmoji;
+
+const getLeagueEmoji = function(EMOJI){
+    EMOJI = EMOJI.trim().replace(' ', '');
+    let emoji = client.guilds.cache.get('689313920107675714').emojis.cache.find(emo => { return emo.name == EMOJI });
+    if (!emoji) return '';
+    console.log("FINISHED EMOJI: ")
+    console.log(`<:${EMOJI}:${emoji.id}>`)
+    return `<:${EMOJI}:${emoji.id}>`;
+}
+exports.getLeagueEmoji = getLeagueEmoji;
 
 async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title, selector) {
 
@@ -604,7 +611,8 @@ server.on('error', (err) => { console.log("Caught server error") })
 
 // Grab an arbitrary unused port.
 //'45.63.17.228'
-server.listen('33432', '45.63.17.228', () => {
+//33432
+server.listen(33432, '45.63.17.228', () => {
     console.log('opened server on', server.address());
 });
 server.on('connection', (socket) => { })

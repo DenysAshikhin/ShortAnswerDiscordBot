@@ -130,7 +130,7 @@ async function getStats(member, user) {
         let statsEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
         statsEmbed.date = new Date();
         statsEmbed.fields = [
-            { name: "** **", value: "```md\n" + `You joined this server on:\n#${user.dateJoined[index]}` + "```", inline: true },
+            { name: "** **", value: "```md\n" + `Tracked since:\n#${user.dateJoined[index]}` + "```", inline: true },
             { name: "** **", value: "```md\n" + `Total number of messages sent:\n#${user.messages[index]}\n\n` +  `Last message sent:\n#${user.lastMessage[index]}` + "```", inline: true },
             { name: "** **", value: "```md\n" + `Last time you talked was:\n#${user.lastTalked[index]}\n\n` + `Total time spent talking (in minutes):\n#${user.timeTalked[index]}\n\n` 
             + `Time spent AFK (in minutes):\n#${user.timeAFK[index]}` + "```", inline: true },
@@ -185,7 +185,7 @@ async function personalStats(message, params, user) {
                     { name: "Total time spent talking (in minutes): ", value: user.timeTalked[i], inline: false },
                     { name: "Last time you talked was: ", value: user.lastTalked[i], inline: false },
                     { name: "Time spent AFK (in minutes): ", value: user.timeAFK[i], inline: false },
-                    { name: "You joined this server on: ", value: user.dateJoined[i], inline: false },
+                    { name: "Tracked since: ", value: user.dateJoined[i], inline: false },
                     { name: "Number of succesful summons: ", value: user.summoner[i], inline: false },
                 ];
 

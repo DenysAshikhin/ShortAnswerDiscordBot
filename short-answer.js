@@ -1,10 +1,9 @@
 const PORT = '33432';
 //const IP = '127.0.0.1';
 const IP = '45.63.17.228';
-/*
-const PORT = '43125';
-const IP = '45.63.17.228';
-*/
+
+//const PORT = '43919';
+
 exports.IP = IP;
 exports.PORT = PORT;
 var defaultPrefix = "sa!";

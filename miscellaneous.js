@@ -177,74 +177,20 @@ async function leagueStats(message, params, user) {
     else
         zone = params.region;
 
-    let start;
-    let summonerTotalInfo;
-    let summonerRankedInfo;
-    let summonerFlexInfo;
-    let messagy;
+        
     let socky = new net.Socket();
     socky.on('error', (err) => { console.log("socket error in get stats") });
 
     socky.connect(MAIN.PORT, MAIN.IP, () => {
-        socky.write(JSON.stringify({ command: 'league_stats', params: [args[0], zone] }))
+        socky.write(JSON.stringify({ command: 'league_stats', params: [zone, args[0], message.guild.id, message.channel.id] }))
     });
     socky.on('data', async (data) => {
         let stringed = data.toString();
         let parsed = JSON.parse(stringed);
 
-        if (parsed.status == -1) {
-            message.channel.send(`${args[0]} in the region *${zone}* does not exist, try again?`);
-            socky.destroy();
-            if (messagy) messagy.delete();
-            return -1;
-        }
-        if (parsed.position) {
 
-            if (parsed.position <= -1) {
-                start = new Date();
-                if (!messagy) messagy = await message.channel.send("Now processing your request!");
-                else messagy.edit("Now processing your request!");
-            }
-            else if (parsed.position > 0) {
-                if (!messagy) messagy = await message.channel.send("Wow, this command seems to be really popular, your position in queue is: " + parsed.position);
-                else messagy.edit("Wow, this command seems to be really popular, your position in queue is: " + parsed.position);
-            }
-        }
+        socky.destroy();
 
-        if (stringed.includes("totalStats")) {
-            summonerTotalInfo = JSON.parse(stringed).totalStats;
-        }
-        if (stringed.includes("rankedSolo")) {
-            summonerRankedInfo = JSON.parse(stringed).rankedSolo;
-        }
-        if (stringed.includes("rankedFlex")) {
-            summonerFlexInfo = JSON.parse(stringed).rankedFlex;
-
-            console.log(summonerTotalInfo)
-            console.log(summonerRankedInfo)
-            console.log(summonerFlexInfo)
-
-            message.channel.send(`It took ${((new Date() - start) / 1000)} seconds to get your request`);
-
-            MAIN.prettyEmbed(message, "Here are the Leage of Legends stats for: " + summonerTotalInfo.name,
-                [
-                    {
-                        name: "Previous Ranks", value: `${summonerTotalInfo.previousRanks.reduce((accum, current, index) => { return `${current}\n${accum}`; }, '')}`
-                    },
-                    {
-                        name: `Overall Win Rate: ${((Number(summonerTotalInfo.totalWins) / Number(summonerTotalInfo.totalLoses))).toFixed(2)}`, value: [`Total Games: ${summonerTotalInfo.totalGames}`, `Total Wins: ${summonerTotalInfo.totalWins}`,
-                        `Total Loses: ${summonerTotalInfo.totalLoses}`
-                        ]
-                    },
-                    {
-                        name: `KDA: ${(((Number(summonerTotalInfo.averageAssists) + Number(summonerTotalInfo.averageKills))) / Number(summonerTotalInfo.averageDeaths)).toFixed(2)}`, value: [
-                            `Average Kills: ${summonerTotalInfo.averageKills}`, `Average Deaths: ${summonerTotalInfo.averageDeaths}`, `Average Assists: ${summonerTotalInfo.averageAssists}`,
-                            `K/D Ratio: ${((Number(summonerTotalInfo.averageKills) / Number(summonerTotalInfo.averageDeaths))).toFixed(2)}`
-                        ]
-                    }
-                ], -1, -1, 1);
-            socky.destroy();
-        }
     })
 
     return -1;
