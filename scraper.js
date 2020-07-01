@@ -206,7 +206,8 @@ async function checkTwitch() {
 }//eventualy check this to only get the guilds this shard or whatever is a part of
 async function minuteCount() {
 
-    if (process.argv.length != 3) {
+    console.log(process.argv.length)
+    if (process.argv.length == 3) {
         countTalk();
         checkTwitch();
     }

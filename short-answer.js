@@ -1308,6 +1308,11 @@ async function sleep(ms) {
 }
 exports.sleep = sleep;
 
+/**
+ * 
+
+ * @param {*} emoji -> If exists, don't delete the message
+ */
 async function selfDestructMessage(message, text, seconds, emoji) {
 
     let temp = await message.channel.send(text);
@@ -1321,7 +1326,6 @@ exports.selfDestructMessage = selfDestructMessage;
 
 //release 1
 //make sockets auto kill themselves once the server responds with ok. ({kill: true}) and replace this for functions that have back and forth for no reason. Even sending messages -> scraper can do
-//when adding emojis, check for the proper permission!!
 //format timezone better
 //video game stats
 
@@ -1340,7 +1344,6 @@ process.on('unhandledException', (reason, p) => {
 
 
 
-//-1 to stop suggestion prompt/delete it!
 
 //release 2
 //give people ability to choose how their menus are skinned!

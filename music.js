@@ -803,13 +803,12 @@ async function songControlEmoji(message) {
     await message.react('⏪')
     await message.react('⏯️')
     await message.react('⏩')
-    await message.react('🔼')
-    await message.react('🔽')
+    await message.react('🔉')
+    await message.react('🔊')
     await message.react('⏹️')
     await message.react('🔀')
     await message.react('🔁')
     await message.react('↩️')
-
 }
 
 async function refreshEmojiControls() {
@@ -828,7 +827,7 @@ async function checkControlsEmoji(message) {
 
     let collector = await message.createReactionCollector(function (reaction, user) {
         return (((reaction.emoji.name === '⏪') || (reaction.emoji.name === '⏯️') ||
-            (reaction.emoji.name === '⏩') || (reaction.emoji.name === '🔼') || (reaction.emoji.name === '🔽')
+            (reaction.emoji.name === '⏩') || (reaction.emoji.name === '🔊') || (reaction.emoji.name === '🔉')
             || (reaction.emoji.name === '⏹️') || (reaction.emoji.name === '🔀') || (reaction.emoji.name === '↩️')
             || (reaction.emoji.name === '🔁')) && (!user.bot))
     }, { time: 60000 });
@@ -852,7 +851,7 @@ async function checkControlsEmoji(message) {
         else if (emoji.emoji.toString() == '⏩') {
             skip(emoji.message, '1', true)
         }
-        else if (emoji.emoji.toString() == '🔼') {
+        else if (emoji.emoji.toString() == '🔊') {
 
             if (exactQueue.volume >= 4.5) {
                 MAIN.selfDestructMessage(emoji.message, "The volume is already maxed!", 3, emoji);
@@ -864,7 +863,7 @@ async function checkControlsEmoji(message) {
             }
 
         }
-        else if (emoji.emoji.toString() == '🔽') {
+        else if (emoji.emoji.toString() == '🔉') {
             if (exactQueue.volume <= 0.5) {
                 MAIN.selfDestructMessage(emoji.message, "The volume is already minimum!", 3, emoji);
             }
@@ -917,11 +916,14 @@ async function checkControlsEmoji(message) {
 async function playSong(guild, sonG, skip, message) {
     const serverQueue = queue.get(guild.id);
 
-    if (!serverQueue.message) {
-        serverQueue.message = await message.channel.send("```md\nNow Playing\n#" + sonG.title + "\n["
-            + '00:00'
-            + "](" + MAIN.timeConvert(Math.floor(sonG.duration)) + ")```");
-        songControlEmoji(serverQueue.message)
+
+    if (serverQueue) {
+        if (!serverQueue.message) {
+            serverQueue.message = await message.channel.send("```md\nNow Playing\n#" + sonG.title + "\n["
+                + '00:00'
+                + "](" + MAIN.timeConvert(Math.floor(sonG.duration)) + ")```");
+            songControlEmoji(serverQueue.message)
+        }
     }
     else if (sonG) serverQueue.message.edit("```md\nNow Playing\n#" + sonG.title + "\n["
         + '00:00'
@@ -1124,7 +1126,7 @@ player_response": {
 
         let writeStream = fs.createWriteStream(tempAudio);
         let currentSongsQueue = queue.get(guild);
-        if (!currentSongsQueue){
+        if (!currentSongsQueue) {
             serverDownload.songToDownload = null;
             serverDownload.progress = 0;
             downloadingSongs.delete(song.id);
@@ -1646,7 +1648,7 @@ async function checkEmptyChannel() {
 
     if (queue.size > 0)
         for (server of queue.entries()) {
-            if(!server[1].connection){
+            if (!server[1].connection) {
                 download.delete(server[1].originMessage.guild.id);
                 queue.delete(server[0]);
                 continue;

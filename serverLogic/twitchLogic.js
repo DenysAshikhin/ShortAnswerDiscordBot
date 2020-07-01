@@ -37,7 +37,7 @@ twitchInitiliasation();
 
 
 async function checkGuildTwitchStreams(guilds) {
-
+console.log("CGHECKING GUILD")
     let sendArray = [];
     let promiseArray = [];
     for (guild of guilds) {
@@ -98,7 +98,7 @@ async function checkGuildTwitchStreams(guilds) {
 exports.checkGuildTwitchStreams = checkGuildTwitchStreams;
 
 async function checkUsersTwitchStreams(users) {
-
+    console.log("CGHECKING UUUUSER")
     let sendArray = [];
     let promiseArray = [];
     for (user1 of users) {
@@ -156,7 +156,6 @@ async function checkUsersTwitchStreams(users) {
     return 1;
 }
 exports.checkUsersTwitchStreams = checkUsersTwitchStreams;
-
 
 
 //params = [streamer, channelTwitch, channelID] -> Guild.channelTwitch
