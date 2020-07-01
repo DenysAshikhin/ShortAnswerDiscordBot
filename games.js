@@ -14,6 +14,118 @@ for (let element of gameJSON)
 games.sort();
 
 
+
+async function setControlEmoji(message) {
+
+    await message.react(MAIN.getEmojiObject('queue'))
+    // await message.react('2️⃣')
+    // await message.react('3️⃣')
+    // await message.react('4️⃣')
+    // await message.react('5️⃣')
+}
+
+// async function setEmojiCollector() {
+//     for (let messy of commandTracker.values()) {
+//         messy.collector.resetTimer();
+//     }
+// }
+//setInterval(refreshEmojiControls, 20 * 1000);
+async function setEmojiCollector(message) {
+
+    let collector = await message.createReactionCollector(function (reaction, user) {
+        return (((reaction.emoji == MAIN.getEmojiObject('queue')) || (reaction.emoji.name === '2️⃣') ||
+            (reaction.emoji.name === '3️⃣') || (reaction.emoji.name === '4️⃣') || (reaction.emoji.name === '5️⃣')
+            && (user.id != message.author.id)) && (!user.bot))
+    }, { time: 29 * 60 * 1000 });
+    collector.on('collect', async function (emoji, user) {
+
+        let choice;
+        // let usery = await findUser({ id: user.id });
+        if (emoji.emoji.toString() == MAIN.getEmoji('queue')) {
+            MAIN.selfDestructMessage(message, "TRied to join", 3, emoji)
+            let result = await Queue(emoji.message, null, user, { displayName: user.username, id: user.id });
+            if (result)
+                emoji.users.remove(user);
+            if (result == -1)
+                return MAIN.selfDestructMessage(message, "You're already a part of this summon!", 3, emoji);
+            else if (result == -2)
+                return MAIN.selfDestructMessage(message, "There is no more room in the summon!", 3, emoji);
+
+            resetSummonRitual(message, user.id);
+        }
+
+        // if (!(emoji.emoji.toString() == '↩️'))
+        //     emoji.users.remove(user);
+    });
+    
+    collector.on('dispose', async function (emoji, user){
+
+        console.log(emoji.name)
+    });
+
+    return collector;
+}
+
+
+
+const resetSummonRitual = async function (message, summonerID, time) {
+
+    let squads = guildSquads.get(message.guild.id);
+
+    for (let squad of squads.values()) {
+
+        if (squad.messageID == message.id) {
+
+            let lastMessage = await message.channel.messages.fetch({ limit: 1 });
+            lastMessage = lastMessage.first();
+            let defaultDesc = squad.message.embeds[0].description.substring(0,
+                squad.message.embeds[0].description.indexOf("!```") + 4);
+            // if (lastMessage.id == message.id) {
+
+            //     if (time)
+            //         lastMessage.embeds[0].description = defaultDesc + MAIN.mention(summonerID) + ` is joining in ${time} minutes!`;
+            //     else
+            //         lastMessage.embeds[0].description = defaultDesc + MAIN.mention(summonerID) + ` has joined!`;
+            //     lastMessage.edit(lastMessage.embeds[0])
+            // }
+            // else 
+            {
+                let summonMessage;
+
+                if (time)
+                    summonMessage = await MAIN.prettyEmbed(message, defaultDesc + MAIN.mention(summonerID) + ` is joining in ${time} minutes!`,
+                        [{
+                            name: `${message.member.displayName}'s Summon: 1/${squad.size}`,
+                            value: squad.displayNames.reduce((acc, current, index) => {
+                                acc.push(`${index + 1}) ${current}`);
+                                return acc;
+                            }, [])
+                        }], -1, -1, 1,
+                        null, null, null, 1);
+                else
+                    summonMessage = await MAIN.prettyEmbed(message, defaultDesc + MAIN.mention(summonerID) + ` has joined!`,
+                        [{
+                            name: `${message.member.displayName}'s Summon: 1/${squad.size}`,
+                            value: squad.displayNames.reduce((acc, current, index) => {
+                                acc.push(`${index + 1}) ${current}`);
+                                return acc;
+                            }, [])
+                        }], -1, -1, 1,
+                        null, null, null, 1);
+                setControlEmoji(summonMessage);
+                let collector = await setEmojiCollector(summonMessage);
+                squad.collector.stop();
+                squad.collector = collector;
+                squad.messageID = summonMessage.id;
+                squad.message.delete();
+                squad.message = summonMessage;
+            }
+            return 1;
+        }
+    }
+}
+
+
 //move this to backup if needed
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
@@ -73,23 +185,35 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
 
         let users = await User.find({ games: game, guilds: message.guild.id });
         for (let user of users) {
-            if (!user.kicked[user.guilds.indexOf(message.guild.id)] && !(commonUsers.includes(user.id))) {
+            if (!user.kicked[user.guilds.indexOf(message.guild.id)] && (user.id != message.author.id)) {
+
                 if ((user.excludePing == false) && !(commonUsers.includes(user.id)))
                     signedUp += MAIN.mention(user.id) + " ";
                 else
-                    signedUp += `${user.displayName} `;
+                    signedUp += `**${message.guild.members.cache.get(user.id).displayName}** `;
 
                 if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
                     MAIN.directMessage(message, user.id, game);
             }
         }
 
-        let finalEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-        finalEmbed.timestamp = new Date();
-        finalEmbed.description = message.member.displayName + " has summoned " + signedUp + " for some " + game
-            + "```fix\n" + `To accept the summons type ${prefix}q` + "```";
-
         if (signedUp.length > 3) {
+
+
+            let summonMessage = await MAIN.prettyEmbed(message, message.member.displayName + " has summoned " + signedUp + " for some " + game
+                + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```",
+                [{
+                    name: `${message.member.displayName}'s Summon: 1/${squadSize}`,
+                    value: [user.displayName].reduce((acc, current, index) => {
+                        acc.push(`${index + 1}) ${current}`);
+                        return acc;
+                    }, [])
+                }], -1, -1, 1,
+                null, null, null, 1);
+
+            setControlEmoji(summonMessage);
+            let collector = await setEmojiCollector(summonMessage);
+
 
             let squads = guildSquads.get(message.guild.id);
 
@@ -102,26 +226,23 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             }
 
             if (squads)
-                squads.push({ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id });
+                squads.push({ joinedIDS: [user.id], message: summonMessage, collector: collector, messageID: summonMessage.id, game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id });
             else
-                guildSquads.set(message.guild.id, [{ game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id }])
-            message.channel.send({ embed: finalEmbed });
+                guildSquads.set(message.guild.id, [{ joinedIDS: [user.id], message: summonMessage, collector: collector, messageID: summonMessage.id, game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id }])
 
 
-            // for (let i = 0; i < 25; i++) {
+            {     // for (let i = 0; i < 25; i++) {
 
-            //     let tempPlayers = [];
+                //     let tempPlayers = [];
 
-            //     for (let j = 0; j < 7; j++) {
+                //     for (let j = 0; j < 7; j++) {
 
-            //         tempPlayers.push(`${user.displayName} ${i}-${j}`);
-            //     }
-            //     let squads = guildSquads.get(message.guild.id);
-            //     squads.push({ game: game, displayNames: JSON.parse(JSON.stringify(tempPlayers)), size: squadSize, created: new Date(), summoner: user.displayName + i, summonerID: user.id });
-            // }
-
-
-
+                //         tempPlayers.push(`${user.displayName} ${i}-${j}`);
+                //     }
+                //     let squads = guildSquads.get(message.guild.id);
+                //     squads.push({ game: game, displayNames: JSON.parse(JSON.stringify(tempPlayers)), size: squadSize, created: new Date(), summoner: user.displayName + i, summonerID: user.id });
+                // }
+            }
         }
         else
             message.channel.send("No one else has signed up for " + game + ".");
@@ -377,7 +498,7 @@ async function gameStats(message, params, user) {
 
             if (users[i].games.includes(game) && users[i].guilds.includes(message.guild.id))
                 if (!users[i].kicked[users[i].guilds.indexOf(message.guild.id)]) {
-                    signedUp.push(users[i].displayName);
+                    signedUp.push(message.guild.members.cache.get(users[i].id).displayName);
                 }
         }
 
@@ -465,69 +586,95 @@ async function topGames(message, params) {
 }
 exports.topGames = topGames;
 
-async function Queue(message, params, user) {
+async function Queue(message, params, user, emoji) {
 
-    if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+    if (emoji) {
+        let squads = guildSquads.get(message.guild.id);
+        if (squads && (squads.length != 0)) {
 
-    let squads = guildSquads.get(message.guild.id);
+            for (let squad of squads.values()) {
+                if (squad.messageID == message.id) {
 
-    if (!squads) return message.channel.send("There are no active summons in the server to queue for!");
+                    if (squad.joinedIDS.includes(emoji.id)) return -1;
 
-    if (squads.length == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
-
-    let ETA;
-    if (message.content.includes(','))
-        ETA = message.content.split(',')[1];
-    else if (message.mentions.members.size == 0)
-        ETA = message.content.split(" ").slice(1).join(" ");
-
-    if (ETA)
-        ETA.trim();
-    let finalETA = !isNaN(ETA) && ETA.length > 0 ? Number(ETA) : -1;
-    if (finalETA < 0)
-        finalETA = -1;
-
-    if (squads.length == 1 || params.summon) {
-        let squad = params.summon ? params.summon : squads.values().next().value;
-        if (squad.displayNames.length < squad.size) {
-
-            if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
-
-            squad.displayNames.push(user.displayName);
-            let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-            newEmbed.description = (finalETA == -1) ? `${MAIN.mention(user.id)} has joined the summon!` : `${MAIN.mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
-            newEmbed.fields = [{ name: `Current summons members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
-            return message.channel.send({ embed: newEmbed });
+                    if (squad.displayNames.length < squad.size) {
+                        squad.displayNames.push(user.username);
+                        squad.joinedIDS.push(user.id);
+                        break;
+                    }
+                    else {
+                        return -2;
+                    }
+                }
+            }
         }
-        else return message.channel.send("There is no space left in the summon!");
-    }
-    else if (message.mentions.members.size > 0) {
-
-        let squad = squads.find(element => element.summonerID == message.mentions.members.values().next().value.id);
-        if (!squad) return message.channel.send("That user does not have any active summoninings!");
-        if (squad.displayNames.length < squad.size) {
-
-            if (squad.displayNames.includes(user.displayName)) return message.channel.send("You have already joined this summon!");
-            squad.displayNames.push(user.displayName);
-
-            let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-            newEmbed.description = (finalETA == -1) ? `${MAIN.mention(user.id)} has joined the summon!` : `${MAIN.mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
-            newEmbed.fields = [{ name: `Current squad members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
-            return message.channel.send({ embed: newEmbed });
-        }
-        else return message.channel.send("There is no space left in the summon!");
     }
     else {
 
-        let searchArray = [];
-        let internalArray = [];
+        if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
 
-        for (let squad of squads.entries()) {
-            searchArray.push(`${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`);
-            internalArray.push({ summon: squad[1] });
+        let squads = guildSquads.get(message.guild.id);
+
+        if (!squads) return message.channel.send("There are no active summons in the server to queue for!");
+
+        if (squads.length == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+
+        let ETA;
+        if (message.content.includes(','))
+            ETA = message.content.split(',')[1];
+        else if (message.mentions.members.size == 0)
+            ETA = message.content.split(" ").slice(1).join(" ");
+
+        if (ETA)
+            ETA.trim();
+        let finalETA = !isNaN(ETA) && ETA.length > 0 ? Number(ETA) : -1;
+        if (finalETA < 0)
+            finalETA = -1;
+
+        if (squads.length == 1 || params.summon) {
+            let squad = params.summon ? params.summon : squads.values().next().value;
+            if (squad.displayNames.length < squad.size) {
+
+                if (squad.joinedIDS.includes(user.id)) return message.channel.send("You have already joined this summon!");
+
+                squad.displayNames.push(user.displayName);
+                squad.joinedIDS.push(user.id)
+                let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
+                newEmbed.description = (finalETA == -1) ? `${MAIN.mention(user.id)} has joined the summon!` : `${MAIN.mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
+                newEmbed.fields = [{ name: `Current summons members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
+                return message.channel.send({ embed: newEmbed });
+            }
+            else return message.channel.send("There is no space left in the summon!");
         }
+        else if (message.mentions.members.size > 0) {
 
-        return MAIN.generalMatcher(message, -23, user, searchArray, internalArray, Queue, "There are more than one active summon, please enter the number whose summon you wish to answer!");
+            let squad = squads.find(element => element.summonerID == message.mentions.members.values().next().value.id);
+            if (!squad) return message.channel.send("That user does not have any active summoninings!");
+            if (squad.displayNames.length < squad.size) {
+
+                if (squad.joinedIDS.includes(user.id)) return message.channel.send("You have already joined this summon!");
+                squad.displayNames.push(user.displayName);
+                squad.joinedIDS.push(user.id)
+
+                let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
+                newEmbed.description = (finalETA == -1) ? `${MAIN.mention(user.id)} has joined the summon!` : `${MAIN.mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
+                newEmbed.fields = [{ name: `Current squad members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
+                return message.channel.send({ embed: newEmbed });
+            }
+            else return message.channel.send("There is no space left in the summon!");
+        }
+        else {
+
+            let searchArray = [];
+            let internalArray = [];
+
+            for (let squad of squads.entries()) {
+                searchArray.push(`${squad[1].summoner}'s Summon: ${squad[1].displayNames.length}/${squad[1].size}`);
+                internalArray.push({ summon: squad[1] });
+            }
+
+            return MAIN.generalMatcher(message, -23, user, searchArray, internalArray, Queue, "There are more than one active summon, please enter the number whose summon you wish to answer!");
+        }
     }
 }
 exports.Queue = Queue;
@@ -550,12 +697,14 @@ async function deQueue(message, params, user) {
         if (!squad) return message.channel.send(`${MAIN.mention(mentionID)} doesn't have a summon!`);
         if (squad.summoner == user.displayName) {
             message.channel.send("You have cancelled your summon!");
+            squad.joinedIDS.splice(squad.joinedIDS.indexOf(user.joinedIDS), 1);
             return squads.splice(squads.indexOf(squad), 1);
         }
 
-        if (!squad.displayNames.includes(user.displayName)) return message.channel.send("You have not joined this summon to leave it yet!");
+        if (!squad.joinedIDS.includes(user.id)) return message.channel.send("You have not joined this summon to leave it yet!");
 
         message.channel.send(`Left ${squad.summoner}'s summon!`);
+        squad.joinedIDS.splice(squad.joinedIDS.indexOf(user.joinedIDS), 1);
         return squad.displayNames.splice(squad.displayNames.indexOf(user.displayName), 1);
         //return squad.players.splice(squad.players.indexOf(mentionID), 1);
     }
@@ -563,8 +712,10 @@ async function deQueue(message, params, user) {
         for (let squad of squads) {
             if (squad.summonerID == user.id)
                 squads[squads.indexOf(squad)] = -1;
-            else if (squad.displayNames.includes(user.displayName))
+            else if (squad.displayNames.includes(user.displayName)) {
                 squad.displayNames.splice(squad.displayNames.indexOf(user.displayName), 1);//cannot splice on undefined
+                squad.joinedIDS.splice(squad.joinedIDS.indexOf(user.joinedIDS), 1);
+            }
         }
 
         while (squads.includes(-1))
@@ -680,7 +831,6 @@ function removeGame(message, game, user) {
 
             if (isNaN(game[0]) && (game[0].length > 0)) {
                 let check = checkGame(user.games, game, user);
-                console.log(check);
                 if ((check == -1)) {
 
                     if (!mass)
@@ -915,7 +1065,6 @@ async function signUpAllUsers(message, game, user) {
         if (member && !member.user.bot) {
             updateGames(message, { game: game, mass: true }, currUser);
             tally++;
-            console.log(currUser.displayName);
         }
     }
 

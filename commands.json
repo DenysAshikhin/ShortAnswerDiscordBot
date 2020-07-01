@@ -295,7 +295,7 @@
         ["1) removeChannelTwitchPairs summit1g, #nameOfTextChannel"],
         ["1) leagueRank", "2) leagueRank TheLastSpark", "3) leagueRank TheLastSpark, na"],
 
-        ["1) rlStats", "2) rlStats TheLastSpark", "3) rlStats TheLastSpark, steam"]
+        ["1) rlRanks TheLastSpark", "3) rlRanks TheLastSpark, steam"]
     ],
     "subsection": [
         [3],

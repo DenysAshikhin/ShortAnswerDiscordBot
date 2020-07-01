@@ -1036,12 +1036,17 @@ async function cacheSong(song, GUILD, MESSAGE) {
     let serverDownload;
     let message;
     if (!song)
+
         if (downloadManager.active.length == downloadManager.limit) return -1;
         else if ((downloadManager.backlog.length == 0)) return -1;
         else {
             guild = downloadManager.backlog.shift();
             downloadManager.active.push(guild);
             serverDownload = download.get(guild);
+            if (!serverDownload) {
+                downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
+                return cacheSong(null, guild);
+            }
             message = serverDownload.message;
         }
     else {
@@ -1119,6 +1124,13 @@ player_response": {
 
         let writeStream = fs.createWriteStream(tempAudio);
         let currentSongsQueue = queue.get(guild);
+        if (!currentSongsQueue){
+            serverDownload.songToDownload = null;
+            serverDownload.progress = 0;
+            downloadingSongs.delete(song.id);
+            downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
+            cacheSong(null, guild);
+        }
         currentSongsQueue.ytdl = youtubeResolve;
         currentSongsQueue.writeStream = writeStream;
 
@@ -1634,9 +1646,16 @@ async function checkEmptyChannel() {
 
     if (queue.size > 0)
         for (server of queue.entries()) {
+            if(!server[1].connection){
+                download.delete(server[1].originMessage.guild.id);
+                queue.delete(server[0]);
+                continue;
+            }
             if (server[1].connection.channel.members.size == 1) {
-                server[1].originMessage.channel.send("Leaving because there is no one listening!");
-                await server[1].voiceChannel.leave();
+                if (server[1].originMessage.channel) {
+                    server[1].originMessage.channel.send("Leaving because there is no one listening!");
+                    await server[1].voiceChannel.leave();
+                }
                 download.delete(server[1].originMessage.guild.id);
                 queue.delete(server[0]);
             }

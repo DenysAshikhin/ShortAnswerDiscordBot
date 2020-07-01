@@ -1,8 +1,8 @@
 const PORT = '33432';
-//const IP = '127.0.0.1';
 const IP = '45.63.17.228';
 
-//const PORT = '43919';
+//const IP = '127.0.0.1';
+//const PORT = '35833';
 
 exports.IP = IP;
 exports.PORT = PORT;
@@ -478,9 +478,23 @@ async function triggerCommandHandler(message, user, skipSearch, emoji) {
 
 const getEmoji = function (EMOJI) {
     let emoji = Client.guilds.cache.get(guildID).emojis.cache.find(emo => emo.name == EMOJI);
-    return `<:${EMOJI}:${emoji.id}>`;
+    if (emoji) {
+      
+        return `<:${EMOJI}:${emoji.id}>`;
+    }
+    return '';
 }
 exports.getEmoji = getEmoji;
+
+const getEmojiObject = function (EMOJI) {
+    let emoji = Client.guilds.cache.get(guildID).emojis.cache.find(emo => emo.name == EMOJI);
+    if (emoji) {
+        
+        return emoji;
+    }
+    return '';
+}
+exports.getEmojiObject = getEmojiObject;
 
 async function commandMatcher(message, command, params, user) {
 
@@ -858,12 +872,12 @@ exports.shuffleArray = shuffleArray;
 
 
 async function setControlEmoji(message) {
+    setEmojiCollector(message);
     await message.react('1️⃣')
     await message.react('2️⃣')
     await message.react('3️⃣')
     await message.react('4️⃣')
     await message.react('5️⃣')
-    setEmojiCollector(message);
 }
 
 // async function setEmojiCollector() {
@@ -875,9 +889,9 @@ async function setControlEmoji(message) {
 async function setEmojiCollector(message) {
 
     let collector = await message.createReactionCollector(function (reaction, user) {
-        return ((reaction.emoji.name === '1️⃣') || (reaction.emoji.name === '2️⃣') ||
+        return (((reaction.emoji.name === '1️⃣') || (reaction.emoji.name === '2️⃣') ||
             (reaction.emoji.name === '3️⃣') || (reaction.emoji.name === '4️⃣') || (reaction.emoji.name === '5️⃣')
-            && (user.id != message.author.id))
+            && (user.id != message.author.id)) && (!user.bot))
     }, { time: 60000 });
     collector.on('collect', async function (emoji, user) {
 
@@ -980,7 +994,6 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
     }
 }
 exports.generalMatcher = generalMatcher;
-
 
 //If it ever gets bad enough, move the embed construction to backup - all it needs is guild + channel id's and all the other parameters
 async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title, selector) {

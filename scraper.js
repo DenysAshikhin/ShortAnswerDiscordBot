@@ -226,7 +226,7 @@ const getEmoji = function (EMOJI) {
 }
 exports.getEmoji = getEmoji;
 
-const getLeagueEmoji = function(EMOJI){
+const getLeagueEmoji = function (EMOJI) {
     EMOJI = EMOJI.trim().replace(' ', '');
     let emoji = client.guilds.cache.get('689313920107675714').emojis.cache.find(emo => { return emo.name == EMOJI });
     if (!emoji) return '';
@@ -236,7 +236,7 @@ const getLeagueEmoji = function(EMOJI){
 }
 exports.getLeagueEmoji = getLeagueEmoji;
 
-async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title, selector) {
+async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title, selector, MAXLength, cutOff) {
 
     let runningString = "";
     let previousName = "";
@@ -244,11 +244,20 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
     let tally = startTally == 0 ? startTally : 1;
     let field = null;
     let fieldArray = [];
-    let maxLength = 100;
+    let maxLength = MAXLength ? MAXLength : 100;
+
+
 
     let tester = 1;
     for (item of array) {
+
         let BIGSPLIT = false;
+
+        // if((item.value == "** **") && (item.name == "** **")){
+        //     fieldArray.push(item);
+        //     continue;
+        // }
+
         if (item.value == '') continue;
 
         element = item.value ? item.value : item;
@@ -370,22 +379,23 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
         field.name = `${part} ${groupNumber}`;
     if (field.value.length != 0)
         fieldArray.push(JSON.parse(JSON.stringify(field)));
-
-    return await testy(fieldArray, description, message, modifier, URL, title, selector);
+    return await testy(fieldArray, description, message, modifier, URL, title, selector, cutOff);
 }
 exports.prettyEmbed = prettyEmbed;
 
-function createThreeQueue(array) {
+function createThreeQueue(array, cutOff) {
 
     let threeQueue = {
         queue: [[], [], []],
         index: 0
     };
 
+    const CUT = cutOff ? cutOff : 4;
+
     let rows = Math.floor(array.length / 3);
     if ((array.length % 3) > 0) rows++;
 
-    if (rows < 4) {
+    if (rows < CUT) {
         for (let j = 0; j < rows; j++) {
 
             if (array.length == 4) {
@@ -428,7 +438,7 @@ function createThreeQueue(array) {
     return threeQueue;
 }
 
-async function testy(ARR, description, message, modifier, URL, title, selector) {
+async function testy(ARR, description, message, modifier, URL, title, selector, cutOff) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.timestamp = new Date();
@@ -438,7 +448,7 @@ async function testy(ARR, description, message, modifier, URL, title, selector) 
 
     let amount = ARR.length > 24 ? 24 : ARR.length;
 
-    let threeQueue = createThreeQueue(ARR.splice(0, amount))
+    let threeQueue = createThreeQueue(ARR.splice(0, amount), cutOff)
 
     threeQueue.index = 0;
 
@@ -615,6 +625,10 @@ server.on('error', (err) => { console.log("Caught server error") })
 server.listen(33432, '45.63.17.228', () => {
     console.log('opened server on', server.address());
 });
+
+// server.listen(33432, '127.0.0.1', () => {
+//     console.log('opened server on', server.address());
+// });
 server.on('connection', (socket) => { })
 
 

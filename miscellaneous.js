@@ -12,7 +12,8 @@ var needle = require('needle');
 
 //http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
 
-var regionsEZ = ['br', 'eune', 'euw', 'jp', 'kr', 'lan', 'las', 'na', 'oce', 'tr', 'ru', 'pbe'];
+//sometimes 'pbe' should be in there
+var regionsEZ = ['br', 'eune', 'euw', 'jp', 'kr', 'lan', 'las', 'na', 'oce', 'tr', 'ru'];
 var regionsExact = ['br1', 'eun1', 'euw1', 'jp1', 'kr', 'la1', 'la2', 'na1', 'oc1', 'tr1', 'ru', 'pbe1'];
 var dataDragon = new Map();
 var championKeys = new Map();
@@ -159,7 +160,8 @@ async function leagueStats(message, params, user) {
     //if (!user.twitchFollows) user.twitchFollow = [];
     let args = message.content.split(" ").slice(1).join(' ').split(',');
 
-    if ((args.length == 0) && (!user.linkedLeague)) return message.channel.send("You don't have a league account linked, or did not provide at least a summoner name!");
+    // console.log(user.linkedLeague)
+    if ((!args[0])) return message.channel.send("You did not provide at least a summoner name!");
 
     let zone = 'na';
     if (!params.looped) {
@@ -177,7 +179,7 @@ async function leagueStats(message, params, user) {
     else
         zone = params.region;
 
-        
+
     let socky = new net.Socket();
     socky.on('error', (err) => { console.log("socket error in get stats") });
 
@@ -201,7 +203,8 @@ const RLRanks = async function (message, params, user) {
 
     let args = message.content.split(" ").slice(1).join(' ').split(',');
 
-    if ((args.length == 0) && (!user.linkedLeague)) return message.channel.send("You don't have a Rocket League account linked, or did not provide at least a summoner name!");
+    // console.log(user.linkedLeague)
+    if ((!args[0])) return message.channel.send("You did not provide at least a summoner name!");
 
     let zones = ['steam', 'ps', 'xbox'];
     let zone = zones[0];
