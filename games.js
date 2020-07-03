@@ -14,7 +14,6 @@ for (let element of gameJSON)
 games.sort();
 
 
-
 async function setControlEmoji(message) {
     try {
         await message.react(MAIN.getEmojiObject('queue'));
@@ -175,7 +174,6 @@ const resetSummonRitual = async function (message, summonerID, time, queue) {
         }
     }
 }
-
 
 //move this to backup if needed
 async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
@@ -958,7 +956,7 @@ function removeGame(message, game, user) {
 
                     //message.channel.send({ embed: removeEmbed });
                     MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-                        removeEmbed.fields, -1, 1, 1, null, null, true);
+                        removeEmbed.fields, -1, -1, 1, null, null, true);
                     MAIN.specificCommandCreator(removeGame, [message, -1, user], check.result, user);
                     return -11;
                 }
@@ -1221,7 +1219,7 @@ async function updateGames(message, game, user) {
 
             //message.channel.send({ embed: removeEmbed });
             MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-                removeEmbed.fields, -1, 1, 1, null, null, true);
+                removeEmbed.fields, -1, -1, 1, null, null, true);
             MAIN.specificCommandCreator(updateGames, [message, -1, user], check.result, user);
             return -11;
         }

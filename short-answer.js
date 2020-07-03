@@ -1,8 +1,7 @@
 const PORT = '33432';
-const IP = '45.63.17.228';
+//const IP = '45.63.17.228';
 
-//const IP = '127.0.0.1';
-//const PORT = '35833';
+const IP = '127.0.0.1';
 
 exports.IP = IP;
 exports.PORT = PORT;
@@ -455,6 +454,9 @@ function populateCommandMap() {
     commandMap.set(Commands.commands[78], MISCELLANEOUS.removeChannelTwitchLink)
     commandMap.set(Commands.commands[79], MISCELLANEOUS.leagueStats)
     commandMap.set(Commands.commands[80], MISCELLANEOUS.RLRanks)
+    commandMap.set(Commands.commands[81], MISCELLANEOUS.RLTracker)
+    commandMap.set(Commands.commands[82], MISCELLANEOUS.UnlinkRLTracker)
+    commandMap.set(Commands.commands[83], MISCELLANEOUS.viewRLTrackers)
 
     exports.commandMap = commandMap;
 }
@@ -1360,4 +1362,14 @@ process.on('unhandledException', (reason, p) => {
 //poker, texas hold em, war, gold fish, 
 
 //Make a vote system for the next feature to focus on
+
+//Make a missingGame command, that makes takes a game name, returns the top 10 result, if the person doesn't see it, they can press confirm
+//this will add it to a queue, where only one game a time is shown in the support server channel. It will display the suggestion, closest matches (5?)
+//the name of person as well as which server. There will be a checkmark and x emoji. Clicking on check will add the game to the gameslist, x will remove
+//the thing from suggestion and add it to a rejectGame array + json. It will also send a person a notification if there suggestion has been approved
+//or refused
+//Maybe an emoji for accepted, thanks for the suggestion! Or rejected because: dumb/troll suggestion, already exists (someone else suggested before you)
+//if accepted, also say that it should be live within a few hours
+
+
 //MEE6 bot - beatiful ui, mainly the website

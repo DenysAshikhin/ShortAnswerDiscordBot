@@ -102,6 +102,7 @@ var commandMap = new Map();
     commandMap.set('check_guild_twitch_streams', twitchLogic.checkGuildTwitchStreams);
     commandMap.set('check_user_twitch_streams', twitchLogic.checkUsersTwitchStreams);
     commandMap.set('rocket_league_ranks', rocketScraper.rocketLeagueRanks);
+    commandMap.set('rocket_league_tracker', rocketScraper.RLTracker);
 }
 
 var workQueue = {
@@ -126,9 +127,6 @@ async function showResources() {
 
 
 
-
-
-
 async function countTalk() {
 
     for (let GUILD of client.guilds.cache) {
@@ -143,8 +141,6 @@ async function countTalk() {
             if (channel.type == "voice") {
 
                 for (let MEMBER of channel.members) {
-                    console.log("number of members: ")
-                    console.log(channel.members.size)
                     if ((channel.members.size < 2) && (channel.id != guild.afkChannelID)) {
                         break channelLoop;
                     }
@@ -158,7 +154,7 @@ async function countTalk() {
 
                             if (channel.id == guild.afkChannelID) {
 
-                                let timeAFK = user.timeAFK;
+                                let timeAFK = usy.timeAFK;
                                 timeAFK[index] += 1;
 
                                 User.findOneAndUpdate({ id: member.id },
@@ -204,15 +200,6 @@ async function checkTwitch() {
         console.log("Error with twitch checks!");
     }
 }//eventualy check this to only get the guilds this shard or whatever is a part of
-async function minuteCount() {
-
-    console.log(process.argv.length)
-    if (process.argv.length == 3) {
-        countTalk();
-        checkTwitch();
-    }
-}
-setInterval(minuteCount, 60 * 1000);
 
 
 
@@ -221,8 +208,8 @@ const getEmoji = function (EMOJI) {
     EMOJI = EMOJI.trim().replace(' ', '');
     let emoji = client.guilds.cache.get(guildID).emojis.cache.find(emo => { return emo.name == EMOJI });
     if (!emoji) return '';
-    console.log("FINISHED EMOJI: ")
-    console.log(`<:${EMOJI}:${emoji.id}>`)
+    // console.log("FINISHED EMOJI: ")
+    // console.log(`<:${EMOJI}:${emoji.id}>`)
     return `<:${EMOJI}:${emoji.id}>`;
 }
 exports.getEmoji = getEmoji;
@@ -231,8 +218,8 @@ const getLeagueEmoji = function (EMOJI) {
     EMOJI = EMOJI.trim().replace(' ', '');
     let emoji = client.guilds.cache.get('689313920107675714').emojis.cache.find(emo => { return emo.name == EMOJI });
     if (!emoji) return '';
-    console.log("FINISHED EMOJI: ")
-    console.log(`<:${EMOJI}:${emoji.id}>`)
+    // console.log("FINISHED EMOJI: ")
+    // console.log(`<:${EMOJI}:${emoji.id}>`)
     return `<:${EMOJI}:${emoji.id}>`;
 }
 exports.getLeagueEmoji = getLeagueEmoji;
@@ -499,7 +486,7 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
 
 async function queue(command, params, socket, newWork) {
 
-
+    console.log("Amount of work in the queue:")
     console.log(workQueue.active.length)
 
     if (newWork) {
@@ -530,7 +517,6 @@ async function queue(command, params, socket, newWork) {
         let currentTask = workQueue.backlog.shift();
         workQueue.active.push({ command: currentTask.command, params: currentTask.params, socket: currentTask.socket });
         queue(null, null, false);
-
         return 2;
     }
 }
@@ -623,13 +609,13 @@ server.on('error', (err) => { console.log("Caught server error") })
 // Grab an arbitrary unused port.
 //'45.63.17.228'
 //33432
-server.listen(33432, '45.63.17.228', () => {
-    console.log('opened server on', server.address());
-});
-
-// server.listen(33432, '127.0.0.1', () => {
+// server.listen(33432, '45.63.17.228', () => {
 //     console.log('opened server on', server.address());
 // });
+
+server.listen(33432, '127.0.0.1', () => {
+    console.log('opened server on', server.address());
+});
 server.on('connection', (socket) => { })
 
 
@@ -637,15 +623,39 @@ connectDB.once('open', async function () {
 
     await client.login(token);
 
-
     client.on("ready", () => {
 
         console.log("Ready!");
         exports.Client = client;
-        checkTwitch();
+        checkRL();
     });
     client.on('message', async (message) => {
 
         console.log(message.content);
     })
 });
+
+var county = 0;
+async function minuteCount() {
+
+    if (process.argv.length == 3) {
+        countTalk();
+        checkTwitch();
+        // console.log(county++)
+    }
+}
+setInterval(minuteCount, 60 * 1000);
+
+
+const checkRL = async function () {
+
+    let guilds = await Guild.find({ RLTracker: { $exists: true, $not: { $size: 0 } } });
+    // console.log(guilds);
+    rocketScraper.checkRLTrackers(guilds);
+
+    //max - min + 1) + min
+    let ms = Math.floor(((Math.random() * (5 - 1 + 1)) + 1) * 60000);
+    console.log(`RANDOMISED: ${ms}`)
+    setTimeout(checkRL, ms)
+    console.log("GOT TO ENDDDD")
+}

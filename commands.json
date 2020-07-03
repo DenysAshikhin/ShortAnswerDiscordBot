@@ -96,7 +96,10 @@
         "REMOVECHANNELTWITCHPAIR",
         "LEAGUESTATS",
 
-        "RLRANKS"
+        "RLRANKS",
+        "RLTRACKER",
+        "REMOVERLTRACKER",
+        "VIEWRLTRACKERS"
     ],
     "explanation": [
         "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
@@ -195,7 +198,10 @@
         "Removes a serverChannel - twitchStreamer pair.",
         "Shows you your league stats, or the stats of another person. You have to specify the region and their summoner name seperated by a comma! **Default zone is 'na'!**",
         
-        "Shows you your Rocket League ranks, or the ranks of another person. You have to specify the platform and their name seperated by a comma! **Default platform is 'steam'!**. The others are: ps for playstation and xbox for...xbox"
+        "Shows you your Rocket League ranks, or the ranks of another person. You have to specify the platform and their name seperated by a comma! **Default platform is 'steam'!**. The others are: ps for playstation and xbox for...xbox",
+        "Sends a message with a Rocket Leauge elo rating update for a specific player/platofrm in a specified channel.",
+        "Removes a Rocket League tracker for a player+platform from a specified channel.",
+        "Shows all the player+platform(s) that are being tracked for the server and the channels in which they are being posted."
     ],
         
     "example": [
@@ -290,12 +296,15 @@
         ["1) unfollowTwitchChannel TheLastSpark"],
 
         ["1) followTwitchChannel TheLastSpark"],
-        ["1) pairChannelWithTwitch summit1g #nameOfTextChannel"],
+        ["1) pairChannelWithTwitch summit1g, #nameOfTextChannel"],
         ["1) showChannelTwitchPairs"],
         ["1) removeChannelTwitchPairs summit1g, #nameOfTextChannel"],
         ["1) leagueRank", "2) leagueRank TheLastSpark", "3) leagueRank TheLastSpark, na"],
 
-        ["1) rlRanks TheLastSpark", "3) rlRanks TheLastSpark, steam"]
+        ["1) rlRanks TheLastSpark", "2) rlRanks TheLastSpark, steam"],
+        ["1) rlTracker TheLastSpark, #command", "2) rlTracker TheLastSpark, steam, #notifications"],
+        ["1) removeRLTracker TheLastSpark, #command", "2) removeRLTracker TheLastSpark, steam, #notifications"],
+        ["1) viewRLTrackers"]
     ],
     "subsection": [
         [3],
@@ -394,6 +403,9 @@
         [3, 5],
         [3],
 
+        [3],
+        [3],
+        [3],
         [3]
     ]
 }

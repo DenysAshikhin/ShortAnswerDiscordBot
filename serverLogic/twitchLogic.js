@@ -37,7 +37,7 @@ twitchInitiliasation();
 
 
 async function checkGuildTwitchStreams(guilds) {
-console.log("CGHECKING GUILD")
+    console.log("CGHECKING GUILD")
     let sendArray = [];
     let promiseArray = [];
     for (guild of guilds) {
@@ -119,8 +119,10 @@ async function checkUsersTwitchStreams(users) {
                                 index = i;
 
                                 let previousTime = new Date(USER.twitchNotifications[i][1]);
-                                if ((previousTime - streamDate) == 0)
+                                if ((previousTime - streamDate) == 0) {
+                                    console.log(`${stream._data.display_name}'s stream has already been notifed of`)
                                     found = true;
+                                }
                                 break;
                             }
                         }

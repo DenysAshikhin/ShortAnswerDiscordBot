@@ -242,15 +242,169 @@ const RLRanks = async function (message, params, user) {
 }
 exports.RLRanks = RLRanks;
 
-async function getTwitchChannel(streamer) {
-    const user = await MAIN.twitchClient.helix.users.getUserByName(streamer);
-    return user;
-}
+const RLTracker = async function (message, params, user) {
 
-async function getTwitchChannelByID(id) {
-    const user = await MAIN.twitchClient.helix.users.getUserById(id);
-    return user;
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only administrators can use this command!");
+
+    if (!(message.mentions.channels.size == 1)) return message.channel.send("You have to mention a channel to put the notifications in!");
+
+    let args = message.content.split(" ").slice(1).join(' ').split(',');
+
+    // console.log(user.linkedLeague)
+    if ((!args[0])) return message.channel.send("You did not provide at least a player's name!");
+
+    //  if (args.length != 2) return message.channel.send("You did not specify a proper player + text-channel combo!");
+    console.log(args[0])
+
+    if (args[0].includes('<#')) {
+
+        message.channel.send(`You have entered invalid arguments. Make sure to seperate the **player name** and the channel with a *comma*.`
+            + ` Use the **help rlTracker** command to get a better example!`);
+        return -1
+    }
+    // if (args[0].includes('<#'))
+    //     args[0] = args[0].substring(0, args[0].indexOf('<#') - 1)
+    // if (args.length == 3)
+    //     if (args[1].includes('<#'))
+    //         args[1] = args[0].substring(0, args[1].indexOf('<#') - 1)
+
+    let zones = ['steam', 'ps', 'xbox'];
+    let zone = zones[0];
+
+    if (!params.looped) {
+        if (args.length > 2) {
+            zone = args[1].toLowerCase();
+            if (zones.includes(zone)) {
+                zone = zones[zones.indexOf(zone)];
+            }
+            else
+                return MAIN.generalMatcher(message, zone, user, zones,
+                    zones.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    RLTracker, "Please indicate which platform you wanted to user!");
+        }
+    }
+    else
+        zone = params.region;
+
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+    if (!guild.RLTracker) guild.RLTracker = [];
+
+    let ID = message.mentions.channels.first().id
+
+    let status;
+    let socky = new net.Socket();
+    socky.on('error', (err) => { console.log("socket error in link_channel_with_RL") });
+
+    socky.connect(MAIN.PORT, MAIN.IP, () => {
+
+        socky.write(JSON.stringify({ command: 'rocket_league_tracker', params: [zone, args[0], guild.RLTracker, ID] }));
+    });
+    socky.on('data', async (data) => {
+        let stringed = data.toString();
+        let parsed = JSON.parse(stringed);
+        console.log(parsed)
+
+        if (parsed.status) {
+            if (parsed.status == -1) {
+                message.channel.send("I could not find that player+platform combination, try again?");
+                result = -1;
+                socky.destroy();
+            }
+            else {
+                message.channel.send("Such a ServerChannel - Player pair already exists!");
+                result = -2;
+                socky.destroy();
+            }
+        }
+        else {
+            Guild.findOneAndUpdate({ id: guild.id }, { $set: { RLTracker: parsed.RLTracker } }, function (err, doc, res) { if (err) console.log(err) });
+            message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
+            status = 1;
+            socky.destroy();
+        }
+    });
+    return status;
 }
+exports.RLTracker = RLTracker;
+
+const UnlinkRLTracker = async function (message, params, user) {
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only administrators can use this command!");
+
+    if (!(message.mentions.channels.size == 1)) return message.channel.send("You have to mention a channel to remove the notifications from!");
+
+    let args = message.content.split(" ").slice(1).join(' ').split(',');
+
+    // console.log(user.linkedLeague)
+    if ((!args[0])) return message.channel.send("You did not provide at least a player's name!");
+
+    //  if (args.length != 2) return message.channel.send("You did not specify a proper player + text-channel combo!");
+
+    if (args[0].includes('<#')) {
+
+        message.channel.send(`You have entered invalid arguments. Make sure to seperate the **player name** and the channel with a *comma*.`
+            + ` Use the **help removeRLTracker** command to get a better example!`);
+        return -1
+    }
+
+    let zones = ['steam', 'ps', 'xbox'];
+    let zone = zones[0];
+
+    if (!params.looped) {
+        if (args.length > 2) {
+            zone = args[1].toLowerCase();
+            if (zones.includes(zone)) {
+                zone = zones[zones.indexOf(zone)];
+            }
+            else
+                return MAIN.generalMatcher(message, zone, user, zones,
+                    zones.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    UnlinkRLTracker, "Please indicate which platform you wanted to use!");
+        }
+    }
+    else
+        zone = params.region;
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+    if (!guild.RLTracker) guild.RLTracker = [];
+
+    let ID = message.mentions.channels.first().id
+
+    for (let link of guild.RLTracker) {
+
+        if (link.channelID == ID) {
+
+            if ((link.player == args[0]) && (link.platform == zone)) {
+                message.channel.send(`Succesfully removed ${link.player} on ${link.platform} from ${message.mentions.channels.first()}!`);
+                guild.RLTracker.splice(guild.RLTracker.indexOf(link), 1);
+                Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { RLTracker: guild.RLTracker } }, () => { });
+                return 1;
+            }
+        }
+    }
+
+    message.channel.send(`Could not find ${link.player} on ${link.platform} notifications for ${message.mentions.channels.first()}!`);
+    return -1;
+}
+exports.UnlinkRLTracker = UnlinkRLTracker;
+
+const viewRLTrackers = async function (message, params, user){
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.RLTracker || (guild.RLTracker.length == 0)) return message.channel.send("There are no trackers setup for this server!");
+
+    MAIN.prettyEmbed(message, "Here are the RLTrackers for this server:", guild.RLTracker.reduce((accum, curr) => {
+
+        accum.push({name: '** **', value: `<#${message.guild.channels.cache.get(curr.channelID).name} is linked to=${curr.player}_${curr.platform}`});
+        return accum;
+    }, []), -1, 1, 'md');
+    return 1;
+}
+exports.viewRLTrackers = viewRLTrackers;
 
 async function followTwitchChannel(message, params, user) {
 
@@ -376,7 +530,6 @@ async function showChannelTwitchLinks(message, params, user) {
 
     if (!guild.channelTwitch || (guild.channelTwitch.length == 0)) return message.channel.send("There are no pairs setup for this server!");
 
-
     let status;
     let socky = new net.Socket();
     socky.on('error', (err) => { console.log("socket error in unfollowtwitch") });
@@ -428,12 +581,11 @@ async function removeChannelTwitchLink(message, params, user) {
 
     if (!guild.channelTwitch || (guild.channelTwitch.length == 0)) return message.channel.send("There are no pairs setup for this server!");
 
-    if (!message.mentions.channels.length != 1) return message.channel.send("You have to mention a channel to remove the twitch notifications from!");
+    if (!(message.mentions.channels.size == 1)) return message.channel.send("You have to mention a channel to remove the twitch notifications from!");
 
     let args = message.content.split(" ").slice(1).join(' ').split(',');
 
     if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
-
 
 
     let status;
@@ -551,10 +703,11 @@ async function linkChannelWithTwitch(message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can use this command!");
 
-    if (!message.mentions.channels.length != 1) return message.channel.send("You have to mention a channel to put the twitch notifications in!");
+    if (!(message.mentions.channels.size == 1)) return message.channel.send("You have to mention a channel to put the twitch notifications in!");
 
     let args = message.content.split(" ").slice(1).join(' ').split(',');
 
+    console.log(args.length)
     if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
 
     let guild = await MAIN.findGuild({ id: message.guild.id });

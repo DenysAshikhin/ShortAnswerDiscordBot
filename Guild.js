@@ -9,7 +9,8 @@ const GuildSchema = new mongoose.Schema({
     duration: Number,
     Users: [],
     channelTwitch: [],
-    twitchNotifications: []
+    twitchNotifications: [],
+    RLTracker: []
 });
 
 module.exports = mongoose.model('Guild', GuildSchema);
