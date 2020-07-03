@@ -201,7 +201,7 @@
         "Shows you your Rocket League ranks, or the ranks of another person. You have to specify the platform and their name seperated by a comma! **Default platform is 'steam'!**. The others are: ps for playstation and xbox for...xbox",
         "Sends a message with a Rocket Leauge elo rating update for a specific player/platofrm in a specified channel.",
         "Removes a Rocket League tracker for a player+platform from a specified channel.",
-        "Shows all the player+platform(s) that are being tracked for the server and the channels in which they are being posted."
+        "Shows all the player+platform(s) that are being tracked for the server and the channels in which they are being posted. Updates can take up to **5 minutes**!"
     ],
         
     "example": [
