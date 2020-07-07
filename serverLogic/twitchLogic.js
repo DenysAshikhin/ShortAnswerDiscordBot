@@ -37,11 +37,12 @@ twitchInitiliasation();
 
 
 async function checkGuildTwitchStreams(guilds) {
-    console.log("CGHECKING GUILD")
+  //  console.log("CGHECKING GUILD")
     let sendArray = [];
     let promiseArray = [];
     for (guild of guilds) {
         for (channel1 of guild.channelTwitch) {
+            let GUILD1 = guild;
             let channel = channel1;
             let channelByID = getTwitchChannelByID(channel[0])
                 .then(async (streamer) => {
@@ -49,18 +50,16 @@ async function checkGuildTwitchStreams(guilds) {
 
                     if (stream) {
 
-                        let streamDate = new Date(stream._data.started_at);
                         let found = false;
                         let index = -1;
 
-                        if (!guild.twitchNotifications) guild.twitchNotifications = [];
+                        if (!GUILD1.twitchNotifications) GUILD1.twitchNotifications = [];
 
-                        for (let i = 0; i < guild.twitchNotifications.length; i++) {
-                            if (guild.twitchNotifications[i][0] == stream._data.user_id) {
+                        for (let i = 0; i < GUILD1.twitchNotifications.length; i++) {
+                            if (GUILD1.twitchNotifications[i][0] == stream._data.user_id) {
                                 index = i;
 
-                                let previousTime = new Date(guild.twitchNotifications[i][1]);
-                                if ((previousTime - streamDate) == 0) {
+                                if (GUILD1.twitchNotifications[i][1] == stream._data.id) {
                                     found = true;
                                 }
                                 break;
@@ -70,12 +69,12 @@ async function checkGuildTwitchStreams(guilds) {
                         if (!found) {
 
                             if (index != -1)
-                                guild.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
+                            GUILD1.twitchNotifications[index] = [stream._data.user_id, stream._data.id];
                             else
-                                guild.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
+                            GUILD1.twitchNotifications.push([stream._data.user_id, stream._data.id]);
 
                             sendArray.push({
-                                twitchNotifications: guild.twitchNotifications, guildID: guild.id,
+                                twitchNotifications: GUILD1.twitchNotifications, guildID: GUILD1.id,
                                 alertMessage: `${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`,
                                 channelID: channel[1]
                             });
@@ -98,7 +97,7 @@ async function checkGuildTwitchStreams(guilds) {
 exports.checkGuildTwitchStreams = checkGuildTwitchStreams;
 
 async function checkUsersTwitchStreams(users) {
-    console.log("CGHECKING UUUUSER")
+   // console.log("CGHECKING UUUUSER")
     let sendArray = [];
     let promiseArray = [];
     for (user1 of users) {
@@ -108,7 +107,6 @@ async function checkUsersTwitchStreams(users) {
                 .then(async (streamer) => {
                     let stream = await streamer.getStream();
                     if (stream) {
-                        let streamDate = new Date(stream._data.started_at);
                         let found = false;
                         let index = -1;
 
@@ -118,9 +116,8 @@ async function checkUsersTwitchStreams(users) {
                             if (USER.twitchNotifications[i][0] == stream._data.user_id) {
                                 index = i;
 
-                                let previousTime = new Date(USER.twitchNotifications[i][1]);
-                                if ((previousTime - streamDate) == 0) {
-                                    console.log(`${stream._data.display_name}'s stream has already been notifed of`)
+                                if (USER.twitchNotifications[i][1] == stream._data.id) {
+                             //       console.log(`${stream._data.display_name}'s stream has already been notifed of`)
                                     found = true;
                                 }
                                 break;
@@ -129,9 +126,9 @@ async function checkUsersTwitchStreams(users) {
                         if (!found) {
 
                             if (index != -1)
-                                USER.twitchNotifications[index] = [stream._data.user_id, stream._data.started_at];
+                                USER.twitchNotifications[index] = [stream._data.user_id, stream._data.id];
                             else
-                                USER.twitchNotifications.push([stream._data.user_id, stream._data.started_at]);
+                                USER.twitchNotifications.push([stream._data.user_id, stream._data.id]);
 
                             sendArray.push({
                                 twitchNotifications: USER.twitchNotifications, userID: USER.id,
@@ -150,7 +147,7 @@ async function checkUsersTwitchStreams(users) {
 
             let member = guild.members.cache.get(entry.userID);
             if (!member) continue;
-            console.log("Trying to alert")
+          //  console.log("Trying to alert")
             member.send(entry.alertMessage);
             User.findOneAndUpdate({ id: entry.userID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
         }
