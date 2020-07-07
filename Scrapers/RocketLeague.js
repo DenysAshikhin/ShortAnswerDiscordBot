@@ -186,8 +186,8 @@ const checkRLTrackers = async function (params) {
                         else {
                             specificNotif.push({
                                 name: "Ranked Duel 1v1 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${player.r1.rank}`)} ${player.r1.rank} : ${player.r1.division} (${player.r1.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.r1.rank}`)} ${temp.ranks.r1.rank} : ${temp.ranks.r1.division} (${temp.ranks.r1.elo})`
+                                value: `${MAIN.getEmoji(`RL${temp.ranks.r1.rank}`)} ${temp.ranks.r1.rank} : ${temp.ranks.r1.division} (${temp.ranks.r1.elo})`
+                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.r1.rank}`)} ${player.r1.rank} : ${player.r1.division} (${player.r1.elo})`
                             });
                         }
                     }
@@ -205,8 +205,8 @@ const checkRLTrackers = async function (params) {
                         else {
                             specificNotif.push({
                                 name: "Ranked Duel 2v2 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${player.r2.rank}`)} ${player.r2.rank} : ${player.r2.division} (${player.r2.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.r2.rank}`)} ${temp.ranks.r2.rank} : ${temp.ranks.r2.division} (${temp.ranks.r2.elo})`
+                                value: `${MAIN.getEmoji(`RL${temp.ranks.r2.rank}`)} ${temp.ranks.r2.rank} : ${temp.ranks.r2.division} (${temp.ranks.r2.elo})`
+                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.r2.rank}`)} ${player.r2.rank} : ${player.r2.division} (${player.r2.elo})`
                             });
                         }
                     }
@@ -224,8 +224,8 @@ const checkRLTrackers = async function (params) {
                         else {
                             specificNotif.push({
                                 name: "Ranked 3v3 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${player.r3.rank}`)} ${player.r3.rank} : ${player.r3.division} (${player.r3.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.r3.rank}`)} ${temp.ranks.r3.rank} : ${temp.ranks.r3.division} (${temp.ranks.r3.elo})`
+                                value: `${MAIN.getEmoji(`RL${temp.ranks.r3.rank}`)} ${temp.ranks.r3.rank} : ${temp.ranks.r3.division} (${temp.ranks.r3.elo})`
+                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.r3.rank}`)} ${player.r3.rank} : ${player.r3.division} (${player.r3.elo})`
                             });
                         }
                     }
@@ -243,8 +243,8 @@ const checkRLTrackers = async function (params) {
                         else {
                             specificNotif.push({
                                 name: "Ranked Solo 3v3 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${player.rs3.rank}`)} ${player.rs3.rank} : ${player.rs3.division} (${player.rs3.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.rs3.rank}`)} ${temp.ranks.rs3.rank} : ${temp.ranks.rs3.division} (${temp.ranks.rs3.elo})`
+                                value: `${MAIN.getEmoji(`RL${temp.ranks.rs3.rank}`)} ${temp.ranks.rs3.rank} : ${temp.ranks.rs3.division} (${temp.ranks.rs3.elo})`
+                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.rs3.rank}`)} ${player.rs3.rank} : ${player.rs3.division} (${player.rs3.elo})`
                             });
                         }
                     }
@@ -262,8 +262,8 @@ const checkRLTrackers = async function (params) {
                         else {
                             specificNotif.push({
                                 name: "Hoops Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${player.hoops.rank}`)} ${player.hoops.rank} : ${player.hoops.division} (${player.hoops.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.hoops.rank}`)} ${temp.ranks.hoops.rank} : ${temp.ranks.hoops.division} (${temp.ranks.hoops.elo})`
+                                value: `${MAIN.getEmoji(`RL${temp.ranks.hoops.rank}`)} ${temp.ranks.hoops.rank} : ${temp.ranks.hoops.division} (${temp.ranks.hoops.elo})`
+                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.hoops.rank}`)} ${player.hoops.rank} : ${player.hoops.division} (${player.hoops.elo})`
                             });
                         }
                     }
@@ -281,8 +281,8 @@ const checkRLTrackers = async function (params) {
                         else {
                             specificNotif.push({
                                 name: "Rumble Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${player.rumble.rank}`)} ${player.rumble.rank} : ${player.rumble.division} (${player.rumble.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.rumble.rank}`)} ${temp.ranks.rumble.rank} : ${temp.ranks.rumble.division} (${temp.ranks.rumble.elo})`
+                                value: `${MAIN.getEmoji(`RL${temp.ranks.rumble.rank}`)} ${temp.ranks.rumble.rank} : ${temp.ranks.rumble.division} (${temp.ranks.rumble.elo})`
+                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.rumble.rank}`)} ${player.rumble.rank} : ${player.rumble.division} (${player.rumble.elo})`
                             });
                         }
                     }
@@ -300,8 +300,8 @@ const checkRLTrackers = async function (params) {
                         else {
                             specificNotif.push({
                                 name: "Dropshot Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${player.dropshot.rank}`)} ${player.dropshot.rank} : ${player.dropshot.division} (${player.dropshot.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.dropshot.rank}`)} ${temp.ranks.dropshot.rank} : ${temp.ranks.dropshot.division} (${temp.ranks.dropshot.elo})`
+                                value: `${MAIN.getEmoji(`RL${temp.ranks.dropshot.rank}`)} ${temp.ranks.dropshot.rank} : ${temp.ranks.dropshot.division} (${temp.ranks.dropshot.elo}))`
+                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.dropshot.rank}`)} ${player.dropshot.rank} : ${player.dropshot.division} (${player.dropshot.elo})`
                             });
                         }
                     }
@@ -319,8 +319,8 @@ const checkRLTrackers = async function (params) {
                         else {
                             specificNotif.push({
                                 name: "Snowday Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${player.snowday.rank}`)} ${player.snowday.rank} : ${player.snowday.division} (${player.snowday.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.snowday.rank}`)} ${temp.ranks.snowday.rank} : ${temp.ranks.snowday.division} (${temp.ranks.rsnowday1.elo})`
+                                value: `${MAIN.getEmoji(`RL${temp.ranks.snowday.rank}`)} ${temp.ranks.snowday.rank} : ${temp.ranks.snowday.division} (${temp.ranks.snowday.elo})`
+                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.snowday.rank}`)} ${player.snowday.rank} : ${player.snowday.division} (${player.snowday.elo})`
                             });
                         }
                     }

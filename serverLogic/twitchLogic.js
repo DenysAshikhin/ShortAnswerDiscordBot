@@ -37,7 +37,7 @@ twitchInitiliasation();
 
 
 async function checkGuildTwitchStreams(guilds) {
-  //  console.log("CGHECKING GUILD")
+    //  console.log("CGHECKING GUILD")
     let sendArray = [];
     let promiseArray = [];
     for (guild of guilds) {
@@ -69,9 +69,9 @@ async function checkGuildTwitchStreams(guilds) {
                         if (!found) {
 
                             if (index != -1)
-                            GUILD1.twitchNotifications[index] = [stream._data.user_id, stream._data.id];
+                                GUILD1.twitchNotifications[index] = [stream._data.user_id, stream._data.id];
                             else
-                            GUILD1.twitchNotifications.push([stream._data.user_id, stream._data.id]);
+                                GUILD1.twitchNotifications.push([stream._data.user_id, stream._data.id]);
 
                             sendArray.push({
                                 twitchNotifications: GUILD1.twitchNotifications, guildID: GUILD1.id,
@@ -88,7 +88,12 @@ async function checkGuildTwitchStreams(guilds) {
 
     for (entry of sendArray) {
 
-        MAIN.Client.guilds.cache.get(entry.guildID).channels.cache.get(entry.channelID).send(entry.alertMessage);
+        let guildy = MAIN.Client.guilds.cache.get(entry.guildID);
+        if (!guildy) continue;
+
+        let cachy = guildy.channels.cache.get(entry.channelID);
+        if (!cachy) continue;
+        cachy.send(entry.alertMessage);
         Guild.findOneAndUpdate({ id: entry.guildID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
     }
 
@@ -97,7 +102,7 @@ async function checkGuildTwitchStreams(guilds) {
 exports.checkGuildTwitchStreams = checkGuildTwitchStreams;
 
 async function checkUsersTwitchStreams(users) {
-   // console.log("CGHECKING UUUUSER")
+    // console.log("CGHECKING UUUUSER")
     let sendArray = [];
     let promiseArray = [];
     for (user1 of users) {
@@ -117,7 +122,7 @@ async function checkUsersTwitchStreams(users) {
                                 index = i;
 
                                 if (USER.twitchNotifications[i][1] == stream._data.id) {
-                             //       console.log(`${stream._data.display_name}'s stream has already been notifed of`)
+                                    //       console.log(`${stream._data.display_name}'s stream has already been notifed of`)
                                     found = true;
                                 }
                                 break;
@@ -147,7 +152,7 @@ async function checkUsersTwitchStreams(users) {
 
             let member = guild.members.cache.get(entry.userID);
             if (!member) continue;
-          //  console.log("Trying to alert")
+            //  console.log("Trying to alert")
             member.send(entry.alertMessage);
             User.findOneAndUpdate({ id: entry.userID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
         }
