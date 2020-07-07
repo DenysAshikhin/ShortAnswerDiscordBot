@@ -47,7 +47,7 @@ async function rocketLeagueRanks(params) {
 
 
 
-    console.log(params)
+    //    console.log(params)
 
     if (params[4]) {//Meaning it's called from RLTracker function (returns a different version of the information)
 
@@ -111,7 +111,7 @@ async function rocketLeagueRanks(params) {
         return ranks;
     }
 
-    console.log("GOT PAST PARAMs")
+    //  console.log("GOT PAST PARAMs")
     let finalArray = [];
 
     for (let rank of finalContent) {
@@ -169,151 +169,170 @@ const checkRLTrackers = async function (params) {
                     //finalArray.push({ name: rank[0], value: `${MAIN.getEmoji(`RL${rank[1]}`)} ${rank[1]} : ${rank[2]} (${rank[3]})` })
                     let specificNotif = [];
 
+                    let playerElo = 0;
+                    let tempElo = 0;
+
                     if ((player.r1.elo != temp.ranks.r1.elo)) {
+                        playerElo = isNaN(player.r1.elo) ? Number(player.r1.elo.replace(',', '')) : Number(player.r1.elo);
+                        tempElo = isNaN(temp.ranks.r1.elo) ? Number(temp.ranks.r1.elo.replace(',', '')) : Number(temp.ranks.r1.elo);
 
                         if ((temp.ranks.r1.elo > player.r1.elo)) {
                             specificNotif.push({
-                                name: "Ranked Duel 1v1 Loss!" + ` Lost ${Number(temp.ranks.r1.elo.replace(',', '')) - Number(player.r1.elo.replace(',', ''))} Elo`,
+                                name: "Ranked Duel 1v1 Loss!" + ` Lost ${tempElo - playerElo} Elo`,
                                 value: `${MAIN.getEmoji(`RL${temp.ranks.r1.rank}`)} ${temp.ranks.r1.rank} : ${temp.ranks.r1.division} (${temp.ranks.r1.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${player.r1.rank}`)} ${player.r1.rank} : ${player.r1.division} (${player.r1.elo})`
                             });
                         }
                         else {
                             specificNotif.push({
-                                name: "Ranked Duel 1v1 Victory!" + ` Gained ${(Number(temp.ranks.r1.elo.replace(',', '')) - Number(player.r1.elo.replace(',', ''))) * -1} Elo`,
+                                name: "Ranked Duel 1v1 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
                                 value: `${MAIN.getEmoji(`RL${player.r1.rank}`)} ${player.r1.rank} : ${player.r1.division} (${player.r1.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.r1.rank}`)} ${temp.ranks.r1.rank} : ${temp.ranks.r1.division} (${temp.ranks.r1.elo})`
                             });
                         }
                     }
                     if ((player.r2.elo != temp.ranks.r2.elo)) {
+                        playerElo = isNaN(player.r2.elo) ? Number(player.r2.elo.replace(',', '')) : Number(player.r2.elo);
+                        tempElo = isNaN(temp.ranks.r2.elo) ? Number(temp.ranks.r2.elo.replace(',', '')) : Number(temp.ranks.r2.elo);
 
                         if ((temp.ranks.r2.elo > player.r2.elo)) {
                             specificNotif.push({
-                                name: "Ranked Duel 2v2 Loss!" + ` Lost ${Number(temp.ranks.r2.elo.replace(',', '')) - Number(player.r2.elo.replace(',', ''))} Elo`,
+                                name: "Ranked Duel 2v2 Loss!" + ` Lost ${tempElo - playerElo} Elo`,
                                 value: `${MAIN.getEmoji(`RL${temp.ranks.r2.rank}`)} ${temp.ranks.r2.rank} : ${temp.ranks.r2.division} (${temp.ranks.r2.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${player.r2.rank}`)} ${player.r2.rank} : ${player.r2.division} (${player.r2.elo})`
                             });
                         }
                         else {
                             specificNotif.push({
-                                name: "Ranked Duel 2v2 Victory!" + ` Gained ${(Number(temp.ranks.r2.elo.replace(',', '')) - Number(player.r2.elo.replace(',', ''))) * -1} Elo`,
+                                name: "Ranked Duel 2v2 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
                                 value: `${MAIN.getEmoji(`RL${player.r2.rank}`)} ${player.r2.rank} : ${player.r2.division} (${player.r2.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.r2.rank}`)} ${temp.ranks.r2.rank} : ${temp.ranks.r2.division} (${temp.ranks.r2.elo})`
                             });
                         }
                     }
                     if ((player.r3.elo != temp.ranks.r3.elo)) {
+                        playerElo = isNaN(player.r3.elo) ? Number(player.r3.elo.replace(',', '')) : Number(player.r3.elo);
+                        tempElo = isNaN(temp.ranks.r3.elo) ? Number(temp.ranks.r3.elo.replace(',', '')) : Number(temp.ranks.r3.elo);
 
                         if ((temp.ranks.r3.elo > player.r3.elo)) {
                             specificNotif.push({
-                                name: "Ranked 3v3 Loss!" + ` Lost ${Number(temp.ranks.r3.elo.replace(',', '')) - Number(player.r3.elo.replace(',', ''))} Elo`,
+                                name: "Ranked 3v3 Loss!" + ` Lost ${tempElo - playerElo} Elo`,
                                 value: `${MAIN.getEmoji(`RL${temp.ranks.r3.rank}`)} ${temp.ranks.r3.rank} : ${temp.ranks.r3.division} (${temp.ranks.r3.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${player.r3.rank}`)} ${player.r3.rank} : ${player.r3.division} (${player.r3.elo})`
                             });
                         }
                         else {
                             specificNotif.push({
-                                name: "Ranked 3v3 Victory!" + ` Gained ${(Number(temp.ranks.r3.elo.replace(',', '')) - Number(player.r3.elo.replace(',', ''))) * -1} Elo`,
+                                name: "Ranked 3v3 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
                                 value: `${MAIN.getEmoji(`RL${player.r3.rank}`)} ${player.r3.rank} : ${player.r3.division} (${player.r3.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.r3.rank}`)} ${temp.ranks.r3.rank} : ${temp.ranks.r3.division} (${temp.ranks.r3.elo})`
                             });
                         }
                     }
                     if ((player.rs3.elo != temp.ranks.rs3.elo)) {
+                        playerElo = isNaN(player.rs3.elo) ? Number(player.rs3.elo.replace(',', '')) : Number(player.rs3.elo);
+                        tempElo = isNaN(temp.ranks.rs3.elo) ? Number(temp.ranks.rs3.elo.replace(',', '')) : Number(temp.ranks.rs3.elo);
 
                         if ((temp.ranks.rs3.elo > player.rs3.elo)) {
                             specificNotif.push({
-                                name: "Ranked Solor 3v3 Loss!" + ` Lost ${Number(temp.ranks.rs3.elo.replace(',', '')) - Number(player.rs3.elo.replace(',', ''))} Elo`,
+                                name: "Ranked Solo 3v3 Loss!" + ` Lost ${tempElo - playerElo} Elo`,
                                 value: `${MAIN.getEmoji(`RL${temp.ranks.rs3.rank}`)} ${temp.ranks.rs3.rank} : ${temp.ranks.rs3.division} (${temp.ranks.rs3.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${player.rs3.rank}`)} ${player.rs3.rank} : ${player.rs3.division} (${player.rs3.elo})`
                             });
                         }
                         else {
                             specificNotif.push({
-                                name: "Ranked Solo 3v3 Victory!" + ` Gained ${(Number(temp.ranks.rs3.elo.replace(',', '')) - Number(player.rs3.elo.replace(',', ''))) * -1} Elo`,
+                                name: "Ranked Solo 3v3 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
                                 value: `${MAIN.getEmoji(`RL${player.rs3.rank}`)} ${player.rs3.rank} : ${player.rs3.division} (${player.rs3.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.rs3.rank}`)} ${temp.ranks.rs3.rank} : ${temp.ranks.rs3.division} (${temp.ranks.rs3.elo})`
                             });
                         }
                     }
                     if ((player.hoops.elo != temp.ranks.hoops.elo)) {
+                        playerElo = isNaN(player.hoops.elo) ? Number(player.hoops.elo.replace(',', '')) : Number(player.hoops.elo);
+                        tempElo = isNaN(temp.ranks.hoops.elo) ? Number(temp.ranks.hoops.elo.replace(',', '')) : Number(temp.ranks.hoops.elo);
 
                         if ((temp.ranks.hoops.elo > player.hoops.elo)) {
                             specificNotif.push({
-                                name: "Hoops Loss!" + ` Lost ${Number(temp.ranks.hoops.elo.replace(',', '')) - Number(player.hoops.elo.replace(',', ''))} Elo`,
+                                name: "Hoops Loss!" + ` Lost ${tempElo - playerElo} Elo`,
                                 value: `${MAIN.getEmoji(`RL${temp.ranks.hoops.rank}`)} ${temp.ranks.hoops.rank} : ${temp.ranks.hoops.division} (${temp.ranks.hoops.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${player.hoops.rank}`)} ${player.hoops.rank} : ${player.hoops.division} (${player.hoops.elo})`
                             });
                         }
                         else {
                             specificNotif.push({
-                                name: "Hoops Victory!" + ` Gained ${(Number(temp.ranks.hoops.elo.replace(',', '')) - Number(player.hoops.elo.replace(',', ''))) * -1} Elo`,
+                                name: "Hoops Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
                                 value: `${MAIN.getEmoji(`RL${player.hoops.rank}`)} ${player.hoops.rank} : ${player.hoops.division} (${player.hoops.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.hoops.rank}`)} ${temp.ranks.hoops.rank} : ${temp.ranks.hoops.division} (${temp.ranks.hoops.elo})`
                             });
                         }
                     }
                     if ((player.rumble.elo != temp.ranks.rumble.elo)) {
+                        playerElo = isNaN(player.rumble.elo) ? Number(player.rumble.elo.replace(',', '')) : Number(player.rumble.elo);
+                        tempElo = isNaN(temp.ranks.rumble.elo) ? Number(temp.ranks.rumble.elo.replace(',', '')) : Number(temp.ranks.rumble.elo);
 
                         if ((temp.ranks.rumble.elo > player.rumble.elo)) {
                             specificNotif.push({
-                                name: "Rumble 1v1 Loss!" + ` Lost ${Number(temp.ranks.rumble.elo.replace(',', '')) - Number(player.rumble.elo.replace(',', ''))} Elo`,
+                                name: "Rumble Loss!" + ` Lost ${tempElo - playerElo} Elo`,
                                 value: `${MAIN.getEmoji(`RL${temp.ranks.rumble.rank}`)} ${temp.ranks.rumble.rank} : ${temp.ranks.rumble.division} (${temp.ranks.rumble.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${player.rumble.rank}`)} ${player.rumble.rank} : ${player.rumble.division} (${player.rumble.elo})`
                             });
                         }
                         else {
                             specificNotif.push({
-                                name: "Rumble Victory!" + ` Gained ${(Number(temp.ranks.rumble.elo.replace(',', '')) - Number(player.rumble.elo.replace(',', ''))) * -1} Elo`,
+                                name: "Rumble Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
                                 value: `${MAIN.getEmoji(`RL${player.rumble.rank}`)} ${player.rumble.rank} : ${player.rumble.division} (${player.rumble.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.rumble.rank}`)} ${temp.ranks.rumble.rank} : ${temp.ranks.rumble.division} (${temp.ranks.rumble.elo})`
                             });
                         }
                     }
                     if ((player.dropshot.elo != temp.ranks.dropshot.elo)) {
+                        playerElo = isNaN(player.dropshot.elo) ? Number(player.dropshot.elo.replace(',', '')) : Number(player.dropshot.elo);
+                        tempElo = isNaN(temp.ranks.dropshot.elo) ? Number(temp.ranks.dropshot.elo.replace(',', '')) : Number(temp.ranks.dropshot.elo);
 
                         if ((temp.ranks.dropshot.elo > player.dropshot.elo)) {
                             specificNotif.push({
-                                name: "Dropshot Loss!" + ` Lost ${Number(temp.ranks.dropshot.elo.replace(',', '')) - Number(player.dropshot.elo.replace(',', ''))} Elo`,
+                                name: "Dropshot Loss!" + ` Lost ${tempElo - playerElo} Elo`,
                                 value: `${MAIN.getEmoji(`RL${temp.ranks.dropshot.rank}`)} ${temp.ranks.dropshot.rank} : ${temp.ranks.dropshot.division} (${temp.ranks.dropshot.elo}))`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${player.dropshot.rank}`)} ${player.dropshot.rank} : ${player.dropshot.division} (${player.dropshot.elo})`
                             });
                         }
                         else {
                             specificNotif.push({
-                                name: "Dropshot Victory!" + ` Gained ${(Number(temp.ranks.r3.elo.replace(',', '')) - Number(player.r3.elo.replace(',', ''))) * -1} Elo`,
+                                name: "Dropshot Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
                                 value: `${MAIN.getEmoji(`RL${player.dropshot.rank}`)} ${player.dropshot.rank} : ${player.dropshot.division} (${player.dropshot.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.dropshot.rank}`)} ${temp.ranks.dropshot.rank} : ${temp.ranks.dropshot.division} (${temp.ranks.dropshot.elo})`
                             });
                         }
                     }
                     if ((player.snowday.elo != temp.ranks.snowday.elo)) {
+                        playerElo = isNaN(player.snowday.elo) ? Number(player.snowday.elo.replace(',', '')) : Number(player.snowday.elo);
+                        tempElo = isNaN(temp.ranks.snowday.elo) ? Number(temp.ranks.snowday.elo.replace(',', '')) : Number(temp.ranks.snowday.elo);
 
                         if ((temp.ranks.snowday.elo > player.snowday.elo)) {
                             specificNotif.push({
-                                name: "Snowday Loss!" + ` Lost ${Number(temp.ranks.snowday.elo.replace(',', '')) - Number(player.snowday.elo.replace(',', ''))} Elo`,
+                                name: "Snowday Loss!" + ` Lost ${tempElo - playerElo} Elo`,
                                 value: `${MAIN.getEmoji(`RL${temp.ranks.snowday.rank}`)} ${temp.ranks.snowday.rank} : ${temp.ranks.snowday.division} (${temp.ranks.snowday.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${player.snowday.rank}`)} ${player.snowday.rank} : ${player.snowday.division} (${player.snowday.elo})`
                             });
                         }
                         else {
                             specificNotif.push({
-                                name: "Snowday Victory!" + ` Gained ${(Number(temp.ranks.snowday.elo.replace(',', '')) - Number(player.snowday.elo.replace(',', ''))) * -1} Elo`,
+                                name: "Snowday Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
                                 value: `${MAIN.getEmoji(`RL${player.snowday.rank}`)} ${player.snowday.rank} : ${player.snowday.division} (${player.snowday.elo})`
                                     + ` ➡️ ${MAIN.getEmoji(`RL${temp.ranks.snowday.rank}`)} ${temp.ranks.snowday.rank} : ${temp.ranks.snowday.division} (${temp.ranks.rsnowday1.elo})`
                             });
                         }
                     }
 
-                    if (specificNotif.length == 0)
-                        console.log("NO CHANGE")
+                    if (specificNotif.length == 0) { }
+                    // console.log("NO CHANGE")
                     else {
 
                         tempGuild.RLTracker[tempGuild.RLTracker.indexOf(temp)].ranks = player;
-                        console.log("INITIAL CHANGE")
-                        console.log(tempGuild.RLTracker);
-                        Guild.findOneAndUpdate({ id: tempGuild.id }, { $set: { RLTracker: tempGuild.RLTracker } }, (err, doc, res) => { if(err)console.log(err)});
+                        // console.log("INITIAL CHANGE")
+                        // console.log(tempGuild.RLTracker);
+                        Guild.findOneAndUpdate({ id: tempGuild.id }, { $set: { RLTracker: tempGuild.RLTracker } }, (err, doc, res) => { if (err) console.log(err) });
                         MAIN.prettyEmbed({ guildID: guildy.id, channelID: temp.channelID }, `Rocket League Update For **${temp.player}**:`,
                             specificNotif, -1, -1, -1, null, null, null, 1000);
                     }

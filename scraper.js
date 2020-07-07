@@ -133,7 +133,7 @@ async function countTalk() {
 
         let guild = client.guilds.cache.get(GUILD[0]);
         let channels = guild.channels.cache;
-        channelLoop:
+       // channelLoop:
         for (let CHANNEL of channels) {
 
             let channel = CHANNEL[1];
@@ -142,7 +142,7 @@ async function countTalk() {
 
                 for (let MEMBER of channel.members) {
                     if ((channel.members.size < 2) && (channel.id != guild.afkChannelID)) {
-                        break channelLoop;
+                        continue;
                     }
                     let member = MEMBER[1];
                     let user = findUser({ id: member.id })
@@ -170,7 +170,7 @@ async function countTalk() {
 
                                 let lastTalked = usy.lastTalked;
                                 lastTalked[index] = getDate();
-                                console.log("Doing ")
+                             //   console.log("Doing ")
                                 User.findOneAndUpdate({ id: member.id },
                                     {
                                         $set: { timeTalked: timeTalked, lastTalked: lastTalked }
@@ -486,8 +486,8 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
 
 async function queue(command, params, socket, newWork) {
 
-    console.log("Amount of work in the queue:")
-    console.log(workQueue.active.length)
+   // console.log("Amount of work in the queue:")
+   // console.log(workQueue.active.length)
 
     if (newWork) {
         //  if ((cpu < 0.9) && (memory > 50)) {
@@ -593,14 +593,14 @@ const server = net.createServer(async (socket) => {
     })
     socket.on('error', (err) => {
         // Handle errors here.
-        console.log(err);
-        console.log("Caught socket error");
+       // console.log(err);
+       // console.log("Caught socket error");
     });
     socket.on('close', (had_error) => {
-        console.log("socket closed");
-        console.log(had_error)
+       // console.log("socket closed");
+       // console.log(had_error)
         socket.destroy();
-        console.log("destroyed the closed socket?");
+       // console.log("destroyed the closed socket?");
     })
 });
 
@@ -655,7 +655,7 @@ const checkRL = async function () {
 
     //max - min + 1) + min
     let ms = Math.floor(((Math.random() * (5 - 1 + 1)) + 1) * 60000);
-    console.log(`RANDOMISED: ${ms}`)
+  //  console.log(`RANDOMISED: ${ms}`)
     setTimeout(checkRL, ms)
-    console.log("GOT TO ENDDDD")
+  //  console.log("GOT TO ENDDDD")
 }
