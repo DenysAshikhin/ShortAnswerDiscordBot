@@ -224,17 +224,28 @@ const getLeagueEmoji = function (EMOJI) {
 }
 exports.getLeagueEmoji = getLeagueEmoji;
 
-async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title, selector, MAXLength, cutOff) {
+/**
+ * 
+ * @param {part, startTally, modifier, URL, title, description, selector, maxLength} extraParams 
+ */
+async function prettyEmbed(message, array, extraParams) {
+
+    let part = extraParams.part ? extraParams.part : -1;
+    let tally = extraParams.startTally ? extraParams.startTally : -1;
+    let modifier = extraParams.modifier ? extraParams.modifier : -1;
+    let URL = extraParams.URL;
+    let title = extraParams.title;
+    let selector = extraParams.selector;
+    let description = extraParams.description ? extraParams.description : '';
+    let maxLength = extraParams.maxLength ? extraParams.maxLength : 100;
+    let cutOff = extraParams.cutOff;
+
 
     let runningString = "";
     let previousName = "";
     let groupNumber = 1;
-    let tally = startTally == 0 ? startTally : 1;
     let field = null;
     let fieldArray = [];
-    let maxLength = MAXLength ? MAXLength : 100;
-
-
 
     let tester = 1;
     for (item of array) {
@@ -335,7 +346,7 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                     field.name = `${part} ${groupNumber}`;
                     previousName = `${part} ${groupNumber}`;
                 }
-                if (startTally == -1)
+                if (!extraParams.startTally)
                     field.value.push(`${element}`);
                 else
                     field.value.push(`${tally}) ${element}`);
@@ -627,10 +638,11 @@ connectDB.once('open', async function () {
 
         console.log("Ready!");
         exports.Client = client;
+        checkRL();
     });
     client.on('message', async (message) => {
 
-        console.log(message.content);
+      //  console.log(message.content);
     })
 });
 

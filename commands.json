@@ -1,411 +1,917 @@
-{
-    "commands": [
-        "POPULATE",
-        "SEARCH",
-        "SIGNUP",
-        "MYGAMES",
-        "REMOVEGAME",
-
-        "EXCLUDEPING",
-        "EXCLUDEDM",
-        "HELP",
-        "HELPGAMES",
-        "HELPSTATS",
-
-        "HELPMISCELLANEOUS",
-        "HELPMUSIC",
-        "STUDY",
-        "PING",
-        "INITIALISEUSERS",
-
-        "DELETE",
-        "MYSTATS",
-        "ALLSTATS",
-        "USERSTATS",
-        "TOPSTATS",
-
-        "PLAY",
-        "STOP",
-        "PAUSE",
-        "RESUME",
-        "SKIP",
-
-        "GAMETUTORIAL",
-        "SUGGEST",
-        "UPDATEME",
-        "TUTORIALS",
-        "QUITTUTORIAL",
-
-        "PURGEGAMES",
-        "GAMESTATS",
-        "TOPGAMES",
-        "SETSERVERPREFIX",
-        "SETDEFAULTPREFIX",
-
-        "SETDEFAULTSERVERPREFIX",
-        "FORWARD",
-        "REWIND",
-        "SEEK",
-        "REVERSE",
-
-        "ADDSONG",
-        "CREATEPLAYLIST",
-        "MYPLAYLISTS",
-        "REMOVESONG",
-        "PLAYLIST",
-
-        "SAVEPLAYLIST",
-        "REMOVEPLAYLIST",
-        "Q",
-        "DQ",
-        "VIEWACTIVESUMMONS",
-
-        "BANISH",
-        "SIGNUPALLUSERS",
-        "REMOVEGAMEFROMALLUSERS",
-        "SIGNUPSPECIFICUSER",
-        "REMOVEGAMEFROMSPECIFICUSER",
-
-        "CURRENTSONG",
-        "CURRENTPLAYLIST",
-        "SEARCHFORUSER",
-        "FLIPCOIN",
-        "GOTO",
-
-        "SHUFFLE",
-        "REPEAT",
-        "DECIDER",
-        "ROLL",
-        "SETTIMER",
-
-        "SHAKEUSER",
-        "VOLUME",
-        "SETCOMMAND",
-        "MONIKERS",
-        "REMOVEMONIKER",
-
-        "TIMEZONE",
-        "LINKTWITCH",
-        "UNLINKTWITCH",
-        "VIEWTWITCHFOLLOWS",
-        "UNFOLLOWTWITCHCHANNEL",
-
-        "FOLLOWTWITCHCHANNEL",
-        "PAIRCHANNELWITHTWITCH",
-        "VIEWCHANNELTWITCHPAIRS",
-        "REMOVECHANNELTWITCHPAIR",
-        "LEAGUESTATS",
-
-        "RLRANKS",
-        "RLTRACKER",
-        "REMOVERLTRACKER",
-        "VIEWRLTRACKERS"
-    ],
-    "explanation": [
-        "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
-        "Searches the complete game list for the speicified game(s) you wish to find. You can search for multiple games at once, simply seperate by a comma.",
-        "Signs you up to be summoned when someone pings any of the [games] in your games list. You can either write the full game title or the associated number.",
-        "Shows your games list, you will get notifed if anyone pings a game on your games list.",
-        "Removes [game] from your game list. [game] can be number or the complete title of the game.",
-       
-        "Sets whether you wish to be @mentioned when someone pings a game to play. If set to 'true', you will be excluded from all pings.",
-        "Sets whether you wish to receive a direct message when someone pings a game to play. If set to 'true', you will be excluded from all DM's.",
-        "Shows the general help screen.",
-        "Shows the list of commands involving game functionalities.",
-        "Shows the list of commands involving stats functionalities.",
-       
-        "Shows the list of commands involving miscellaneous functionalities.",
-        "Shows the list of commands involving music functionalities.",
-        "????? [Number of results], [Number of minimum matches], [Number of minimum unique matches]",
-        "Pings and DM's every member from the called server who have [game] in their games list. Also starts a squad for the game, default size of 5, can be modified by passing a number after the game title with a ','.",
-        "Legacy command, checks every user in the server for existing the the database, no need to run it anymore.",
-       
-        "Deletes [number] of the last messages. You and the bot must have the *Manage_Messages* permission in the channel you wish to run the command.",
-        "Shows you all of your stats.",
-        "Shows the stats for every user in the server. Can only be called by the server *Administrators*.",
-        "Shows the stats of a specific user who has been mentioned (@user).",
-        "Shows the top stats of this server.",
-
-        "Plays a song from a specified URL or search result from youtube. **Supports spotify links as well!**",    
-        "Empties the queue and makes the bot leave the voice channel.",
-        "Pauses the current song.",
-        "Resumes playing the current song.",
-        "Skips the current song. Or skips a [number] of songs, if provided.",
-
-        "Starts the game tutorial for you, or reminds of your current step if it is already in progress.",
-        "Send a suggestion to the creator of the bot! All are welcome.",
-        "If true, you will get a DM whenever a new feature/update/major fix is released!",
-        "Configure whether you get notified of a new tutorial release, or an addition/modification to one you have already completed. Setting to true will notify you, false will not.",   
-        "Quits any current tutorial.",
-        
-        "Removes all the games from your games list.",
-        "Shows the number of players (and optionally the list of players) signed up for a specific game.",
-        "Shows the top games for the server (by number of players signed up for them). Default length is 5, can be set manually.",
-        "Sets a custom prefix for this server that only applies to *you*. This prefix has the highest priority.", 
-        "Sets a custom prefix that will be used when DM'ing me, or if the there are no other prefixes set.",
- 
-        "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission.",
-        "Forwards a song [number] of seconds. Also works with negative numbers, which will result in a rewind.",
-        "Rewinds a song [number] of seconds or hours:minutes:seconds timestamp. Also works with negative numbers, which will result in a forward.",
-        "Starts playing from the provided timestamp in format *Hours:Minutes:Seconds* **OR** *numberOfSeconds*",
-        "Reverses the playlist by 1 song. Or a [number] of songs if provided.",
-
-        "Adds either the current playing song or one from a provided url/suggestion to one of your existing playlists or makes a new one.",
-        "Creates a new playlist with the provided name - playlists cannot have the same names.",
-        "Shows you all of your playlists by default, if you provide a number or the name of a playlist it will display the specific playlist.",
-        "Removes a song from a playlist. You can either specify the exact playlist to remove a song from, or use the suggestion prompt.",
-        "Loads one of your playlists into the the queue. If you provide a name of a playlist it will automaticlly be chosen, otherwise a suggestion prompt will appear.",
-
-        "Saves the current playing playlist into one of your playlists.",
-        "Removes a specified playlist.",
-        "Joins an active summon (squad). In the case of multiple active summons, you can specify who to join using an @mention. A number following a comma will notify the others that you will join them in [number] minutes.",
-        "Will remove you from any active summons you have joined. If you provide an @mention, it will attempt to leave that player's summon.",
-        "Shows all of the acive summons for this server.",
-
-        "Kicks a player from your summon.",
-        "Admin-exclusive command to forcefully signup every user for a specified game. Works identical to the *signUp* command.",
-        "Admin-exclusive command to forcefully remove a game from every user in the server. Works identical to the *removeGame* command",
-        "Admin-exclusive command to forcefully signUp one or more users for a specified game.",
-        "Admin-exclusive command to forcefully remove a game from one or more users for a specified game.",
-
-        "Shows the current timestamp of the song out of the total.",
-        "Shows the current playlist information.",
-        "Searches all of the servers' voice channels I know of for a specific user, stalker imo :shrug:",
-        "Can't decide between heads or tails? Flip a coin!",
-        "Go to a specific song in the playlist.",
-
-        "Shuffles the current playlist",
-        "Sets the repeat mode for songs. One: repeats the current song. All: loops the entire playlist.",
-        "Randomly chooses an option out of the ones provided.",
-        "Rolls any number-sided die. Default is 20.",
-        "Sets a timer that once finished, will send you a message.",
-
-        "Randomly moves a user across voice channels x times, and returns them to the starting channel at start.",
-        "Sets the music volume out of 100.",
-        "Sets a new moniker for an existing command, the original command names will still work. Make sure to seperate the original command and the moniker by a single comma!",
-        "Shows you a list of all your command monikers.",
-        "Removes a specified moniker from your personal list.",
-
-        "Converts a specified time to a different timezone. Time is used in 12hour format!",
-        "Link a twitch account (using just a name) to automatically add any channels you follow for the bot to notify you!",
-        "Unlinks a twitch account and optionally all associated follows.",
-        "Shows you a list of all the twitch channels you are following.",
-        "Unfollows a specific twitch channel.",
-
-        "Follows a specific twitch channel",
-        "Tells the bot to put a notification in the @mentioned channel when the specified twitch streamer goes live!",
-        "Shows you the server channel - twitch streamer pairs.",
-        "Removes a serverChannel - twitchStreamer pair.",
-        "Shows you your league stats, or the stats of another person. You have to specify the region and their summoner name seperated by a comma! **Default zone is 'na'!**",
-        
-        "Shows you your Rocket League ranks, or the ranks of another person. You have to specify the platform and their name seperated by a comma! **Default platform is 'steam'!**. The others are: ps for playstation and xbox for...xbox",
-        "Sends a message with a Rocket Leauge elo rating update for a specific player/platofrm in a specified channel.",
-        "Removes a Rocket League tracker for a player+platform from a specified channel.",
-        "Shows all the player+platform(s) that are being tracked for the server and the channels in which they are being posted. Updates can take up to **5 minutes**!"
-    ],
-        
-    "example": [
-        ["1) populate 3"],
-        ["1) search Counter", "2) search Counter, minerfct, tr@ve"],
-        ["1) signUp 3", "2) signUp Minecraft, Counter-Strike: Global Offensive", "3) signUp Minecraft, 321, 33, Counter-Strike: Global Offensive"],
-        ["1) myGames"],
-        ["1) removeGame 2", "2) removeGame Valorant"],
-       
-        ["1) excludePing true", "2) excludePing false"],
-        ["1) excludeDM true", "2) excludeDM false"],
-        ["1) help"],
-        ["1) helpGames"],
-        ["1) helpStats"],
-       
-        ["1) helpMiscellaneous"],
-        ["1) helpMusic"],
-        ["1) ???? medicine", "2) ???? medicine, 2", "3) ???? medicine, 2,1", "4) ???? medicine, 2,1,1"],
-        ["1) ping Valorant", "2) ping 0", "3) ping Valorant, 4"],
-        ["1) initialiseUsers"],
-       
-        ["1) delete 4"],
-        ["1) myStats"],
-        ["1) allStats"],
-        ["1) userStats @Short Answer Bot"],
-        ["1) topStats"],
-
-        ["1) play https://www.youtube.com/watch?v=mMMRGJCFsQE&list=RDmMMRGJCFsQE&start_radio=1", "2) play https://open.spotify.com/playlist/37i9dQZF1E35lgRsCHRsxa?si=AF5wfKXFTm2T8qfB4S-enQ", "3) play PegboardNerds Hero"],
-        ["1) stop"],
-        ["1) pause"],
-        ["1) resume"],
-        ["1) skip", "2) skip 3", "3) skip -4"],
-        
-        ["1) gameTutorial"],
-        ["1) suggest *Game xyz is missing from the list, add it!*", "2) suggest the bot should be able to do: !"],
-        ["1) updateMe true", "2) updateme false"],
-        ["1) tutorials true", "2) tutorials false"],     
-        ["1) quitTutorial"],
-        
-        ["1) purgeGames"],
-        ["1) gameStats Valorant"],
-        ["1) topGames", "2) topGames 8"],
-        ["1) setServerPrefix !"],  
-        ["1) setDefaultPrefix !"],   
-        
-        ["1) setDefaultServerPrefix !"],
-        ["1) forward 20", "2) forward 2:20", "3) forward -25", "4) forward -2:20"],
-        ["1) rewind 20", "2) rewind 2:20", "3) rewind -25", "4) rewind -2:20"],
-        ["1) seek 2:20", "2) seek 33"],
-        ["1) reverse", "2) reverse 3", "3) reverse -4"],
-
-        ["1) addSong In Your Arms", "2) addSong https://www.youtube.com/watch?v=mt1mXwBLsSE&list=RDmt1mXwBLsSE&start_radio=1", "3) addSong https://open.spotify.com/track/0WSjVLITbxV6kVXndziQDm?si=c_3xBbStRu6xaDUH6zuJAQ"],
-        ["1) createPlaylist Dankest Wubs"],
-        ["1) myPlayLists", "2) myPlayLists 2", "3) myPlayLists Best Wubs"],
-        ["1) removeSong", "2) removeSong Best Wubs"],
-        ["1) playlist", "2) playlist Best Wubs"],
-
-        ["1) savePlayList", "2) savePlayList Best Wubs"],
-        ["1) removePlayList", "2) removePlayList Best Wubs"],
-        ["1) q", "2) q @The Last Spark", "3) q @The Last Spark, 5"],
-        ["1) dq", "2) dq @The Last Spark"],
-        ["1) viewActiveSummons"],
-
-        ["1) banish", "2) banish @The Last Spark"],
-        ["1) signUpAllUsers 3", "2) signUpAllUsers Minecraft, Counter-Strike: Global Offensive", "3) signUpAllUsers Minecraft, 321, 33, Counter-Strike: Global Offensive"],
-        ["1) removeGameFromAllUsers 2", "2) removeGameFromAllUsers Valorant"],
-        ["1) signUpSpecificUser Valorant @TheLastSpark", "2) signUpSpecificUser Valorant @TheLastSpark @Whoever"],
-        ["1) removeGameFromSpecificUser Valorant @TheLastSpark", "2) removeGameFromSpecificUser Valorant @TheLastSpark @Whoever"],
-
-        ["1) currentSong"],
-        ["1) currentPlaylist"],
-        ["1) searchForUser @TheLastSpark", "2) searchForUser The Last Spark"],
-        ["1) flipCoin"],
-        ["1) goTo 12"],
-
-        ["1) shuffle"],
-        ["1) repeat One", "2) repeat All", "3) repeat Off"],
-        ["1) decider choice A, choice B, choice C"],
-        ["1) roll", "2) roll 6"],
-        ["1) setTimer 1:30", "2) setTimer 30"],
-
-        ["1) shakeUser @TheLastSpark 5"],
-        ["1) volume 30"],
-        ["1) setCommand ping, summon", "2) setCommand dq, deque"],
-        ["1) monikers"],
-        ["1) removeMoniker deque"],
-
-        ["1) timeZone acst, 8:00, est"],
-        ["1) linkTwitch TheLastSpark"],
-        ["1) unlinkTwitch"],
-        ["1) viewTwitchFollows"],
-        ["1) unfollowTwitchChannel TheLastSpark"],
-
-        ["1) followTwitchChannel TheLastSpark"],
-        ["1) pairChannelWithTwitch summit1g, #nameOfTextChannel"],
-        ["1) showChannelTwitchPairs"],
-        ["1) removeChannelTwitchPairs summit1g, #nameOfTextChannel"],
-        ["1) leagueRank", "2) leagueRank TheLastSpark", "3) leagueRank TheLastSpark, na"],
-
-        ["1) rlRanks TheLastSpark", "2) rlRanks TheLastSpark, steam"],
-        ["1) rlTracker TheLastSpark, #command", "2) rlTracker TheLastSpark, steam, #notifications"],
-        ["1) removeRLTracker TheLastSpark, #command", "2) removeRLTracker TheLastSpark, steam, #notifications"],
-        ["1) viewRLTrackers"]
-    ],
-    "subsection": [
-        [3],
-        [1],
-        [1],
-        [1],
-        [1],
-
-        [1,6],
-        [1,6],
-        [7],
-        [1,7],
-        [2,7],
-
-        [3,7],
-        [4,7],
-        [3],
-        [1],
-        [5],
-
-        [8],
-        [2],
-        [2],
-        [2],
-        [2],
-
-        [4],
-        [4],
-        [4],
-        [4],
-        [4],
-
-        [9],
-        [10],
-        [6],
-        [9],
-        [6,9],
-
-        [1],
-        [1,2],
-        [1,2],
-        [6],
-        [6],
-
-        [5, 6],
-        [4],
-        [4],
-        [4],
-        [4],
-
-        [4],
-        [4],
-        [4],
-        [4],
-        [4],
-
-        [4],
-        [4],
-        [1],
-        [1],
-        [1],
-
-        [1],
-        [1, 5],
-        [1, 5],
-        [1, 5],
-        [1, 5],
-    
-        [4],
-        [4],
-        [3],
-        [3],
-        [4],
-        
-        [4],
-        [4],
-        [3, 6, 8],
-        [3],
-        [6, 8],
-
-        [3],
-        [4],
-        [6],
-        [6],
-        [6],
-
-        [8],
-        [3],
-        [3],
-        [3],
-        [3],
-
-        [3],
-        [3, 5],
-        [3],
-        [3, 5],
-        [3],
-
-        [3],
-        [3],
-        [3],
-        [3]
-    ]
-}
+[
+    {
+        "title": "populate",
+        "explanation": "Creates [number] of questions numbered 1 - [number] with an reaction emoji for letters A-E.",
+        "example": [
+            "1) populate 3"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "search",
+        "explanation": "Searches the complete game list for the speicified game(s) you wish to find. You can search for multiple games at once, simply seperate by a comma.",
+        "example": [
+            "1) search Counter",
+            "2) search Counter, minerfct, tr@ve"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "signUp",
+        "explanation": "Signs you up to be summoned when someone pings any of the [games] in your games list. You can either write the full game title or the associated number.",
+        "example": [
+            "1) signUp 3",
+            "2) signUp Minecraft, Counter-Strike: Global Offensive",
+            "3) signUp Minecraft, 321, 33, Counter-Strike: Global Offensive"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "myGames",
+        "explanation": "Shows your games list, you will get notifed if anyone pings a game on your games list.",
+        "example": [
+            "1) myGames"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "removeGame",
+        "explanation": "Removes [game] from your game list. [game] can be number or the complete title of the game.",
+        "example": [
+            "1) removeGame 2",
+            "2) removeGame Valorant"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "excludePing",
+        "explanation": "Sets whether you wish to be @mentioned when someone pings a game to play. If set to 'true', you will be excluded from all pings.",
+        "example": [
+            "1) excludePing true",
+            "2) excludePing false"
+        ],
+        "subsection": [
+            1,
+            6
+        ]
+    },
+    {
+        "title": "excludeDM",
+        "explanation": "Sets whether you wish to receive a direct message when someone pings a game to play. If set to 'true', you will be excluded from all DM's.",
+        "example": [
+            "1) excludeDM true",
+            "2) excludeDM false"
+        ],
+        "subsection": [
+            1,
+            6
+        ]
+    },
+    {
+        "title": "help",
+        "explanation": "Shows the general help screen.",
+        "example": [
+            "1) help"
+        ],
+        "subsection": [
+            7
+        ]
+    },
+    {
+        "title": "helpGames",
+        "explanation": "Shows the list of commands involving game functionalities.",
+        "example": [
+            "1) helpGames"
+        ],
+        "subsection": [
+            1,
+            7
+        ]
+    },
+    {
+        "title": "helpStats",
+        "explanation": "Shows the list of commands involving stats functionalities.",
+        "example": [
+            "1) helpStats"
+        ],
+        "subsection": [
+            2,
+            7
+        ]
+    },
+    {
+        "title": "helpMiscellaneous",
+        "explanation": "Shows the list of commands involving miscellaneous functionalities.",
+        "example": [
+            "1) helpMiscellaneous"
+        ],
+        "subsection": [
+            3,
+            7
+        ]
+    },
+    {
+        "title": "helpMusic",
+        "explanation": "Shows the list of commands involving music functionalities.",
+        "example": [
+            "1) helpMusic"
+        ],
+        "subsection": [
+            4,
+            7
+        ]
+    },
+    {
+        "title": "STUDY",
+        "explanation": "????? [Number of results], [Number of minimum matches], [Number of minimum unique matches]",
+        "example": [
+            "1) ???? medicine",
+            "2) ???? medicine, 2",
+            "3) ???? medicine, 2,1",
+            "4) ???? medicine, 2,1,1"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "ping",
+        "explanation": "Pings and DM's every member from the called server who have [game] in their games list. Also starts a squad for the game, default size of 5, can be modified by passing a number after the game title with a ','.",
+        "example": [
+            "1) ping Valorant",
+            "2) ping 0",
+            "3) ping Valorant, 4"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "initialiseUsers",
+        "explanation": "Legacy command, checks every user in the server for existing the the database, no need to run it anymore.",
+        "example": [
+            "1) initialiseUsers"
+        ],
+        "subsection": [
+            5
+        ]
+    },
+    {
+        "title": "delete",
+        "explanation": "Deletes [number] of the last messages. You and the bot must have the *Manage_Messages* permission in the channel you wish to run the command.",
+        "example": [
+            "1) delete 4"
+        ],
+        "subsection": [
+            8
+        ]
+    },
+    {
+        "title": "myStats",
+        "explanation": "Shows you all of your stats.",
+        "example": [
+            "1) myStats"
+        ],
+        "subsection": [
+            2
+        ]
+    },
+    {
+        "title": "allStats",
+        "explanation": "Shows the stats for every user in the server. Can only be called by the server *Administrators*.",
+        "example": [
+            "1) allStats"
+        ],
+        "subsection": [
+            2
+        ]
+    },
+    {
+        "title": "userStats",
+        "explanation": "Shows the stats of a specific user who has been mentioned (@user).",
+        "example": [
+            "1) userStats @Short Answer Bot"
+        ],
+        "subsection": [
+            2
+        ]
+    },
+    {
+        "title": "topStats",
+        "explanation": "Shows the top stats of this server.",
+        "example": [
+            "1) topStats"
+        ],
+        "subsection": [
+            2
+        ]
+    },
+    {
+        "title": "play",
+        "explanation": "Plays a song from a specified URL or search result from youtube. **Supports spotify links as well!**",
+        "example": [
+            "1) play https://www.youtube.com/watch?v=mMMRGJCFsQE&list=RDmMMRGJCFsQE&start_radio=1",
+            "2) play https://open.spotify.com/playlist/37i9dQZF1E35lgRsCHRsxa?si=AF5wfKXFTm2T8qfB4S-enQ",
+            "3) play PegboardNerds Hero"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "stop",
+        "explanation": "Empties the queue and makes the bot leave the voice channel.",
+        "example": [
+            "1) stop"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "pause",
+        "explanation": "Pauses the current song.",
+        "example": [
+            "1) pause"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "resume",
+        "explanation": "Resumes playing the current song.",
+        "example": [
+            "1) resume"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "skip",
+        "explanation": "Skips the current song. Or skips a [number] of songs, if provided.",
+        "example": [
+            "1) skip",
+            "2) skip 3",
+            "3) skip -4"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "gameTutorial",
+        "explanation": "Starts the game tutorial for you, or reminds of your current step if it is already in progress.",
+        "example": [
+            "1) gameTutorial"
+        ],
+        "subsection": [
+            9
+        ]
+    },
+    {
+        "title": "suggest",
+        "explanation": "Send a suggestion to the creator of the bot! All are welcome.",
+        "example": [
+            "1) suggest *Game xyz is missing from the list, add it!*",
+            "2) suggest the bot should be able to do: !"
+        ],
+        "subsection": [
+            10
+        ]
+    },
+    {
+        "title": "updateMe",
+        "explanation": "If true, you will get a DM whenever a new feature/update/major fix is released!",
+        "example": [
+            "1) updateMe true",
+            "2) updateme false"
+        ],
+        "subsection": [
+            6
+        ]
+    },
+    {
+        "title": "tutorials",
+        "explanation": "Configure whether you get notified of a new tutorial release, or an addition/modification to one you have already completed. Setting to true will notify you, false will not.",
+        "example": [
+            "1) tutorials true",
+            "2) tutorials false"
+        ],
+        "subsection": [
+            9
+        ]
+    },
+    {
+        "title": "quitTutorial",
+        "explanation": "Quits any current tutorial.",
+        "example": [
+            "1) quitTutorial"
+        ],
+        "subsection": [
+            6,
+            9
+        ]
+    },
+    {
+        "title": "purgeGames",
+        "explanation": "Removes all the games from your games list.",
+        "example": [
+            "1) purgeGames"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "gameStats",
+        "explanation": "Shows the number of players (and optionally the list of players) signed up for a specific game.",
+        "example": [
+            "1) gameStats Valorant"
+        ],
+        "subsection": [
+            1,
+            2
+        ]
+    },
+    {
+        "title": "topGames",
+        "explanation": "Shows the top games for the server (by number of players signed up for them). Default length is 5, can be set manually.",
+        "example": [
+            "1) topGames",
+            "2) topGames 8"
+        ],
+        "subsection": [
+            1,
+            2
+        ]
+    },
+    {
+        "title": "setServerPrefix",
+        "explanation": "Sets a custom prefix for this server that only applies to *you*. This prefix has the highest priority.",
+        "example": [
+            "1) setServerPrefix !"
+        ],
+        "subsection": [
+            6
+        ]
+    },
+    {
+        "title": "setDefaultPrefix",
+        "explanation": "Sets a custom prefix that will be used when DM'ing me, or if the there are no other prefixes set.",
+        "example": [
+            "1) setDefaultPrefix !"
+        ],
+        "subsection": [
+            6
+        ]
+    },
+    {
+        "title": "setDefaultServerPrefix",
+        "explanation": "Sets a custom prefix that is used as the default for this server, useful to avoid prefix conflicts with other bots on the server. You must have the *Administrator* permission.",
+        "example": [
+            "1) setDefaultServerPrefix !"
+        ],
+        "subsection": [
+            5,
+            6
+        ]
+    },
+    {
+        "title": "forward",
+        "explanation": "Forwards a song [number] of seconds. Also works with negative numbers, which will result in a rewind.",
+        "example": [
+            "1) forward 20",
+            "2) forward 2:20",
+            "3) forward -25",
+            "4) forward -2:20"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "rewind",
+        "explanation": "Rewinds a song [number] of seconds or hours:minutes:seconds timestamp. Also works with negative numbers, which will result in a forward.",
+        "example": [
+            "1) rewind 20",
+            "2) rewind 2:20",
+            "3) rewind -25",
+            "4) rewind -2:20"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "seek",
+        "explanation": "Starts playing from the provided timestamp in format *Hours:Minutes:Seconds* **OR** *numberOfSeconds*",
+        "example": [
+            "1) seek 2:20",
+            "2) seek 33"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "reverse",
+        "explanation": "Reverses the playlist by 1 song. Or a [number] of songs if provided.",
+        "example": [
+            "1) reverse",
+            "2) reverse 3",
+            "3) reverse -4"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "addSong",
+        "explanation": "Adds either the current playing song or one from a provided url/suggestion to one of your existing playlists or makes a new one.",
+        "example": [
+            "1) addSong In Your Arms",
+            "2) addSong https://www.youtube.com/watch?v=mt1mXwBLsSE&list=RDmt1mXwBLsSE&start_radio=1",
+            "3) addSong https://open.spotify.com/track/0WSjVLITbxV6kVXndziQDm?si=c_3xBbStRu6xaDUH6zuJAQ"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "createPlaylist",
+        "explanation": "Creates a new playlist with the provided name - playlists cannot have the same names.",
+        "example": [
+            "1) createPlaylist Dankest Wubs"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "myPlayLists",
+        "explanation": "Shows you all of your playlists by default, if you provide a number or the name of a playlist it will display the specific playlist.",
+        "example": [
+            "1) myPlayLists",
+            "2) myPlayLists 2",
+            "3) myPlayLists Best Wubs"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "removeSong",
+        "explanation": "Removes a song from a playlist. You can either specify the exact playlist to remove a song from, or use the suggestion prompt.",
+        "example": [
+            "1) removeSong",
+            "2) removeSong Best Wubs"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "playlist",
+        "explanation": "Loads one of your playlists into the the queue. If you provide a name of a playlist it will automaticlly be chosen, otherwise a suggestion prompt will appear.",
+        "example": [
+            "1) playlist",
+            "2) playlist Best Wubs"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "savePlayList",
+        "explanation": "Saves the current playing playlist into one of your playlists.",
+        "example": [
+            "1) savePlayList",
+            "2) savePlayList Best Wubs"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "removePlayList",
+        "explanation": "Removes a specified playlist.",
+        "example": [
+            "1) removePlayList",
+            "2) removePlayList Best Wubs"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "q",
+        "explanation": "Joins an active summon (squad). In the case of multiple active summons, you can specify who to join using an @mention. A number following a comma will notify the others that you will join them in [number] minutes.",
+        "example": [
+            "1) q",
+            "2) q @The Last Spark",
+            "3) q @The Last Spark, 5"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "dq",
+        "explanation": "Will remove you from any active summons you have joined. If you provide an @mention, it will attempt to leave that player's summon.",
+        "example": [
+            "1) dq",
+            "2) dq @The Last Spark"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "viewActiveSummons",
+        "explanation": "Shows all of the acive summons for this server.",
+        "example": [
+            "1) viewActiveSummons"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "banish",
+        "explanation": "Kicks a player from your summon.",
+        "example": [
+            "1) banish",
+            "2) banish @The Last Spark"
+        ],
+        "subsection": [
+            1
+        ]
+    },
+    {
+        "title": "signUpAllUsers",
+        "explanation": "Admin-exclusive command to forcefully signup every user for a specified game. Works identical to the *signUp* command.",
+        "example": [
+            "1) signUpAllUsers 3",
+            "2) signUpAllUsers Minecraft, Counter-Strike: Global Offensive",
+            "3) signUpAllUsers Minecraft, 321, 33, Counter-Strike: Global Offensive"
+        ],
+        "subsection": [
+            1,
+            5
+        ]
+    },
+    {
+        "title": "removeGameFromAllUsers",
+        "explanation": "Admin-exclusive command to forcefully remove a game from every user in the server. Works identical to the *removeGame* command",
+        "example": [
+            "1) removeGameFromAllUsers 2",
+            "2) removeGameFromAllUsers Valorant"
+        ],
+        "subsection": [
+            1,
+            5
+        ]
+    },
+    {
+        "title": "signUpSpecificUser",
+        "explanation": "Admin-exclusive command to forcefully signUp one or more users for a specified game.",
+        "example": [
+            "1) signUpSpecificUser Valorant @TheLastSpark",
+            "2) signUpSpecificUser Valorant @TheLastSpark @Whoever"
+        ],
+        "subsection": [
+            1,
+            5
+        ]
+    },
+    {
+        "title": "removeGameFromSpecificUser",
+        "explanation": "Admin-exclusive command to forcefully remove a game from one or more users for a specified game.",
+        "example": [
+            "1) removeGameFromSpecificUser Valorant @TheLastSpark",
+            "2) removeGameFromSpecificUser Valorant @TheLastSpark @Whoever"
+        ],
+        "subsection": [
+            1,
+            5
+        ]
+    },
+    {
+        "title": "currentSong",
+        "explanation": "Shows the current timestamp of the song out of the total.",
+        "example": [
+            "1) currentSong"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "currentPlaylist",
+        "explanation": "Shows the current playlist information.",
+        "example": [
+            "1) currentPlaylist"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "searchForUser",
+        "explanation": "Searches all of the servers' voice channels I know of for a specific user, stalker imo :shrug:",
+        "example": [
+            "1) searchForUser @TheLastSpark",
+            "2) searchForUser The Last Spark"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "flipCoin",
+        "explanation": "Can't decide between heads or tails? Flip a coin!",
+        "example": [
+            "1) flipCoin"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "goTo",
+        "explanation": "Go to a specific song in the playlist.",
+        "example": [
+            "1) goTo 12"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "shuffle",
+        "explanation": "Shuffles the current playlist",
+        "example": [
+            "1) shuffle"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "repeat",
+        "explanation": "Sets the repeat mode for songs. One: repeats the current song. All: loops the entire playlist.",
+        "example": [
+            "1) repeat One",
+            "2) repeat All",
+            "3) repeat Off"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "decider",
+        "explanation": "Randomly chooses an option out of the ones provided.",
+        "example": [
+            "1) decider choice A, choice B, choice C"
+        ],
+        "subsection": [
+            3,
+            6,
+            8
+        ]
+    },
+    {
+        "title": "roll",
+        "explanation": "Rolls any number-sided die. Default is 20.",
+        "example": [
+            "1) roll",
+            "2) roll 6"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "setTimer",
+        "explanation": "Sets a timer that once finished, will send you a message.",
+        "example": [
+            "1) setTimer 1:30",
+            "2) setTimer 30"
+        ],
+        "subsection": [
+            6,
+            8
+        ]
+    },
+    {
+        "title": "shakeUser",
+        "explanation": "Randomly moves a user across voice channels x times, and returns them to the starting channel at start.",
+        "example": [
+            "1) shakeUser @TheLastSpark 5"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "volume",
+        "explanation": "Sets the music volume out of 100.",
+        "example": [
+            "1) volume 30"
+        ],
+        "subsection": [
+            4
+        ]
+    },
+    {
+        "title": "setCommand",
+        "explanation": "Sets a new moniker for an existing command, the original command names will still work. Make sure to seperate the original command and the moniker by a single comma!",
+        "example": [
+            "1) setCommand ping, summon",
+            "2) setCommand dq, deque"
+        ],
+        "subsection": [
+            6
+        ]
+    },
+    {
+        "title": "monikers",
+        "explanation": "Shows you a list of all your command monikers.",
+        "example": [
+            "1) monikers"
+        ],
+        "subsection": [
+            6
+        ]
+    },
+    {
+        "title": "removeMoniker",
+        "explanation": "Removes a specified moniker from your personal list.",
+        "example": [
+            "1) removeMoniker deque"
+        ],
+        "subsection": [
+            6
+        ]
+    },
+    {
+        "title": "timeZone",
+        "explanation": "Converts a specified time to a different timezone. Time is used in 12hour format!",
+        "example": [
+            "1) timeZone acst, 8:00, est"
+        ],
+        "subsection": [
+            8
+        ]
+    },
+    {
+        "title": "linkTwitch",
+        "explanation": "Link a twitch account (using just a name) to automatically add any channels you follow for the bot to notify you!",
+        "example": [
+            "1) linkTwitch TheLastSpark"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "unlinkTwitch",
+        "explanation": "Unlinks a twitch account and optionally all associated follows.",
+        "example": [
+            "1) unlinkTwitch"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "viewTwitchFollows",
+        "explanation": "Shows you a list of all the twitch channels you are following.",
+        "example": [
+            "1) viewTwitchFollows"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "unfollowTwitchChannel",
+        "explanation": "Unfollows a specific twitch channel.",
+        "example": [
+            "1) unfollowTwitchChannel TheLastSpark"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "followTwitchChannel",
+        "explanation": "Follows a specific twitch channel",
+        "example": [
+            "1) followTwitchChannel TheLastSpark"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "pairChannelWithTwitch",
+        "explanation": "Tells the bot to put a notification in the @mentioned channel when the specified twitch streamer goes live!",
+        "example": [
+            "1) pairChannelWithTwitch summit1g, #nameOfTextChannel"
+        ],
+        "subsection": [
+            3,
+            5
+        ]
+    },
+    {
+        "title": "showChannelTwitchPairs",
+        "explanation": "Shows you the server channel - twitch streamer pairs.",
+        "example": [
+            "1) showChannelTwitchPairs"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "removeChannelTwitchPairs",
+        "explanation": "Removes a serverChannel - twitchStreamer pair.",
+        "example": [
+            "1) removeChannelTwitchPairs summit1g, #nameOfTextChannel"
+        ],
+        "subsection": [
+            3,
+            5
+        ]
+    },
+    {
+        "title": "leagueRank",
+        "explanation": "Shows you your league stats, or the stats of another person. You have to specify the region and their summoner name seperated by a comma! **Default zone is 'na'!**",
+        "example": [
+            "1) leagueRank",
+            "2) leagueRank TheLastSpark",
+            "3) leagueRank TheLastSpark, na"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "rlRanks",
+        "explanation": "Shows you your Rocket League ranks, or the ranks of another person. You have to specify the platform and their name seperated by a comma! **Default platform is 'steam'!**. The others are: ps for playstation and xbox for...xbox",
+        "example": [
+            "1) rlRanks TheLastSpark",
+            "2) rlRanks TheLastSpark, steam"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "rlTracker",
+        "explanation": "Sends a message with a Rocket Leauge elo rating update for a specific player/platofrm in a specified channel.",
+        "example": [
+            "1) rlTracker TheLastSpark, #command",
+            "2) rlTracker TheLastSpark, steam, #notifications"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "removeRLTracker",
+        "explanation": "Removes a Rocket League tracker for a player+platform from a specified channel.",
+        "example": [
+            "1) removeRLTracker TheLastSpark, #command",
+            "2) removeRLTracker TheLastSpark, steam, #notifications"
+        ],
+        "subsection": [
+            3
+        ]
+    },
+    {
+        "title": "viewRLTrackers",
+        "explanation": "Shows all the player+platform(s) that are being tracked for the server and the channels in which they are being posted. Updates can take up to **5 minutes**!",
+        "example": [
+            "1) viewRLTrackers"
+        ],
+        "subsection": [
+            3
+        ]
+    }
+]

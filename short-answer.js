@@ -57,6 +57,7 @@ const mongoose = require('mongoose');
 const Fuse = require('fuse.js');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const Commands = require('./commands.json');
+exports.Commands = Commands;
 const DATABASE = require('./backups/26-04-2020.json');
 const fs = require('fs');
 const STATS = require('./stats.js');
@@ -73,7 +74,8 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 
-var osu = require('node-os-utils')
+var osu = require('node-os-utils');
+const { executionAsyncResource } = require('async_hooks');
 var cpu = osu.cpu;
 var mem = osu.mem;
 
@@ -82,6 +84,13 @@ async function OSU() {
     console.log(await cpu.usage());
 }
 //setInterval(OSU, 10000);
+
+var checkCommandsSearchArray = Commands.reduce((accum, curr) => {
+    accum.upperCase.push(curr.title.toUpperCase());
+    accum.normal.push(curr.title);
+    return accum;
+}, { upperCase: [], normal: [] });
+exports.commandsText = checkCommandsSearchArray;
 
 var EMOJI = new Map();
 EMOJI.set('bronze1', '725771774532517948');
@@ -248,6 +257,25 @@ connectDB.once('open', async function () {
     populateCommandMap();
 
 
+    // {
+
+    //     let arrayOfFinalCommands = [];
+    //     let config = require('./commands.json')
+
+    //     for (let i = 0; i < config.commands.length; i++) {
+
+    //         arrayOfFinalCommands.push({
+    //             title: config.commands[i],
+    //             explanation:  config.explanation[i],
+    //             example: config.example[i],
+    //             subsection: config.subsection[i]
+    //         })
+    //     }
+
+    //     await fs.promises.writeFile('./newCommands.json', JSON.stringify(arrayOfFinalCommands), 'UTF-8');
+    // }
+
+
     Client.on("ready", () => {
 
         console.log("Ready!");
@@ -373,90 +401,90 @@ connectDB.once('open', async function () {
 
 function populateCommandMap() {
 
-    commandMap.set(Commands.commands[0], MISCELLANEOUS.populate)
-    commandMap.set(Commands.commands[1], GAMES.search)
-    commandMap.set(Commands.commands[2], GAMES.updateGames)
-    commandMap.set(Commands.commands[3], GAMES.personalGames)
-    commandMap.set(Commands.commands[4], GAMES.removeGame)
-    commandMap.set(Commands.commands[5], GAMES.excludePing)
-    commandMap.set(Commands.commands[6], GAMES.excludeDM)
-    commandMap.set(Commands.commands[7], HELP.generalHelp)
-    commandMap.set(Commands.commands[8], HELP.gameHelp)
-    commandMap.set(Commands.commands[9], HELP.helpStats)
-    commandMap.set(Commands.commands[10], HELP.helpMiscellaneous)
-    commandMap.set(Commands.commands[11], HELP.helpMusic)
-    commandMap.set(Commands.commands[12], MISCELLANEOUS.study)
-    commandMap.set(Commands.commands[13], GAMES.pingUsers)
-    commandMap.set(Commands.commands[14], ADMINISTRATOR.initialiseUsers)
-    commandMap.set(Commands.commands[15], GENERAL.Delete)
-    commandMap.set(Commands.commands[16], STATS.personalStats)
-    commandMap.set(Commands.commands[17], STATS.guildStats)
-    commandMap.set(Commands.commands[18], STATS.specificStats)
-    commandMap.set(Commands.commands[19], STATS.topStats)
-    commandMap.set(Commands.commands[20], MUSIC.play)
-    commandMap.set(Commands.commands[21], MUSIC.stop)
-    commandMap.set(Commands.commands[22], MUSIC.pause)
-    commandMap.set(Commands.commands[23], MUSIC.resume)
-    commandMap.set(Commands.commands[24], MUSIC.skip)
-    commandMap.set(Commands.commands[25], TUTORIAL.gameTutorial)
-    commandMap.set(Commands.commands[26], BUGS.suggest)
-    commandMap.set(Commands.commands[27], QOF.setNotifyUpdate)
-    commandMap.set(Commands.commands[28], TUTORIAL.setNotifyTutorials)
-    commandMap.set(Commands.commands[29], TUTORIAL.quitTutorial)
-    commandMap.set(Commands.commands[30], GAMES.purgeGamesList)
-    commandMap.set(Commands.commands[31], GAMES.gameStats)
-    commandMap.set(Commands.commands[32], GAMES.topGames)
-    commandMap.set(Commands.commands[33], QOF.setServerPrefix)
-    commandMap.set(Commands.commands[34], QOF.setDefaultPrefix)
-    commandMap.set(Commands.commands[35], ADMINISTRATOR.setDefaultServerPrefix)
-    commandMap.set(Commands.commands[36], MUSIC.forward)
-    commandMap.set(Commands.commands[37], MUSIC.rewind)
-    commandMap.set(Commands.commands[38], MUSIC.seek)
-    commandMap.set(Commands.commands[39], MUSIC.reverse)
-    commandMap.set(Commands.commands[40], MUSIC.addSong)
-    commandMap.set(Commands.commands[41], MUSIC.createPlaylist)
-    commandMap.set(Commands.commands[42], MUSIC.myPlayLists)
-    commandMap.set(Commands.commands[43], MUSIC.removeSong)
-    commandMap.set(Commands.commands[44], MUSIC.playUserPlayList)
-    commandMap.set(Commands.commands[45], MUSIC.savePlayList)
-    commandMap.set(Commands.commands[46], MUSIC.removePlayList)
-    commandMap.set(Commands.commands[47], GAMES.Queue)
-    commandMap.set(Commands.commands[48], GAMES.deQueue)
-    commandMap.set(Commands.commands[49], GAMES.viewActiveSummons)
-    commandMap.set(Commands.commands[50], GAMES.banish)
-    commandMap.set(Commands.commands[51], GAMES.signUpAllUsers)
-    commandMap.set(Commands.commands[52], GAMES.removeGameFromAllUsers)
-    commandMap.set(Commands.commands[53], GAMES.signUpSpecificUser)
-    commandMap.set(Commands.commands[54], GAMES.removeGameFromSpecificUser)
-    commandMap.set(Commands.commands[55], MUSIC.currentSong)
-    commandMap.set(Commands.commands[56], MUSIC.currentPlaylist)
-    commandMap.set(Commands.commands[57], MISCELLANEOUS.searchForUser)
-    commandMap.set(Commands.commands[58], MISCELLANEOUS.flipCoin)
-    commandMap.set(Commands.commands[59], MUSIC.goTo)
-    commandMap.set(Commands.commands[60], MUSIC.shuffle)
-    commandMap.set(Commands.commands[61], MUSIC.repeat)
-    commandMap.set(Commands.commands[62], MISCELLANEOUS.decider)
-    commandMap.set(Commands.commands[63], MISCELLANEOUS.roll)
-    commandMap.set(Commands.commands[64], QOF.setTimer)
-    commandMap.set(Commands.commands[65], MISCELLANEOUS.shakeUser)
-    commandMap.set(Commands.commands[66], MUSIC.volume)
-    commandMap.set(Commands.commands[67], QOF.setCommand)
-    commandMap.set(Commands.commands[68], QOF.commandMonikers)
-    commandMap.set(Commands.commands[69], QOF.removeMoniker)
-    commandMap.set(Commands.commands[70], GENERAL.timeZone)
-    commandMap.set(Commands.commands[71], MISCELLANEOUS.linkTwitch)
-    commandMap.set(Commands.commands[72], MISCELLANEOUS.unlinkTwitch)
-    commandMap.set(Commands.commands[73], MISCELLANEOUS.viewTwitchFollows)
-    commandMap.set(Commands.commands[74], MISCELLANEOUS.unfollowTwitchChannel)
-    commandMap.set(Commands.commands[75], MISCELLANEOUS.followTwitchChannel)
-    commandMap.set(Commands.commands[76], MISCELLANEOUS.linkChannelWithTwitch)
-    commandMap.set(Commands.commands[77], MISCELLANEOUS.showChannelTwitchLinks)
-    commandMap.set(Commands.commands[78], MISCELLANEOUS.removeChannelTwitchLink)
-    commandMap.set(Commands.commands[79], MISCELLANEOUS.leagueStats)
-    commandMap.set(Commands.commands[80], MISCELLANEOUS.RLRanks)
-    commandMap.set(Commands.commands[81], MISCELLANEOUS.RLTracker)
-    commandMap.set(Commands.commands[82], MISCELLANEOUS.UnlinkRLTracker)
-    commandMap.set(Commands.commands[83], MISCELLANEOUS.viewRLTrackers)
+    commandMap.set(Commands[0].title.toUpperCase(), MISCELLANEOUS.populate)
+    commandMap.set(Commands[1].title.toUpperCase(), GAMES.search)
+    commandMap.set(Commands[2].title.toUpperCase(), GAMES.updateGames)
+    commandMap.set(Commands[3].title.toUpperCase(), GAMES.personalGames)
+    commandMap.set(Commands[4].title.toUpperCase(), GAMES.removeGame)
+    commandMap.set(Commands[5].title.toUpperCase(), GAMES.excludePing)
+    commandMap.set(Commands[6].title.toUpperCase(), GAMES.excludeDM)
+    commandMap.set(Commands[7].title.toUpperCase(), HELP.generalHelp)
+    commandMap.set(Commands[8].title.toUpperCase(), HELP.gameHelp)
+    commandMap.set(Commands[9].title.toUpperCase(), HELP.helpStats)
+    commandMap.set(Commands[10].title.toUpperCase(), HELP.helpMiscellaneous)
+    commandMap.set(Commands[11].title.toUpperCase(), HELP.helpMusic)
+    commandMap.set(Commands[12].title.toUpperCase(), MISCELLANEOUS.study)
+    commandMap.set(Commands[13].title.toUpperCase(), GAMES.pingUsers)
+    commandMap.set(Commands[14].title.toUpperCase(), ADMINISTRATOR.initialiseUsers)
+    commandMap.set(Commands[15].title.toUpperCase(), GENERAL.Delete)
+    commandMap.set(Commands[16].title.toUpperCase(), STATS.personalStats)
+    commandMap.set(Commands[17].title.toUpperCase(), STATS.guildStats)
+    commandMap.set(Commands[18].title.toUpperCase(), STATS.specificStats)
+    commandMap.set(Commands[19].title.toUpperCase(), STATS.topStats)
+    commandMap.set(Commands[20].title.toUpperCase(), MUSIC.play)
+    commandMap.set(Commands[21].title.toUpperCase(), MUSIC.stop)
+    commandMap.set(Commands[22].title.toUpperCase(), MUSIC.pause)
+    commandMap.set(Commands[23].title.toUpperCase(), MUSIC.resume)
+    commandMap.set(Commands[24].title.toUpperCase(), MUSIC.skip)
+    commandMap.set(Commands[25].title.toUpperCase(), TUTORIAL.gameTutorial)
+    commandMap.set(Commands[26].title.toUpperCase(), BUGS.suggest)
+    commandMap.set(Commands[27].title.toUpperCase(), QOF.setNotifyUpdate)
+    commandMap.set(Commands[28].title.toUpperCase(), TUTORIAL.setNotifyTutorials)
+    commandMap.set(Commands[29].title.toUpperCase(), TUTORIAL.quitTutorial)
+    commandMap.set(Commands[30].title.toUpperCase(), GAMES.purgeGamesList)
+    commandMap.set(Commands[31].title.toUpperCase(), GAMES.gameStats)
+    commandMap.set(Commands[32].title.toUpperCase(), GAMES.topGames)
+    commandMap.set(Commands[33].title.toUpperCase(), QOF.setServerPrefix)
+    commandMap.set(Commands[34].title.toUpperCase(), QOF.setDefaultPrefix)
+    commandMap.set(Commands[35].title.toUpperCase(), ADMINISTRATOR.setDefaultServerPrefix)
+    commandMap.set(Commands[36].title.toUpperCase(), MUSIC.forward)
+    commandMap.set(Commands[37].title.toUpperCase(), MUSIC.rewind)
+    commandMap.set(Commands[38].title.toUpperCase(), MUSIC.seek)
+    commandMap.set(Commands[39].title.toUpperCase(), MUSIC.reverse)
+    commandMap.set(Commands[40].title.toUpperCase(), MUSIC.addSong)
+    commandMap.set(Commands[41].title.toUpperCase(), MUSIC.createPlaylist)
+    commandMap.set(Commands[42].title.toUpperCase(), MUSIC.myPlayLists)
+    commandMap.set(Commands[43].title.toUpperCase(), MUSIC.removeSong)
+    commandMap.set(Commands[44].title.toUpperCase(), MUSIC.playUserPlayList)
+    commandMap.set(Commands[45].title.toUpperCase(), MUSIC.savePlayList)
+    commandMap.set(Commands[46].title.toUpperCase(), MUSIC.removePlayList)
+    commandMap.set(Commands[47].title.toUpperCase(), GAMES.Queue)
+    commandMap.set(Commands[48].title.toUpperCase(), GAMES.deQueue)
+    commandMap.set(Commands[49].title.toUpperCase(), GAMES.viewActiveSummons)
+    commandMap.set(Commands[50].title.toUpperCase(), GAMES.banish)
+    commandMap.set(Commands[51].title.toUpperCase(), GAMES.signUpAllUsers)
+    commandMap.set(Commands[52].title.toUpperCase(), GAMES.removeGameFromAllUsers)
+    commandMap.set(Commands[53].title.toUpperCase(), GAMES.signUpSpecificUser)
+    commandMap.set(Commands[54].title.toUpperCase(), GAMES.removeGameFromSpecificUser)
+    commandMap.set(Commands[55].title.toUpperCase(), MUSIC.currentSong)
+    commandMap.set(Commands[56].title.toUpperCase(), MUSIC.currentPlaylist)
+    commandMap.set(Commands[57].title.toUpperCase(), MISCELLANEOUS.searchForUser)
+    commandMap.set(Commands[58].title.toUpperCase(), MISCELLANEOUS.flipCoin)
+    commandMap.set(Commands[59].title.toUpperCase(), MUSIC.goTo)
+    commandMap.set(Commands[60].title.toUpperCase(), MUSIC.shuffle)
+    commandMap.set(Commands[61].title.toUpperCase(), MUSIC.repeat)
+    commandMap.set(Commands[62].title.toUpperCase(), MISCELLANEOUS.decider)
+    commandMap.set(Commands[63].title.toUpperCase(), MISCELLANEOUS.roll)
+    commandMap.set(Commands[64].title.toUpperCase(), QOF.setTimer)
+    commandMap.set(Commands[65].title.toUpperCase(), MISCELLANEOUS.shakeUser)
+    commandMap.set(Commands[66].title.toUpperCase(), MUSIC.volume)
+    commandMap.set(Commands[67].title.toUpperCase(), QOF.setCommand)
+    commandMap.set(Commands[68].title.toUpperCase(), QOF.commandMonikers)
+    commandMap.set(Commands[69].title.toUpperCase(), QOF.removeMoniker)
+    commandMap.set(Commands[70].title.toUpperCase(), GENERAL.timeZone)
+    commandMap.set(Commands[71].title.toUpperCase(), MISCELLANEOUS.linkTwitch)
+    commandMap.set(Commands[72].title.toUpperCase(), MISCELLANEOUS.unlinkTwitch)
+    commandMap.set(Commands[73].title.toUpperCase(), MISCELLANEOUS.viewTwitchFollows)
+    commandMap.set(Commands[74].title.toUpperCase(), MISCELLANEOUS.unfollowTwitchChannel)
+    commandMap.set(Commands[75].title.toUpperCase(), MISCELLANEOUS.followTwitchChannel)
+    commandMap.set(Commands[76].title.toUpperCase(), MISCELLANEOUS.linkChannelWithTwitch)
+    commandMap.set(Commands[77].title.toUpperCase(), MISCELLANEOUS.showChannelTwitchLinks)
+    commandMap.set(Commands[78].title.toUpperCase(), MISCELLANEOUS.removeChannelTwitchLink)
+    commandMap.set(Commands[79].title.toUpperCase(), MISCELLANEOUS.leagueStats)
+    commandMap.set(Commands[80].title.toUpperCase(), MISCELLANEOUS.RLRanks)
+    commandMap.set(Commands[81].title.toUpperCase(), MISCELLANEOUS.RLTracker)
+    commandMap.set(Commands[82].title.toUpperCase(), MISCELLANEOUS.UnlinkRLTracker)
+    commandMap.set(Commands[83].title.toUpperCase(), MISCELLANEOUS.viewRLTrackers)
 
     exports.commandMap = commandMap;
 }
@@ -481,7 +509,7 @@ async function triggerCommandHandler(message, user, skipSearch, emoji) {
 const getEmoji = function (EMOJI) {
     let emoji = Client.guilds.cache.get(guildID).emojis.cache.find(emo => emo.name == EMOJI);
     if (emoji) {
-      
+
         return `<:${EMOJI}:${emoji.id}>`;
     }
     return '';
@@ -491,7 +519,7 @@ exports.getEmoji = getEmoji;
 const getEmojiObject = function (EMOJI) {
     let emoji = Client.guilds.cache.get(guildID).emojis.cache.find(emo => emo.name == EMOJI);
     if (emoji) {
-        
+
         return emoji;
     }
     return '';
@@ -511,16 +539,16 @@ async function commandMatcher(message, command, params, user) {
         let fieldArray = new Array();
 
         for (let i = 0; i < check.result.length; i++) {
-            fieldArray.push({ value: check.result[i].item, name: "** **", inline: false })
+            fieldArray.push({ value: check.result[i], name: "** **", inline: false })
         }
-        let newEmbed = JSON.parse(JSON.stringify(Embed));
-        newEmbed.date = new Date();
-        newEmbed.description = `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`;
-        newEmbed.fields = fieldArray;
 
-        //message.channel.send({ embed: newEmbed })
-        prettyEmbed(message, `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
-            fieldArray, -1, 1, 1, null, null, true);
+        prettyEmbed(message, check.prettyList, {
+            description: `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
+            startTally: 1, modifier: 1, selector: true
+        });
+
+        // prettyEmbed(message, `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
+        //     fieldArray, -1, 1, 1, null, null, true);
         specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
         return -11;
     }
@@ -536,7 +564,6 @@ async function commandMatcher(message, command, params, user) {
 
 //-1 invalid input, 0 don't delete (passed to command matcher) - need it next time, 1 handled - delete
 async function handleCommandTracker(specificCommand, message, user, skipSearch, emoji) {
-    //console.log(specificCommand)
     let params = emoji ? emoji + '' : message.content;
     let tutorialResult;
     if (!skipSearch) {
@@ -597,28 +624,35 @@ async function checkCommands(params, user) {
         params = params[0].trim();
     }
     else {
+
         params = params.trim();
     }
 
     let finalArray = new Array();
-    let finalList = "";
+    let prettyArray = [];
+    // let finalList = "";
     let newOptions = JSON.parse(JSON.stringify(options));
     newOptions = {
         ...newOptions,
+        isCaseSensitive: false,
         minMatchCharLength: params.length / 2,
-        findAllMatches: false,
-        includeScore: true,
+        findAllMatches: true,
+        includeScore: true
     }
 
-    let searchArray = Commands.commands;
+    let fuse;
 
     if (user.commands) {
 
         let reducedCommands = user.commands.reduce((accum, current) => { accum.push(current[1]); return accum }, []);
-        searchArray = searchArray.concat(reducedCommands);
-    }
+        newOptions.keys.push("temp");
+        checkCommandsSearchArray.temp = checkCommandsSearchArray.upperCase.concat(reducedCommands);
 
-    let fuse = new Fuse(searchArray, newOptions);
+        fuse = new Fuse(checkCommandsSearchArray.upperCase.concat(reducedCommands), newOptions);
+    }
+    else
+        fuse = new Fuse(checkCommandsSearchArray.upperCase, newOptions);
+
     let result = fuse.search(params);
     let maxResults = 5;
     if (maxResults > result.length)
@@ -626,13 +660,16 @@ async function checkCommands(params, user) {
 
     for (let i = 0; i < maxResults; i++) {
 
-        finalList += (i + 1) + ") " + result[i].item + "\n";
+        if (result[i].refIndex >= checkCommandsSearchArray.normal.length)
+            prettyArray.push(checkCommandsSearchArray.temp[result[i].refIndex]);
+        else
+            prettyArray.push(checkCommandsSearchArray.normal[result[i].refIndex]);
         finalArray.push(result[i]);
     }
 
     let completeCheck = {
         result: finalArray,
-        prettyList: finalList
+        prettyList: prettyArray
     };
 
     if (finalArray.length > 0)
@@ -897,7 +934,7 @@ async function setEmojiCollector(message) {
     }, { time: 60000 });
     collector.on('collect', async function (emoji, user) {
 
-        console.log("INSIDE OF NUMBA- ")
+        //  console.log("INSIDE OF NUMBA- ")
         let choice;
         let usery = await findUser({ id: user.id });
         if (emoji.emoji.toString() == '1️⃣') {
@@ -953,7 +990,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
     if (params != -23) {
         let fuse = new Fuse(searchArray, newOptions);
         let result = fuse.search(params);
-        console.log(result)
+        // console.log(result)
         if (result[0])
             if (result[0].score == 0) {
                 // console.log("ORIGIN:::", originalCommand);
@@ -985,7 +1022,8 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         for (let i = 0; i < promptArray.length; i++)
             fieldArray.push(promptArray[i].item);
 
-        prettyEmbed(message, flavourText, fieldArray, -1, 1, 1, null, null, true);
+        prettyEmbed(message, fieldArray, { description: flavourText, startTally: 1, modifier: 1, selector: true });
+        //prettyEmbed(message, flavourText, fieldArray, -1, 1, 1, null, null, true);
 
         specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
         return 0;
@@ -997,26 +1035,39 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 }
 exports.generalMatcher = generalMatcher;
 
-//If it ever gets bad enough, move the embed construction to backup - all it needs is guild + channel id's and all the other parameters
-async function prettyEmbed(message, description, array, part, startTally, modifier, URL, title, selector) {
-    console.log(selector)
+/**
+ * 
+ * @param {part, startTally, modifier, URL, title, description, selector, maxLength} extraParams 
+ */
+async function prettyEmbed(message, array, extraParams) {
+
+
+    let part = extraParams.part ? extraParams.part : -1;
+    let tally = extraParams.startTally ? extraParams.startTally : -1;
+    let modifier = extraParams.modifier ? extraParams.modifier : -1;
+    let URL = extraParams.URL;
+    let title = extraParams.title;
+    let selector = extraParams.selector;
+    let description = extraParams.description ? extraParams.description : '';
+    let maxLength = extraParams.maxLength ? extraParams.maxLength : 100;
+
     let runningString = "";
     let previousName = "";
     let groupNumber = 1;
-    let tally = startTally == 0 ? startTally : 1;
     let field = null;
     let fieldArray = [];
-    let maxLength = 100;
+
 
     let tester = 1;
+
 
     for (item of array) {
         let BIGSPLIT = false;
         if (item.value == '') continue;
-
         element = item.value ? item.value : item;
         element = element ? element : '** **';
         if (element == '** **') continue;
+
         element = Array.isArray(element) ? element.join("\n") : element;
         let itemName = item.name ? item.name : "";
 
@@ -1035,7 +1086,6 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
             if (field.value.length != 0) {
 
                 fieldArray.push(JSON.parse(JSON.stringify(field)));
-
             }
 
             runningString = "";
@@ -1055,11 +1105,10 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
 
                 if (runningString.length == 0) {
                     if (tempElement.includes('\n')) {
-
                         let tempRun = '';
                         for (newSplit of tempElement.split('\n')) {
                             if (newSplit.length > maxLength) {
-                                message.channel.send(`${newSplit} is too long to be included in the embeds. If this occured from normal use, please notify the creator with the **suggest** command!`);
+                                await message.channel.send(`${newSplit} is too long to be included in the embeds. If this occured from normal use, please notify the creator with the **suggest** command!`);
                             }
                             else
                                 tempRun += newSplit + "\n";
@@ -1069,8 +1118,10 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                         tempElement = tempElement.substring(tempRun.length);
                         element = element.substring(0, tempRun.length);
                     }
-                    else
-                        message.channel.send("Found an unsplittable message body, odds of that happening naturally are next-to-none so stop testing me D:< However, if this is indeed from normal use, please notify the creator with the **suggest** command.");
+                    else {
+                        console.log("UNSPLITABLE AF")
+                        return message.channel.send("Found an unsplittable message body, odds of that happening naturally are next-to-none so stop testing me D:< However, if this is indeed from normal use, please notify the creator with the **suggest** command.");
+                    }
                 }
                 else {
                     tempElement = -1;
@@ -1102,14 +1153,13 @@ async function prettyEmbed(message, description, array, part, startTally, modifi
                     field.name = `${part} ${groupNumber}`;
                     previousName = `${part} ${groupNumber}`;
                 }
-                if (startTally == -1)
+                if (!extraParams.startTally)
                     field.value.push(`${element}`);
                 else
                     field.value.push(`${tally}) ${element}`);
             }
 
             if (BIGSPLIT) {
-
                 if (item.name) {
                     field.name = item.name;
                     previousName = item.name;
@@ -1241,8 +1291,9 @@ async function testy(ARR, description, message, modifier, URL, title, selector) 
         return testy(ARR, description, message, modifier);
     }
 
-    if (!selector)
+    if (!selector) {
         return await message.channel.send({ embed: newEmbed });
+    }
     else {
         let temp = await message.channel.send({ embed: newEmbed });
         setControlEmoji(temp);
@@ -1253,11 +1304,11 @@ async function testy(ARR, description, message, modifier, URL, title, selector) 
 function sendHelpMessage(Index, message) {
 
     let examples = "```md\n";
+    examples += Commands[Index].explanation + "\n\n";
 
-    examples += Commands.explanation[Index] + "\n\n";
+    for (example of Commands[Index].example) {
 
-    for (example of Commands.example[Index]) {
-
+        //  console.log(examples)
         let index = example.indexOf(" ");
         examples += `<${example.slice(0, index)}` + prefix + `${example.slice(index + 1)}>\n\n`;
     }

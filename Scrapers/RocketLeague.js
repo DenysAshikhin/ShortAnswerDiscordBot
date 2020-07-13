@@ -45,8 +45,6 @@ async function rocketLeagueRanks(params) {
         }
     }
 
-
-
     //    console.log(params)
 
     if (params[4]) {//Meaning it's called from RLTracker function (returns a different version of the information)
@@ -56,6 +54,8 @@ async function rocketLeagueRanks(params) {
         for (let i = 0; i < finalContent.length; i++) {
 
             let rank = finalContent[i];
+
+            //     console.log(rank)
 
             switch (i) {
                 case 0:
@@ -123,7 +123,8 @@ async function rocketLeagueRanks(params) {
         }
     }
 
-    MAIN.prettyEmbed({ guildID: params[2], channelID: params[3] }, `Here are ${params[1]} 's stats:`, finalArray, -1, -1, -1);
+    MAIN.prettyEmbed({ guildID: params[2], channelID: params[3] }, finalArray, { description: `Here are ${params[1]} 's stats:` });
+    //MAIN.prettyEmbed({ guildID: params[2], channelID: params[3] }, `Here are ${params[1]} 's stats:`, finalArray, -1, -1, -1);
     return 1;
 }
 exports.rocketLeagueRanks = rocketLeagueRanks;
@@ -172,7 +173,8 @@ const checkRLTrackers = async function (params) {
                     let playerElo = 0;
                     let tempElo = 0;
 
-                    if ((player.r1.elo != temp.ranks.r1.elo)) {
+                    if (!player.r1.elo) return;
+                    if ((player.r1.elo != temp.ranks.r1.elo) && (player.r1.elo != -1)) {
                         playerElo = isNaN(player.r1.elo) ? Number(player.r1.elo.replace(',', '')) : Number(player.r1.elo);
                         tempElo = isNaN(temp.ranks.r1.elo) ? Number(temp.ranks.r1.elo.replace(',', '')) : Number(temp.ranks.r1.elo);
 
@@ -191,7 +193,7 @@ const checkRLTrackers = async function (params) {
                             });
                         }
                     }
-                    if ((player.r2.elo != temp.ranks.r2.elo)) {
+                    if ((player.r2.elo != temp.ranks.r2.elo) && (player.r2.elo != -1)) {
                         playerElo = isNaN(player.r2.elo) ? Number(player.r2.elo.replace(',', '')) : Number(player.r2.elo);
                         tempElo = isNaN(temp.ranks.r2.elo) ? Number(temp.ranks.r2.elo.replace(',', '')) : Number(temp.ranks.r2.elo);
 
@@ -210,7 +212,7 @@ const checkRLTrackers = async function (params) {
                             });
                         }
                     }
-                    if ((player.r3.elo != temp.ranks.r3.elo)) {
+                    if ((player.r3.elo != temp.ranks.r3.elo) && (player.r3.elo != -1)) {
                         playerElo = isNaN(player.r3.elo) ? Number(player.r3.elo.replace(',', '')) : Number(player.r3.elo);
                         tempElo = isNaN(temp.ranks.r3.elo) ? Number(temp.ranks.r3.elo.replace(',', '')) : Number(temp.ranks.r3.elo);
 
@@ -229,7 +231,7 @@ const checkRLTrackers = async function (params) {
                             });
                         }
                     }
-                    if ((player.rs3.elo != temp.ranks.rs3.elo)) {
+                    if ((player.rs3.elo != temp.ranks.rs3.elo) && (player.rs3.elo != -1)) {
                         playerElo = isNaN(player.rs3.elo) ? Number(player.rs3.elo.replace(',', '')) : Number(player.rs3.elo);
                         tempElo = isNaN(temp.ranks.rs3.elo) ? Number(temp.ranks.rs3.elo.replace(',', '')) : Number(temp.ranks.rs3.elo);
 
@@ -248,7 +250,7 @@ const checkRLTrackers = async function (params) {
                             });
                         }
                     }
-                    if ((player.hoops.elo != temp.ranks.hoops.elo)) {
+                    if ((player.hoops.elo != temp.ranks.hoops.elo) && (player.hoops.elo != -1)) {
                         playerElo = isNaN(player.hoops.elo) ? Number(player.hoops.elo.replace(',', '')) : Number(player.hoops.elo);
                         tempElo = isNaN(temp.ranks.hoops.elo) ? Number(temp.ranks.hoops.elo.replace(',', '')) : Number(temp.ranks.hoops.elo);
 
@@ -267,7 +269,7 @@ const checkRLTrackers = async function (params) {
                             });
                         }
                     }
-                    if ((player.rumble.elo != temp.ranks.rumble.elo)) {
+                    if ((player.rumble.elo != temp.ranks.rumble.elo) && (player.rumble.elo != -1)) {
                         playerElo = isNaN(player.rumble.elo) ? Number(player.rumble.elo.replace(',', '')) : Number(player.rumble.elo);
                         tempElo = isNaN(temp.ranks.rumble.elo) ? Number(temp.ranks.rumble.elo.replace(',', '')) : Number(temp.ranks.rumble.elo);
 
@@ -286,7 +288,7 @@ const checkRLTrackers = async function (params) {
                             });
                         }
                     }
-                    if ((player.dropshot.elo != temp.ranks.dropshot.elo)) {
+                    if ((player.dropshot.elo != temp.ranks.dropshot.elo) && (player.dropshot.elo != -1)) {
                         playerElo = isNaN(player.dropshot.elo) ? Number(player.dropshot.elo.replace(',', '')) : Number(player.dropshot.elo);
                         tempElo = isNaN(temp.ranks.dropshot.elo) ? Number(temp.ranks.dropshot.elo.replace(',', '')) : Number(temp.ranks.dropshot.elo);
 
@@ -305,7 +307,7 @@ const checkRLTrackers = async function (params) {
                             });
                         }
                     }
-                    if ((player.snowday.elo != temp.ranks.snowday.elo)) {
+                    if ((player.snowday.elo != temp.ranks.snowday.elo) && (player.snowday.elo != -1)) {
                         playerElo = isNaN(player.snowday.elo) ? Number(player.snowday.elo.replace(',', '')) : Number(player.snowday.elo);
                         tempElo = isNaN(temp.ranks.snowday.elo) ? Number(temp.ranks.snowday.elo.replace(',', '')) : Number(temp.ranks.snowday.elo);
 
@@ -325,16 +327,23 @@ const checkRLTrackers = async function (params) {
                         }
                     }
 
-                    if (specificNotif.length == 0) { }
-                    // console.log("NO CHANGE")
+                    if (specificNotif.length == 0) {
+                        //  console.log("NO CHANGE")
+                    }
+
                     else {
 
                         tempGuild.RLTracker[tempGuild.RLTracker.indexOf(temp)].ranks = player;
                         // console.log("INITIAL CHANGE")
                         // console.log(tempGuild.RLTracker);
                         Guild.findOneAndUpdate({ id: tempGuild.id }, { $set: { RLTracker: tempGuild.RLTracker } }, (err, doc, res) => { if (err) console.log(err) });
-                        MAIN.prettyEmbed({ guildID: guildy.id, channelID: temp.channelID }, `Rocket League Update For **${temp.player}**:`,
-                            specificNotif, -1, -1, -1, null, null, null, 1000);
+
+                        MAIN.prettyEmbed({ guildID: guildy.id, channelID: temp.channelID }, specificNotif, {
+                            description: `Rocket League Update For **${temp.player}**:`,
+                            maxLength: 1000
+                        });
+                        //MAIN.prettyEmbed({ guildID: guildy.id, channelID: temp.channelID }, `Rocket League Update For **${temp.player}**:`,
+                        //  specificNotif, -1, -1, -1, null, null, null, 1000);
                     }
                 })
         }

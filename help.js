@@ -1,52 +1,49 @@
 const MAIN = require('./short-answer.js');
 const Commands = require('./commands.json');
 
+const generalHelpMessage = async function (message, tag, title) {
 
-function helpStats(message, params, user) {
 
+    let fields = [];
+    for (let i = 0; i < MAIN.commandsText.normal.length; i++)
+        if (MAIN.Commands[i].subsection.includes(tag))
+            fields.push({ name: "** **", value: MAIN.Commands[i].title });
+    // fields.push({ name: prefix + MAIN.Commands[i].title, value: MAIN.Commands[i].explanation })
 
-    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = MAIN.Embed.title + ` Stats Commands`;
-    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
+    // console.log(newEmbed.fields)
+    //message.channel.send({ embed: newEmbed });
+    return MAIN.prettyEmbed(message, fields,
+        {
+            modifier: 1, title: title, startTally: 1,
+            //maxLength: 1000,
+            description: "```md\n" + `You can find out more information about any command by typing <${prefix}help Command>` + "```"
+        });
+}
 
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(2))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
+async function helpStats(message, params, user) {
 
-    message.channel.send({ embed: newEmbed });
+    generalHelpMessage(message, 2, `Stats Commands`);
 }
 exports.helpStats = helpStats;
 
 function helpMusic(message, params, user) {
 
-    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = MAIN.Embed.title + ` Music Commands`;
-    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(4))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i], inline: true });
-
-    message.channel.send({ embed: newEmbed });
+    generalHelpMessage(message, 4, `Music Commands`);
 }
 exports.helpMusic = helpMusic;
 
 function gameHelp(message, params, user) {
 
-    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = MAIN.Embed.title + ` Game Commands`,
-        newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(1))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
-
-    message.channel.send({ embed: newEmbed });
+    generalHelpMessage(message, 1, `Help Commands`);
 }
 exports.gameHelp = gameHelp;
+
+function helpMiscellaneous(message) {
+
+    generalHelpMessage(message, 3, `Miscellaneous Commands`);
+}
+exports.helpMiscellaneous = helpMiscellaneous;
+
 
 function generalHelp(message, params, user) {
 
@@ -54,41 +51,25 @@ function generalHelp(message, params, user) {
 
     if (!args) {
 
-        let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-        newEmbed.timestamp = new Date();
-        newEmbed.title = MAIN.Embed.title + ` General Help`;
-        newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-        newEmbed.fields = [
-            { name: "Games", value: "", inline: true },
-            { name: "Stats", value: "", inline: true },
-            { name: "Miscellaneous", value: "", inline: true },
-            { name: "Music", value: "", inline: true },
-            { name: "Admins", value: "", inline: true },
-            { name: "Quality of Life", value: "", inline: true },
-            { name: "Help", value: "", inline: true },
-            { name: "General", value: "", inline: true },
-            { name: "Tutorials", value: "", inline: true },
-            { name: "Bugs/Suggestions", value: "", inline: true },
-        ];
-
-        for (tag of MAIN.tags) {
-
-            let counter = 0;
-            for (let i = 0; i < Commands.commands.length; i++) {
-
-                if (Commands.subsection[i].includes(tag)) {
-                    counter++;
-                    newEmbed.fields[tag - 1].value += counter + ") " + Commands.commands[i] + "\n"
-                }
-            }
-        }
-
-        return message.channel.send({ embed: newEmbed });
+        return MAIN.prettyEmbed(message,
+            [
+                { name: "** **", value: "Games", inline: true },
+                { name: "** **", value: "Stats", inline: true },
+                { name: "** **", value: "Miscellaneous", inline: true },
+                { name: "** **", value: "Music", inline: true },
+                { name: "** **", value: "Admins", inline: true },
+                { name: "** **", value: "Quality of Life", inline: true },
+                { name: "** **", value: "Help", inline: true },
+                { name: "** **", value: "General", inline: true },
+                { name: "** **", value: "Tutorials", inline: true },
+                { name: "** **", value: "Bugs/Suggestions", inline: true },
+            ], {
+            description: "```md\n" + `You can see a list of commands under each category by typing <${prefix}helpCommand> I.E.:\n` +
+                `1) <${prefix}helpMusic>` + "```", startTally: 1, modifier: 1, title: `General Help`
+        });
     }
 
     if (params.index != null) {
-
-
         return MAIN.sendHelpMessage(params.index, message);
     }
     else {
@@ -104,43 +85,12 @@ function generalHelp(message, params, user) {
             }
         }
 
-        for (let i = 0; i < Commands.commands.length; i++) {
+        for (let i = 0; i < MAIN.Commands.length; i++) {
 
-            promptArray.push(Commands.commands[i]);
+            promptArray.push(MAIN.Commands[i].title);
             internalArray.push({ index: i });
         }
         return MAIN.generalMatcher(message, command, user, promptArray, internalArray, generalHelp, `Enter the number of the command you wish to learn more about!`);
     }
 }
 exports.generalHelp = generalHelp;
-
-function gameHelp(message, params, user) {
-
-    let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-    newEmbed.timestamp = new Date();
-    newEmbed.title = MAIN.Embed.title + ` Game Commands`;
-    newEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(1))
-            newEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i], inline: true });
-
-    message.channel.send({ embed: newEmbed });
-}
-exports.gameHelp = gameHelp;
-
-function helpMiscellaneous(message) {
-
-    let miscEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-    miscEmbed.timestamp = new Date();
-    miscEmbed.title = MAIN.Embed.title + ` Miscellaneous Commands`;
-    miscEmbed.description = `You can find out more information about any command by typing ${prefix}help *Command*`;
-
-    for (let i = 0; i < Commands.commands.length; i++)
-        if (Commands.subsection[i].includes(3))
-            miscEmbed.fields.push({ name: prefix + Commands.commands[i], value: Commands.explanation[i] })
-
-    message.channel.send({ embed: miscEmbed });
-}
-exports.helpMiscellaneous = helpMiscellaneous;

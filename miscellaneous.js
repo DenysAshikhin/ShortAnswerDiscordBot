@@ -391,17 +391,22 @@ const UnlinkRLTracker = async function (message, params, user) {
 }
 exports.UnlinkRLTracker = UnlinkRLTracker;
 
-const viewRLTrackers = async function (message, params, user){
+const viewRLTrackers = async function (message, params, user) {
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
 
     if (!guild.RLTracker || (guild.RLTracker.length == 0)) return message.channel.send("There are no trackers setup for this server!");
 
-    MAIN.prettyEmbed(message, "Here are the RLTrackers for this server:", guild.RLTracker.reduce((accum, curr) => {
+    // MAIN.prettyEmbed(message, "Here are the RLTrackers for this server:", guild.RLTracker.reduce((accum, curr) => {
+    //     accum.push({name: '** **', value: `<#${message.guild.channels.cache.get(curr.channelID).name} is linked to=${curr.player}_${curr.platform}`});
+    //     return accum;
+    // }, []), -1, 1, 'md');
 
-        accum.push({name: '** **', value: `<#${message.guild.channels.cache.get(curr.channelID).name} is linked to=${curr.player}_${curr.platform}`});
+    MAIN.prettyEmbed(message, guild.RLTracker.reduce((accum, curr) => {
+        accum.push({ name: '** **', value: `<#${message.guild.channels.cache.get(curr.channelID).name} is linked to=${curr.player}_${curr.platform}` });
         return accum;
-    }, []), -1, 1, 'md');
+    }, []), { description: "Here are the RLTrackers for this server:", modifier: 'md' });
+
     return 1;
 }
 exports.viewRLTrackers = viewRLTrackers;
@@ -514,8 +519,8 @@ async function viewTwitchFollows(message, params, user) {
         let stringed = data.toString();
         let parsed = JSON.parse(stringed).finalArray;
 
-        MAIN.prettyEmbed(message, `You are following ${parsed.length} channels!`, parsed,
-            -1, 1, 'md');
+        // MAIN.prettyEmbed(message, , parsed, -1, 1, 'md');
+        MAIN.prettyEmbed(message, parsed, { description: `You are following ${parsed.length} channels!`, startTally: 1, modifier: 'md' });
         status = 1;
         socky.destroy();
     });
@@ -558,11 +563,16 @@ async function showChannelTwitchLinks(message, params, user) {
 
         finishedArray.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
 
-        MAIN.prettyEmbed(message, "Here are the ServerChannel-TwitchStreamer pairs:",
-            finishedArray.reduce((accum, current) => {
-                accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
-                return accum;
-            }, []), -1, 1, 'md');
+        // MAIN.prettyEmbed(message, "Here are the ServerChannel-TwitchStreamer pairs:",
+        //     finishedArray.reduce((accum, current) => {
+        //         accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
+        //         return accum;
+        //     }, []), -1, 1, 'md');
+
+        MAIN.prettyEmbed(message, finishedArray.reduce((accum, current) => {
+            accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
+            return accum;
+        }, []), { description: "Here are the ServerChannel-TwitchStreamer pairs:", startTally: 1, modifier: 'md' });
 
         status = 1;
         socky.destroy();

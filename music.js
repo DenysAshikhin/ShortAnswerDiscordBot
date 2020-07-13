@@ -264,10 +264,14 @@ async function spotifyPlaylist(message, params, user) {
             }, []));
 
     if (finalReport.length > 0)
-        MAIN.prettyEmbed(message,
-            `I found ${numFound}/${numSongs} song for sure.\n${found.length}/${numSongs} I wasn't sure about **but should be accurate**.\n${missed.length} songs had no matches.`
-            + "```fix\nUse the currentPlaylist command to view the whole **loaded** playlist!```",
-            finalReport, -1, -1, 1);
+        MAIN.prettyEmbed(message, finalReport, {
+            description: `I found ${numFound}/${numSongs} song for sure.\n${found.length}/${numSongs} I wasn't sure about **but should be accurate**.\n${missed.length} songs had no matches.`
+                + "```fix\nUse the currentPlaylist command to view the whole **loaded** playlist!```", modifier: 1
+        });
+    // MAIN.prettyEmbed(message,
+    //     `I found ${numFound}/${numSongs} song for sure.\n${found.length}/${numSongs} I wasn't sure about **but should be accurate**.\n${missed.length} songs had no matches.`
+    //     + "```fix\nUse the currentPlaylist command to view the whole **loaded** playlist!```",
+    //     finalReport, -1, -1, 1);
 
     notifMess.delete();
 }
@@ -992,7 +996,7 @@ async function playSong(guild, sonG, skip, message) {
         let streamResolve = await ytdl(song.url, {
             format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 }
         });
-        streamResolve.on('info', (info) => { console.log(); console.log('yeeeee') })
+       // streamResolve.on('info', (info) => { console.log(); console.log('yeeeee') })
         streamResolve.on('error', (err) => {
             console.log("RESOLVE ERROR")
             //message.channel.send(`${song.title} is no longer availabe, I suggest removing it with the removeSong command. Skipping it for now...`);
@@ -1528,7 +1532,8 @@ async function myPlayLists(message, params, user) {
         for (song of params.songs)
             fieldArray.push(song.title + "\n");
 
-        MAIN.prettyEmbed(message, `Here are the songs for **${params.title}**`, fieldArray, -1, 1, 1);
+        MAIN.prettyEmbed(message, fieldArray, { description: `Here are the songs for **${params.title}**`, startTally: 1, modifier: 1 });
+        //MAIN.prettyEmbed(message, `Here are the songs for **${params.title}**`, fieldArray, -1, 1, 1);
     }
     else {
 
@@ -1577,8 +1582,12 @@ async function currentPlaylist(message, params, user) {
         else fieldArray.push(`${i + 1}) ${song.title}\n`);
     }
 
-    MAIN.prettyEmbed(message, `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`,
-        fieldArray, -1, -1, 'md');
+    MAIN.prettyEmbed(message, fieldArray, {
+        description: `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`,
+        modifier: 'md'
+    });
+    //MAIN.prettyEmbed(message, `There are a total of ${songQueue.songs.length} songs queued. Total duration: ${MAIN.timeConvert(totalDuration)}`,
+    // fieldArray, -1, -1, 'md');
 }
 exports.currentPlaylist = currentPlaylist;
 

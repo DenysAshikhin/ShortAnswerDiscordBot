@@ -2,7 +2,7 @@ const gameJSON = require('./gameslist.json');
 const MAIN = require('./short-answer.js');
 const Fuse = require('fuse.js');
 const User = require('./User.js');
-const Commands = require('./commands.json');
+//const Commands = require('./commands.json');
 
 
 var games = new Array();
@@ -140,15 +140,28 @@ const resetSummonRitual = async function (message, summonerID, time, queue) {
             //.substring(0,squad.message.embeds[0].description.indexOf("!```") + 4);
 
             {
-                let summonMessage = await MAIN.prettyEmbed(message, defaultDesc,
+                let summonMessage = await MAIN.prettyEmbed(message,
                     [{
                         name: `${message.guild.members.cache.get(squad.summonerID).displayName}'s Summon: ${squad.joinedIDS.length}/${squad.size}`,
                         value: squad.displayNames.reduce((acc, current, index) => {
                             acc.push(`${index + 1}) ${current}`);
                             return acc;
                         }, [])
-                    }], -1, -1, 1,
-                    null, null, null, 1);
+                    }], { description: defaultDesc, modifier: 1, selector: 1 });
+
+
+                // await MAIN.prettyEmbed(message, defaultDesc,
+                //     [{
+                //         name: `${message.guild.members.cache.get(squad.summonerID).displayName}'s Summon: ${squad.joinedIDS.length}/${squad.size}`,
+                //         value: squad.displayNames.reduce((acc, current, index) => {
+                //             acc.push(`${index + 1}) ${current}`);
+                //             return acc;
+                //         }, [])
+                //     }], -1, -1, 1,
+                //     null, null, null, 1);
+
+
+
 
                 if (queue) {
                     if (time)
@@ -216,7 +229,14 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         for (suggestion of prettyArray)
             tempArray.push(suggestion)
 
-        MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`, tempArray, -1, -1, 1, null, null, true);
+        //MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`, tempArray, -1, -1, 1, null, null, true);
+
+        MAIN.prettyEmbed(message, tempArray, {
+            description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+            modifier: 1, selector: true
+        });
+
+
 
         MAIN.specificCommandCreator(pingUsers, [message, -1, user], check.result, user);
         return -11;
@@ -249,16 +269,28 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         if (signedUp.length > 3) {
 
 
-            let summonMessage = await MAIN.prettyEmbed(message, message.member.displayName + " has summoned " + signedUp + " for some " + game
-                + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```",
+            let summonMessage = await MAIN.prettyEmbed(message,
                 [{
                     name: `${message.member.displayName}'s Summon: 1/${squadSize}`,
                     value: [user.displayName].reduce((acc, current, index) => {
                         acc.push(`${index + 1}) ${current}`);
                         return acc;
                     }, [])
-                }], -1, -1, 1,
-                null, null, null, 1);
+                }], {
+                description: message.member.displayName + " has summoned " + signedUp + " for some " + game
+                    + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```", modifier: 1, selector: true
+            });
+
+            // let summonMessage = await MAIN.prettyEmbed(message, message.member.displayName + " has summoned " + signedUp + " for some " + game
+            // + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```",
+            // [{
+            //     name: `${message.member.displayName}'s Summon: 1/${squadSize}`,
+            //     value: [user.displayName].reduce((acc, current, index) => {
+            //         acc.push(`${index + 1}) ${current}`);
+            //         return acc;
+            //     }, [])
+            // }], -1, -1, 1,
+            // null, null, null, 1);
 
             setControlEmoji(summonMessage);
             let collector = await setEmojiCollector(summonMessage);
@@ -382,7 +414,8 @@ async function personalGames(message, params, user) {
         gameArr.push(`${user.games[i]}`);
     }
 
-    MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", gameArr, -1, 1, 1);
+    //MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", gameArr, -1, 1, 1);
+    MAIN.prettyEmbed(message, gameArr, { description: display + " here are the games you are signed up for:", modifier: 1 });
 
     if (games.length <= 0)
         message.channel.send("You are not signed up for any games.");
@@ -395,12 +428,12 @@ function search(message, searches) {
 
     if (searches == undefined || searches == null || searches.length < 1) {
 
-        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + Commands.commands[1] + " counter");
+        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "search counter");
         return -1;
     }
-    if (searches.length == 1 && (searches[0].toUpperCase() == (prefix.toUpperCase() + Commands.commands[1]))) {
+    if (searches.length == 1 && (searches[0].toUpperCase() == (prefix.toUpperCase() + "SEARCH"))) {
 
-        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + Commands.commands[1] + " counter");
+        message.channel.send("You didn't provide a search criteria, try again - i.e. " + prefix + "search counter");
         return -1;
     }
 
@@ -426,7 +459,8 @@ function search(message, searches) {
             if (result.length < 1)
                 message.channel.send(`No matching games were found for: ${query}`)
             else
-                MAIN.prettyEmbed(message, `Here are the results for: ${query}`, fieldArray, -1, -1, 1);
+                MAIN.prettyEmbed(message, fieldArray, { description: `Here are the results for: ${query}`, modifier: 1 });
+            //MAIN.prettyEmbed(message, `Here are the results for: ${query}`, fieldArray, -1, -1, 1);
         }
 
     }//for loop
@@ -440,7 +474,7 @@ exports.search = search;
 function excludePing(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + "excludePing** *true/false*");
         return -1;
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
@@ -458,7 +492,7 @@ function excludePing(message, params, user) {
         return 0;
     }
     else {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[5] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + "excludePing** *true/false*");
         return -1;
     }
 }
@@ -467,7 +501,7 @@ exports.excludePing = excludePing;
 function excludeDM(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + "excludeDM** *true/false*");
         return -1;
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
@@ -493,7 +527,7 @@ function excludeDM(message, params, user) {
         return 0;
     }
     else {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[6] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + "excludeDM** *true/false*");
         return -1;
     }
 }
@@ -506,7 +540,11 @@ async function gameStats(message, params, user) {
     if (params != null) {
         if (params.userList) {
 
-            MAIN.prettyEmbed(message, `Here are the users signed up for ${params.gameTitle}. Total: ${params.userList.length}.`, params.userList, -1, 1, 1);
+            //MAIN.prettyEmbed(message, `Here are the users signed up for ${params.gameTitle}. Total: ${params.userList.length}.`, params.userList, -1, 1, 1);
+            MAIN.prettyEmbed(message, params.userList, {
+                description: `Here are the users signed up for ${params.gameTitle}. Total: ${params.userList.length}.`,
+                modifier: 1, startTally: 1
+            });
             return 1;
         }
     }
@@ -531,8 +569,12 @@ async function gameStats(message, params, user) {
 
         let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
-        MAIN.prettyEmbed(message, `**${game}** is not a valid game, if you meant one of the following, simply type the number you wish to use:`, prettyArray,
-            -1, -1, 1, null, null, true);
+        // MAIN.prettyEmbed(message, `**${game}** is not a valid game, if you meant one of the following, simply type the number you wish to use:`, prettyArray,
+        //     -1, -1, 1, null, null, true);
+        MAIN.prettyEmbed(message, prettyArray, {
+            description: `**${game}** is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+            modifier: 1, selector: true
+        });
 
         MAIN.specificCommandCreator(gameStats, [message, -1, user], check.result, user);
         return -11;
@@ -630,7 +672,8 @@ async function topGames(message, params) {
         fieldArray.push(`<${gameMap[i][1]} User(s) signed up for ${gameMap[i][0]}>\n`);
     }
 
-    MAIN.prettyEmbed(message, description, fieldArray, -1, 1, 'md');
+    //MAIN.prettyEmbed(message, description, fieldArray, -1, 1, 'md');
+    MAIN.prettyEmbed(message, fieldArray, { description: description, modifier: 'md', startTally: 1 });
     return gameMap.length;
 }
 exports.topGames = topGames;
@@ -838,7 +881,8 @@ async function viewActiveSummons(message, params, user) {
         });
     }
 
-    MAIN.prettyEmbed(message, `There are ${squads.length} active summon(s)!`, fieldArray, -1, -1, 1);
+    //MAIN.prettyEmbed(message, `There are ${squads.length} active summon(s)!`, fieldArray, -1, -1, 1);
+    MAIN.prettyEmbed(message, fieldArray, { description: `There are ${squads.length} active summon(s)!`, modifier: 1 });
 }
 exports.viewActiveSummons = viewActiveSummons;
 
@@ -905,7 +949,7 @@ function removeGame(message, game, user) {
 
     if (user.games.length < 1 && !game.mass) {
 
-        message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + Commands.commands[2]);
+        message.channel.send(`You have no games in your games list, please sign up for some with ${prefix}` + `signUp`);
         return -1;
     }
     else {
@@ -945,18 +989,22 @@ function removeGame(message, game, user) {
 
                     let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
 
-                    let removeEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-                    removeEmbed.timestamp = new Date();
-                    removeEmbed.title = MAIN.Embed.title + ` Game Commands`;
-                    removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
-
+                    // let removeEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
+                    // removeEmbed.timestamp = new Date();
+                    // removeEmbed.title = MAIN.Embed.title + ` Game Commands`;
+                    // removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+                    let fields = [];
 
                     for (suggestion of prettyArray)
-                        removeEmbed.fields.push({ value: suggestion, name: "** **" });
+                        fields.push({ value: suggestion, name: "** **" });
 
                     //message.channel.send({ embed: removeEmbed });
-                    MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-                        removeEmbed.fields, -1, -1, 1, null, null, true);
+                    // MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                    //     removeEmbed.fields, -1, -1, 1, null, null, true);
+                    MAIN.prettyEmbed(message, fields, {
+                        description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                        modifier: 1, selector: true
+                    });
                     MAIN.specificCommandCreator(removeGame, [message, -1, user], check.result, user);
                     return -11;
                 }
@@ -1020,7 +1068,8 @@ function removeGame(message, game, user) {
         }
 
         if (!mass)
-            MAIN.prettyEmbed(message, '', fieldArray, -1, -1, 1);
+            MAIN.prettyEmbed(message, fieldArray, { modifier: 1 });
+        //MAIN.prettyEmbed(message, '', fieldArray, -1, -1, 1);
 
 
         gameArr.sort();

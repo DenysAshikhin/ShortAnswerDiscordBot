@@ -5,14 +5,14 @@ const GAMES = require('./games.js');
 
 const GameTutorial = {
     expectedCommand: [
-        Commands.commands[1],//"SEARCH"
-        Commands.commands[2],//"SIGNUP"
-        Commands.commands[2],//"SIGNUP"
-        Commands.commands[3],//"MYGAMES"
-        Commands.commands[4],//"REMOVEGAME"
-        Commands.commands[13],//"PING"
-        Commands.commands[5],//"EXCLUDEPING"
-        Commands.commands[6]//"EXCLUDEDM"
+        Commands[1].title,//"SEARCH"
+        Commands[2].title,//"SIGNUP"
+        Commands[2].title,//"SIGNUP"
+        Commands[3].title,//"MYGAMES"
+        Commands[4].title,//"REMOVEGAME"
+        Commands[13].title,//"PING"
+        Commands[5].title,//"EXCLUDEPING"
+        Commands[6].title//"EXCLUDEDM"
     ],
     specificCommand: [
         GAMES.search,
@@ -63,15 +63,15 @@ async function gameTutorial(message, params, command) {
         `The second notification is a direct message. To disable/enable direct messages from pings - *False* = you will be DMed, *True* = you will not be DMed.`,
 
         `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
-        + ` **${prefix}` + Commands.commands[26] + `** and I'll forward the message to the creator.`
+        + ` **${prefix}` + `suggest** and I'll forward the message to the creator.`
         + `\nAs a final note, this bot is being rapidly developed with new features constantly being added,`
-        + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + Commands.commands[27] + `**.`
+        + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + `updateMe**.`
     ]
 
     if (user.tutorialStep == -1) {
 
         message.channel.send(GameTutorial.steps[0]);
-        MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[0]), message);
+        MAIN.sendHelpMessage(MAIN.commandsText.upperCase.indexOf(GameTutorial.expectedCommand[0]), message);
 
         await User.findOneAndUpdate({ id: user.id },
             {
@@ -86,10 +86,10 @@ async function gameTutorial(message, params, command) {
     else {
         if (user.activeTutorial == 0 || user.activeTutorial == -1) {
 
-            if (command == MAIN.commandMap.get(Commands.commands[25])) {
+            if (command == MAIN.commandMap.get('gameTutorial')) {
 
                 message.channel.send(GameTutorial.steps[user.tutorialStep]);
-                let Index = Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]);
+                let Index = MAIN.commandsText.normal.indexOf(GameTutorial.expectedCommand[user.tutorialStep]);
 
                 console.log(GameTutorial.expectedCommand[user.tutorialStep])
                 MAIN.sendHelpMessage(Index, message);
@@ -100,7 +100,7 @@ async function gameTutorial(message, params, command) {
                 if (user.tutorialStep != GameTutorial.steps.length - 1) {
 
                     message.channel.send(GameTutorial.steps[user.tutorialStep]);
-                    MAIN.sendHelpMessage(Commands.commands.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
+                    MAIN.sendHelpMessage(MAIN.commandsText.normal.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
                     await User.findOneAndUpdate({ id: user.id },
                         {
                             $set: {
@@ -113,8 +113,8 @@ async function gameTutorial(message, params, command) {
                     //Need to add the recommend and something else commands
                     message.channel.send(GameTutorial.steps[user.tutorialStep]);
 
-                   MAIN.sendHelpMessage(Commands.commands.indexOf('UPDATEME'), message);
-                   MAIN.sendHelpMessage(Commands.commands.indexOf('SUGGEST'), message);
+                   MAIN.sendHelpMessage(MAIN.commandsText.upperCase.indexOf('UPDATEME'), message);
+                   MAIN.sendHelpMessage(MAIN.commandsText.upperCase.indexOf('SUGGEST'), message);
                     if (!user.completedTutorials.includes(0)) {
                         user.completedTutorials.push(0);
                     }
@@ -175,7 +175,7 @@ exports.quitTutorial = quitTutorial;
 function setNotifyTutorials(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[28] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + "tutorials** *true/false*");
         return -1;
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
@@ -192,7 +192,7 @@ function setNotifyTutorials(message, params, user) {
         return 0;
     }
     else {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[28] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + "tutorials** *true/false*");
         return -1;
     }
 }

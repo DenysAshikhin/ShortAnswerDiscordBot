@@ -120,7 +120,7 @@ async function leagueStats(params, socket) {
 
     for (let i = 0; i < total.champions.length; i++) {
 
-        switch (i) { 
+        switch (i) {
             case 0:
                 embedArray.push({
                     name: `${MAIN.getEmoji(`FLARE${total.champions[0].mastery}`)} ${total.champions[0].name} Ranked + Standard Main`, value: `${
@@ -128,7 +128,7 @@ async function leagueStats(params, socket) {
                         + `Average Kills: ${total.champions[0].avgKills}\nAverage Deaths: ${total.champions[0].avgDeaths}\nAverage Assists: ${total.champions[0].avgAssists}\n`
                         + `Average KDA: ${((Number(total.champions[0].avgKills) + Number(total.champions[0].avgAssists)) / Number(total.champions[0].avgDeaths)).toFixed(2)}`}`
                 });
-            break;
+                break;
             case 1:
                 embedArray.push({
                     name: `${MAIN.getEmoji(`FLARE${total.champions[1].mastery}`)} ${total.champions[1].name} Ranked + Standard Main`, value: `${
@@ -136,12 +136,16 @@ async function leagueStats(params, socket) {
                         + `Average Kills: ${total.champions[1].avgKills}\nAverage Deaths: ${total.champions[1].avgDeaths}\nAverage Assists: ${total.champions[1].avgAssists}\n`
                         + `Average KDA: ${((Number(total.champions[1].avgKills) + Number(total.champions[1].avgAssists)) / Number(total.champions[1].avgDeaths)).toFixed(2)}`}`
                 });
-            break;
+                break;
         }
     }
-  
-    
-    MAIN.prettyEmbed({ guildID: params[2], channelID: params[3] }, `Here are ${params[1]} 's stats:`, embedArray, -1, -1, 1, null, null, null, 1000, 1);
+
+
+    MAIN.prettyEmbed({ guildID: params[2], channelID: params[3] }, embedArray, {
+        description: `Here are ${params[1]} 's stats:`, modifier: 1,
+        maxLength: 1000, cutOff: 1
+    });
+    //MAIN.prettyEmbed({ guildID: params[2], channelID: params[3] }, `Here are ${params[1]} 's stats:`, embedArray, -1, -1, 1, null, null, null, 1000, 1);
     console.log(((new Date() - DDD) / 1000));
     return 1;
 }

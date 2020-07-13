@@ -1,5 +1,5 @@
 const MAIN = require('./short-answer.js');
-const Commands = require('./commands.json');
+//const Commands = require('./commands.json');
 const User = require('./User.js');
 
 var timers = new Map();
@@ -16,7 +16,11 @@ async function commandMonikers(message, params, user) {
         fieldArray.push({ name: '', value: `<${combo[0]} ${combo[1]}>\n` })
     }
 
-    MAIN.prettyEmbed(message, "```md\n" + 'The monikers will take the format of:\n<originalCommand commandMoniker>' + "```", fieldArray, -1, 1, 'md');
+    MAIN.prettyEmbed(message, fieldArray, {
+        description: "```md\n" + 'The monikers will take the format of:\n<originalCommand commandMoniker>' + "```",
+        startTally: 1, modifier: 'md'
+    });
+    //MAIN.prettyEmbed(message, "```md\n" + 'The monikers will take the format of:\n<originalCommand commandMoniker>' + "```", fieldArray, -1, 1, 'md');
 }
 exports.commandMonikers = commandMonikers;
 
@@ -57,15 +61,16 @@ async function setCommand(message, params, user) {
         if (!args[1].trim() || (args[1].trim().length < 1)) return message.channel.send("You have to provide the moniker for the original command, **seperated by a comma**.");
         args[1] = args[1].trim().toUpperCase();
 
-        if (!Commands.commands.includes(args[0])) {
+        if (!MAIN.commandsText.upperCase.includes(args[0])) {
 
             let internalArray = [];
 
-            for (comm of Commands.commands) {
+            for (comm of MAIN.commandsText.upperCase) {
                 internalArray.push({ loop: true, args: [comm, args[1]] });
             }
 
-            return MAIN.generalMatcher(message, args[0], user, Commands.commands, internalArray, setCommand, "Select which command you meant to create a moniker for: ");
+            return MAIN.generalMatcher(message, args[0], user, MAIN.commandsText.normal, internalArray,
+                setCommand, "Select which command you meant to create a moniker for: ");
         }
     }
 
@@ -93,7 +98,7 @@ exports.setCommand = setCommand;
 function setNotifyUpdate(message, params, user) {
 
     if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[27] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + "updateMe** *true/false*");
         return -1;
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();
@@ -110,7 +115,7 @@ function setNotifyUpdate(message, params, user) {
         return 0;
     }
     else {
-        message.channel.send("You must enter either true or false: **" + prefix + Commands.commands[27] + "** *true/false*");
+        message.channel.send("You must enter either true or false: **" + prefix + + "updateMe** *true/false*");
         return -1;
     }
 }
