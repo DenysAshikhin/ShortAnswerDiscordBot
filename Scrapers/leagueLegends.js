@@ -107,7 +107,7 @@ async function leagueStats(params, socket) {
     }
 
     if ((soloRank.champions.length == 0))
-        return MAIN.Client.guilds.cache.get(params[2]).channels.cache.get(params[3]).send(`You need to play at least 1 different champions for Solo Ranked before seeing your stats!`);
+        return MAIN.Client.guilds.cache.get(params[2]).channels.cache.get(params[3]).send(`You need to play at least 2 different champions for Solo Ranked before seeing your stats!`);
 
     embedArray.push({
         name: `Ranked + Standard`,

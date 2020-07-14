@@ -819,12 +819,11 @@ async function refreshEmojiControls() {
     for (let messy of queue.values()) {
         if (messy.collector) {
             messy.collector.resetTimer();
-            messy.message.edit("```md\nNow Playing\n#" + messy.songs[messy.index].title + "\n[" + MAIN.timeConvert(await currentSong(messy.message, null, null, true))
+            messy.message.edit("```md\nNow Playing" + ` Song ${messy.index + 1}/${messy.songs.length}` + "\n#" + messy.songs[messy.index].title + "\n[" + MAIN.timeConvert(await currentSong(messy.message, null, null, true))
                 + "](" + MAIN.timeConvert(Math.floor(messy.songs[messy.index].duration)) + ")```");
         }
     }
 }
-
 setInterval(refreshEmojiControls, 5 * 1000);
 
 async function checkControlsEmoji(message) {
@@ -923,13 +922,13 @@ async function playSong(guild, sonG, skip, message) {
 
     if (serverQueue) {
         if (!serverQueue.message) {
-            serverQueue.message = await message.channel.send("```md\nNow Playing\n#" + sonG.title + "\n["
+            serverQueue.message = await message.channel.send("```md\nNow Playing" + ` Song ${serverQueue.index + 1}/${serverQueue.songs.length}` + "\n#" + sonG.title + "\n["
                 + '00:00'
                 + "](" + MAIN.timeConvert(Math.floor(sonG.duration)) + ")```");
             songControlEmoji(serverQueue.message)
         }
     }
-    else if (sonG) serverQueue.message.edit("```md\nNow Playing\n#" + sonG.title + "\n["
+    else if (sonG) serverQueue.message.edit("```md\nNow Playing" + ` Song ${serverQueue.index + 1}/${serverQueue.songs.length}` + "\n#" + sonG.title + "\n["
         + '00:00'
         + "](" + MAIN.timeConvert(Math.floor(sonG.duration)) + ")```");
 
@@ -996,7 +995,7 @@ async function playSong(guild, sonG, skip, message) {
         let streamResolve = await ytdl(song.url, {
             format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 }
         });
-       // streamResolve.on('info', (info) => { console.log(); console.log('yeeeee') })
+        // streamResolve.on('info', (info) => { console.log(); console.log('yeeeee') })
         streamResolve.on('error', (err) => {
             console.log("RESOLVE ERROR")
             //message.channel.send(`${song.title} is no longer availabe, I suggest removing it with the removeSong command. Skipping it for now...`);
@@ -1135,6 +1134,15 @@ player_response": {
             serverDownload.progress = 0;
             downloadingSongs.delete(song.id);
             downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
+            cacheSong(null, guild);
+        }
+        if (!currentSongsQueue) {
+
+            serverDownload.songToDownload = null;
+            serverDownload.progress = 0;
+            downloadingSongs.delete(song.id);
+            downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
+            downloadManager.backlog.push(guild);
             cacheSong(null, guild);
         }
         currentSongsQueue.ytdl = youtubeResolve;

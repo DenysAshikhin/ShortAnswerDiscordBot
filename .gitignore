@@ -119,3 +119,4 @@ config.json
 
 *.mp3
 *.mp4
+.vscode/launch.json

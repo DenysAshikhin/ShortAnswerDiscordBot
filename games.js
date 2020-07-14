@@ -278,7 +278,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                     }, [])
                 }], {
                 description: message.member.displayName + " has summoned " + signedUp + " for some " + game
-                    + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```", modifier: 1, selector: true
+                    + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```", modifier: 1
             });
 
             // let summonMessage = await MAIN.prettyEmbed(message, message.member.displayName + " has summoned " + signedUp + " for some " + game
@@ -415,7 +415,7 @@ async function personalGames(message, params, user) {
     }
 
     //MAIN.prettyEmbed(message, display + " here are the games you are signed up for:", gameArr, -1, 1, 1);
-    MAIN.prettyEmbed(message, gameArr, { description: display + " here are the games you are signed up for:", modifier: 1 });
+    MAIN.prettyEmbed(message, gameArr, { description: display + " here are the games you are signed up for:", modifier: 1, startTally: 1 });
 
     if (games.length <= 0)
         message.channel.send("You are not signed up for any games.");
@@ -1258,17 +1258,21 @@ async function updateGames(message, game, user) {
         else if (check.result[0].score != 0) {
 
             let prettyArray = check.prettyList.split('\n').filter(v => v.length > 1);
-            let removeEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-            removeEmbed.date = new Date();
-            removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
+            //let removeEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
+            // removeEmbed.date = new Date();
+            // removeEmbed.description = `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`;
 
-
+            let fields = [];
             for (suggestion of prettyArray)
-                removeEmbed.fields.push({ value: suggestion, name: "** **" });
+                fields.push({ value: suggestion, name: "** **" });
 
             //message.channel.send({ embed: removeEmbed });
-            MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
-                removeEmbed.fields, -1, -1, 1, null, null, true);
+            MAIN.prettyEmbed(message, fields, {
+                description: `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+                modifier: 1, selector: true
+            });
+            // MAIN.prettyEmbed(message, `${game} is not a valid game, if you meant one of the following, simply type the number you wish to use:`,
+            //     removeEmbed.fields, -1, -1, 1, null, null, true);
             MAIN.specificCommandCreator(updateGames, [message, -1, user], check.result, user);
             return -11;
         }

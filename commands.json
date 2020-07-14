@@ -7,7 +7,8 @@
         ],
         "subsection": [
             3
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "search",
@@ -18,7 +19,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Personal Games"
     },
     {
         "title": "signUp",
@@ -30,7 +32,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Personal Games"
     },
     {
         "title": "myGames",
@@ -40,7 +43,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Personal Games"
     },
     {
         "title": "removeGame",
@@ -51,7 +55,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Personal Games"
     },
     {
         "title": "excludePing",
@@ -63,7 +68,8 @@
         "subsection": [
             1,
             6
-        ]
+        ],
+        "category": "Summoning/Pinging"
     },
     {
         "title": "excludeDM",
@@ -75,7 +81,8 @@
         "subsection": [
             1,
             6
-        ]
+        ],
+        "category": "Summoning/Pinging"
     },
     {
         "title": "help",
@@ -85,7 +92,8 @@
         ],
         "subsection": [
             7
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "helpGames",
@@ -96,7 +104,8 @@
         "subsection": [
             1,
             7
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "helpStats",
@@ -107,7 +116,8 @@
         "subsection": [
             2,
             7
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "helpMiscellaneous",
@@ -118,7 +128,8 @@
         "subsection": [
             3,
             7
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "helpMusic",
@@ -129,7 +140,8 @@
         "subsection": [
             4,
             7
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "STUDY",
@@ -142,7 +154,8 @@
         ],
         "subsection": [
             3
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "ping",
@@ -154,7 +167,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Summoning/Pinging"
     },
     {
         "title": "initialiseUsers",
@@ -164,7 +178,8 @@
         ],
         "subsection": [
             5
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "delete",
@@ -174,7 +189,8 @@
         ],
         "subsection": [
             8
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "myStats",
@@ -184,7 +200,8 @@
         ],
         "subsection": [
             2
-        ]
+        ],
+        "category": "Server-User Stats"
     },
     {
         "title": "allStats",
@@ -194,7 +211,8 @@
         ],
         "subsection": [
             2
-        ]
+        ],
+        "category": "Server-User Stats"
     },
     {
         "title": "userStats",
@@ -204,7 +222,8 @@
         ],
         "subsection": [
             2
-        ]
+        ],
+        "category": "Server-User Stats"
     },
     {
         "title": "topStats",
@@ -214,7 +233,8 @@
         ],
         "subsection": [
             2
-        ]
+        ],
+        "category": "Server-User Stats"
     },
     {
         "title": "play",
@@ -226,7 +246,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "stop",
@@ -236,7 +257,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "pause",
@@ -246,7 +268,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "resume",
@@ -256,7 +279,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "skip",
@@ -268,7 +292,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "gameTutorial",
@@ -278,7 +303,8 @@
         ],
         "subsection": [
             9
-        ]
+        ],
+        "category": "Specific Tutorials"
     },
     {
         "title": "suggest",
@@ -289,7 +315,8 @@
         ],
         "subsection": [
             10
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "updateMe",
@@ -300,7 +327,8 @@
         ],
         "subsection": [
             6
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "tutorials",
@@ -311,7 +339,8 @@
         ],
         "subsection": [
             9
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "quitTutorial",
@@ -322,7 +351,8 @@
         "subsection": [
             6,
             9
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "purgeGames",
@@ -332,7 +362,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Personal Games"
     },
     {
         "title": "gameStats",
@@ -343,7 +374,8 @@
         "subsection": [
             1,
             2
-        ]
+        ],
+        "category": "Game-Server Stats"
     },
     {
         "title": "topGames",
@@ -355,7 +387,8 @@
         "subsection": [
             1,
             2
-        ]
+        ],
+        "category": "Game-Server Stats"
     },
     {
         "title": "setServerPrefix",
@@ -365,7 +398,8 @@
         ],
         "subsection": [
             6
-        ]
+        ],
+        "category": "Prefixes"
     },
     {
         "title": "setDefaultPrefix",
@@ -375,7 +409,8 @@
         ],
         "subsection": [
             6
-        ]
+        ],
+        "category": "Prefixes"
     },
     {
         "title": "setDefaultServerPrefix",
@@ -386,7 +421,8 @@
         "subsection": [
             5,
             6
-        ]
+        ],
+        "category": "Prefixes"
     },
     {
         "title": "forward",
@@ -399,7 +435,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Song Control"
     },
     {
         "title": "rewind",
@@ -412,7 +449,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "seek",
@@ -423,7 +461,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Song Control"
     },
     {
         "title": "reverse",
@@ -435,7 +474,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Song Control"
     },
     {
         "title": "addSong",
@@ -447,7 +487,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Personal Playlist"
     },
     {
         "title": "createPlaylist",
@@ -457,7 +498,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Personal Playlist"
     },
     {
         "title": "myPlayLists",
@@ -469,7 +511,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Personal Playlist"
     },
     {
         "title": "removeSong",
@@ -480,7 +523,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Personal Playlist"
     },
     {
         "title": "playlist",
@@ -491,7 +535,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Personal Playlist"
     },
     {
         "title": "savePlayList",
@@ -502,7 +547,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Personal Playlist"
     },
     {
         "title": "removePlayList",
@@ -513,7 +559,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "Personal Playlist"
     },
     {
         "title": "q",
@@ -525,7 +572,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Summoning/Pinging"
     },
     {
         "title": "dq",
@@ -536,7 +584,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Summoning/Pinging"
     },
     {
         "title": "viewActiveSummons",
@@ -546,7 +595,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Summoning/Pinging"
     },
     {
         "title": "banish",
@@ -557,7 +607,8 @@
         ],
         "subsection": [
             1
-        ]
+        ],
+        "category": "Summoning/Pinging"
     },
     {
         "title": "signUpAllUsers",
@@ -570,7 +621,8 @@
         "subsection": [
             1,
             5
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "removeGameFromAllUsers",
@@ -582,7 +634,8 @@
         "subsection": [
             1,
             5
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "signUpSpecificUser",
@@ -594,7 +647,8 @@
         "subsection": [
             1,
             5
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "removeGameFromSpecificUser",
@@ -606,7 +660,8 @@
         "subsection": [
             1,
             5
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "currentSong",
@@ -616,7 +671,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "currentPlaylist",
@@ -626,7 +682,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "searchForUser",
@@ -637,7 +694,8 @@
         ],
         "subsection": [
             3
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "flipCoin",
@@ -647,7 +705,8 @@
         ],
         "subsection": [
             3
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "goTo",
@@ -657,7 +716,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "shuffle",
@@ -667,7 +727,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "repeat",
@@ -679,7 +740,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "decider",
@@ -691,7 +753,8 @@
             3,
             6,
             8
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "roll",
@@ -702,7 +765,8 @@
         ],
         "subsection": [
             3
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "setTimer",
@@ -714,7 +778,8 @@
         "subsection": [
             6,
             8
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "shakeUser",
@@ -724,7 +789,8 @@
         ],
         "subsection": [
             3
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "volume",
@@ -734,7 +800,8 @@
         ],
         "subsection": [
             4
-        ]
+        ],
+        "category": "DJ Controls"
     },
     {
         "title": "setCommand",
@@ -745,7 +812,8 @@
         ],
         "subsection": [
             6
-        ]
+        ],
+        "category": "Monikers"
     },
     {
         "title": "monikers",
@@ -755,7 +823,8 @@
         ],
         "subsection": [
             6
-        ]
+        ],
+        "category": "Monikers"
     },
     {
         "title": "removeMoniker",
@@ -765,7 +834,8 @@
         ],
         "subsection": [
             6
-        ]
+        ],
+        "category": "Monikers"
     },
     {
         "title": "timeZone",
@@ -775,7 +845,8 @@
         ],
         "subsection": [
             8
-        ]
+        ],
+        "category": "*Other*"
     },
     {
         "title": "linkTwitch",
@@ -784,8 +855,9 @@
             "1) linkTwitch TheLastSpark"
         ],
         "subsection": [
-            3
-        ]
+            11
+        ],
+        "category": "*Other*"
     },
     {
         "title": "unlinkTwitch",
@@ -794,8 +866,9 @@
             "1) unlinkTwitch"
         ],
         "subsection": [
-            3
-        ]
+            11
+        ],
+        "category": "*Other*"
     },
     {
         "title": "viewTwitchFollows",
@@ -804,8 +877,9 @@
             "1) viewTwitchFollows"
         ],
         "subsection": [
-            3
-        ]
+            11
+        ],
+        "category": "*Other*"
     },
     {
         "title": "unfollowTwitchChannel",
@@ -814,8 +888,9 @@
             "1) unfollowTwitchChannel TheLastSpark"
         ],
         "subsection": [
-            3
-        ]
+            11
+        ],
+        "category": "*Other*"
     },
     {
         "title": "followTwitchChannel",
@@ -824,8 +899,9 @@
             "1) followTwitchChannel TheLastSpark"
         ],
         "subsection": [
-            3
-        ]
+            11
+        ],
+        "category": "*Other*"
     },
     {
         "title": "pairChannelWithTwitch",
@@ -834,9 +910,10 @@
             "1) pairChannelWithTwitch summit1g, #nameOfTextChannel"
         ],
         "subsection": [
-            3,
-            5
-        ]
+            5,
+            11
+        ],
+        "category": "Channel Pair"
     },
     {
         "title": "showChannelTwitchPairs",
@@ -845,8 +922,9 @@
             "1) showChannelTwitchPairs"
         ],
         "subsection": [
-            3
-        ]
+            11
+        ],
+        "category": "*Other*"
     },
     {
         "title": "removeChannelTwitchPairs",
@@ -855,21 +933,23 @@
             "1) removeChannelTwitchPairs summit1g, #nameOfTextChannel"
         ],
         "subsection": [
-            3,
-            5
-        ]
+            5,
+            11
+        ],
+        "category": "Channel Pair"
     },
     {
         "title": "leagueRank",
-        "explanation": "Shows you your league stats, or the stats of another person. You have to specify the region and their summoner name seperated by a comma! **Default zone is 'na'!**",
+        "explanation": "Shows you your Leage of Legends stats, or the stats of another person. You have to specify the region and their summoner name seperated by a comma! **Default zone is 'na'!**",
         "example": [
             "1) leagueRank",
             "2) leagueRank TheLastSpark",
             "3) leagueRank TheLastSpark, na"
         ],
         "subsection": [
-            3
-        ]
+            2
+        ],
+        "category": "Game Ranks"
     },
     {
         "title": "rlRanks",
@@ -879,8 +959,9 @@
             "2) rlRanks TheLastSpark, steam"
         ],
         "subsection": [
-            3
-        ]
+            2
+        ],
+        "category": "Game Ranks"
     },
     {
         "title": "rlTracker",
@@ -890,8 +971,9 @@
             "2) rlTracker TheLastSpark, steam, #notifications"
         ],
         "subsection": [
-            3
-        ]
+            2, 5
+        ],
+        "category": "Trackers"
     },
     {
         "title": "removeRLTracker",
@@ -901,17 +983,87 @@
             "2) removeRLTracker TheLastSpark, steam, #notifications"
         ],
         "subsection": [
-            3
-        ]
+            2, 5
+        ],
+        "category": "Trackers"
     },
     {
         "title": "viewRLTrackers",
-        "explanation": "Shows all the player+platform(s) that are being tracked for the server and the channels in which they are being posted. Updates can take up to **5 minutes**!",
+        "explanation": "Shows all the player+platform(s) that are being tracked (on Rocket League) for the server and the channels in which they are being posted. Updates can take up to **5 minutes**!",
         "example": [
             "1) viewRLTrackers"
         ],
         "subsection": [
-            3
-        ]
+            2
+        ],
+        "category": "Trackers"
+    },
+    {
+        "title": "helpAdmins",
+        "explanation": "Shows the list of commands involving admin functionalities.",
+        "example": [
+            "1) helpAdmins"
+        ],
+        "subsection": [
+            7
+        ],
+        "category": "*Other*"
+    },
+    {
+        "title": "helpQualityOfLife",
+        "explanation": "Shows the list of commands involving quality of life functionalities.",
+        "example": [
+            "1) helpQualityOfLife"
+        ],
+        "subsection": [
+            7
+        ],
+        "category": "*Other*"
+    },
+    {
+        "title": "helpTutorials",
+        "explanation": "Shows the list of commands involving tutorial functionalities.",
+        "example": [
+            "1) helpTutorials"
+        ],
+        "subsection": [
+            7
+        ],
+        "category": "*Other*"
+    },
+    {
+        "title": "helpBugsSuggestions",
+        "explanation": "Shows the list of commands involving bug/suggestion functionalities.",
+        "example": [
+            "1) helpBugsSuggestions"
+        ],
+        "subsection": [
+            7
+        ],
+        "category": "*Other*"
+    },
+    {
+        "title": "helpTwitch",
+        "explanation": "Shows the list of commands involving twitch functionalities.",
+        "example": [
+            "1) helpTwitch"
+        ],
+        "subsection": [
+            7,
+            11
+        ],
+        "category": "*Other*"
+    },
+    {
+        "title": "helpGeneral",
+        "explanation": "Shows the list of commands involving general functionalities.",
+        "example": [
+            "1) helpGeneral"
+        ],
+        "subsection": [
+            7,
+            8
+        ],
+        "category": "*Other*"
     }
 ]

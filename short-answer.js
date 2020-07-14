@@ -181,6 +181,7 @@ const tags = [
     8,// - general
     9,// - tutorials
     10,// - bugs/suggestions/improvements
+    11// - twitch
 ]
 exports.tags = tags;
 
@@ -485,6 +486,12 @@ function populateCommandMap() {
     commandMap.set(Commands[81].title.toUpperCase(), MISCELLANEOUS.RLTracker)
     commandMap.set(Commands[82].title.toUpperCase(), MISCELLANEOUS.UnlinkRLTracker)
     commandMap.set(Commands[83].title.toUpperCase(), MISCELLANEOUS.viewRLTrackers)
+    commandMap.set(Commands[84].title.toUpperCase(), HELP.helpAdministrator)
+    commandMap.set(Commands[85].title.toUpperCase(), HELP.helpQOF)
+    commandMap.set(Commands[86].title.toUpperCase(), HELP.helpTutorials)
+    commandMap.set(Commands[87].title.toUpperCase(), HELP.helpBugsSuggestions)
+    commandMap.set(Commands[88].title.toUpperCase(), HELP.helpTwitch)
+    commandMap.set(Commands[89].title.toUpperCase(), HELP.helpGeneral)
 
     exports.commandMap = commandMap;
 }
