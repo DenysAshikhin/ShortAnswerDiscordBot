@@ -1,28 +1,78 @@
 const MAIN = require('./short-answer.js');
 const User = require('./User.js');
-const Commands = require('./commands.json');
-const GAMES = require('./games.js');
+// const Commands = require('./commands.json');
+// const GAMES = require('./games.js');
+
+
+const initialTutorialPopulate = function () {
+
+    populateSpecificCommands(IntroTutorial);
+    populateSpecificCommands(GameTutorial);
+}
+exports.initialTutorialPopulate = initialTutorialPopulate;
+
+const populateSpecificCommands = function (tut) {
+    for (let i = 0; i < tut.expectedCommand.length; i++) {
+        tut.specificCommand.push(MAIN.commandMap.get(tut.expectedCommand[i].toUpperCase()));
+    }
+}
+
+
+const tutorialMap = new Map();
+
+const IntroTutorial = {
+    expectedCommand: [
+        MAIN.Commands[8].title,//helpGames
+        MAIN.Commands[1].title//search
+    ],
+    specificCommand: [
+    ],
+    expectedOutput: [
+        0,
+        2
+    ],
+    steps: [
+        `Welcome to the general introduction. If nothing else, please remember that this bot breaks up commands into 3 parts`
+        + "```\n 1)The prefix\n2) The command itself\n3) Any (sometimes optional) parameters.```" + `By default, the prefix will be **sa!**`
+        + `\nThe command can be anything, for this example we will use helpGames. There are no parameters here, but they will be covered later.`
+        + ` Please proceed by calling the command below.`,
+
+        `Now I will introduce a command which can take an unlimited number of parameters. Parameters are seperated from the prefix+command by a space.`
+        + ` In the case of needing/wanting to use multiple parameters, seperate each one by comma. ` + "`" + "To continue please use the command below with 2 or more" 
+        + ` parameters!` + "`",
+
+        "Congratulations on finishing the introductory tutorial!"
+    ],
+    id: 100
+};
+tutorialMap.set(IntroTutorial.id, IntroTutorial);
 
 const GameTutorial = {
     expectedCommand: [
-        Commands[1].title,//"SEARCH"
-        Commands[2].title,//"SIGNUP"
-        Commands[2].title,//"SIGNUP"
-        Commands[3].title,//"MYGAMES"
-        Commands[4].title,//"REMOVEGAME"
-        Commands[13].title,//"PING"
-        Commands[5].title,//"EXCLUDEPING"
-        Commands[6].title//"EXCLUDEDM"
+        MAIN.Commands[1].title,//"SEARCH"
+        MAIN.Commands[2].title,//"SIGNUP"
+        MAIN.Commands[2].title,//"SIGNUP"
+        MAIN.Commands[3].title,//"MYGAMES"
+        MAIN.Commands[4].title,//"REMOVEGAME"
+        MAIN.Commands[13].title,//"PING",
+        MAIN.Commands[50].title,//"BANISH",
+        MAIN.Commands[47].title,// Queue
+        MAIN.Commands[48].title,// deQueue
+        MAIN.Commands[5].title,//"EXCLUDEPING"
+        MAIN.Commands[6].title//"EXCLUDEDM"
     ],
     specificCommand: [
-        GAMES.search,
-        GAMES.updateGames,
-        GAMES.updateGames,
-        GAMES.personalGames,
-        GAMES.removeGame,
-        GAMES.pingUsers,
-        GAMES.excludePing,
-        GAMES.excludeDM
+        // GAMES.search,
+        // GAMES.updateGames,
+        // GAMES.updateGames,
+        // GAMES.personalGames,
+        // GAMES.removeGame,
+        // GAMES.pingUsers,
+        // GAMES.banish,
+        // GAMES.Queue,
+        // GAMES.deQueue,
+        // GAMES.excludePing,
+        // GAMES.excludeDM
     ],
     expectedOutput: [
         1,
@@ -32,18 +82,13 @@ const GameTutorial = {
         1,
         0,
         0,
+        0,
+        0,
+        0,
         0
     ],
-    steps: []
-};
-exports.GameTutorial = GameTutorial;
-
-async function gameTutorial(message, params, command) {
-
-    let user = await MAIN.findUser({ id: message.author.id });
-
-    GameTutorial.steps = [
-        `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!\nDo so by typing **${prefix}search**  *nameOfGame*.`,
+    steps: [
+        `Awesome, welcome to the game tutorial! let's start by searching for a game you play with others!`,
 
         `Now that you see a bunch of results, hopefully the game you wanted is towards the top, along with the associated number.`
         + ` Please add any valid (and new) game to your games list to continue`,
@@ -57,26 +102,80 @@ async function gameTutorial(message, params, command) {
 
         `Onto the fun stuff, if you want to play a game but not sure who is up for it, you can ping and anyone who has this game will be notified.`,
 
+        `If someone joined your summon that you don't like, you can banish them from it.`,
+
+        `You can also join someone else's summon.`,
+
+        `Alternatively, if you want to leave a summon or disband your own summon.`,
+
         `Almost done, now some quality of life, when someone pings a game there will be two notifications for you, the first is`
         + ` an @mention in the text channel it was sent from. To disable/enable @mentions use the command below - *False* = you will be pinged, *True* = you will not be pinged.`,
 
         `The second notification is a direct message. To disable/enable direct messages from pings - *False* = you will be DMed, *True* = you will not be DMed.`,
 
-        `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by typing`
-        + ` **${prefix}` + `suggest** and I'll forward the message to the creator.`
+        `Congratulations! You have completed the game tutorial. As a reward, you can now offer feedback, suggestions or anything else to the creator by using`
+        + ` the **suggest** command and I'll forward the message to the creator.`
         + `\nAs a final note, this bot is being rapidly developed with new features constantly being added,`
-        + ` if you would like to recieve a private message when a new feature is live, type **${prefix}` + `updateMe**.`
-    ]
+        + ` if you would like to recieve a private message when a new feature is live, use the **updateMe** command.`
+    ],
+    id: 1
+};
+tutorialMap.set(GameTutorial.id, GameTutorial);
+
+//exports.tutorialMap = tutorialMap;
+
+
+
+
+/**
+ * @param {forceStart: Number} other 
+ */
+const tutorialStarter = async function (message, params, command, user, other) {
+
+    other = other ? other : {};
+    if ((user.activeTutorial == -1) && (!other.forceStart)) return -22;
+
+    let tutorialDecider = other.forceStart ? other.forceStart : user.activeTutorial;
+
+    //Determining if the command that was being asked of the bot is the one the user is currently on in the tutorial
+    let specificCommand = tutorialMap.get(user.activeTutorial) ? command == tutorialMap.get(user.activeTutorial).specificCommand[user.tutorialStep] : false;
+
+    switch (tutorialDecider) {
+        case 1:
+            if (specificCommand || (command == gameTutorial)) {
+                return await generalTutorial(message, params, command, GameTutorial, gameTutorial, user);
+            }
+            break;
+        case 2:
+
+            break;
+
+
+        case 100:
+            if (specificCommand || (command == introTutorial)) {
+                return await generalTutorial(message, params, command, IntroTutorial, introTutorial, user);
+            }
+            break;
+    }
+
+    return -22;//No tutorial was triggered
+}
+exports.tutorialStarter = tutorialStarter;
+
+
+const generalTutorial = async function (message, params, command, tutorial, tutorialCommand, user) {
+
+    user = await MAIN.findUser({ id: user.id });
 
     if (user.tutorialStep == -1) {
 
-        message.channel.send(GameTutorial.steps[0]);
-        MAIN.sendHelpMessage(MAIN.commandsText.upperCase.indexOf(GameTutorial.expectedCommand[0]), message);
+        message.channel.send(tutorial.steps[0]);
+        MAIN.sendHelpMessage(MAIN.commandsText.normal.indexOf(tutorial.expectedCommand[0]), message);
 
         await User.findOneAndUpdate({ id: user.id },
             {
                 $set: {
-                    activeTutorial: 0,
+                    activeTutorial: tutorial.id,
                     tutorialStep: 0,
                     previousTutorialStep: 0
                 }
@@ -84,23 +183,23 @@ async function gameTutorial(message, params, command) {
         return 1;
     }
     else {
-        if (user.activeTutorial == 0 || user.activeTutorial == -1) {
+        if ((user.activeTutorial == tutorial.id) || (user.activeTutorial == -1)) {
 
-            if (command == MAIN.commandMap.get('gameTutorial')) {
+            if (command == tutorialCommand) {
 
-                message.channel.send(GameTutorial.steps[user.tutorialStep]);
-                let Index = MAIN.commandsText.normal.indexOf(GameTutorial.expectedCommand[user.tutorialStep]);
+                message.channel.send(tutorial.steps[user.tutorialStep]);
+                let Index = MAIN.commandsText.normal.indexOf(tutorial.expectedCommand[user.tutorialStep]);
 
-                console.log(GameTutorial.expectedCommand[user.tutorialStep])
+                console.log(tutorial.expectedCommand[user.tutorialStep])
                 MAIN.sendHelpMessage(Index, message);
                 return 1;
             }
-            else if (user.tutorialStep - user.previousTutorialStep == 1) {//If the user completed a previous step succesfuly, give the new prompt
+            else if ((user.tutorialStep - user.previousTutorialStep) == 1) {//If the user completed a previous step succesfuly, give the new prompt
 
-                if (user.tutorialStep != GameTutorial.steps.length - 1) {
+                if (user.tutorialStep != (tutorial.steps.length - 1)) {
 
-                    message.channel.send(GameTutorial.steps[user.tutorialStep]);
-                    MAIN.sendHelpMessage(MAIN.commandsText.normal.indexOf(GameTutorial.expectedCommand[user.tutorialStep]), message);
+                    message.channel.send(tutorial.steps[user.tutorialStep]);
+                    MAIN.sendHelpMessage(MAIN.commandsText.normal.indexOf(tutorial.expectedCommand[user.tutorialStep]), message);
                     await User.findOneAndUpdate({ id: user.id },
                         {
                             $set: {
@@ -111,12 +210,12 @@ async function gameTutorial(message, params, command) {
                 }
                 else {//Tutorial over!!!!!
                     //Need to add the recommend and something else commands
-                    message.channel.send(GameTutorial.steps[user.tutorialStep]);
+                    message.channel.send(tutorial.steps[user.tutorialStep]);
 
-                   MAIN.sendHelpMessage(MAIN.commandsText.upperCase.indexOf('UPDATEME'), message);
-                   MAIN.sendHelpMessage(MAIN.commandsText.upperCase.indexOf('SUGGEST'), message);
-                    if (!user.completedTutorials.includes(0)) {
-                        user.completedTutorials.push(0);
+                    // MAIN.sendHelpMessage(MAIN.commandsText.upperCase.indexOf('UPDATEME'), message);
+                    // MAIN.sendHelpMessage(MAIN.commandsText.upperCase.indexOf('SUGGEST'), message);
+                    if (!user.completedTutorials.includes(tutorial.id)) {
+                        user.completedTutorials.push(tutorial.id);
                     }
                     await User.findOneAndUpdate({ id: user.id },
                         {
@@ -134,11 +233,13 @@ async function gameTutorial(message, params, command) {
             }
             else {//Test if their response is the correct one.
 
-                if (command == GameTutorial.specificCommand[user.tutorialStep]) {
-                    let result = await GameTutorial.specificCommand[user.tutorialStep].call(null, message, params, user);
-                    if (result >= GameTutorial.expectedOutput[user.tutorialStep]) {
-                        User.findOneAndUpdate({ id: user.id }, { $set: { tutorialStep: user.tutorialStep + 1 } }, function (err, doc, res) { });
-                        setTimeout(gameTutorial, 1000, message, params, command);
+                if (command == tutorial.specificCommand[user.tutorialStep]) {
+                    let result = await tutorial.specificCommand[user.tutorialStep].call(null, message, params, user);
+                    if (result >= tutorial.expectedOutput[user.tutorialStep]) {
+                        User.findOneAndUpdate({ id: user.id }, { $set: { tutorialStep: user.tutorialStep + 1 } }, function (err, doc, res) {
+                            setTimeout(generalTutorial, 1000, message, params, command, tutorial, tutorialCommand, user);
+                        });
+
                     }
                     return result;
                 }
@@ -147,12 +248,24 @@ async function gameTutorial(message, params, command) {
             }
         }
         else {
-            message.channel.send(`You are already doing ${tutorial[user.activeTutorial]}, to quit it type **${prefix}quitTutorial**`);
+            message.channel.send(`You are already doing a different tutorial, to quit it type **${prefix}quitTutorial**`);
             return 1;
         }
     }
 }
+
+
+async function gameTutorial(message, params, user) {
+
+    return await tutorialStarter(message, params, gameTutorial, user, { forceStart: 1 });
+}
 exports.gameTutorial = gameTutorial;
+
+async function introTutorial(message, params, user) {
+
+    return await tutorialStarter(message, params, introTutorial, user, { forceStart: 100 });
+}
+exports.introTutorial = introTutorial;
 
 function quitTutorial(message, params, user) {
 
@@ -201,15 +314,15 @@ exports.setNotifyTutorials = setNotifyTutorials;
 function createTutorialEmbed(tutorialStep) {
 
     let prompt = GameTutorial.steps[tutorialStep];
-    let index = Commands.commands.indexOf(GameTutorial.expectedCommand[tutorialStep]);
+    let index = MAIN.Commands.commands.indexOf(GameTutorial.expectedCommand[tutorialStep]);
     let fieldArray = new Array();
 
     if (index != -1) {
-        for (let i = 0; i < Commands.example[index].length; i++) {
+        for (let i = 0; i < MAIN.Commands.example[index].length; i++) {
 
             fieldArray.push({
                 name: `Example ${i + 1})`,
-                value: prefix + Commands.example[index][i].substring(3)
+                value: prefix + MAIN.Commands.example[index][i].substring(3)
             })
         }
     } else {
@@ -225,20 +338,20 @@ function createTutorialEmbed(tutorialStep) {
     return newEmbed;
 }
 
-//-22 meaning no matching tutorial was found
-async function tutorialHandler(message, command, params, user) {
+// //-22 meaning no matching tutorial was found
+// async function tutorialHandler(message, command, params, user) {
 
-    switch (user.activeTutorial) {
-        case 0:
-            if (command == GameTutorial.specificCommand[user.tutorialStep] || command == gameTutorial) {
+//     switch (user.activeTutorial) {
+//         case 0:
+//             if (command == GameTutorial.specificCommand[user.tutorialStep] || command == gameTutorial) {
 
-                return await gameTutorial(message, params, command);
-            }
-        case 1:
+//                 return await gameTutorial(message, params, MAIN.commandMap.get('gameTutorial'), );
+//             }
+//         case 1:
 
-            break;
-    }
+//             break;
+//     }
 
-    return -22;
-}
-exports.tutorialHandler = tutorialHandler;
+//     return -22;
+// }
+// exports.tutorialHandler = tutorialHandler;

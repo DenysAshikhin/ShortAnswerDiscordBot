@@ -256,7 +256,7 @@ connectDB.once('open', async function () {
     await Client.login(token);
     updateAll();
     populateCommandMap();
-
+    TUTORIAL.initialTutorialPopulate();
 
     // {
 
@@ -492,6 +492,7 @@ function populateCommandMap() {
     commandMap.set(Commands[87].title.toUpperCase(), HELP.helpBugsSuggestions)
     commandMap.set(Commands[88].title.toUpperCase(), HELP.helpTwitch)
     commandMap.set(Commands[89].title.toUpperCase(), HELP.helpGeneral)
+    commandMap.set(Commands[90].title.toUpperCase(), TUTORIAL.introTutorial)
 
     exports.commandMap = commandMap;
 }
@@ -573,6 +574,7 @@ async function commandMatcher(message, command, params, user) {
 async function handleCommandTracker(specificCommand, message, user, skipSearch, emoji) {
     let params = emoji ? emoji + '' : message.content;
     let tutorialResult;
+
     if (!skipSearch) {
         if (!isNaN(params) && params.length > 0) {
 
@@ -588,7 +590,7 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch, 
             }
 
             specificCommand.defaults[1] = specificCommand.choices[Math.floor(params)].item
-            tutorialResult = await tutorialHandler(specificCommand.defaults[0], specificCommand.command, specificCommand.defaults[1], user);
+            tutorialResult = await TUTORIAL.tutorialStarter(specificCommand.defaults[0], specificCommand.command, specificCommand.defaults[1], user);
             if (tutorialResult != -22)
                 return tutorialResult;
         }
@@ -599,7 +601,7 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch, 
     }
     else {
 
-        tutorialResult = await tutorialHandler(specificCommand.defaults[0], specificCommand.command, specificCommand.defaults[1], user);
+        tutorialResult = await TUTORIAL.tutorialStarter(specificCommand.defaults[0], specificCommand.defaults[1], specificCommand.command, user);
         if (tutorialResult != -22)
             return tutorialResult;
     }
@@ -684,22 +686,22 @@ async function checkCommands(params, user) {
     else return -1
 }
 
-//-22 meaning no matching tutorial was found
-async function tutorialHandler(message, command, params, user) {
+// //-22 meaning no matching tutorial was found
+// async function tutorialHandler(message, command, params, user) {
 
-    switch (user.activeTutorial) {
-        case 0:
-            if (command == TUTORIAL.GameTutorial.specificCommand[user.tutorialStep] || command == TUTORIAL.gameTutorial) {
+//     switch (user.activeTutorial) {
+//         case 0:
+//             if (command == TUTORIAL.GameTutorial.specificCommand[user.tutorialStep] || command == TUTORIAL.gameTutorial) {
 
-                return await TUTORIAL.gameTutorial(message, params, command);
-            }
-        case 1:
+//                 return await TUTORIAL.tutorialStarter(message, params, command, user);
+//             }
+//         case 1:
 
-            break;
-    }
+//             break;
+//     }
 
-    return -22;
-}
+//     return -22;
+// }
 
 // `Greetings!\nYou are getting this message because I noticed you haven't signed up for any games! If you would like to summon other players (friends)`
 // + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
@@ -1311,6 +1313,7 @@ async function testy(ARR, description, message, modifier, URL, title, selector) 
 function sendHelpMessage(Index, message) {
 
     let examples = "```md\n";
+
     examples += Commands[Index].explanation + "\n\n";
 
     for (example of Commands[Index].example) {

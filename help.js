@@ -4,61 +4,61 @@ const Commands = require('./commands.json');
 
 function gameHelp(message, params, user) {
 
-    generalHelpMessage(message, 1, `Games Commands`);
+    return generalHelpMessage(message, 1, `Games Commands`, user);
 }
 exports.gameHelp = gameHelp;
 
 async function helpStats(message, params, user) {
 
-    generalHelpMessage(message, 2, `Stats Commands`);
+    return generalHelpMessage(message, 2, `Stats Commands`, user);
 }
 exports.helpStats = helpStats;
 
 function helpMiscellaneous(message) {
 
-    generalHelpMessage(message, 3, `Miscellaneous Commands`);
+    return generalHelpMessage(message, 3, `Miscellaneous Commands`, user);
 }
 exports.helpMiscellaneous = helpMiscellaneous;
 
 function helpMusic(message, params, user) {
 
-    generalHelpMessage(message, 4, `Music Commands`);
+    return generalHelpMessage(message, 4, `Music Commands`, user);
 }
 exports.helpMusic = helpMusic;
 
 function helpAdministrator(message, params, user) {
 
-    generalHelpMessage(message, 5, `Admin Commands`);
+    return generalHelpMessage(message, 5, `Admin Commands`, user);
 }
 exports.helpAdministrator = helpAdministrator;
 
 function helpQOF(message, params, user) {
 
-    generalHelpMessage(message, 6, `Quality of Life Commands`);
+    return generalHelpMessage(message, 6, `Quality of Life Commands`, user);
 }
 exports.helpQOF = helpQOF;
 
 function helpGeneral(message, params, user) {
 
-    generalHelpMessage(message, 8, `General Commands`);
+    return generalHelpMessage(message, 8, `General Commands`, user);
 }
 exports.helpGeneral = helpGeneral;
 
 function helpTutorials(message, params, user) {
 
-    generalHelpMessage(message, 9, `Tutorial Commands`);
+    return generalHelpMessage(message, 9, `Tutorial Commands`, user);
 }
 exports.helpTutorials = helpTutorials;
 
 function helpBugsSuggestions(message, params, user) {
 
-    generalHelpMessage(message, 10, `Bugs/Suggestion Commands`);
+    return generalHelpMessage(message, 10, `Bugs/Suggestion Commands`, user);
 }
 exports.helpBugsSuggestions = helpBugsSuggestions;
 
 function helpTwitch(message, params, user) {
 
-    generalHelpMessage(message, 11, `Twitch Commands`);
+    return generalHelpMessage(message, 11, `Twitch Commands`, user);
 }
 exports.helpTwitch = helpTwitch;
 
@@ -67,7 +67,7 @@ exports.helpTwitch = helpTwitch;
 
 
 
-const generalHelpMessage = async function (message, tag, title) {
+const generalHelpMessage = async function (message, tag, title, user) {
 
     let fields = [];
     for (let i = 0; i < MAIN.commandsText.normal.length; i++)
@@ -88,12 +88,52 @@ const generalHelpMessage = async function (message, tag, title) {
                 return a.name.localeCompare(b.name);
     })
 
-    return MAIN.prettyEmbed(message, fields,
+    let description = "```md\n" + `You can find out more information about any command by typing <${prefix}help Command>` + "```";
+
+    if (!user.completedTutorials.includes(tag))
+        switch (tag) {
+            case 1:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 2:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 3:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 4:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 5:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 6:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 7:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 8:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 9:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 10:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+            case 11:
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                break;
+        }
+
+    MAIN.prettyEmbed(message, fields,
         {
             modifier: 1, title: title, startTally: 1,
             //maxLength: 1000,
-            description: "```md\n" + `You can find out more information about any command by typing <${prefix}help Command>` + "```"
+            description: description
         });
+    return 1;
 }
 
 
@@ -111,6 +151,13 @@ function generalHelp(message, params, user) {
 
     if (!args) {
 
+        let description = "```md\n" + `You can see a list of commands under each category by typing <${prefix}helpCommand> I.E.:\n` +
+            `1) <${prefix}helpMusic>` + "```";
+
+        if (!user.completedTutorials.includes(100))
+            description += "```fix\n" + `You have not completed the introductory tutorial which would teach you the basics of using the bot,`
+                + ` you can do so by typing ${prefix}introTutorial` + "```";
+
         return MAIN.prettyEmbed(message,
             [
                 { name: "Popular", value: "Games", inline: true },
@@ -124,8 +171,7 @@ function generalHelp(message, params, user) {
                 { name: "Hush-Hush", value: "Admins", inline: true },
                 { name: "Hush-Hush", value: "Bugs/Suggestions", inline: true },
             ], {
-            description: "```md\n" + `You can see a list of commands under each category by typing <${prefix}helpCommand> I.E.:\n` +
-                `1) <${prefix}helpMusic>` + "```", startTally: 1, modifier: 1, title: `General Help`
+            description: description, startTally: 1, modifier: 1, title: `General Help`
         });
     }
 

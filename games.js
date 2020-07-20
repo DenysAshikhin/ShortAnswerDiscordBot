@@ -147,7 +147,7 @@ const resetSummonRitual = async function (message, summonerID, time, queue) {
                             acc.push(`${index + 1}) ${current}`);
                             return acc;
                         }, [])
-                    }], { description: defaultDesc, modifier: 1, selector: 1 });
+                    }], { description: defaultDesc, modifier: 1 });
 
 
                 // await MAIN.prettyEmbed(message, defaultDesc,
@@ -466,7 +466,9 @@ function search(message, searches) {
     }//for loop
 
     if (foundOne)
-        return 1;
+        if (Array.isArray(searches))
+            return searches.length;
+        else return 1;
     return 0;
 }
 exports.search = search;
@@ -553,7 +555,7 @@ async function gameStats(message, params, user) {
 
     let game = Array.isArray(params) ? params[0].trim() : params;
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
-    if (!args) return message.channel.send("You have to provide the name of a game whose stats you wish to see!");
+    if (!args) { message.channel.send("You have to provide the name of a game whose stats you wish to see!"); return -1; }
 
     let finalEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
     finalEmbed.timestamp = new Date();
@@ -692,6 +694,7 @@ async function Queue(message, params, user, emoji) {
                     if (squad.displayNames.length < squad.size) {
                         squad.displayNames.push(user.username);
                         squad.joinedIDS.push(user.id);
+                        return 1;
                         break;
                     }
                     else {
@@ -703,13 +706,13 @@ async function Queue(message, params, user, emoji) {
     }
     else {
 
-        if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+        if (message.channel.type != 'text') { message.channel.send("This is a server-text channel exclusive command!"); return -1; }
 
         let squads = guildSquads.get(message.guild.id);
 
-        if (!squads) return message.channel.send("There are no active summons in the server to queue for!");
+        if (!squads) { message.channel.send("There are no active summons in the server to queue for!"); return 0; }
 
-        if (squads.length == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+        if (squads.length == 0) { message.channel.send("There aren't any summons active, start a new one? :wink:"); return 0; }
 
         let ETA;
         if (message.content.includes(','))
@@ -734,17 +737,13 @@ async function Queue(message, params, user, emoji) {
                 if (finalETA == -1)
                     return await resetSummonRitual(squad.message, user.id, null, true);
                 return await resetSummonRitual(squad.message, user.id, finalETA, true);
-                // let newEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-                // newEmbed.description = (finalETA == -1) ? `${MAIN.mention(user.id)} has joined the summon!` : `${MAIN.mention(user.id)} is arriving, they will be there in ${finalETA} minutes!`;
-                // newEmbed.fields = [{ name: `Current summons members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
-                //return message.channel.send({ embed: newEmbed });
             }
-            else return message.channel.send("There is no space left in the summon!");
+            else { message.channel.send("There is no space left in the summon!"); return 0; }
         }
         else if (message.mentions.members.size > 0) {
 
             let squad = squads.find(element => element.summonerID == message.mentions.members.values().next().value.id);
-            if (!squad) return message.channel.send("That user does not have any active summoninings!");
+            if (!squad) { message.channel.send("That user does not have any active summoninings!"); return 0; }
             if (squad.displayNames.length < squad.size) {
 
                 if (squad.joinedIDS.includes(user.id)) return message.channel.send("You have already joined this summon!");
@@ -758,7 +757,7 @@ async function Queue(message, params, user, emoji) {
                 // newEmbed.fields = [{ name: `Current squad members: ${squad.displayNames.length}/${squad.size}`, value: squad.displayNames }];
                 // return message.channel.send({ embed: newEmbed });
             }
-            else return message.channel.send("There is no space left in the summon!");
+            else { message.channel.send("There is no space left in the summon!"); return 0; }
         }
         else {
 
@@ -803,20 +802,20 @@ async function deQueue(message, params, user, emoji) {
     }
     else {
 
-        if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+        if (message.channel.type != 'text') { message.channel.send("This is a server-text channel exclusive command!"); return -1; }
 
         let squads = guildSquads.get(message.guild.id);
 
-        if (!squads) return message.channel.send("There are no active summons in the server to deQueue from!");
+        if (!squads) { message.channel.send("There are no active summons in the server to deQueue from!"); return 0; }
 
-        if (squads.length == 0) return message.channel.send("There aren't any summons active, start a new one? :wink:");
+        if (squads.length == 0) { message.channel.send("There aren't any summons active, start a new one? :wink:"); return 0; }
 
         let mentionID = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
 
         if (mentionID != -1) {
 
             let squad = squads.find(element => element.summonerID == mentionID);
-            if (!squad) return message.channel.send(`${MAIN.mention(mentionID)} doesn't have a summon!`);
+            if (!squad) { message.channel.send(`${MAIN.mention(mentionID)} doesn't have a summon!`); return 0; }
             if (squad.summonerID == user.id) {
                 message.channel.send("You have cancelled your summon!");
                 //      squad.joinedIDS.splice(squad.joinedIDS.indexOf(user.joinedIDS), 1);
@@ -826,7 +825,7 @@ async function deQueue(message, params, user, emoji) {
                 //return resetSummonRitual(squad.message, user.id, null, false);
             }
 
-            if (!squad.joinedIDS.includes(user.id)) return message.channel.send("You have not joined this summon to leave it yet!");
+            if (!squad.joinedIDS.includes(user.id)) { message.channel.send("You have not joined this summon to leave it yet!"); return 0; }
 
             message.channel.send(`Left ${squad.summoner}'s summon!`);
             squad.joinedIDS.splice(squad.joinedIDS.indexOf(user.id), 1);
@@ -888,13 +887,12 @@ exports.viewActiveSummons = viewActiveSummons;
 
 async function banish(message, params, user, emoji) {
 
-
     {
 
-        if (message.channel.type != 'text') return message.channel.send("This is a server-text channel exclusive command!");
+        if (message.channel.type != 'text') { message.channel.send("This is a server-text channel exclusive command!"); return -1; }
 
         let squads = guildSquads.get(message.guild.id);
-        if (!squads) return message.channel.send("There are no active summons in the server to banish from!");
+        if (!squads) { message.channel.send("There are no active summons in the server to banish from!"); return 0; }
 
         let mentionID = message.mentions.members.size > 0 ? message.mentions.members.values().next().value.id : -1;
         let squad = squads.find(element => element.summonerID == user.id);
@@ -904,7 +902,7 @@ async function banish(message, params, user, emoji) {
                 MAIN.selfDestructMessage(message, `Only the original summoner can kick from this summon!`, 3, true)
             else
                 message.channel.send("You don't have any active summons to kick from!");
-            return -1;
+            return 0;
         }
 
         if (mentionID != -1) {
@@ -917,7 +915,8 @@ async function banish(message, params, user, emoji) {
                         await resetSummonRitual(squad.message, message.mentions.members.values().next().value.id, null, false);
                     }
                 }
-            return message.channel.send("Either you don't have an active summon or such player wasn't part of it!");
+            message.channel.send("Either you don't have an active summon or such player wasn't part of it!");
+            return 0;
         }
         else if (params.player) {
             squad.joinedIDS.splice(squad.joinedIDS.indexOf(params.id));
@@ -1093,7 +1092,7 @@ async function removeGameFromAllUsers(message, game, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can forcefully signup players on the server!");
     const args = message.content.split(" ").slice(1).join(" ");
-    if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
+    if (!args) { message.channel.send("You have to provide the name or number of a game for which you want to signUp for!"); return -1; }
 
     if (!game.valid) {
 
@@ -1181,7 +1180,7 @@ async function signUpSpecificUser(message, game, user) {
             continue;
         }
         let tempUser = await MAIN.findUser({ id: member.id });
-        finalList.push(tempUser.displayName);
+        finalList.push(message.guild.members.cache.get(member.id).displayName);
         updateGames(message, { game: game.game, mass: true }, tempUser);
     }
 
@@ -1206,7 +1205,7 @@ async function signUpAllUsers(message, game, user) {
         game = [game];
 
     const args = message.content.split(" ").slice(1).join(" ");
-    if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
+    if (!args) { message.channel.send("You have to provide the name or number of a game for which you want to signUp for!"); return -1; }
 
     let users = await MAIN.getUsers();
     let tally = 0;
@@ -1238,7 +1237,7 @@ async function updateGames(message, game, user) {
         game = [game];
 
     const args = message.content.split(" ").slice(1).join(" ");
-    if (!args) return message.channel.send("You have to provide the name or number of a game for which you want to signUp for!");
+    if (!args) { message.channel.send("You have to provide the name or number of a game for which you want to signUp for!"); return -1; }
 
     games.sort();
     let existingGames = user.games;
