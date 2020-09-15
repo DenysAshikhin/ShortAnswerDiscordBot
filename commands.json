@@ -577,7 +577,7 @@
     },
     {
         "title": "dq",
-        "explanation": "Will remove you from any active summons you have joined. If you provide an @mention, it will attempt to leave that player's summon.",
+        "explanation": "Removes you from any active summons you have joined and your own summon (if applicable). If you provide an @mention, it will attempt to leave that player's summon.",
         "example": [
             "1) dq",
             "2) dq @The Last Spark"

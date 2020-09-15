@@ -42,7 +42,7 @@ async function rocketLeagueRanks(params) {
 
     //  console.log("to finish parse: ", (t1 - t0))
 
-    let moreTest = anotherTrial['stats-v2'].standardProfiles[`rocket-league|${params[0]}|${params[1].toLowerCase()}`];
+    let moreTest = anotherTrial['stats-v2'].standardProfiles[`rocket-league|${modifiedZone}|${params[1].toLowerCase()}`];
 
 
     for (let i = 1; i < 10; i++)
