@@ -620,13 +620,13 @@ server.on('error', (err) => { console.log("Caught server error") })
 // Grab an arbitrary unused port.
 //'45.63.17.228'
 //33432
-server.listen(33432, '45.63.17.228', () => {
-    console.log('opened server on', server.address());
-});
-
-// server.listen(33432, '127.0.0.1', () => {
+// server.listen(33432, '45.63.17.228', () => {
 //     console.log('opened server on', server.address());
 // });
+
+server.listen(33432, '127.0.0.1', () => {
+    console.log('opened server on', server.address());
+});
 server.on('connection', (socket) => { })
 
 

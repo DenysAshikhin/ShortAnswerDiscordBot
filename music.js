@@ -45,7 +45,6 @@ authoriseSpotify();
 
 async function loadCachedSongsMap() {
 
-
     let audioOutput = path.resolve(`songs`, `finished`);
     fs.readdir(audioOutput, (err, files) => {
         files.forEach(file => {

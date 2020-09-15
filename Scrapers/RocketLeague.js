@@ -12,38 +12,45 @@ const Guild = require('../Guild.js')
 */
 async function rocketLeagueRanks(params) {
 
-    let resp = await needle('get', `https://rocketleague.tracker.network/profile/${params[0]}/${params[1]}`);
+    let resp = await needle('get', `https://rocketleague.tracker.network/rocket-league/profile/${params[0]}/${params[1]}/overview`);
     if (resp.body.includes('We could not find your stats, please ensure your platform and name are correct')) {
         if (!params[4]) MAIN.Client.guilds.cache.get(params[2]).channels.cache.get(params[3]).send(`Could not find ${params[1]} on ${params[0]}`);
         return -1;
     }
     const $ = cheerio.load(resp.body);
-    const CompleteTable = $('div.card-table-container').children();
+
+    const CompleteTable = $('div.trn-table__container table.trn-table')
+    //.children().first().next().children();
+    const lengthy = CompleteTable.length;
+
+    console.log($.text());
+    console.log(CompleteTable.html())
+console.log(resp.body.includes("trn-table"))
+
+    //.children().first().next().children().first();
     let finalContent = [];//[Gamemode, rank, division]
-    for (let i = 0; i != CompleteTable.length; i++) {
+    
+    
+    for (let i = 0; i != lengthy; i++) {
 
-        const season = CompleteTable[i];
+        CompleteTable = CompleteTable.next();
 
-        if (i == 0) {
-            const row = season.children[3].children[3].children;
+        const row = CompleteTable.children().first().next();
+        
+        
 
-            for (let j = 3; j < row.length; j += 2) {
-                const individual = row[j];
-                const temp = cheerio.load(individual.children[2]);
-                const specific = temp.text().split('\n').filter(value => value.length != 0);
-
-                if (temp.html().includes("you have not played Rocket League")) {
-                    finalContent.push([specific[0], 'Unranked']);
-                }
-                else {
-
-                    const mmr = cheerio.load(individual.children[5]).text().trim().split("\n");
-                    specific.push(mmr.splice(0, 1)[0]);
-                    finalContent.push(specific);
-                }
-            }
+        if (temp.html().includes("you have not played Rocket League")) {
+            finalContent.push([specific[0], 'Unranked']);
         }
+        else {
+
+            const mmr = cheerio.load(individual.children[5]).text().trim().split("\n");
+            specific.push(mmr.splice(0, 1)[0]);
+            finalContent.push(specific);
+        }        
     }
+
+
 
     //    console.log(params)
 
@@ -130,7 +137,6 @@ async function rocketLeagueRanks(params) {
 exports.rocketLeagueRanks = rocketLeagueRanks;
 
 
-
 /** 
  * @params = [zone, args[0], guild.RLTracker, ID]
 */
@@ -173,7 +179,7 @@ const checkRLTrackers = async function (params) {
                     let playerElo = 0;
                     let tempElo = 0;
 
-                    if (!player.r1.elo) return;
+                    if (!player.r1) return;
                     if ((player.r1.elo != temp.ranks.r1.elo) && (player.r1.elo != -1)) {
                         playerElo = isNaN(player.r1.elo) ? Number(player.r1.elo.replace(',', '')) : Number(player.r1.elo);
                         tempElo = isNaN(temp.ranks.r1.elo) ? Number(temp.ranks.r1.elo.replace(',', '')) : Number(temp.ranks.r1.elo);
