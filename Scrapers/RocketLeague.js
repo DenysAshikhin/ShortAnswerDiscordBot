@@ -14,14 +14,15 @@ const { init } = require('../User.js');
 */
 async function rocketLeagueRanks(params) {
 
+    let modifiedZone = params[0];
 
-    if (params[0] == 'xbox')
-        params[0] = 'xbl'
-    else if (params[0] == 'ps')
-        params[0] = 'psn'
+    if (modifiedZone == 'xbox')
+        modifiedZone = 'xbl'
+    else if (modifiedZone == 'ps')
+        modifiedZone = 'psn'
 
-    let resp = await needle('get', `https://rocketleague.tracker.network/rocket-league/profile/${params[0]}/${params[1]}/overview`);
-    if (resp.body.includes('We could not find your stats, please ensure your platform and name are correct')) {
+    let resp = await needle('get', `https://rocketleague.tracker.network/rocket-league/profile/${modifiedZone}/${params[1]}/overview`);
+    if (resp.body.includes('Player Not Found')) {
         if (!params[4]) MAIN.Client.guilds.cache.get(params[2]).channels.cache.get(params[3]).send(`Could not find ${params[1]} on ${params[0]}`);
         return -1;
     }
@@ -39,7 +40,7 @@ async function rocketLeagueRanks(params) {
 
     var t1 = performance.now()
 
-  //  console.log("to finish parse: ", (t1 - t0))
+    //  console.log("to finish parse: ", (t1 - t0))
 
     let moreTest = anotherTrial['stats-v2'].standardProfiles[`rocket-league|${params[0]}|${params[1].toLowerCase()}`];
 
