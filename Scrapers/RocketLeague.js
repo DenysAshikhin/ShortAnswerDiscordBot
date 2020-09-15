@@ -2,7 +2,9 @@ var needle = require('needle');
 const cheerio = require('cheerio');
 var MAIN = require('../scraper.js');
 const User = require('../User.js');
-const Guild = require('../Guild.js')
+const Guild = require('../Guild.js');
+const { PerformanceObserver, performance } = require('perf_hooks');
+const { init } = require('../User.js');
 
 /** 
  * @params = [zone, player, guildID, channelID, returnInfo]
@@ -12,47 +14,44 @@ const Guild = require('../Guild.js')
 */
 async function rocketLeagueRanks(params) {
 
+
+    if (params[0] == 'xbox')
+        params[0] = 'xbl'
+    else if (params[0] == 'ps')
+        params[0] = 'psn'
+
     let resp = await needle('get', `https://rocketleague.tracker.network/rocket-league/profile/${params[0]}/${params[1]}/overview`);
     if (resp.body.includes('We could not find your stats, please ensure your platform and name are correct')) {
         if (!params[4]) MAIN.Client.guilds.cache.get(params[2]).channels.cache.get(params[3]).send(`Could not find ${params[1]} on ${params[0]}`);
         return -1;
     }
-    const $ = cheerio.load(resp.body);
 
-    const CompleteTable = $('div.trn-table__container table.trn-table')
-    //.children().first().next().children();
-    const lengthy = CompleteTable.length;
+    let $ = resp.body;
 
-    console.log($.text());
-    console.log(CompleteTable.html())
-console.log(resp.body.includes("trn-table"))
+    let finalContent = [];
 
-    //.children().first().next().children().first();
-    let finalContent = [];//[Gamemode, rank, division]
-    
-    
-    for (let i = 0; i != lengthy; i++) {
+    var t0 = performance.now()
 
-        CompleteTable = CompleteTable.next();
+    let initialIndex = $.indexOf('"stats":');
+    let trialy = '{' + $.substring(initialIndex, $.indexOf(';', initialIndex) - 1) + '}';
 
-        const row = CompleteTable.children().first().next();
-        
-        
+    let anotherTrial = JSON.parse(trialy);
 
-        if (temp.html().includes("you have not played Rocket League")) {
-            finalContent.push([specific[0], 'Unranked']);
-        }
-        else {
+    var t1 = performance.now()
 
-            const mmr = cheerio.load(individual.children[5]).text().trim().split("\n");
-            specific.push(mmr.splice(0, 1)[0]);
-            finalContent.push(specific);
-        }        
-    }
+  //  console.log("to finish parse: ", (t1 - t0))
+
+    let moreTest = anotherTrial['stats-v2'].standardProfiles[`rocket-league|${params[0]}|${params[1].toLowerCase()}`];
 
 
+    for (let i = 1; i < 10; i++)
+        finalContent.push([
+            moreTest.segments[i].metadata.name,
+            moreTest.segments[i].stats.tier.metadata.name,
+            moreTest.segments[i].stats.division.metadata.name.substring(9),
+            moreTest.segments[i].stats.rating.displayValue
+        ])
 
-    //    console.log(params)
 
     if (params[4]) {//Meaning it's called from RLTracker function (returns a different version of the information)
 
@@ -62,7 +61,6 @@ console.log(resp.body.includes("trn-table"))
 
             let rank = finalContent[i];
 
-            //     console.log(rank)
 
             switch (i) {
                 case 0:
