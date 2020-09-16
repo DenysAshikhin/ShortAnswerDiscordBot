@@ -6,6 +6,7 @@ const rocketScraper = require('./Scrapers/RocketLeague.js')
 const twitchLogic = require('./serverLogic/twitchLogic');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
+const http = require("http");
 const mongoose = require('mongoose');
 
 const fs = require('fs');
@@ -620,14 +621,35 @@ server.on('error', (err) => { console.log("Caught server error") })
 // Grab an arbitrary unused port.
 //'45.63.17.228'
 //33432
-server.listen(33432, '45.63.17.228', () => {
+
+
+const port = 33432;
+const host = '45.63.17.228';
+//const host = 'localhost';
+
+server.listen(port, host, () => {
     console.log('opened server on', server.address());
 });
 
-// server.listen(33432, '127.0.0.1', () => {
-//     console.log('opened server on', server.address());
-// });
 server.on('connection', (socket) => { })
+
+
+
+
+// const requestListener = function (req, res) {
+//     res.writeHead(200);
+//     res.end("My first server!");
+// };
+
+// const HTTPserver = http.createServer(requestListener);
+// HTTPserver.listen(port, host, () => {
+//     console.log(`Server is running on http://${host}:${port}`);
+// });
+
+
+
+
+
 
 
 connectDB.once('open', async function () {

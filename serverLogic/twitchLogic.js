@@ -1,11 +1,16 @@
-const TwitchClient = require('twitch').default;
+//const TwitchClient = require('twitch').default;
+var twitchClient;
+//import { ApiClient } from 'twitch';
+const { ApiClient } = require('twitch');
+//import { RefreshableAuthProvider, StaticAuthProvider } from 'twitch-auth';
+const { RefreshableAuthProvider, StaticAuthProvider } = require('twitch-auth');
+
 const twitchConfig = require('../twitch.json');
 const MAIN = require('../scraper.js');
 const fs = require('fs');
 const User = require('../User.js');
 const Guild = require('../Guild.js');
 const { send } = require('process');
-var twitchClient;
 
 
 async function twitchInitiliasation() {
@@ -16,20 +21,42 @@ async function twitchInitiliasation() {
     let refreshy = twitchConfig.twitchRefresh;
     let expiry = twitchConfig.expiryTimestamp;
 
-    twitchClient = TwitchClient.withCredentials(clienty, accessy, undefined, {
-        clientSecret,
-        refreshToken: refreshy,
-        expiry: expiry === null ? null : new Date(expiry),
-        onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
-            const newTokenData = {
-                ...twitchConfig,
-                twitchAccess: accessToken,
-                twitchRefresh: refreshToken,
-                expiryDate: expiryDate === null ? null : expiryDate.getTime()
-            };
-            await fs.promises.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8');
+    // twitchClient = TwitchClient.withCredentials(clienty, accessy, undefined, {
+    //     clientSecret,
+    //     refreshToken: refreshy,
+    //     expiry: expiry === null ? null : new Date(expiry),
+    //     onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
+    //         const newTokenData = {
+    //             ...twitchConfig,
+    //             twitchAccess: accessToken,
+    //             twitchRefresh: refreshToken,
+    //             expiryDate: expiryDate === null ? null : expiryDate.getTime()
+    //         };
+    //         await fs.promises.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8');
+    //     }
+    // }
+    // );
+    //exports.twitchClient = twitchClient;
+
+
+    const authProvider = new RefreshableAuthProvider(
+        new StaticAuthProvider(clienty, accessy),
+        {
+            clientSecret,
+            refreshToken: refreshy,
+            expiry: expiry === null ? null : new Date(expiry),
+            onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
+                const newTokenData = {
+                    ...twitchConfig,
+                    twitchAccess: accessToken,
+                    twitchRefresh: refreshToken,
+                    expiryDate: expiryDate === null ? null : expiryDate.getTime()
+                };
+                await fs.promises.writeFile('./twitch.json', JSON.stringify(newTokenData), 'UTF-8');
+            }
         }
-    });
+    );
+    twitchClient = new ApiClient({ authProvider });
     exports.twitchClient = twitchClient;
 }
 twitchInitiliasation();

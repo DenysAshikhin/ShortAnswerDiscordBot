@@ -673,7 +673,8 @@ async function play(message, params, user) {
         let playlist = '';
 
         try {
-            playlist = await ytpl(args, { limit: 0 })
+            playlist = await ytpl(args, { limit: 10000 })
+            .catch(err => console.log(err))
         }
         catch (err) {
             message.channel.send("This playlist is private!");
