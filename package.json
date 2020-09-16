@@ -34,8 +34,8 @@
     "teemojs": "^2.0.0-alpha.6",
     "twitch": "^4.2.2",
     "uniqid": "^5.2.0",
-    "ytdl-core": "^2.1.2",
-    "ytpl": "^0.1.21",
+    "ytdl-core": "^3.2.2",
+    "ytpl": "^1.0.1",
     "ytsr": "^0.1.21"
   },
   "devDependencies": {},

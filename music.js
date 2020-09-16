@@ -666,7 +666,7 @@ async function play(message, params, user) {
     if (!params.spoti && ((await spotifyPlaylist(message, args, user)) != -1)) {
         console.log('it was spotify')
     }
-    else if ((await ytpl.validateURL(args)) && !params.spoti) {
+    else if ((ytpl.validateID(await ytpl.getPlaylistID(args))) && !params.spoti) {
 
         console.log('it was playlist')
 
@@ -674,7 +674,7 @@ async function play(message, params, user) {
 
         try {
             playlist = await ytpl(args, { limit: 10000 })
-            .catch(err => console.log(err))
+                .catch(err => console.log(err))
         }
         catch (err) {
             message.channel.send("This playlist is private!");
@@ -1116,64 +1116,70 @@ async function cacheSong(song, GUILD, MESSAGE) {
 
     if (!tempAudioExists && !audioExists) {
 
-        let downloadYTDL = require('ytdl-core');
-        downloadingSongs.set(song.id, true);
+        try{
+            let downloadYTDL = require('ytdl-core');
+            downloadingSongs.set(song.id, true);
 
-        /*
-player_response": {
-    "playabilityStatus": {
-      "status": "OK
-        */
-        let youtubeResolve = await downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
+            /*
+    player_response": {
+        "playabilityStatus": {
+          "status": "OK
+            */
+            let youtubeResolve = await downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
 
 
-        let writeStream = fs.createWriteStream(tempAudio);
-        let currentSongsQueue = queue.get(guild);
-        if (!currentSongsQueue) {
-            serverDownload.songToDownload = null;
-            serverDownload.progress = 0;
-            downloadingSongs.delete(song.id);
-            downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
-            cacheSong(null, guild);
-        }
-        if (!currentSongsQueue) {
-
-            serverDownload.songToDownload = null;
-            serverDownload.progress = 0;
-            downloadingSongs.delete(song.id);
-            downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
-            downloadManager.backlog.push(guild);
-            cacheSong(null, guild);
-        }
-        currentSongsQueue.ytdl = youtubeResolve;
-        currentSongsQueue.writeStream = writeStream;
-
-        writeStream.on('finish', () => {
-            //console.log("FINISHED: WRITE STREAM " + song.title);
-            mv(tempAudio, audioOutput, function (err) {
-                if (err) {
-                    console.log(err);
-                    MAIN.Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
-                }
+            let writeStream = fs.createWriteStream(tempAudio);
+            let currentSongsQueue = queue.get(guild);
+            if (!currentSongsQueue) {
                 serverDownload.songToDownload = null;
                 serverDownload.progress = 0;
-                cachedSongs.set(song.id, true);
+                downloadingSongs.delete(song.id);
+                downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
+                cacheSong(null, guild);
+            }
+            if (!currentSongsQueue) {
+
+                serverDownload.songToDownload = null;
+                serverDownload.progress = 0;
                 downloadingSongs.delete(song.id);
                 downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
                 downloadManager.backlog.push(guild);
                 cacheSong(null, guild);
-            });
-        });
+            }
+            currentSongsQueue.ytdl = youtubeResolve;
+            currentSongsQueue.writeStream = writeStream;
 
-        youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
-            currentSongsQueue.songs[currentSongsQueue.index].totalSize = (total - 50000);
-            const percent = downloaded / total;
-            readline.cursorTo(process.stdout, 0);
-            song.progress = Math.floor((percent * 100).toFixed(2));
-            if (download.get(guild))
-                download.get(guild).progress = song.progress;
-        });
-        youtubeResolve.pipe(writeStream);
+            writeStream.on('finish', () => {
+                //console.log("FINISHED: WRITE STREAM " + song.title);
+                mv(tempAudio, audioOutput, function (err) {
+                    if (err) {
+                        console.log(err);
+                        MAIN.Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+                    }
+                    serverDownload.songToDownload = null;
+                    serverDownload.progress = 0;
+                    cachedSongs.set(song.id, true);
+                    downloadingSongs.delete(song.id);
+                    downloadManager.active.splice(downloadManager.active.indexOf(guild), 1);
+                    downloadManager.backlog.push(guild);
+                    cacheSong(null, guild);
+                });
+            });
+
+            youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+                currentSongsQueue.songs[currentSongsQueue.index].totalSize = (total - 50000);
+                const percent = downloaded / total;
+                readline.cursorTo(process.stdout, 0);
+                song.progress = Math.floor((percent * 100).toFixed(2));
+                if (download.get(guild))
+                    download.get(guild).progress = song.progress;
+            });
+            youtubeResolve.pipe(writeStream);
+        }
+        catch(err){
+            console.log(err)
+            console.log("Caught error when caching (probably stopped stream before cached was done")
+        }
     }
 }
 exports.cacheSong = cacheSong;
