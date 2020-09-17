@@ -44,14 +44,21 @@ async function rocketLeagueRanks(params) {
 
     let moreTest = anotherTrial['stats-v2'].standardProfiles[`rocket-league|${modifiedZone}|${params[1].toLowerCase()}`];
 
-
-    for (let i = 1; i < 10; i++)
-        finalContent.push([
-            moreTest.segments[i].metadata.name,
-            moreTest.segments[i].stats.tier.metadata.name,
-            moreTest.segments[i].stats.division.metadata.name.substring(9),
-            moreTest.segments[i].stats.rating.displayValue
-        ])
+    try {
+        for (let i = 1; i < 10; i++)
+            finalContent.push([
+                moreTest.segments[i].metadata.name,
+                moreTest.segments[i].stats.tier.metadata.name,
+                moreTest.segments[i].stats.division.metadata.name.substring(9),
+                moreTest.segments[i].stats.rating.displayValue
+            ])
+    }
+    catch (err) {
+        console.log(err);
+        console.log("Probably some weird issue pulling data: here stats just in case: ")
+        console.log(params);
+        return -1;
+    }
 
 
     if (params[4]) {//Meaning it's called from RLTracker function (returns a different version of the information)
@@ -61,7 +68,6 @@ async function rocketLeagueRanks(params) {
         for (let i = 0; i < finalContent.length; i++) {
 
             let rank = finalContent[i];
-
 
             switch (i) {
                 case 0:

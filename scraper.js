@@ -13,6 +13,8 @@ const fs = require('fs');
 var uniqid = require('uniqid');
 var token;
 var uri;
+var port;
+var host;
 
 const { Client, Intents } = require('discord.js');
 const main = require('ytsr');
@@ -80,11 +82,15 @@ if (process.argv.length == 3) {
 
     uri = config.uri;
     token = config.token;
+    IP = config.IP;
+    PORT = config.PORT;
 }
 else {
     uri = config.uri;
     token = config.TesterToken;
     defaultPrefix = "##";
+    IP = 'localhost';
+    PORT = config.PORT;
 }
 
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -623,9 +629,7 @@ server.on('error', (err) => { console.log("Caught server error") })
 //33432
 
 
-const port = 33432;
-const host = '45.63.17.228';
-//const host = 'localhost';
+
 
 server.listen(port, host, () => {
     console.log('opened server on', server.address());

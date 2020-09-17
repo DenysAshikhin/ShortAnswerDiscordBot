@@ -1,5 +1,5 @@
-const PORT = '33432';
-const IP = '45.63.17.228';
+var PORT;
+var IP;
 //const IP = '127.0.0.1';
 
 exports.IP = IP;
@@ -20,6 +20,7 @@ try {
     // if (defaultPrefix != '##')
     //     twitchInitiliasation();
 
+
     spotifyClient = config.spotifyClient;
     exports.spotifyClient = spotifyClient;
     spotifySecret = config.spotifySecret;
@@ -29,10 +30,14 @@ try {
 
         uri = config.uri;
         token = config.token;
+        IP = config.IP;
+        PORT = config.PORT;
     }
     else {
         uri = config.uri;
         token = config.TesterToken;
+        IP = 'localhost';
+        PORT = config.PORT;
         defaultPrefix = "##";
     }
 }
