@@ -73,6 +73,13 @@ const GENERAL = require('./general.js');
 const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
 const ffmpeg = require('fluent-ffmpeg');
+
+const Cache = require('caching-map');
+
+
+const cachedUsers = new Cache(100);
+const cachedGuilds = new Cache(100);
+
 ffmpeg.setFfmpegPath(ffmpegPath);
 var needle = require('needle');
 exports.needle = needle;
@@ -317,12 +324,25 @@ connectDB.once('open', async function () {
     Client.on("message", async (message) => {
 
         if (message.author.bot) return;
-        let user = await findUser({ id: message.author.id });
+
+        let user = cachedUsers.get(message.author.id);
+        if (!user) {
+
+            user = await findUser({ id: message.author.id });
+            cachedUsers.set(user.id, user);
+        }
 
 
         if (message.channel.type != 'dm') {
 
-            let guild = await findGuild({ id: message.guild.id });
+            let guild = cachedGuilds.get(message.guild.id);
+            if (!guild) {
+
+                guild = await findGuild({ id: message.guild.id });
+                cachedUsers.set(user.id, user);
+            }
+
+
             if (!user || !user.guilds.includes(message.guild.id)) {//Checking that the user exists in DB and they have a valid guild
                 await checkExistance(message.member);
                 user = await findUser({ id: message.member.id });
@@ -353,6 +373,10 @@ connectDB.once('open', async function () {
 
 
         if (message.content.substr(0, prefix.length) == prefix) {
+
+            user = await findUser({ id: message.author.id });
+            cachedUsers.set(user.id, user);
+            console.log(`Number of cached users: ${cachedUsers.size}`);
 
             if (message.channel.type != 'dm') {
                 let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
