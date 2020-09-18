@@ -282,7 +282,7 @@ async function viewTwitchFollows(params, socket) {
     }
 
     finalArray.sort((a, b) => b.name.localeCompare(a.name));
-    return JSON.stringify({ finalArray: finalArray });
+    return { finalArray: finalArray };
 }
 exports.viewTwitchFollows = viewTwitchFollows;
 
@@ -310,19 +310,18 @@ async function unfollowTwitchChannel(params, socket) {
             internalArray.push({ looped: true, channel: channel.id, name: channel._data.display_name });
         }
         if (!found) {
-            return (JSON.stringify({ channelNames: channelNames, internalArray: internalArray }));
+            return { channelNames: channelNames, internalArray: internalArray };
         }
         else {
-            console.log(params[1])
-            console.log(args)
 
             params[1].splice(params[1].indexOf(found._data.id), 1);
-            return JSON.stringify({ twitchFollows: params[1], name: args });
+            return { twitchFollows: params[1], name: args };
         }
     }
     else {
         params[1].splice(params[1].indexOf(args), 1);
-        return JSON.stringify({ twitchFollows: params[1], name: args });
+
+        return { twitchFollows: params[1], name: (await getTwitchChannelByID(args))._data.display_name };
     }
 }
 exports.unfollowTwitchChannel = unfollowTwitchChannel;
@@ -353,7 +352,7 @@ async function getTwitchChannel(streamer) {
         const user = await twitchClient.helix.users.getUserByName(streamer);
         return user;
     }
-    catch(err){
+    catch (err) {
         console.log(err);
         console.log("Caught error getting a twitch channel");
         return null;

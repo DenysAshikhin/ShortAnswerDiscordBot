@@ -179,21 +179,7 @@ async function leagueStats(message, params, user) {
     else
         zone = params.region;
 
-
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in get stats") });
-
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
-        socky.write(JSON.stringify({ command: 'league_stats', params: [zone, args[0], message.guild.id, message.channel.id] }))
-    });
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed);
-
-
-        socky.destroy();
-
-    })
+    MAIN.sendToServer({ command: 'league_stats', params: [zone, args[0], message.guild.id, message.channel.id] });
 
     return -1;
 }
@@ -442,37 +428,28 @@ async function unfollowTwitchChannel(message, params, user) {
     if (!args) return message.channel.send("You have to specify the name of the channel you wish to unfollow!");
 
     let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in unfollowtwitch") });
 
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
-        if (!params.looped)
-            socky.write(JSON.stringify({ command: 'unfollow_twitch_channel', params: [args, user.twitchFollows] }))
-        else
-            socky.write(JSON.stringify({ command: 'unfollow_twitch_channel', params: [params.channel, user.twitchFollows, true] }))
-    });
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed);
+    let parsed;
 
-        if (parsed.channelNames) {
 
-            console.log('inside of if')
-            MAIN.generalMatcher(message, args, user, parsed.channelNames, parsed.internalArray, unfollowTwitchChannel, "Select which channel you meant to remove:");
-            socky.destroy();
-            status = -1;
-        }//147711920
-        else if (parsed.twitchFollows) {
-            console.log('inside of else if')
-            console.log(parsed.twitchFollows)
-            User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.twitchFollows } }, function (err, doc, res) { if (err) console.log(err) });
-            message.channel.send(`Successfully removed ${parsed.name} from your follows!`);
-            socky.destroy();
-            status = 1;
-        }
-    });
+    if (!params.looped)
+        parsed = await MAIN.sendToServer({ command: 'unfollow_twitch_channel', params: [args, user.twitchFollows] });
+    else
+        parsed = await MAIN.sendToServer({ command: 'unfollow_twitch_channel', params: [params.channel, user.twitchFollows, true] });
 
-    return status;
+
+    if (parsed.channelNames) {
+
+        return MAIN.generalMatcher(message, args, user, parsed.channelNames, parsed.internalArray, unfollowTwitchChannel, "Select which channel you meant to remove:");
+    }//147711920
+    else if (parsed.twitchFollows) {
+
+        console.log(parsed)
+        User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.twitchFollows } }, function (err, doc, res) { if (err) console.log(err) });
+        message.channel.send(`Successfully removed ${parsed.name} from your follows!`);
+    }
+
+    return 1;
 }
 exports.unfollowTwitchChannel = unfollowTwitchChannel;
 
@@ -481,25 +458,8 @@ async function viewTwitchFollows(message, params, user) {
     if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");
     if (user.twitchFollows.length == 0) return message.channel.send("You do not have twitch channels being followed!");
 
-    let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in unfollowtwitch") });
-
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
-
-        socky.write(JSON.stringify({ command: 'view_twitch_follows', params: [user.twitchFollows] }));
-    });
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed).finalArray;
-
-        // MAIN.prettyEmbed(message, , parsed, -1, 1, 'md');
-        MAIN.prettyEmbed(message, parsed, { description: `You are following ${parsed.length} channels!`, startTally: 1, modifier: 'md' });
-        status = 1;
-        socky.destroy();
-    });
-
-    return status;
+    let parsed = await MAIN.sendToServer({ command: 'view_twitch_follows', params: [user.twitchFollows] });
+    return MAIN.prettyEmbed(message, parsed.finalArray, { description: `You are following ${parsed.finalArray.length} channels!`, startTally: 1, modifier: 'md' });
 }
 exports.viewTwitchFollows = viewTwitchFollows;
 
