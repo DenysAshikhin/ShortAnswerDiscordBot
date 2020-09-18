@@ -9,6 +9,7 @@ const Guild = require('./Guild.js')
 const studyArray = new Array();
 const net = require('net');
 var needle = require('needle');
+const { parse } = require('path');
 
 //http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
 
@@ -229,7 +230,7 @@ const RLTracker = async function (message, params, user) {
     if ((!args[0])) return message.channel.send("You did not provide at least a player's name!");
 
     //  if (args.length != 2) return message.channel.send("You did not specify a proper player + text-channel combo!");
-    console.log(args[0])
+
 
     if (args[0].includes('<#')) {
 
@@ -253,7 +254,7 @@ const RLTracker = async function (message, params, user) {
                 zone = zones[zones.indexOf(zone)];
             }
             else
-                return MAIN.generalMatcher(message, zone, user, zones,
+                return await MAIN.generalMatcher(message, zone, user, zones,
                     zones.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
                     RLTracker, "Please indicate which platform you wanted to user!");
         }
@@ -268,37 +269,25 @@ const RLTracker = async function (message, params, user) {
     let ID = message.mentions.channels.first().id
 
     let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in link_channel_with_RL") });
 
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
+    let parsed = await MAIN.sendToServer({ command: 'rocket_league_tracker', params: [zone, args[0], guild.RLTracker, ID] });
 
-        socky.write(JSON.stringify({ command: 'rocket_league_tracker', params: [zone, args[0], guild.RLTracker, ID] }));
-    });
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed);
-        console.log(parsed)
-
-        if (parsed.status) {
-            if (parsed.status == -1) {
-                message.channel.send("I could not find that player+platform combination, try again?");
-                result = -1;
-                socky.destroy();
-            }
-            else {
-                message.channel.send("Such a ServerChannel - Player pair already exists!");
-                result = -2;
-                socky.destroy();
-            }
+    if (parsed.status) {
+        if (parsed.status == -1) {
+            message.channel.send("I could not find that player+platform combination, try again?");
+            result = -1;
         }
         else {
-            Guild.findOneAndUpdate({ id: guild.id }, { $set: { RLTracker: parsed.RLTracker } }, function (err, doc, res) { if (err) console.log(err) });
-            message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
-            status = 1;
-            socky.destroy();
+            message.channel.send("Such a ServerChannel - Player pair already exists!");
+            result = -2;
         }
-    });
+    }
+    else {
+        Guild.findOneAndUpdate({ id: guild.id }, { $set: { RLTracker: parsed.RLTracker } }, function (err, doc, res) { if (err) console.log(err) });
+        message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
+        status = 1;
+    }
+
     return status;
 }
 exports.RLTracker = RLTracker;
@@ -459,7 +448,8 @@ async function viewTwitchFollows(message, params, user) {
     if (user.twitchFollows.length == 0) return message.channel.send("You do not have twitch channels being followed!");
 
     let parsed = await MAIN.sendToServer({ command: 'view_twitch_follows', params: [user.twitchFollows] });
-    return MAIN.prettyEmbed(message, parsed.finalArray, { description: `You are following ${parsed.finalArray.length} channels!`, startTally: 1, modifier: 'md' });
+    return MAIN.prettyEmbed(message, parsed.finalArray,
+        { description: `You are following ${parsed.finalArray.length} channels!`, startTally: 1, modifier: 'md', maxLength: 150 });
 }
 exports.viewTwitchFollows = viewTwitchFollows;
 
@@ -469,50 +459,29 @@ async function showChannelTwitchLinks(message, params, user) {
 
     if (!guild.channelTwitch || (guild.channelTwitch.length == 0)) return message.channel.send("There are no pairs setup for this server!");
 
-    let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in unfollowtwitch") });
+    let parsed = await MAIN.sendToServer({ command: 'show_channel_twitch_links', params: [guild.channelTwitch] });
 
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
+    let promiseArray = parsed.promiseArray;
+    let textChannels = [];
 
-        socky.write(JSON.stringify({ command: 'show_channel_twitch_links', params: [guild.channelTwitch] }));
-    });
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed).promiseArray;
+    for (follow of guild.channelTwitch) {
+        textChannels.push(message.guild.channels.cache.get(follow[1]));
+    }
 
-        let promiseArray = [];
-        let textChannels = [];
+    let finishedArray = [];
 
-        for (follow of guild.channelTwitch) {
-            textChannels.push(message.guild.channels.cache.get(follow[1]));
-        }
+    for (let i = 0; i < promiseArray.length; i++) {
+        finishedArray.push({ texty: textChannels[i], streamy: promiseArray[i] });
+    }
 
+    console.log(finishedArray[1])
 
-        let finishedArray = [];
+    finishedArray.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
 
-        for (let i = 0; i < parsed.length; i++) {
-            finishedArray.push({ texty: textChannels[i], streamy: parsed[i] });
-        }
-
-        finishedArray.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
-
-        // MAIN.prettyEmbed(message, "Here are the ServerChannel-TwitchStreamer pairs:",
-        //     finishedArray.reduce((accum, current) => {
-        //         accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
-        //         return accum;
-        //     }, []), -1, 1, 'md');
-
-        MAIN.prettyEmbed(message, finishedArray.reduce((accum, current) => {
-            accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
-            return accum;
-        }, []), { description: "Here are the ServerChannel-TwitchStreamer pairs:", startTally: 1, modifier: 'md' });
-
-        status = 1;
-        socky.destroy();
-    });
-
-    return status;
+    return MAIN.prettyEmbed(message, finishedArray.reduce((accum, current) => {
+        accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
+        return accum;
+    }, []), { description: "Here are the ServerChannel-TwitchStreamer pairs:", startTally: 1, modifier: 'md' });
 }
 exports.showChannelTwitchLinks = showChannelTwitchLinks;
 
@@ -531,19 +500,10 @@ async function removeChannelTwitchLink(message, params, user) {
 
     if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
 
+    let parsed = await MAIN.sendToServer({ command: 'remove_channel_twitch_link', params: [args[0]] });
 
-    let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in removeTwitchPair") });
-
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
-
-        socky.write(JSON.stringify({ command: 'remove_channel_twitch_link', params: [args[0]] }));
-    });
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed).streamer;
-
+    if (parsed.streamer) {
+        parsed = parsed.streamer;
 
         if (!guild.channelTwitch) guild.channelTwitch = [];
 
@@ -552,18 +512,16 @@ async function removeChannelTwitchLink(message, params, user) {
                 if (parsed._data.id == guild.channelTwitch[i][0]) {
                     guild.channelTwitch.splice(i, 1);
                     Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelTwitch: guild.channelTwitch } }, function (err, doc, res) { });
-                    status = 1;
-                    socky.destroy();
-                    message.channel.send(`Successfully unlinked ${parsed._data.display_name} and <#${message.mentions.channels.first().id}>`);
-                    return status;
+                    return message.channel.send(`Successfully unlinked ${parsed._data.display_name} and <#${message.mentions.channels.first().id}>`);
                 }
             }
         }
         message.channel.send("No such pair exists for this server, try again?");
-        status = 1;
-        socky.destroy();
-    });
-    return status;
+    }
+    else
+        return message.channel.send("No such pair exists for this server, try again?");
+
+    return 1;
 }
 exports.removeChannelTwitchLink = removeChannelTwitchLink;
 
@@ -593,36 +551,22 @@ async function linkTwitch(message, params, user) {
     if (!args) return message.channel.send("You did not provide the name of the channel you wish to link to!");
 
     if (!params.looped) {
-        let status;
-        let socky = new net.Socket();
-        socky.on('error', (err) => { console.log("socket error in LinkTwitch") });
 
-        socky.connect(MAIN.PORT, MAIN.IP, () => {
+        let parsed = await MAIN.sendToServer({ command: 'link_twitch', params: [args, user.twitchLinks] });
 
-            socky.write(JSON.stringify({ command: 'link_twitch', params: [args, user.twitchLinks] }));
-        });
+        if (parsed.status) {
 
-        socky.on('data', async (data) => {
-            let stringed = data.toString();
-            let parsed = JSON.parse(stringed);
+            message.channel.send("I could not find a channel with that name, try again?")
+            return -1;
+        }
+        else {
 
-            if (parsed.status) {
-                status = -1;
-                message.channel.send("I could not find a channel with that name, try again?")
-            }
-            else {
-
-                linkTwitch(message, { looped: true, streamer: parsed.streamer, goodArray: parsed.goodArray }, user);
-                status = 1;
-                socky.destroy();
-            }
-        });
-        return status;
+            return await linkTwitch(message, { looped: true, streamer: parsed.streamer, goodArray: parsed.goodArray }, user);
+        }
     }
     else {
 
         if (params.keep) {
-            console.log(params.streamer)
             User.findOneAndUpdate({ id: user.id }, { $set: { linkedTwitch: params.streamer._data.id, twitchFollows: params.followArr } }, function (err, doc, res) { });
             message.channel.send(`Succesfully linked ${params.streamer._data.display_name} to your account, you now have ${params.followArr.length} channels you are following!`);
             return 1;
@@ -630,13 +574,13 @@ async function linkTwitch(message, params, user) {
         else if (user.twitchFollows && (user.twitchFollows.length > 0)) {
 
             if (user.twitchFollows.length > 0)
-                return MAIN.generalMatcher(message, -23, user, ['Combine', 'Remove'],
+                return await MAIN.generalMatcher(message, -23, user, ['Combine', 'Remove'],
                     [{ streamer: params.streamer, looped: true, keep: 1, followArr: params.goodArray.concat(user.twitchFollows.filter(item => !params.goodArray.includes(item))) },
                     { streamer: params.streamer, looped: true, keep: -1, followArr: params.goodArray }],
                     linkTwitch, "You already have a linked twitch account or channels you have followed, would you like to combine the old follows, or remove them?");
         }
         else {
-            return linkTwitch(message, { looped: true, followArr: params.goodArray, keep: -3, streamer: params.streamer }, user);
+            return await linkTwitch(message, { looped: true, followArr: params.goodArray, keep: -3, streamer: params.streamer }, user);
         }
     }
 }
@@ -651,7 +595,6 @@ async function linkChannelWithTwitch(message, params, user) {
 
     let args = message.content.split(" ").slice(1).join(' ').split(',');
 
-    console.log(args.length)
     if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
@@ -659,37 +602,27 @@ async function linkChannelWithTwitch(message, params, user) {
 
     let ID = message.mentions.channels.first().id
 
+    let parsed = await MAIN.sendToServer({ command: 'link_channel_with_twitch', params: [args[0], guild.channelTwitch, ID] });
+    let result;
     let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in link_channel_with_twitch") });
 
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
-
-        socky.write(JSON.stringify({ command: 'link_channel_with_twitch', params: [args[0], guild.channelTwitch, ID] }));
-    });
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed);
-
-        if (parsed.status) {
-            if (parsed.status == -1) {
-                message.channel.send("I could not find a streamer with that name, try again?");
-                result = -1;
-                socky.destroy();
-            }
-            else {
-                message.channel.send("Such a ServerChannel - TwitchStreamer pair already exists!");
-                result = -2;
-                socky.destroy();
-            }
+    if (parsed.status) {
+        if (parsed.status == -1) {
+            message.channel.send("I could not find a streamer with that name, try again?");
+            result = -1;
         }
         else {
-            Guild.findOneAndUpdate({ id: guild.id }, { $set: { channelTwitch: parsed.channelTwitch } }, function (err, doc, res) { if (err) console.log(err) });
-            message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
-            status = 1;
-            socky.destroy();
+            message.channel.send("Such a ServerChannel - TwitchStreamer pair already exists!");
+            result = -2;
         }
-    });
+    }
+    else {
+        Guild.findOneAndUpdate({ id: guild.id }, { $set: { channelTwitch: parsed.channelTwitch } }, function (err, doc, res) { if (err) console.log(err) });
+        message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
+        status = 1;
+
+    }
+
     return status;
 }
 exports.linkChannelWithTwitch = linkChannelWithTwitch;
@@ -1000,28 +933,16 @@ async function checkGuildTwitchStreams(guilds) {
         guildArray.push({ channelTwitch: guild.channelTwitch, twitchNotifications: guild.twitchNotifications, id: guild.id });
     }
 
-    let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in check_guild_twitch_streams") });
+    let parsed = await MAIN.sendToServer({ command: 'check_guild_twitch_streams', params: [guildArray] });
+    parsed = parsed.completeArray;
 
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
+    for (entry of parsed) {
 
-        socky.write(JSON.stringify({ command: 'check_guild_twitch_streams', params: [guildArray] }));
-    });
+        MAIN.Client.guilds.cache.get(entry.guildID).channels.cache.get(entry.channelID).send(entry.alertMessage);
+        Guild.findOneAndUpdate({ id: entry.guildID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+    }
 
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed).completeArray;
-
-        for (entry of parsed) {
-
-            MAIN.Client.guilds.cache.get(entry.guildID).channels.cache.get(entry.channelID).send(entry.alertMessage);
-            Guild.findOneAndUpdate({ id: entry.guildID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
-        }
-        status = 1;
-        socky.destroy();
-    });
-    return status;
+    return 1;
 }
 exports.checkGuildTwitchStreams = checkGuildTwitchStreams;
 
@@ -1034,35 +955,22 @@ async function checkUsersTwitchStreams(users) {
     }
 
 
-    let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in check_user_twitch_streams") });
+    let parsed = await MAIN.sendToServer({ command: 'check_user_twitch_streams', params: [userArray] });
+    parsed = parsed.completeArray;
 
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
-        socky.write(JSON.stringify({ command: 'check_user_twitch_streams', params: [userArray] }));
-    });
+    for (entry of parsed) {
+        for (let guild of MAIN.Client.guilds.cache.values()) {
 
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed).completeArray;
-        console.log(parsed);
-        for (entry of parsed) {
-            for (let guild of MAIN.Client.guilds.cache.values()) {
-
-                let member = guild.members.cache.get(entry.userID);
-                if (!member) continue;
-                console.log(member.displayName)
-                member.send(entry.alertMessage);
-                User.findOneAndUpdate({ id: entry.userID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
-                status = 1;
-                socky.destroy();
-                return status;
-            }
+            let member = guild.members.cache.get(entry.userID);
+            if (!member) continue;
+            console.log(member.displayName)
+            member.send(entry.alertMessage);
+            User.findOneAndUpdate({ id: entry.userID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+            return 1;
         }
-        status = -1;
-        socky.destroy();
-    });
-    return status;
+    }
+
+    return 1;
 }
 exports.checkUsersTwitchStreams = checkUsersTwitchStreams;
 

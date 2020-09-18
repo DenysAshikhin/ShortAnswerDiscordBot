@@ -195,17 +195,17 @@ async function linkChannelWithTwitch(params, socket) {
     let streamer = await getTwitchChannel(params[0])
         .catch((err) => { console.log("caught error in linkChannelWithTwitch") });
 
-    if (!streamer) return -1;
+    if (!streamer) return { status: -1 };
 
     for (channel of params[1]) {
         if (channel[1] == params[2]) {
             if (channel[0] == streamer._data.id) {
-                return -2;
+                return { status: -2 };
             }
         }
     }
     params[1].push([streamer._data.id, params[2]])
-    return JSON.stringify({ channelTwitch: params[1] });
+    return { channelTwitch: params[1] };
 }
 exports.linkChannelWithTwitch = linkChannelWithTwitch;
 
@@ -215,7 +215,7 @@ async function linkTwitch(params, socket) {
     let args = params[0];
 
     let streamer = await getTwitchChannel(args);
-    if (!streamer) return -1;
+    if (!streamer) return { status: -1 };
 
     let follows = await streamer.getFollows();
     let followIDs = [];
@@ -233,8 +233,8 @@ async function linkTwitch(params, socket) {
     }
 
     if (goodArray.length > 0)
-        return JSON.stringify({ goodArray: goodArray, streamer: streamer });
-    return JSON.stringify({ streamer: streamer });
+        return { goodArray: goodArray, streamer: streamer };
+    return { streamer: streamer };
 }
 exports.linkTwitch = linkTwitch;
 
@@ -242,8 +242,8 @@ exports.linkTwitch = linkTwitch;
 async function removeChannelTwitchLink(params, socket) {
 
     let streamer = await getTwitchChannel(params[0]).catch((err) => { console.log("caught error in removeChannelTwitchLink"); })
-    if (!streamer) return -1;
-    else return JSON.stringify({ streamer: streamer });
+    if (!streamer) return { status: -1 };
+    else return { streamer: streamer };
 }
 exports.removeChannelTwitchLink = removeChannelTwitchLink;
 
@@ -252,11 +252,10 @@ async function showChannelTwitchLinks(params, socket) {
 
     let promiseArray = [];
 
-    for (follow of params[0]) {
+    for (follow of params[0])
         promiseArray.push(getTwitchChannelByID(follow[0]));
-    }
 
-    return JSON.stringify({ promiseArray: await Promise.all(promiseArray) });
+    return { promiseArray: await Promise.all(promiseArray) };
 }
 exports.showChannelTwitchLinks = showChannelTwitchLinks;
 
@@ -271,17 +270,23 @@ async function viewTwitchFollows(params, socket) {
     let finishedPromises = await Promise.all(promiseArray);
     finishedPromises.sort((a, b) => { return b._data.view_count - a._data.view_count });
     let finalArray = [];
+    let online = [];
+    let offline = [];
 
     for (promisy of finishedPromises) {
 
         let streamy = await isStreamLive(promisy._data.id);
         if (streamy)
-            finalArray.push({ name: 'Online', value: `<${promisy._data.display_name} is currently live with= ${streamy._data.viewer_count} Viewers!>\n` });
+            online.push({ name: 'Online', value: `<${promisy._data.display_name} is currently live with= ${streamy._data.viewer_count} Viewers!>\n`, viewers: streamy._data.viewer_count });
         else
-            finalArray.push({ name: 'Offline', value: `<${promisy._data.display_name} - Total Views=${promisy._data.view_count}>\n` });
+            offline.push({ name: 'Offline', value: `<${promisy._data.display_name} - Total Views=${promisy._data.view_count}>\n`, viewers: promisy._data.view_count });
     }
 
-    finalArray.sort((a, b) => b.name.localeCompare(a.name));
+    online.sort((a, b) => b.viewers - (a.viewers));
+    offline.sort((a, b) => b.viewers - (a.viewers));
+
+    finalArray = online.concat(offline);
+    console.log(finalArray);
     return { finalArray: finalArray };
 }
 exports.viewTwitchFollows = viewTwitchFollows;

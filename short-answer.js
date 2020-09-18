@@ -287,7 +287,11 @@ const sendToServer = async function (data) {
     let payload = JSON.parse(resp.raw.toString('utf8'));
     let decryptedPayload = decrypt({ content: payload.payload, tag: Buffer.from(payload.tag, 'base64'), iv: Buffer.from(payload.iv, 'base64') })
 
-    return JSON.parse(decryptedPayload);
+    let finalPayload = JSON.parse(decryptedPayload);
+    if ((typeof finalPayload) == 'string')
+        finalPayload = JSON.parse(finalPayload);
+
+    return finalPayload;
 }
 exports.sendToServer = sendToServer;
 
@@ -301,25 +305,6 @@ connectDB.once('open', async function () {
     updateAll();
     populateCommandMap();
     TUTORIAL.initialTutorialPopulate();
-
-    // {
-
-    //     let arrayOfFinalCommands = [];
-    //     let config = require('./commands.json')
-
-    //     for (let i = 0; i < config.commands.length; i++) {
-
-    //         arrayOfFinalCommands.push({
-    //             title: config.commands[i],
-    //             explanation:  config.explanation[i],
-    //             example: config.example[i],
-    //             subsection: config.subsection[i]
-    //         })
-    //     }
-
-    //     await fs.promises.writeFile('./newCommands.json', JSON.stringify(arrayOfFinalCommands), 'UTF-8');
-    // }
-
 
     Client.on("ready", () => {
 
@@ -364,14 +349,6 @@ connectDB.once('open', async function () {
 
         if (defaultPrefix == "##")
             prefix = "##";
-
-
-
-        //testing stuff
-        if (defaultPrefix == "##") {
-
-        }
-
 
 
 

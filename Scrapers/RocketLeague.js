@@ -156,19 +156,19 @@ const RLTracker = async function (params) {
 
     let player = await rocketLeagueRanks([params[0], params[1], null, null, true]);
 
-    if (player == -1) return -1;
+    if (player == -1) return { status: -1 };
 
     //channel = {player: , platform: , channelID: }
     for (channel of params[2]) {
         if (channel.id == params[4]) {
             if ((channel.player == params[1]) && (channel.platform == params[0])) {
-                return -2;
+                return { status: -2 };
             }
         }
     }
 
     params[2].push({ player: params[1], platform: params[0], channelID: params[3], ranks: player });
-    return JSON.stringify({ RLTracker: params[2] });
+    return { RLTracker: params[2] };
 }
 exports.RLTracker = RLTracker;
 
