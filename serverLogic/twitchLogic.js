@@ -286,7 +286,6 @@ async function viewTwitchFollows(params, socket) {
     offline.sort((a, b) => b.viewers - (a.viewers));
 
     finalArray = online.concat(offline);
-    console.log(finalArray);
     return { finalArray: finalArray };
 }
 exports.viewTwitchFollows = viewTwitchFollows;

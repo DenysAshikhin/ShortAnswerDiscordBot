@@ -704,7 +704,6 @@ const requestListener = async function (req, res) {
     if (commandMap.get(payload.command)) {
 
         res.writeHead(200);
-        console.log(payload.params)
         let functionRes = await commandMap.get(payload.command).apply(null, [payload.params]);
         let encrypted = encrypt(JSON.stringify(functionRes));
 
