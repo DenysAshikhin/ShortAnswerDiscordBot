@@ -1,9 +1,6 @@
 var PORT;
 var IP;
-//const IP = '127.0.0.1';
 
-exports.IP = IP;
-exports.PORT = PORT;
 var defaultPrefix = "sa!";
 global.prefix;
 
@@ -13,7 +10,7 @@ var lastMessage;
 
 var spotifyClient;
 var spotifySecret;
-
+var config = null;
 try {
 
     config = require('./config.json');
@@ -36,7 +33,7 @@ try {
     else {
         uri = config.uri;
         token = config.TesterToken;
-        IP = 'localhost';
+        IP = '127.0.0.1';
         PORT = config.PORT;
         defaultPrefix = "##";
     }
@@ -44,16 +41,17 @@ try {
 catch (err) {
     console.log("config.json doesn't exist - probably running on heroku?");
 
-
     uri = process.env.uri;
-    console.log(uri);
     token = process.env.token;
-    console.log(token)
     spotifyClient = process.env.spotifyClient;
     exports.spotifyClient = spotifyClient;
     spotifySecret = process.env.spotifySecret;
     exports.spotifySecret = spotifySecret
 }
+
+exports.IP = IP;
+exports.PORT = PORT;
+
 const Discord = require('discord.js');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
@@ -76,7 +74,12 @@ const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
+var needle = require('needle');
+exports.needle = needle;
 
+const crypto = require('crypto');
+const algorithm = 'aes-256-gcm',
+    password = crypto.createHash('sha256').update(String(config.KEY)).digest('base64').substr(0, 32);
 
 var osu = require('node-os-utils');
 const { executionAsyncResource } = require('async_hooks');
@@ -97,7 +100,7 @@ var checkCommandsSearchArray = Commands.reduce((accum, curr) => {
 exports.commandsText = checkCommandsSearchArray;
 
 var EMOJI = new Map();
-EMOJI.set('bronze1', '725771774532517948');
+//EMOJI.set('bronze1', '725771774532517948');
 
 const logID = '712000077295517796';
 exports.logID = logID;
@@ -193,9 +196,6 @@ var Client = new Discord.Client();
 
 var commandMap = new Map();
 var commandTracker = new Map();
-var config = null;
-
-
 
 
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -254,8 +254,48 @@ const getUsersInGuild = async function (guildID) {
 exports.getUsersInGuild = getUsersInGuild;
 
 
+const encrypt = function (text) {
+    const iv = crypto.randomBytes(12);
+    var cipher = crypto.createCipheriv(algorithm, password, iv)
+    var encrypted = cipher.update(text, 'utf8', 'hex')
+    encrypted += cipher.final('hex');
+    var tag = cipher.getAuthTag();
+    return {
+        content: encrypted,
+        tag: tag,
+        iv: iv
+    };
+}
+exports.encrypt = encrypt;
+
+const decrypt = function (encrypted) {
+    var decipher = crypto.createDecipheriv(algorithm, password, encrypted.iv)
+    decipher.setAuthTag(encrypted.tag);
+    var dec = decipher.update(encrypted.content, 'hex', 'utf8')
+    dec += decipher.final('utf8');
+    return dec;
+}
+exports.decrypt = decrypt;
+
+const sendToServer = async function (data) {
+
+    let encrypted = encrypt(JSON.stringify({ ...data, password: config.PASSWORD }))
+
+    let resp = await needle('get', `${IP}:${PORT}`, null,
+        { headers: { 'payload': encrypted.content, 'tag': encrypted.tag.toString('base64'), 'iv': encrypted.iv.toString('base64') } });
+
+    let payload = JSON.parse(resp.raw.toString('utf8'));
+    let decryptedPayload = decrypt({ content: payload.payload, tag: Buffer.from(payload.tag, 'base64'), iv: Buffer.from(payload.iv, 'base64') })
+
+    return JSON.parse(decryptedPayload);
+}
+exports.sendToServer = sendToServer;
+
+
+
 
 connectDB.once('open', async function () {
+
 
     await Client.login(token);
     updateAll();

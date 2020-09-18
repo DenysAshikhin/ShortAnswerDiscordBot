@@ -225,19 +225,7 @@ const RLRanks = async function (message, params, user) {
     else
         zone = params.region;
 
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in get stats") });
-
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
-        socky.write(JSON.stringify({ command: 'rocket_league_ranks', params: [zone, args[0], message.guild.id, message.channel.id] }))
-    });
-    socky.on('close', (had_error) => {
-        console.log("socket closed");
-        console.log(had_error)
-        socky.destroy();
-        console.log("destroyed the closed socket?");
-    })
-
+    MAIN.sendToServer({ command: 'rocket_league_ranks', params: [zone, args[0], message.guild.id, message.channel.id] });
     return -1;
 }
 exports.RLRanks = RLRanks;
@@ -421,40 +409,26 @@ async function followTwitchChannel(message, params, user) {
         return -1;
     }
 
-    let status;
-    let socky = new net.Socket();
-    socky.on('error', (err) => { console.log("socket error in get stats") });
+    let parsed = await MAIN.sendToServer({ command: 'follow_twitch_channel', params: [args, user.twitchFollows, user.linkedTwitch] });
 
-    socky.connect(MAIN.PORT, MAIN.IP, () => {
-        socky.write(JSON.stringify({ command: 'follow_twitch_channel', params: [args, user.twitchFollows, user.linkedTwitch] }))
-    });
-    socky.on('data', async (data) => {
-        let stringed = data.toString();
-        let parsed = JSON.parse(stringed);
-
-        if (parsed.status) {
-            status = parsed.status;
-            switch (parsed.status) {
-                case -1:
-                    message.channel.send("I could not find such a channel, try again?");
-                    socky.destroy();
-                    break;
-                case -2:
-                    message.channel.send("You're already following this channel!");
-                    socky.destroy();
-                    break;
-                case -3:
-                    message.channel.send("You can't follow your own linked twitch!");
-                    socky.destroy();
-                    break;
-            }
+    if (parsed.status) {
+        status = parsed.status;
+        switch (parsed.status) {
+            case -1:
+                message.channel.send("I could not find such a channel, try again?");
+                break;
+            case -2:
+                message.channel.send("You're already following this channel!");
+                break;
+            case -3:
+                message.channel.send("You can't follow your own linked twitch!");
+                break;
         }
-        else if (parsed.result) {
-            User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.result } }, function (err, doc, res) { });
-            return message.channel.send(`Succesfully added ${parsed.targetChannelName} to your follow list!`);
-        }
-    })
-
+    }
+    else if (parsed.result) {
+        User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.result } }, function (err, doc, res) { });
+        return message.channel.send(`Succesfully added ${parsed.targetChannelName} to your follow list!`);
+    }
     return -1;
 }
 exports.followTwitchChannel = followTwitchChannel;

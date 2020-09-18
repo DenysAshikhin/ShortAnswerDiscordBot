@@ -126,7 +126,6 @@ tutorialMap.set(GameTutorial.id, GameTutorial);
 
 
 
-
 /**
  * @param {forceStart: Number} other 
  */

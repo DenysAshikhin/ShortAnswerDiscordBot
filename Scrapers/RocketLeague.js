@@ -45,13 +45,20 @@ async function rocketLeagueRanks(params) {
     let moreTest = anotherTrial['stats-v2'].standardProfiles[`rocket-league|${modifiedZone}|${params[1].toLowerCase()}`];
 
     try {
-        for (let i = 1; i < 10; i++)
-            finalContent.push([
-                moreTest.segments[i].metadata.name,
-                moreTest.segments[i].stats.tier.metadata.name,
-                moreTest.segments[i].stats.division.metadata.name.substring(9),
-                moreTest.segments[i].stats.rating.displayValue
-            ])
+        for (let i = 2; i < 10; i++)
+            if (moreTest.segments[i].stats.division.metadata.name != 'Unranked')
+                finalContent.push([
+                    moreTest.segments[i].metadata.name,
+                    moreTest.segments[i].stats.tier.metadata.name,
+                    moreTest.segments[i].stats.division.metadata.name.substring(9),
+                    moreTest.segments[i].stats.rating.displayValue
+                ])
+            else
+                finalContent.push([
+                    moreTest.segments[i].metadata.name,
+                    moreTest.segments[i].stats.tier.metadata.name
+                ])
+
     }
     catch (err) {
         console.log(err);

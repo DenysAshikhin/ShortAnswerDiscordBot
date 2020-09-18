@@ -333,15 +333,14 @@ async function followTwitchChannel(params, socket) {
     let args = params[0];
 
     let targetChannel = await getTwitchChannel(args);
-    if (!targetChannel) return -1;
+    if (!targetChannel) return { status: -1 };
 
 
-    if (params[1].includes(targetChannel._data.id)) return -2;
-    if (params[2] == (targetChannel._data.id)) return -3;
+    if (params[1].includes(targetChannel._data.id)) return { status: -2 };
+    if (params[2] == (targetChannel._data.id)) return { status: -3 };
 
     params[1].push(targetChannel._data.id);
-    socket.write(JSON.stringify({ result: params[1], targetChannelName: targetChannel._data.display_name }))
-    return 1;
+    return { result: params[1], targetChannelName: targetChannel._data.display_name };
 }
 exports.followTwitchChannel = followTwitchChannel;
 
@@ -350,8 +349,15 @@ async function isStreamLive(id) {
 }
 
 async function getTwitchChannel(streamer) {
-    const user = await twitchClient.helix.users.getUserByName(streamer);
-    return user;
+    try {
+        const user = await twitchClient.helix.users.getUserByName(streamer);
+        return user;
+    }
+    catch(err){
+        console.log(err);
+        console.log("Caught error getting a twitch channel");
+        return null;
+    }
 }
 
 async function getTwitchChannelByID(id) {

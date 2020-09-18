@@ -8,13 +8,14 @@ const User = require('./User.js');
 const Guild = require('./Guild.js')
 const http = require("http");
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 const fs = require('fs');
 var uniqid = require('uniqid');
 var token;
 var uri;
-var port;
-var host;
+var PORT;
+var HOST;
 
 const { Client, Intents } = require('discord.js');
 const main = require('ytsr');
@@ -82,16 +83,48 @@ if (process.argv.length == 3) {
 
     uri = config.uri;
     token = config.token;
-    IP = config.IP;
+    HOST = config.IP;
     PORT = config.PORT;
 }
 else {
     uri = config.uri;
     token = config.TesterToken;
     defaultPrefix = "##";
-    IP = 'localhost';
+    HOST = '127.0.0.1';
     PORT = config.PORT;
 }
+
+// const Cryptr = require('cryptr');
+// const cryptr = new Cryptr(config.KEY);
+// exports.cryptr = cryptr;
+
+
+var algorithm = 'aes-256-gcm',
+    password = crypto.createHash('sha256').update(String(config.KEY)).digest('base64').substr(0, 32);
+
+function encrypt(text) {
+    const iv = crypto.randomBytes(12);
+    var cipher = crypto.createCipheriv(algorithm, password, iv)
+    var encrypted = cipher.update(text, 'utf8', 'hex')
+    encrypted += cipher.final('hex');
+    var tag = cipher.getAuthTag();
+    return {
+        content: encrypted,
+        tag: tag,
+        iv: iv
+    };
+}
+
+function decrypt(encrypted) {
+    var decipher = crypto.createDecipheriv(algorithm, password, encrypted.iv)
+    decipher.setAuthTag(encrypted.tag);
+    var dec = decipher.update(encrypted.content, 'hex', 'utf8')
+    dec += decipher.final('utf8');
+    return dec;
+}
+
+
+
 
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useFindAndModify', false);
@@ -511,8 +544,8 @@ async function queue(command, params, socket, newWork) {
         //  if ((cpu < 0.9) && (memory > 50)) {
         if (workQueue.active.length < workQueue.limit) {
             workQueue.active.push({ command: command, params: params, socket: socket });
-            queue(null, null, null, false);
-            return 1;
+            return await queue(null, null, null, false);
+
         }
         else {
             workQueue.backlog.push({ command: command, params: params, socket: socket });
@@ -525,10 +558,13 @@ async function queue(command, params, socket, newWork) {
 
         if (result == -21) return 1;
 
-        if (!isNaN(result)) currentTask.socket.write(JSON.stringify({ status: result }));
-        else currentTask.socket.write(result);
+        // if (!isNaN(result)) currentTask.socket.write(JSON.stringify({ status: result }));
+        // else currentTask.socket.write(result);
+
         queue(null, null, null, false);
-        return result;
+
+        if (!isNaN(result)) return { number: result };
+        else return { status: result };
     }
     else if (workQueue.backlog.length > 0) {
 
@@ -624,31 +660,65 @@ const server = net.createServer(async (socket) => {
 
 server.on('error', (err) => { console.log("Caught server error") })
 
-// Grab an arbitrary unused port.
+// Grab an arbitrary unused PORT.
 //'45.63.17.228'
 //33432
 
 
 
 
-server.listen(port, host, () => {
-    console.log('opened server on', server.address());
-});
-
-server.on('connection', (socket) => { })
-
-
-
-
-// const requestListener = function (req, res) {
-//     res.writeHead(200);
-//     res.end("My first server!");
-// };
-
-// const HTTPserver = http.createServer(requestListener);
-// HTTPserver.listen(port, host, () => {
-//     console.log(`Server is running on http://${host}:${port}`);
+// server.listen(PORT, HOST, () => {
+//     console.log('opened server on', server.address());
 // });
+
+// server.on('connection', (socket) => { })
+
+
+
+
+const requestListener = async function (req, res) {
+
+    let payload;
+
+    if ((!req.headers.payload) || (!req.headers.tag) || (!req.headers.iv)) return res.end();
+
+
+    //Buffer.from(bufStr, 'utf8')
+
+    try {
+        payload = JSON.parse(decrypt(
+            { content: req.headers.payload, tag: Buffer.from(req.headers.tag, 'base64'), iv: Buffer.from(req.headers.iv, 'base64') }
+        ));
+    }
+    catch (err) {
+        console.log(err);
+        console.log("error trying to decrypt");
+        return res.end();
+    }
+
+    if (payload.password != config.PASSWORD) {
+        console.log("Incorrect password")
+        return res.end();
+    }
+
+    if (commandMap.get(payload.command)) {
+
+        res.writeHead(200);
+        console.log(payload.params)
+        let functionRes = await commandMap.get(payload.command).apply(null, [payload.params]);
+        let encrypted = encrypt(JSON.stringify(functionRes));
+
+        return res.end(JSON.stringify({ payload: encrypted.content, tag: encrypted.tag.toString('base64'), iv: encrypted.iv.toString('base64') }));
+    }
+    res.end();
+};
+
+const HTTPserver = http.createServer(requestListener);
+HTTPserver.listen(PORT, HOST, () => {
+    console.log(`Server is running on http://${HOST}:${PORT}`);
+
+    console.log(decrypt(encrypt("WeeeOOO")))
+});
 
 
 

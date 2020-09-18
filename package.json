@@ -15,6 +15,7 @@
     "@discordjs/opus": "^0.3.2",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "cheerio": "^1.0.0-rc.3",
+    "cryptr": "^6.0.2",
     "discord.js": "^12.3.1",
     "enhanced-spotify-api": "^1.1.7",
     "ffmpeg": "0.0.4",
