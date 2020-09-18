@@ -142,7 +142,7 @@ async function setTimer(message, params, user) {
 }
 exports.setTimer = setTimer;
 
-function setServerPrefix(message, params, user) {
+async function setServerPrefix(message, params, user) {
 
     if (params == message.content) {
         message.channel.send("You have to provide an actual prefix!");
@@ -160,12 +160,12 @@ function setServerPrefix(message, params, user) {
 
     if (params == "sa!") params = -1;
 
-    User.findOneAndUpdate({ id: user.id }, { $set: { prefix: user.prefix } }, function (err, doc, res) { });
+    await User.findOneAndUpdate({ id: user.id }, { $set: { prefix: user.prefix } }, { new: true }, function (err, doc, res) { MAIN.cachedUsers.set(doc.id, doc) });
     return 1;
 }
 exports.setServerPrefix = setServerPrefix;
 
-function setDefaultPrefix(message, params, user) {
+async function setDefaultPrefix(message, params, user) {
 
     if (params == message.content) {
         message.channel.send("You have to provde an actual prefix!");
@@ -180,7 +180,7 @@ function setDefaultPrefix(message, params, user) {
 
     if (params == "sa!") params = -1;
 
-    User.findOneAndUpdate({ id: user.id }, { $set: { defaultPrefix: params } }, function (err, doc, res) { });
+    User.findOneAndUpdate({ id: user.id }, { $set: { defaultPrefix: params } }, { new: true }, function (err, doc, res) { MAIN.cachedUsers.set(doc.id, doc) });
     return 1;
 }
 exports.setDefaultPrefix = setDefaultPrefix;

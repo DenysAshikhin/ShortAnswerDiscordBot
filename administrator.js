@@ -23,7 +23,7 @@ async function initialiseUsers(message) {
 }
 exports.initialiseUsers = initialiseUsers;
 
-function setDefaultServerPrefix(message, params, user) {
+async function setDefaultServerPrefix(message, params, user) {
 
     if (message.channel.type == 'dm') return message.channel.send("You can only set the default server prefix from inside a server text channel");
 
@@ -47,7 +47,7 @@ function setDefaultServerPrefix(message, params, user) {
 
     if (params == "sa!") params = -1;
 
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { prefix: params } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { prefix: params } }, { new: true }, function (err, doc, res) { MAIN.cachedGuilds.set(doc.id, doc) });
     return 1;
 }
 exports.setDefaultServerPrefix = setDefaultServerPrefix;

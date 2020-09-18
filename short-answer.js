@@ -376,6 +376,7 @@ connectDB.once('open', async function () {
 
             user = await findUser({ id: message.author.id });
             cachedUsers.set(user.id, user);
+            exports.cachedUsers = cachedUsers;
             console.log(`Number of cached users: ${cachedUsers.size}`);
 
             if (message.channel.type != 'dm') {
