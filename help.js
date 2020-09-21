@@ -120,7 +120,7 @@ const generalHelpMessage = async function (message, tag, title, user) {
               //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}tutorialsTutorial` + "```";
                 break;
             case 10:
-                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+            //    description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
                 break;
             case 11:
                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}twitchTutorial` + "```";

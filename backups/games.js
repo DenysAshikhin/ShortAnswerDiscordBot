@@ -12,9 +12,10 @@ var guildSquads = new Map();
 
 const updateGamesList = function () {
 
-    gameJSON = require('./gameslist.json')
+    let gameJSON = require('./gameslist.json')
 
-    games = gameJSON;
+    for (let element of gamyJson)
+        games.push(element.name);
     games.sort();
     exports.games = games;
 }

@@ -118,6 +118,152 @@ exports.botID = botID;
 const guildID = '97354142502092800';
 exports.guildID = guildID;
 
+// const gameSuggest = {
+//     guildID: '97354142502092800',
+//     channelID: '757656344370085929',
+//     messageID: '757687356361801728',
+//     suggestQueue: []
+// }
+const gameSuggest = {
+    guildID: '728358459791245345',
+    channelID: '728360459920736368',
+    messageID: '757701536741720235',
+    suggestQueue: []
+}
+exports.gameSuggest = gameSuggest;
+
+var gameSuggestCollecter;
+
+async function gameSuggestControlEmoji() {
+
+    let message = await Client.guilds.cache.get(gameSuggest.guildID).channels.cache.get(gameSuggest.channelID).messages.fetch(gameSuggest.messageID);
+
+    checkControlsEmoji(message);
+
+    let reactions = message.reactions.cache;
+
+    {
+        if (!reactions.get('✅'))
+            await message.react('✅')
+
+        if (!reactions.get('❎'))
+            await message.react('❎')
+
+        if (!reactions.get('❌'))
+            await message.react('❌')
+
+        if (!reactions.get('🔄'))
+            await message.react('🔄')
+    }
+
+    refreshSuggestQueue(message);
+    setInterval(refreshEmojiControls, 5 * 1000);
+}
+
+
+const refreshSuggestQueue = async function (message) {
+
+    message = await Client.guilds.cache.get(gameSuggest.guildID).channels.cache.get(gameSuggest.channelID).messages.fetch(gameSuggest.messageID);
+    gameSuggest.suggestQueue = (await findGuild({ id: gameSuggest.guildID })).gameSuggest;
+
+    if (gameSuggest.suggestQueue.length == 0)
+        return message.edit("There are currently no new game suggestions.");
+
+    let currentSuggest = gameSuggest.suggestQueue[0];
+
+    let fuse = new Fuse(GAMES.games, options);
+    let result = fuse.search(currentSuggest.game);
+
+    let limit = result.length > 5 ? 5 : result.length;
+
+    let displayMessage = `Total number of suggestions: ${gameSuggest.suggestQueue.length}\n`
+        + `${currentSuggest.displayName} has suggested **${currentSuggest.game}**. The top 5 closest matches are:`;
+
+    for (let i = 0; i < limit; i++)
+        displayMessage += `\n${i + 1}) ${result[i].item}`;
+
+
+    message.edit(displayMessage);
+}
+
+async function checkControlsEmoji(message) {
+
+    gameSuggestCollecter = await message.createReactionCollector(function (reaction, user) {
+        return (((reaction.emoji.name === '✅') || (reaction.emoji.name === '❎') ||
+            (reaction.emoji.name === '❌') || (reaction.emoji.name === '🔄')) && (!user.bot))
+    }, { time: 60000 });
+
+    gameSuggestCollecter.on('collect', async function (emoji, user) {
+
+
+        if (emoji.emoji.toString() == '🔄')
+            refreshSuggestQueue(emoji.message);
+        else if (gameSuggest.suggestQueue.length > 0) {
+
+            if (emoji.emoji.toString() == '✅') {
+
+                Client.guilds.cache.get(gameSuggest.suggestQueue[0].guildID).members.cache.get(gameSuggest.suggestQueue[0].userID).user.send(
+                    `Your suggestion for **${gameSuggest.suggestQueue[0].game}** has been accepted! Thank you for your contribution!`
+                );
+
+                GAMES.games.push(gameSuggest.suggestQueue[0].game);
+
+
+                let guild = await findGuild({ id: gameSuggest.guildID });
+                guild.gameSuggest.shift();
+                await Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
+                });
+
+                await fs.promises.writeFile('./gameslist.json', JSON.stringify(GAMES.games), 'UTF-8');
+
+                refreshSuggestQueue(emoji.message);
+            }
+            else if (emoji.emoji.toString() == '❎') {
+
+
+                Client.guilds.cache.get(gameSuggest.suggestQueue[0].guildID).members.cache.get(gameSuggest.suggestQueue[0].userID).user.send(
+                    `Your suggestion for **${gameSuggest.suggestQueue[0].game}** has been declined because there is already another game with a similar enough name!`
+                    + `\nTry the *search* command with **${gameSuggest.suggestQueue[0].game}** to view the closest matches!`
+                );
+
+                let guild = await findGuild({ id: gameSuggest.guildID });
+                guild.gameSuggest.shift();
+                await Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
+                });
+
+                refreshSuggestQueue(emoji.message);
+            }
+            else if (emoji.emoji.toString() == '❌') {
+
+                Client.guilds.cache.get(gameSuggest.suggestQueue[0].guildID).members.cache.get(gameSuggest.suggestQueue[0].userID).user.send(
+                    `Your suggestion for **${gameSuggest.suggestQueue[0].game}** has been declined for being nonsensical! You are banned from further suggestions for 1 week!`
+                );
+
+                let guild = await findGuild({ id: gameSuggest.guildID });
+                guild.gameSuggest.shift();
+                await Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
+                });
+
+                await User.findOneAndUpdate({ id: user.id }, { $set: { suggestionBanDate: getBanDate() } }, function (err, doc, res) {
+                });
+                refreshSuggestQueue(emoji.message);
+            }
+        }
+        emoji.users.remove(user);
+    });
+}
+
+async function refreshEmojiControls() {
+
+    gameSuggestCollecter.resetTimer();
+}
+
+
+
+
+
+
+
 const options = {
     isCaseSensitive: false,
     findAllMatches: true,
@@ -309,6 +455,7 @@ connectDB.once('open', async function () {
 
 
     await Client.login(token);
+
     updateAll();
     populateCommandMap();
     TUTORIAL.initialTutorialPopulate();
@@ -317,7 +464,8 @@ connectDB.once('open', async function () {
 
         console.log("Ready!");
         exports.Client = Client;
-
+        if (defaultPrefix != '##')
+            gameSuggestControlEmoji();
         Client.user.setActivity("sa!help for information");
     });
 
@@ -539,6 +687,8 @@ function populateCommandMap() {
     commandMap.set(Commands[88].title.toUpperCase(), HELP.helpTwitch)
     commandMap.set(Commands[89].title.toUpperCase(), HELP.helpGeneral)
     commandMap.set(Commands[90].title.toUpperCase(), TUTORIAL.introTutorial)
+    commandMap.set(Commands[91].title.toUpperCase(), BUGS.suggestGame)
+    commandMap.set(Commands[92].title.toUpperCase(), BUGS.officialServer)
 
     exports.commandMap = commandMap;
 }
@@ -811,6 +961,28 @@ function getDate() {
 }
 exports.getDate = getDate;
 
+const getBanDate = function () {
+
+    let today = new Date();
+    today.setDate(today.getDate() + 7);
+
+    let dayNumber = "00";
+    if (today.getUTCDate() < 10)
+        dayNumber = "0" + today.getUTCDate();
+    else
+        dayNumber = today.getUTCDate();
+
+    let monthNumber = "00";
+    if ((Number(today.getMonth()) + 1) < 10)
+        monthNumber = "0" + (Number(today.getMonth()) + 1);
+    else
+        monthNumber = Number(today.getMonth()) + 1;
+
+    return dayNumber + "-" + monthNumber + "-" + today.getFullYear();
+
+}
+exports.getBanDate = getBanDate;
+
 function mention(id) {
     return "<@" + id + ">"
 }
@@ -869,18 +1041,41 @@ async function addGuild(member, memberDB) {
     memberDB.kicked.push(false);
     memberDB.prefix.push("-1");
 
-    memberDB.set("guilds", memberDB.guilds)
-    memberDB.set("messages", memberDB.messages)
-    memberDB.set("lastMessage", memberDB.lastMessage)
-    memberDB.set("timeTalked", memberDB.timeTalked)
-    memberDB.set("lastTalked", memberDB.lastTalked)
-    memberDB.set("timeAFK", memberDB.timeAFK)
-    memberDB.set("dateJoined", memberDB.dateJoined)
-    memberDB.set("summoner", memberDB.summoner)
-    memberDB.set("kicked", memberDB.kicked)
-    memberDB.set("prefix", memberDB.prefix)
-    memberDB.save();
-    console.log("Inside of addGUild")
+    // memberDB.set("guilds", memberDB.guilds)
+    // memberDB.set("messages", memberDB.messages)
+    // memberDB.set("lastMessage", memberDB.lastMessage)
+    // memberDB.set("timeTalked", memberDB.timeTalked)
+    // memberDB.set("lastTalked", memberDB.lastTalked)
+    // memberDB.set("timeAFK", memberDB.timeAFK)
+    // memberDB.set("dateJoined", memberDB.dateJoined)
+    // memberDB.set("summoner", memberDB.summoner)
+    // memberDB.set("kicked", memberDB.kicked)
+    // memberDB.set("prefix", memberDB.prefix)
+    // memberDB.save();
+
+    User.findOneAndUpdate({ id: user.id },
+        {
+            $set: {
+                guilds: memberDB.guilds,
+                messages: memberDB.messages,
+                lastMessage: memberDB.lastMessage,
+                timeTalked: memberDB.timeTalked,
+                lastTalked: memberDB.lastTalked,
+                timeAFK: memberDB.timeAFK,
+                dateJoined: memberDB.dateJoined,
+                summoner: memberDB.summoner,
+                kicked: memberDB.kicked,
+                prefix: memberDB.prefix,
+            }
+        }, function (err, doc, res) {
+            if (err) {
+                Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err.toString());
+                console.log(err);
+            }
+            if (res) Client.guilds.cache.get(guildID).channels.cache.get(logID).send(res.toString())
+        });
+
+
 }
 
 async function createGuild(guild) {

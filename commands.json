@@ -1077,5 +1077,31 @@
             9
         ],
         "category": "Specific Tutorials"
+    },
+    {
+        "title": "suggestGame",
+        "explanation": "Add a game suggestion to the queue which can be found on the official Short Answer Discord Server. If accepted/rejected you will get a notification!",
+        "example": [
+            "1) suggestGame DoTa 2"
+        ],
+        "subsection": [
+            1,
+            10
+        ],
+        "category": "*Other*"
+    },
+    {
+        "title": "officialServerInvite",
+        "explanation": "Creates an invite link to the official Short Answer discord server!",
+        "example": [
+            "1) officialServerInvite"
+        ],
+        "subsection": [
+            3,
+            7,
+            8,
+            10
+        ],
+        "category": "*Other*"
     }
 ]

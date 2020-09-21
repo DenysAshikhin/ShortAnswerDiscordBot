@@ -90,7 +90,15 @@ const UserSchema = new mongoose.Schema({
         default: ''
     },
     twitchNotifications: [],
-    linkedLeague: []
+    linkedLeague: [],
+    suggestionBan: {
+        type: Boolean,
+        default: false
+    },
+    suggestionBanDate: {
+        type: String,
+        default: '0-0-0000'
+    }
 });
 
 module.exports = mongoose.model('User', UserSchema);

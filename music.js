@@ -172,6 +172,9 @@ async function spotifyPlaylist(message, params, user) {
         if (!cleanedName.includes("daycore")) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("daycore"))
         }
+        if (!cleanedName.includes("studio")) {
+            searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("studio"))
+        }
 
         let fuse = new Fuse(searchyArray, newOptions);
         let result = fuse.search(name.replace(/([(){}&,\-])/g, '').replace(/\s{2,}/g, ' '));
