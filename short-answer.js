@@ -498,6 +498,13 @@ connectDB.once('open', async function () {
         if (!user) {
 
             user = await findUser({ id: message.author.id });
+
+            if(!user){
+
+                await checkExistance(message.member);
+                user = await findUser({ id: message.author.id });
+            }
+
             cachedUsers.set(user.id, user);
         }
 
