@@ -326,7 +326,7 @@ async function resume(message) {
 }
 exports.resume = resume;
 
-async function skip(message, params, emoji) {
+async function skip(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
     let guildQueue = queue.get(message.guild.id);
@@ -363,7 +363,7 @@ async function skip(message, params, emoji) {
 }
 exports.skip = skip;
 
-async function reverse(message, params, emoji) {
+async function reverse(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
     let guildQueue = queue.get(message.guild.id);
@@ -669,6 +669,51 @@ async function play(message, params, user) {
     if (!params.spoti && ((await spotifyPlaylist(message, args, user)) != -1)) {
         console.log('it was spotify')
     }
+    else if (ytdl.validateURL(args)) {
+        songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
+
+        //console.log(songInfo)
+        if (songInfo.videoDetails.lengthSeconds) {
+
+            if (!songInfo.player_response.microformat.playerMicroformatRenderer.availableCountries.includes('US'))
+                return message.channel.send("This video is not available here! Please try another one.");
+
+            let startTime = args.lastIndexOf('?t=');
+            let offset = 0;
+
+            if (startTime != -1) {
+
+                let tester = args.substring(startTime + 3);
+                offset = (tester.length > 0 && !isNaN(tester)) ? Number(tester) : 0;
+            }
+
+            let song = {
+                title: songInfo.videoDetails.title,
+                url: songInfo.videoDetails.video_url,
+                duration: songInfo.videoDetails.lengthSeconds,
+                start: null,
+                offset: offset,
+                id: songInfo.videoDetails.videoId,
+                paused: null,
+                timePaused: 0,
+                progress: 0
+            };
+            queueConstruct.songs.push(song);
+            await cacheSong(song, message.guild.id);
+
+
+            if ((queueConstruct.songs.length > 1))
+                if (!params.spoti) { await message.channel.send(`${songInfo.title} has been added to the queue!`); }
+                else { }
+            else {
+
+                callPlay = true;
+            }
+
+        }
+        else
+            message.channel.send("I can't access that video, please try another!");
+    }
     else if ((ytpl.validateID(await ytpl.getPlaylistID(args))) && !params.spoti) {
 
         console.log('it was playlist')
@@ -684,6 +729,16 @@ async function play(message, params, user) {
             queue.delete(message.guild.id);
             return -1;
         }
+
+
+        if ((queueConstruct.songs.length > 1))
+            if (!params.spoti) { await message.channel.send(`${playlist.items.length} songs have been added to the queue!`); }
+            else { }
+        else {
+
+            callPlay = true;
+        }
+
 
         for (Video of playlist.items) {
             if (Video.duration) {
@@ -704,53 +759,9 @@ async function play(message, params, user) {
                 queueConstruct.songs.push(song);
                 await cacheSong(song, message.guild.id);
             }
-        } callPlay = true;
-        MAIN.selfDestructMessage(message, `${playlist.items.length} songs have been added to the queue!`, 3, false);
-    }
-    else if (ytdl.validateURL(args)) {
-        songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
-
-        //console.log(songInfo)
-        if (songInfo.length_seconds) {
-
-            if (!songInfo.player_response.microformat.playerMicroformatRenderer.availableCountries.includes('US'))
-                return message.channel.send("This video is not available here! Please try another one.");
-
-            let startTime = args.lastIndexOf('?t=');
-            let offset = 0;
-
-            if (startTime != -1) {
-
-                let tester = args.substring(startTime + 3);
-                offset = (tester.length > 0 && !isNaN(tester)) ? Number(tester) : 0;
-            }
-
-            let song = {
-                title: songInfo.title,
-                url: songInfo.video_url,
-                duration: songInfo.length_seconds,
-                start: null,
-                offset: offset,
-                id: songInfo.video_id,
-                paused: null,
-                timePaused: 0,
-                progress: 0
-            };
-            queueConstruct.songs.push(song);
-            await cacheSong(song, message.guild.id);
-
-
-            if ((queueConstruct.songs.length > 1))
-                if (!params.spoti) { await message.channel.send(`${songInfo.title} has been added to the queue!`); }
-                else { }
-            else {
-
-                callPlay = true;
-            }
-
         }
-        else
-            message.channel.send("I can't access that video, please try another!");
+
+        // MAIN.selfDestructMessage(message, `${playlist.items.length} songs have been added to the queue!`, 3, false);
     }
     else {
         let searchResult = await ytsr(args, { limit: 10 });
@@ -855,7 +866,7 @@ async function checkControlsEmoji(message) {
             else pause(emoji.message);
         }
         else if (emoji.emoji.toString() == '⏩') {
-            skip(emoji.message, '1', true)
+            skip(emoji.message, '1', null, true)
         }
         else if (emoji.emoji.toString() == '🔊') {
 
@@ -1002,7 +1013,7 @@ async function playSong(guild, sonG, skip, message) {
         streamResolve.on('error', (err) => {
             console.log("RESOLVE ERROR")
             //message.channel.send(`${song.title} is no longer availabe, I suggest removing it with the removeSong command. Skipping it for now...`);
-            skip(message, 1, true);
+            skip(message, 1, null, true);
         })
         const Dispatcher = await serverQueue.connection.play(streamResolve, { seek: song.offset })
             .on('error', error => {
@@ -1119,7 +1130,7 @@ async function cacheSong(song, GUILD, MESSAGE) {
 
     if (!tempAudioExists && !audioExists) {
 
-        try{
+        try {
             let downloadYTDL = require('ytdl-core');
             downloadingSongs.set(song.id, true);
 
@@ -1179,7 +1190,7 @@ async function cacheSong(song, GUILD, MESSAGE) {
             });
             youtubeResolve.pipe(writeStream);
         }
-        catch(err){
+        catch (err) {
             console.log(err)
             console.log("Caught error when caching (probably stopped stream before cached was done")
         }

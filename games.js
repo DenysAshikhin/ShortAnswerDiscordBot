@@ -9,6 +9,8 @@ var games = new Array();
 exports.games = games;
 var guildSquads = new Map();
 
+var guildTeams = new Map();
+
 
 const updateGamesList = function () {
 
@@ -315,9 +317,32 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
             }
 
             if (squads)
-                squads.push({ joinedIDS: [user.id], message: summonMessage, collector: collector, messageID: summonMessage.id, game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id });
+                squads.push({
+                    joinedIDS: [user.id],
+                    message: summonMessage,
+                    collector: collector,
+                    messageID: summonMessage.id,
+                    game: game,
+                    displayNames: [user.displayName],
+                    size: squadSize,
+                    created: new Date(),
+                    summoner: user.displayName,
+                    summonerID: user.id
+                });
             else
-                guildSquads.set(message.guild.id, [{ joinedIDS: [user.id], message: summonMessage, collector: collector, messageID: summonMessage.id, game: game, displayNames: [user.displayName], size: squadSize, created: new Date(), summoner: user.displayName, summonerID: user.id }])
+                guildSquads.set(message.guild.id, [
+                    {
+                        joinedIDS: [user.id],
+                        message: summonMessage,
+                        collector: collector,
+                        messageID: summonMessage.id,
+                        game: game,
+                        displayNames: [user.displayName],
+                        size: squadSize,
+                        created: new Date(),
+                        summoner: user.displayName,
+                        summonerID: user.id
+                    }])
 
 
             {     // for (let i = 0; i < 25; i++) {
@@ -703,7 +728,6 @@ async function Queue(message, params, user, emoji) {
                         squad.displayNames.push(user.username);
                         squad.joinedIDS.push(user.id);
                         return 1;
-                        break;
                     }
                     else {
                         return -2;

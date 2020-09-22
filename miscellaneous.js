@@ -113,7 +113,7 @@ async function getSummoner(zone, name) {
 async function getLeagueEntries(zone, summoner) {
 
     let entries = await api.req(zone, 'lol.leagueV4.getLeagueEntriesForSummoner', summoner.id);
-    console.log(entries);
+
 }
 
 async function getMatchInfo(zone, summoner) {
@@ -129,8 +129,6 @@ async function getMatchInfo(zone, summoner) {
         }
         Promise.all(promises);
     }
-    console.log(matches);
-    console.log(matches.matches.length)
 }
 
 async function getChampionMastery(zone, summoner, topNum) {
@@ -433,7 +431,6 @@ async function unfollowTwitchChannel(message, params, user) {
     }//147711920
     else if (parsed.twitchFollows) {
 
-        console.log(parsed)
         User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.twitchFollows } }, function (err, doc, res) { if (err) console.log(err) });
         message.channel.send(`Successfully removed ${parsed.name} from your follows!`);
     }
@@ -473,8 +470,6 @@ async function showChannelTwitchLinks(message, params, user) {
     for (let i = 0; i < promiseArray.length; i++) {
         finishedArray.push({ texty: textChannels[i], streamy: promiseArray[i] });
     }
-
-    console.log(finishedArray[1])
 
     finishedArray.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
 
@@ -963,7 +958,6 @@ async function checkUsersTwitchStreams(users) {
 
             let member = guild.members.cache.get(entry.userID);
             if (!member) continue;
-            console.log(member.displayName)
             member.send(entry.alertMessage);
             User.findOneAndUpdate({ id: entry.userID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
             return 1;
