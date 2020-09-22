@@ -17,7 +17,7 @@ const suggestGame = async function (message, params, user) {
     if (message.content.split(" ").length < 2)
         return message.channel.send("You have to provide the title of the game to add!");
 
-    let arg = message.content.split(" ").slice(1).join(" ")
+    let arg = message.content.split(" ").slice(1).join(" ");
 
 
     if (user.suggestionBanDate != '0-0-0000')
@@ -34,10 +34,13 @@ const suggestGame = async function (message, params, user) {
 
 
     guild.gameSuggest.push({ guildID: message.guild.id, userID: message.author.id, displayName: user.displayName, game: arg });
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
+    Guild.findOneAndUpdate({ id: MAIN.gameSuggest.guildID }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
     });
     message.channel.send(`**${arg}** has been added to the suggestion queue. You can see the queue in real time at`
         + ` ${(await MAIN.Client.guilds.cache.get('728358459791245345').channels.cache.get('728360459920736368').createInvite()).url}`);
+    
+    await MAIN.sleep(1000);
+    MAIN.refreshSuggestQueue(null);
 }
 exports.suggestGame = suggestGame;
 
@@ -47,3 +50,15 @@ const officialServer = async function (message, params, user) {
     message.channel.send(invite.url);
 }
 exports.officialServer = officialServer;
+
+const acceptSuggestion = async function (message, params, user) {
+
+    if (user.id != MAIN.creatorID)
+        return 1;
+
+    let arg = message.content.split(" ").slice(1).join(" ");
+
+    MAIN.modifiedSuggestionAccept(arg);
+    message.delete();
+}
+exports.acceptSuggestion = acceptSuggestion;

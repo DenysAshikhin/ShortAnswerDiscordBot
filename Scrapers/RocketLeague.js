@@ -42,6 +42,8 @@ async function rocketLeagueRanks(params) {
 
     //  console.log("to finish parse: ", (t1 - t0))
 
+    if(!anotherTrial['stats-v2'].standardProfiles) return -1;
+
     let moreTest = anotherTrial['stats-v2'].standardProfiles[`rocket-league|${modifiedZone}|${params[1].toLowerCase()}`];
 
     try {

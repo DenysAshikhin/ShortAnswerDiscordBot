@@ -971,7 +971,8 @@
             "2) rlTracker TheLastSpark, steam, #notifications"
         ],
         "subsection": [
-            2, 5
+            2,
+            5
         ],
         "category": "Trackers"
     },
@@ -983,7 +984,8 @@
             "2) removeRLTracker TheLastSpark, steam, #notifications"
         ],
         "subsection": [
-            2, 5
+            2,
+            5
         ],
         "category": "Trackers"
     },
@@ -1102,6 +1104,15 @@
             8,
             10
         ],
+        "category": "*Other*"
+    },
+    {
+        "title": "acceptSuggestion",
+        "explanation": "You should know.",
+        "example": [
+            "1) acceptSuggestion Fall Guys"
+        ],
+        "subsection": [10],
         "category": "*Other*"
     }
 ]

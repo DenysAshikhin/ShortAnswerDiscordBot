@@ -185,6 +185,7 @@ const refreshSuggestQueue = async function (message) {
 
     message.edit(displayMessage);
 }
+exports.refreshSuggestQueue = refreshSuggestQueue;
 
 async function checkControlsEmoji(message) {
 
@@ -195,6 +196,8 @@ async function checkControlsEmoji(message) {
 
     gameSuggestCollecter.on('collect', async function (emoji, user) {
 
+        if ((user.id != creatorID))
+            return emoji.users.remove(user);
 
         if (emoji.emoji.toString() == '🔄')
             refreshSuggestQueue(emoji.message);
@@ -259,6 +262,24 @@ async function refreshEmojiControls() {
 }
 
 
+const modifiedSuggestionAccept = async function (game) {
+
+    Client.guilds.cache.get(gameSuggest.suggestQueue[0].guildID).members.cache.get(gameSuggest.suggestQueue[0].userID).user.send(
+        `Your suggestion for **${gameSuggest.suggestQueue[0].game}** has been accepted as: ${game}! Thank you for your contribution!`
+    );
+
+    GAMES.games.push(game);
+
+    let guild = await findGuild({ id: gameSuggest.guildID });
+    guild.gameSuggest.shift();
+    await Guild.findOneAndUpdate({ id: gameSuggest.guildID }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
+    });
+
+    await fs.promises.writeFile('./gameslist.json', JSON.stringify(GAMES.games), 'UTF-8');
+
+    refreshSuggestQueue(null);
+}
+exports.modifiedSuggestionAccept = modifiedSuggestionAccept;
 
 
 
@@ -689,7 +710,8 @@ function populateCommandMap() {
     commandMap.set(Commands[90].title.toUpperCase(), TUTORIAL.introTutorial)
     commandMap.set(Commands[91].title.toUpperCase(), BUGS.suggestGame)
     commandMap.set(Commands[92].title.toUpperCase(), BUGS.officialServer)
-
+    commandMap.set(Commands[93].title.toUpperCase(), BUGS.acceptSuggestion)
+    
     exports.commandMap = commandMap;
 }
 
@@ -1053,7 +1075,7 @@ async function addGuild(member, memberDB) {
     // memberDB.set("prefix", memberDB.prefix)
     // memberDB.save();
 
-    User.findOneAndUpdate({ id: user.id },
+    User.findOneAndUpdate({ id: member.id },
         {
             $set: {
                 guilds: memberDB.guilds,
