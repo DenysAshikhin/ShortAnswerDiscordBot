@@ -1114,5 +1114,19 @@
         ],
         "subsection": [10],
         "category": "*Other*"
+    },
+    {
+        "title": "createFaction",
+        "explanation": "Creates a faction for this server which is tied to a role.",
+        "example": [
+            "1) createFaction Shorts, @nameOfRole"
+        ],
+        "subsection": [
+            1,
+            2,
+            3,
+            5
+        ],
+        "category": "*Other*"
     }
 ]

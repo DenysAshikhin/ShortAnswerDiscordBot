@@ -11,7 +11,11 @@ const GuildSchema = new mongoose.Schema({
     channelTwitch: [],
     twitchNotifications: [],
     RLTracker: [],
-    gameSuggest: []
+    gameSuggest: [],
+    factions: {
+        default: [],
+        type: []
+    }
 });
 
 module.exports = mongoose.model('Guild', GuildSchema);

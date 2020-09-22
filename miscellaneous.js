@@ -10,6 +10,7 @@ const studyArray = new Array();
 const net = require('net');
 var needle = require('needle');
 const { parse } = require('path');
+const { create } = require('./User.js');
 
 //http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
 
@@ -967,6 +968,49 @@ async function checkUsersTwitchStreams(users) {
     return 1;
 }
 exports.checkUsersTwitchStreams = checkUsersTwitchStreams;
+
+
+
+const createFaction = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only create a faction from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can create factions")
+
+    if (params == message.content) {
+        message.channel.send("You have to provde a name for the new faction!");
+        return -1;
+    }
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You have to @mention a single role to link the faction to!");
+
+    const args = message.content.split(" ").slice(1).join(" ").split(",")[0].trim();
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    let existingPair = guild.factions.find(element =>
+        ((element.role == message.mentions.roles.first()) || (element.name == args))
+    );
+
+    if (existingPair)
+        return message.channel.send(`Either a faction named ${args} exists or ${MAIN.mentionRole(message.mentions.roles.first().id)} is already assigned a faction!`);
+
+
+    guild.factions.push({
+        role: message.mentions.roles.first().id,
+        name: args,
+        points: 0,
+        contributions: []
+    });
+
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { if (err) console.log(err) });
+
+    message.channel.send(`The faction: **${args}** has been created and linked to${MAIN.mentionRole(message.mentions.roles.first().id)}!`);
+}
+exports.createFaction = createFaction;
+
 
 
 async function reactAnswers(message) {

@@ -499,7 +499,7 @@ connectDB.once('open', async function () {
 
             user = await findUser({ id: message.author.id });
 
-            if(!user){
+            if (!user) {
 
                 await checkExistance(message.member);
                 user = await findUser({ id: message.author.id });
@@ -604,6 +604,7 @@ connectDB.once('open', async function () {
 
         if (member.id != botID) {
             let user = await findUser({ id: member.id });
+            if (!user) return -1;
             let index = user.guilds.indexOf(member.guild.id);
             user.kicked[index] = true;
             User.findOneAndUpdate({ id: member.id }, { $set: { kicked: user.kicked } }, function (err, doc, res) { });
@@ -718,7 +719,8 @@ function populateCommandMap() {
     commandMap.set(Commands[91].title.toUpperCase(), BUGS.suggestGame)
     commandMap.set(Commands[92].title.toUpperCase(), BUGS.officialServer)
     commandMap.set(Commands[93].title.toUpperCase(), BUGS.acceptSuggestion)
-    
+    commandMap.set(Commands[94].title.toUpperCase(), MISCELLANEOUS.createFaction)
+
     exports.commandMap = commandMap;
 }
 
@@ -1016,6 +1018,11 @@ function mention(id) {
     return "<@" + id + ">"
 }
 exports.mention = mention;
+
+function mentionRole(id) {
+    return "<@&" + id + ">"
+}
+exports.mentionRole = mentionRole;
 
 function directMessage(message, memberID, game) {
 

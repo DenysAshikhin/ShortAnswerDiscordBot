@@ -14,7 +14,7 @@ async function helpStats(message, params, user) {
 }
 exports.helpStats = helpStats;
 
-function helpMiscellaneous(message) {
+function helpMiscellaneous(message, params, user) {
 
     return generalHelpMessage(message, 3, `Miscellaneous Commands`, user);
 }
