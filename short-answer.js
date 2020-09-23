@@ -720,6 +720,7 @@ function populateCommandMap() {
     commandMap.set(Commands[92].title.toUpperCase(), BUGS.officialServer)
     commandMap.set(Commands[93].title.toUpperCase(), BUGS.acceptSuggestion)
     commandMap.set(Commands[94].title.toUpperCase(), MISCELLANEOUS.createFaction)
+    commandMap.set(Commands[95].title.toUpperCase(), MISCELLANEOUS.factionPoints)
 
     exports.commandMap = commandMap;
 }

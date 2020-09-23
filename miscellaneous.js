@@ -978,7 +978,10 @@ const createFaction = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can create factions")
 
-    if (params == message.content) {
+
+    const args = message.content.split(" ").slice(1).join(" ").split(",")[0].trim();
+
+    if (!args) {
         message.channel.send("You have to provde a name for the new faction!");
         return -1;
     }
@@ -986,7 +989,6 @@ const createFaction = async function (message, params, user) {
     if (message.mentions.roles.size != 1)
         return message.channel.send("You have to @mention a single role to link the faction to!");
 
-    const args = message.content.split(" ").slice(1).join(" ").split(",")[0].trim();
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
 
@@ -1002,7 +1004,10 @@ const createFaction = async function (message, params, user) {
         role: message.mentions.roles.first().id,
         name: args,
         points: 0,
-        contributions: []
+        contributions: {
+            general: 0,
+            members: []
+        }
     });
 
     Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { if (err) console.log(err) });
@@ -1011,7 +1016,82 @@ const createFaction = async function (message, params, user) {
 }
 exports.createFaction = createFaction;
 
+const factionPoints = async function (message, params, user) {
 
+    if (message.channel.type == 'dm') return message.channel.send("You can only award/deduct points from inside a server text channel!");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can award/deduct points")
+
+    const args = Number(message.content.split(" ").slice(1).join(" ").split(",")[0].trim());
+
+    if (!args) {
+        message.channel.send("You have to provde a value for the points to award/deduct!");
+        return -1;
+    }
+    if (isNaN(args))
+        return message.channel.send("You have to provide either a positive or negative number to award/deduct!");
+
+    if (message.mentions.roles.size > 1)
+        return message.channel.send("You can only @mention a single role!");
+    if (message.mentions.users.size > 1)
+        return message.channel.send("You can only @mention a single user!");
+
+    if (message.mentions.roles.size == 1)
+        if (message.mentions.users.size == 1)
+            return message.channel.send("You have to @mention either a single role or user to award/deduct points!");
+
+    if ((message.mentions.roles.size == 0) && (message.mentions.users.size == 0))
+        return message.channel.send("You have to @mention either a single role or user to award/deduct points!");
+
+    let guild = (await MAIN.findGuild({ id: message.guild.id })).factions;
+
+    let factionModify;
+
+    if (message.mentions.roles.size == 1) {
+
+        factionModify = guild.findIndex(element => element.role == message.mentions.roles.first().id);
+        if (factionModify == -1)
+            return message.channel.send(`There is no faction tied to ${MAIN.mentionRole(message.mentions.roles.first().id)}`);
+
+        guild[factionModify].points += args;
+        guild[factionModify].contributions.general += args;
+        message.channel.send(`${guild[factionModify].name} is now at ${guild[factionModify].points} points!`);
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild } }, function (err, doc, res) { });
+    }
+    else {
+
+
+        let memberRoles = message.guild.members.cache.get(message.mentions.users.first().id).roles.cache.keyArray();
+
+
+        factionModify = guild.findIndex(element => memberRoles.includes(element.role));
+        if (factionModify == -1)
+            return message.channel.send(`${MAIN.mention(message.mentions.users.first().id)} is not part of any faction!`);
+
+        guild[factionModify].points += args;
+
+        let specificUser = guild[factionModify].contributions.members;
+        if (specificUser.length == 0){
+            specificUser = {
+                userID: message.mentions.users.first().id,
+                points: args
+            };
+            guild[factionModify].contributions.members.push(specificUser);
+        }
+        else{
+            specificUser = guild[factionModify].contributions.members.find(element => element.userID == message.mentions.users.first().id);
+            specificUser.points += args
+        }
+
+            message.channel.send(`${guild[factionModify].name} is now at ${guild[factionModify].points} points!`
+            + `\n${message.guild.members.cache.get(message.mentions.users.first().id).displayName} has contributed ${specificUser.points} points!`);
+
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild } }, function (err, doc, res) { });
+    }
+
+}
+exports.factionPoints = factionPoints;
 
 async function reactAnswers(message) {
 

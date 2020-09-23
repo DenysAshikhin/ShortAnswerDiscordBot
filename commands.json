@@ -1127,6 +1127,20 @@
             3,
             5
         ],
-        "category": "*Other*"
+        "category": "Faction"
+    },
+    {
+        "title": "factionPoints",
+        "explanation": "Awards or removes points from a faction and/or faction member.",
+        "example": [
+            "1) factionsPoints 25, @nameOfRole",
+            "2) factionPoints -31, @userName"
+        ],
+        "subsection": [
+            1,
+            2,
+            3
+        ],
+        "category": "Faction"
     }
 ]
