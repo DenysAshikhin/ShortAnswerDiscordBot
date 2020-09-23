@@ -621,6 +621,22 @@ connectDB.once('open', async function () {
 
         console.log(`Bot has been kicked from ${guild.name}`);
     })
+
+    Client.on("guildMemberUpdate", async function (oldMember, newMember) {
+
+        let guild = await findGuild({ id: newMember.guild.id });
+
+        if (guild.factions.length > 0) {
+
+            let faction = guild.factions.find(element => newMember.roles.cache.keyArray().includes(element.role));
+
+            if (faction) {
+                faction.points += 50;
+                faction.contributions.newMembers += 50;
+                Guild.findOneAndUpdate({ id: newMember.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+            }
+        }
+    })
 });
 
 function populateCommandMap() {
@@ -723,6 +739,7 @@ function populateCommandMap() {
     commandMap.set(Commands[95].title.toUpperCase(), MISCELLANEOUS.factionPoints)
     commandMap.set(Commands[96].title.toUpperCase(), MISCELLANEOUS.viewFaction)
     commandMap.set(Commands[97].title.toUpperCase(), MISCELLANEOUS.deleteFaction)
+    commandMap.set(Commands[98].title.toUpperCase(), MISCELLANEOUS.resetFactions)
 
     exports.commandMap = commandMap;
 }

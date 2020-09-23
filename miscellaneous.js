@@ -12,6 +12,7 @@ var needle = require('needle');
 const { parse } = require('path');
 const { create } = require('./User.js');
 const { mem } = require('node-os-utils');
+const { reset } = require('nodemon');
 
 //http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
 
@@ -1011,6 +1012,7 @@ const createFaction = async function (message, params, user) {
         points: 0,
         contributions: {
             general: 0,
+            newMembers: 0,
             members: []
         }
     });
@@ -1061,7 +1063,7 @@ const factionPoints = async function (message, params, user) {
 
         guild[factionModify].points += args;
         guild[factionModify].contributions.general += args;
-        message.channel.send(`${guild[factionModify].name} is now at ${guild[factionModify].points} points!`);
+        message.channel.send(`**${guild[factionModify].name}** is now at ${guild[factionModify].points} points!`);
         Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild } }, function (err, doc, res) { });
     }
     else {
@@ -1088,7 +1090,7 @@ const factionPoints = async function (message, params, user) {
             specificUser.points += args
         }
 
-        message.channel.send(`${guild[factionModify].name} is now at ${guild[factionModify].points} points!`
+        message.channel.send(`**${guild[factionModify].name}** is now at ${guild[factionModify].points} points!`
             + `\n${message.guild.members.cache.get(message.mentions.users.first().id).displayName} has contributed ${specificUser.points} points!`);
 
         Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild } }, function (err, doc, res) { });
@@ -1140,6 +1142,7 @@ const viewFaction = async function (message, params, user) {
 
             let finalText = `#Current standing: ${faction.points}\n`
                 + `\nGeneral Contributions: ${faction.contributions.general}\n`
+                + `\nNew Member Points: ${faction.contributions.newMembers}`
                 + `\nMember Specific Contributions:\n`
 
             let memberContribution = '';
@@ -1166,6 +1169,7 @@ const viewFaction = async function (message, params, user) {
 
         let finalText = `#Current standing: ${faction.points}\n`
             + `\nGeneral Contributions: ${faction.contributions.general}\n`
+            + `\nNew Member Points: ${faction.contributions.newMembers}`
             + `\nMember Specific Contributions:\n`
 
         let memberContribution = '';
@@ -1192,6 +1196,7 @@ const viewFaction = async function (message, params, user) {
 
         let finalText = `#Current standing: ${faction.points}\n`
             + `\nGeneral Contributions: ${faction.contributions.general}\n`
+            + `\nNew Member Points: ${faction.contributions.newMembers}`
             + `\nMember Specific Contributions:\n`
 
         let memberContribution = '';
@@ -1223,6 +1228,7 @@ const viewFaction = async function (message, params, user) {
 
         let finalText = `#Current standing: ${faction.points}\n`
             + `\nGeneral Contributions: ${faction.contributions.general}\n`
+            + `\nNew Member Points: ${faction.contributions.newMembers}`
             + `\nMember Specific Contributions:\n`
 
         let memberContribution = '';
@@ -1243,20 +1249,19 @@ exports.viewFaction = viewFaction;
 
 const deleteFaction = async function (message, params, user) {
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
-    if (guild.factions.length == 0)
-        return message.channel.send("There are no faction in the server to delete!");
-
-
     let deleted;
 
     if (params.looped) {
 
         deleted = guild.factions.splice(params.factionIndex)[0];
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+        Guild.findOneAndUpdate({ id: params.guildID }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
 
         return message.channel.send(`${deleted.name} has been deleted! ${MAIN.mentionRole(deleted.role)} can now be assigned a new faction!`);
     }
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+    if (guild.factions.length == 0)
+        return message.channel.send("There are no faction in the server to delete!");
 
     if (message.channel.type == 'dm') return message.channel.send("You can only delete factions from inside a server text channel!");
 
@@ -1286,7 +1291,7 @@ const deleteFaction = async function (message, params, user) {
                 acc.push(current.name);
                 return acc;
             }, []), guild.factions.reduce((acc, current, index) => {
-                acc.push({ factionIndex: index, looped: true });
+                acc.push({ factionIndex: index, looped: true, guildID: message.guild.id });
                 return acc;
             }, []), deleteFaction, `**${args}** is not an existing faction! Please choose which one you meant: `);
         }
@@ -1299,6 +1304,44 @@ const deleteFaction = async function (message, params, user) {
     message.channel.send(`${deleted.name} has been deleted! ${MAIN.mentionRole(deleted.role)} can now be assigned a new faction!`);
 }
 exports.deleteFaction = deleteFaction;
+
+const resetFactions = async function (message, params, user) {
+
+    if (params.looped)
+        if (!params.wipe)
+            return message.channel.send("Faction reset aborted!");
+        else {
+            let guild = await MAIN.findGuild({ id: params.guildID });
+
+            for (let faction of guild.factions) {
+
+                faction.points = 0;
+                faction.contributions.general = 0;
+                faction.contributions.members = [];
+                faction.newMembers = 0;
+                // for (let member of faction.contributions.members) {
+                //     member.points = 0;
+                // }
+            }
+            Guild.findOneAndUpdate({ id: params.guildID }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+            return params.channel.send("All factions have been reset!");
+        }
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+    if (guild.factions.length == 0)
+        return message.channel.send("There are no faction in the server to reset!");
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only delete factions from inside a server text channel!");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can delete factions");
+
+    if (!params.looped)
+        return MAIN.generalMatcher(message, -23, user, ['yes', 'no'], [{ looped: true, wipe: true, guildID: message.guild.id, channel: message.channel },
+        { looped: true, wipe: false }],
+            resetFactions, "You are about to reset all faction and member contributions. Are you sure you wish to proceed?");
+}
+exports.resetFactions = resetFactions;
 
 
 async function reactAnswers(message) {
