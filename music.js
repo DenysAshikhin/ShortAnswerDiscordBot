@@ -666,6 +666,15 @@ async function play(message, params, user) {
 
     let songInfo;
 
+    let playlistID;
+
+    try {
+        playlistID = await ytpl.getPlaylistID(args);
+    }
+    catch(err){
+        console.log('not a playlist')
+    }
+
     if (!params.spoti && ((await spotifyPlaylist(message, args, user)) != -1)) {
         console.log('it was spotify')
     }
@@ -714,7 +723,7 @@ async function play(message, params, user) {
         else
             message.channel.send("I can't access that video, please try another!");
     }
-    else if ((ytpl.validateID(await ytpl.getPlaylistID(args))) && !params.spoti) {
+    else if (playlistID && !params.spoti) {
 
         console.log('it was playlist')
 

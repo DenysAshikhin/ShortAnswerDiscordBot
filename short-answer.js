@@ -469,7 +469,9 @@ const sendToServer = async function (data) {
 }
 exports.sendToServer = sendToServer;
 
-
+const inviteLink = function (message) {
+    message.channel.send(`Here you go!\nhttps://discordapp.com/oauth2/authorize?&client_id=689315272531902606&permissions=8&scope=bot`);
+}
 
 
 connectDB.once('open', async function () {
@@ -601,7 +603,7 @@ connectDB.once('open', async function () {
             if (!permission.has("SEND_MESSAGES"))
                 return -1;
 
-            member.guild.channels.cache.get(member.guild.systemChannelID).send("Welcome to the server " + member.displayName + "!");
+            member.guild.channels.cache.get(member.guild.systemChannel).send("Welcome to the server " + member.displayName + "!");
         }
         checkExistance(member);
     });
@@ -781,7 +783,7 @@ function populateCommandMap() {
     commandMap.set(Commands[98].title.toUpperCase(), MISCELLANEOUS.resetFactions)
     commandMap.set(Commands[99].title.toUpperCase(), MISCELLANEOUS.factionNewMemberAlertChannel)
     commandMap.set(Commands[100].title.toUpperCase(), MISCELLANEOUS.createFactionRunningTally)
-
+    commandMap.set(Commands[101].title.toUpperCase(), inviteLink)
 
     exports.commandMap = commandMap;
 }

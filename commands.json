@@ -1214,6 +1214,17 @@
             5
         ],
         "category": "Faction"
+    },
+    {
+        "title": "invite",
+        "explanation": "Creates an invite link to add me to your server!",
+        "example": [
+            "1) invite"
+        ],
+        "subsection": [
+            3,
+            8
+        ],
+        "category": "Special"
     }
-
 ]

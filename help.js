@@ -95,7 +95,7 @@ const generalHelpMessage = async function (message, tag, title, user) {
             description += `Here you can find all the commands pertaining to organizing or summoning people to play games. Or contribute to current faction battles!`;
     }
 
-    description = "```md\n" + `You can find out more information about any command by typing <${prefix}help Command>` + "```";
+    description += "```md\n" + `You can find out more information about any command by typing <${prefix}help Command>` + "```";
 
 
     if (!user.completedTutorials.includes(tag))
@@ -179,6 +179,7 @@ function generalHelp(message, params, user) {
                 { name: "Others", value: "QualityOfLife", inline: true },
                 { name: "Hush-Hush", value: "Admins", inline: true },
                 { name: "Hush-Hush", value: "Bugs/Suggestions", inline: true },
+                { name: "🔥**Invite Me Command**🔥", value: "invite"}
             ], {
             description: description, startTally: 1, modifier: 1, title: `General Help`
         });

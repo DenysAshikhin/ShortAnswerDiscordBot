@@ -790,7 +790,7 @@ connectDB.once('open', async function () {
         console.log("Ready!");
         exports.Client = client;
         checkRL();
-        setInterval(checkTwitch, 1000);
+        setInterval(checkTwitch, 60 * 1000);
     });
     client.on('message', async (message) => {
 

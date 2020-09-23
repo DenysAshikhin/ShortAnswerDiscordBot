@@ -102,7 +102,7 @@ async function checkGuildTwitchStreams(guilds) {
 
                             sendArray.push({
                                 twitchNotifications: GUILD1.twitchNotifications, guildID: GUILD1.id,
-                                alertMessage: `${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`,
+                                alertMessage: `@everyone \n${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`,
                                 channelID: channel[1]
                             });
                         }
