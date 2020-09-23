@@ -597,15 +597,16 @@ connectDB.once('open', async function () {
         if (member.id == botID) {
             console.log("bot joined server!");
         }
-        else if (member.guild.systemChannelID) {
+        else{
 
-            let permission = member.guild.systemChannelID.permissionsFor(await member.guild.members.fetch(botID));
+            checkExistance(member);
+
+            let permission = member.guild.systemChannel.permissionsFor(await member.guild.members.fetch(botID));
             if (!permission.has("SEND_MESSAGES"))
                 return -1;
 
-            member.guild.channels.cache.get(member.guild.systemChannel).send("Welcome to the server " + member.displayName + "!");
+            member.guild.systemChannel.send("Welcome to the server " + member.displayName + "!");
         }
-        checkExistance(member);
     });
 
     Client.on('guildMemberRemove', async member => {

@@ -920,7 +920,6 @@ exports.viewActiveSummons = viewActiveSummons;
 async function banish(message, params, user, emoji) {
 
     {
-
         if (message.channel.type != 'text') { message.channel.send("This is a server-text channel exclusive command!"); return -1; }
 
         let squads = guildSquads.get(message.guild.id);
@@ -931,7 +930,7 @@ async function banish(message, params, user, emoji) {
 
         if (!squad) {
             if (emoji)
-                MAIN.selfDestructMessage(message, `Only the original summoner can kick from this summon!`, 3, true)
+                MAIN.selfDestructMessage(message, `Only the original summoner can kick from this summon!`, 3, false)
             else
                 message.channel.send("You don't have any active summons to kick from!");
             return 0;
@@ -968,7 +967,7 @@ async function banish(message, params, user, emoji) {
                 }
             }
 
-            if (searchArray.length == 0) { MAIN.selfDestructMessage(message, "There is no one to banish from your summon!", 3, !emoji); return -1; }
+            if (searchArray.length == 0) { MAIN.selfDestructMessage(message, "There is no one to banish from your summon!", 3, emoji); return -1; }
 
             return MAIN.generalMatcher(message, -23, user, searchArray, internalArray, banish, "Enter the number of the player you wish to banish from your summon!");
         }
