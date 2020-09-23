@@ -979,13 +979,17 @@ const createFaction = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can create factions")
 
+    if (message.content.split(" ").slice(1).join(" ").split(",").length != 2)
+        return message.channel.send("You have to provide the name and @role seperated by a comma. For more information use the **help createFaction** command!");
 
-    const args = message.content.split(" ").slice(1).join(" ").split(",")[0].trim();
+    let args = message.content.split(" ").slice(1).join(" ").split(",")[0];
 
     if (!args) {
         message.channel.send("You have to provde a name for the new faction!");
         return -1;
     }
+
+    args = args.trim();
 
     if (message.mentions.roles.size != 1)
         return message.channel.send("You have to @mention a single role to link the faction to!");
@@ -1062,7 +1066,6 @@ const factionPoints = async function (message, params, user) {
     }
     else {
 
-
         let memberRoles = message.guild.members.cache.get(message.mentions.users.first().id).roles.cache.keyArray();
 
 
@@ -1096,8 +1099,6 @@ exports.factionPoints = factionPoints;
 
 const viewFaction = async function (message, params, user) {
 
-
-
     if (params.looped) {
         let faction = params.faction;
 
@@ -1124,6 +1125,9 @@ const viewFaction = async function (message, params, user) {
         args = null;
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (guild.factions.length == 0)
+        return message.channel.send("There are no factions in this server! Mods can create one using the **createFaction** command!");
 
     if (!args && (message.mentions.roles.size == 0)) {
 
@@ -1236,6 +1240,66 @@ const viewFaction = async function (message, params, user) {
     }
 }
 exports.viewFaction = viewFaction;
+
+const deleteFaction = async function (message, params, user) {
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+    if (guild.factions.length == 0)
+        return message.channel.send("There are no faction in the server to delete!");
+
+
+    let deleted;
+
+    if (params.looped) {
+
+        deleted = guild.factions.splice(params.factionIndex)[0];
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+
+        return message.channel.send(`${deleted.name} has been deleted! ${MAIN.mentionRole(deleted.role)} can now be assigned a new faction!`);
+    }
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only delete factions from inside a server text channel!");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can delete factions");
+
+
+    if (message.mentions.roles.size > 0) {
+        let faction = guild.factions.findIndex(element => element.role == message.mentions.roles.first().id);
+        if (faction != -1)
+            return message.channel.send(`**${MAIN.mentionRole(message.mentions.roles.first().id)}** is not assigned to any existing faction!`);
+        deleted = guild.factions.splice(faction)[0];
+    }
+    else {
+
+        let args = message.content.split(" ").slice(1).join(" ").split(",")[0].trim();
+        if (args.length == 0)
+            args = null;
+
+        if (!args)
+            return message.channel.send("You have to either provide the name of the faction to delete or @mention the role!");
+
+        let faction = guild.factions.findIndex(element => element.name == args);
+        if (faction == -1) {
+
+            return MAIN.generalMatcher(message, args, user, guild.factions.reduce((acc, current, index) => {
+                acc.push(current.name);
+                return acc;
+            }, []), guild.factions.reduce((acc, current, index) => {
+                acc.push({ factionIndex: index, looped: true });
+                return acc;
+            }, []), deleteFaction, `**${args}** is not an existing faction! Please choose which one you meant: `);
+        }
+
+        deleted = guild.factions.splice(faction)[0];
+    }
+
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+
+    message.channel.send(`${deleted.name} has been deleted! ${MAIN.mentionRole(deleted.role)} can now be assigned a new faction!`);
+}
+exports.deleteFaction = deleteFaction;
+
 
 async function reactAnswers(message) {
 

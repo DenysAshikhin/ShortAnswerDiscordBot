@@ -1158,5 +1158,19 @@
             3
         ],
         "category": "Faction"
+    },
+    {
+        "title": "deleteFaction",
+        "explanation": "Deletes a specific @role faction and all the information associated with it.",
+        "example": [
+            "1) deleteFaction @role"
+        ],
+        "subsection": [
+            1,
+            2,
+            3,
+            5
+        ],
+        "category": "Faction"
     }
 ]
