@@ -1200,5 +1200,20 @@
             5
         ],
         "category": "Faction"
+    },
+    {
+        "title": "createFactionRunningTally",
+        "explanation": "Creates/overwrites the live faction tally display!",
+        "example": [
+            "1) createFactionRunningTally"
+        ],
+        "subsection": [
+            1,
+            2,
+            3,
+            5
+        ],
+        "category": "Faction"
     }
+
 ]

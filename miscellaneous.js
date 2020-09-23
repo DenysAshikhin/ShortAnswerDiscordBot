@@ -1366,6 +1366,56 @@ const factionNewMemberAlertChannel = async function (message, params, user) {
 }
 exports.factionNewMemberAlertChannel = factionNewMemberAlertChannel;
 
+const createFactionRunningTally = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a live Faction Tally from inside a server text channel!");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set create/overwrite a live Faction Tally");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    await message.channel.send("Below will be the updated (once per minute) running tally of all factions!");
+
+    let finalEmbedArray = [];
+
+    for (let faction of guild.factions) {
+
+        let finalText = `#Current standing: ${faction.points}\n`
+            + `\nGeneral Contributions: ${faction.contributions.general}\n`
+            + `\nNew Member Points: ${faction.contributions.newMembers}\n`
+            + `\nMember Specific Contributions:\n`
+
+        let memberContribution = '';
+
+        faction.contributions.members.sort((a, b) => b.points - a.points)
+
+        let limit = faction.contributions.members.length > 5 ? 5 : faction.contributions.members.length;
+
+        for (let i = 0; i < limit; i++) {
+
+            let member = faction.contributions.members[i];
+
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
+                + ` has contributed =${member.points} points!>\n`
+        }
+
+        finalText += memberContribution;
+        finalEmbedArray.push({ name: faction.name, value: finalText });
+    }
+
+    let tally = await MAIN.prettyEmbed(message, finalEmbedArray, { modifier: 'md' });
+
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factionLiveTally: { channelID: tally.channel.id, messageID: tally.id } } },
+        function (err, doc, res) { });
+}
+exports.createFactionRunningTally = createFactionRunningTally;
+
+const createFactionTally = async function (faction) {
+
+
+}
+
 async function reactAnswers(message) {
 
     await message.react("🇦");

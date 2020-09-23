@@ -626,9 +626,14 @@ connectDB.once('open', async function () {
 
         let guild = await findGuild({ id: newMember.guild.id });
 
+        let difference = arraysEqual(oldMember.roles.cache.keyArray(), newMember.roles.cache.keyArray());
+
+        if (!difference.difference)
+            return;
+
         if (guild.factions.length > 0) {
 
-            let faction = guild.factions.find(element => newMember.roles.cache.keyArray().includes(element.role));
+            let faction = guild.factions.find(element => element.role == difference.difference);
 
             if (faction) {
                 faction.points += 50;
@@ -643,6 +648,29 @@ connectDB.once('open', async function () {
         }
     })
 });
+
+
+
+/**
+ * 
+ * @param {*} a old array
+ * @param {*} b new array
+ */
+function arraysEqual(a, b) {
+    if (a === b) return { result: true };
+    if (a == null || b == null) return { result: false };
+   // if (a.length !== b.length) return { result: false };
+
+    a.sort();
+    b.sort();
+
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return { result: false, difference: b[i] };
+    }
+    return { result: true };
+}
+exports.arraysEqual = arraysEqual;
+
 
 function populateCommandMap() {
 
@@ -746,6 +774,8 @@ function populateCommandMap() {
     commandMap.set(Commands[97].title.toUpperCase(), MISCELLANEOUS.deleteFaction)
     commandMap.set(Commands[98].title.toUpperCase(), MISCELLANEOUS.resetFactions)
     commandMap.set(Commands[99].title.toUpperCase(), MISCELLANEOUS.factionNewMemberAlertChannel)
+    commandMap.set(Commands[100].title.toUpperCase(), MISCELLANEOUS.createFactionRunningTally)
+
 
     exports.commandMap = commandMap;
 }
@@ -1354,7 +1384,7 @@ exports.generalMatcher = generalMatcher;
 
 /**
  * 
- * @param {part, startTally, modifier, URL, title, description, selector, maxLength} extraParams 
+ * @param {part, startTally, modifier, URL, title, description, selector, maxLength, embed} extraParams 
  */
 async function prettyEmbed(message, array, extraParams) {
 
@@ -1367,6 +1397,7 @@ async function prettyEmbed(message, array, extraParams) {
     let selector = extraParams.selector;
     let description = extraParams.description ? extraParams.description : '';
     let maxLength = extraParams.maxLength ? extraParams.maxLength : 100;
+    let embedReturn = extraParams.embed ? extraParams.embed : false;
 
     let runningString = "";
     let previousName = "";
@@ -1502,7 +1533,7 @@ async function prettyEmbed(message, array, extraParams) {
     if (field.value.length != 0)
         fieldArray.push(JSON.parse(JSON.stringify(field)));
 
-    return await testy(fieldArray, description, message, modifier, URL, title, selector);
+    return await testy(fieldArray, description, message, modifier, URL, title, selector, embedReturn);
 }
 exports.prettyEmbed = prettyEmbed;
 
@@ -1559,7 +1590,7 @@ function createThreeQueue(array) {
     return threeQueue;
 }
 
-async function testy(ARR, description, message, modifier, URL, title, selector) {
+async function testy(ARR, description, message, modifier, URL, title, selector, embedReturn) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.timestamp = new Date();
@@ -1608,7 +1639,11 @@ async function testy(ARR, description, message, modifier, URL, title, selector) 
         return testy(ARR, description, message, modifier);
     }
 
-    if (!selector) {
+    if (embedReturn) {
+
+        return newEmbed;
+    }
+    else if (!selector) {
         return await message.channel.send({ embed: newEmbed });
     }
     else {

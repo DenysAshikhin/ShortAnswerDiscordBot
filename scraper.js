@@ -231,9 +231,13 @@ async function countTalk() {
     }
 }
 async function checkTwitch() {
+
+    let guilds = await getGuilds();
+
     try {
+        twitchLogic.checkGuildTwitchStreams(guilds);
         twitchLogic.checkUsersTwitchStreams(await getUsers());
-        twitchLogic.checkGuildTwitchStreams(await getGuilds());
+        updateFactionTally(guilds);
     }
     catch (err) {
         console.log(err);
@@ -241,8 +245,57 @@ async function checkTwitch() {
     }
 }//eventualy check this to only get the guilds this shard or whatever is a part of
 
+const updateFactionTally = async function (guilds) {
+
+    for (let GUILD of guilds) {
+        let guild = GUILD;
 
 
+        if (!guild.factionLiveTally)
+            continue;
+        if (!guild.factionLiveTally.channelID)
+            continue;
+
+
+        let message = await client.guilds.cache.get(guild.id)
+            .channels.cache.get(guild.factionLiveTally.channelID).messages.fetch(guild.factionLiveTally.messageID);
+
+        let factions = guild.factions;
+
+        let finalEmbedArray = [];
+
+        for (let faction of guild.factions) {
+
+            let finalText = `#Current standing: ${faction.points}\n`
+                + `\nGeneral Contributions: ${faction.contributions.general}\n`
+                + `\nNew Member Points: ${faction.contributions.newMembers}`
+                + `\nMember Specific Contributions:\n`
+
+            let memberContribution = '';
+
+            faction.contributions.members.sort((a, b) => b.points - a.points)
+
+            let limit = faction.contributions.members.length > 5 ? 5 : faction.contributions.members.length;
+
+            for (let i = 0; i < limit; i++) {
+
+                let member = faction.contributions.members[i];
+
+                let actualyMember = await client.guilds.cache.get(guild.id).members.fetch(member.userID);
+
+
+                memberContribution += `${i + 1})<${actualyMember.displayName.replace(/\s/g, '_')}`
+                    + ` has contributed =${member.points} points!>\n`
+            }
+
+            finalText += memberContribution;
+            finalEmbedArray.push({ name: faction.name, value: finalText });
+        }
+
+        let returnedEmbed = await prettyEmbed(null, finalEmbedArray, { modifier: 'md', embed: true });
+        message.edit({ embed: returnedEmbed });
+    }
+}
 
 const getEmoji = function (EMOJI) {
     EMOJI = EMOJI.trim().replace(' ', '');
@@ -266,7 +319,7 @@ exports.getLeagueEmoji = getLeagueEmoji;
 
 /**
  * 
- * @param {part, startTally, modifier, URL, title, description, selector, maxLength} extraParams 
+ * @param {part, startTally, modifier, URL, title, description, selector, maxLength, embed} extraParams 
  */
 async function prettyEmbed(message, array, extraParams) {
 
@@ -279,7 +332,7 @@ async function prettyEmbed(message, array, extraParams) {
     let description = extraParams.description ? extraParams.description : '';
     let maxLength = extraParams.maxLength ? extraParams.maxLength : 100;
     let cutOff = extraParams.cutOff;
-
+    let embedReturn = extraParams.embed ? extraParams.embed : false;
 
     let runningString = "";
     let previousName = "";
@@ -418,7 +471,7 @@ async function prettyEmbed(message, array, extraParams) {
         field.name = `${part} ${groupNumber}`;
     if (field.value.length != 0)
         fieldArray.push(JSON.parse(JSON.stringify(field)));
-    return await testy(fieldArray, description, message, modifier, URL, title, selector, cutOff);
+    return await testy(fieldArray, description, message, modifier, URL, title, selector, cutOff, embedReturn);
 }
 exports.prettyEmbed = prettyEmbed;
 
@@ -477,7 +530,7 @@ function createThreeQueue(array, cutOff) {
     return threeQueue;
 }
 
-async function testy(ARR, description, message, modifier, URL, title, selector, cutOff) {
+async function testy(ARR, description, message, modifier, URL, title, selector, cutOff, embedReturn) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.timestamp = new Date();
@@ -526,7 +579,10 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
         return testy(ARR, description, message, modifier);
     }
 
-    if (!selector) {
+    if (embedReturn) {
+        return newEmbed;
+    }
+    else if (!selector) {
         return await client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({ embed: newEmbed });
     } else {
         let temp = await client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({ embed: newEmbed });
@@ -734,6 +790,7 @@ connectDB.once('open', async function () {
         console.log("Ready!");
         exports.Client = client;
         checkRL();
+        setInterval(checkTwitch, 1000);
     });
     client.on('message', async (message) => {
 

@@ -19,7 +19,8 @@ const GuildSchema = new mongoose.Schema({
     factionNewMemberAlert: {
         default: '',
         type: String
-    }
+    },
+    factionLiveTally: {}
 });
 
 module.exports = mongoose.model('Guild', GuildSchema);
