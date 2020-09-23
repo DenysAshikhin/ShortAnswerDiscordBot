@@ -721,6 +721,7 @@ function populateCommandMap() {
     commandMap.set(Commands[93].title.toUpperCase(), BUGS.acceptSuggestion)
     commandMap.set(Commands[94].title.toUpperCase(), MISCELLANEOUS.createFaction)
     commandMap.set(Commands[95].title.toUpperCase(), MISCELLANEOUS.factionPoints)
+    commandMap.set(Commands[96].title.toUpperCase(), MISCELLANEOUS.viewFaction)
 
     exports.commandMap = commandMap;
 }

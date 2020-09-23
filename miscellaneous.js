@@ -11,6 +11,7 @@ const net = require('net');
 var needle = require('needle');
 const { parse } = require('path');
 const { create } = require('./User.js');
+const { mem } = require('node-os-utils');
 
 //http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
 
@@ -1072,19 +1073,19 @@ const factionPoints = async function (message, params, user) {
         guild[factionModify].points += args;
 
         let specificUser = guild[factionModify].contributions.members;
-        if (specificUser.length == 0){
+        if (specificUser.length == 0) {
             specificUser = {
                 userID: message.mentions.users.first().id,
                 points: args
             };
             guild[factionModify].contributions.members.push(specificUser);
         }
-        else{
+        else {
             specificUser = guild[factionModify].contributions.members.find(element => element.userID == message.mentions.users.first().id);
             specificUser.points += args
         }
 
-            message.channel.send(`${guild[factionModify].name} is now at ${guild[factionModify].points} points!`
+        message.channel.send(`${guild[factionModify].name} is now at ${guild[factionModify].points} points!`
             + `\n${message.guild.members.cache.get(message.mentions.users.first().id).displayName} has contributed ${specificUser.points} points!`);
 
         Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild } }, function (err, doc, res) { });
@@ -1092,6 +1093,149 @@ const factionPoints = async function (message, params, user) {
 
 }
 exports.factionPoints = factionPoints;
+
+const viewFaction = async function (message, params, user) {
+
+
+
+    if (params.looped) {
+        let faction = params.faction;
+
+        let finalText = `#Current standing: ${faction.points}\n`
+            + `\nGeneral Contributions: ${faction.contributions.general}\n`
+            + `\nMember Specific Contributions:\n`
+
+        let memberContribution = '';
+
+        for (let i = 0; i < faction.contributions.members.length; i++) {
+
+            let member = faction.contributions.members[i];
+
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
+                + ` has contributed =${member.points} points!>\n`
+        }
+
+        finalText += memberContribution;
+        return MAIN.prettyEmbed(message, [{ name: faction.name, value: finalText }], { modifier: 'md' });
+    }
+
+    let args = message.content.split(" ").slice(1).join(" ").split(",")[0].trim();
+    if (args.length == 0)
+        args = null;
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!args && (message.mentions.roles.size == 0)) {
+
+        if (message.mentions.has())
+            return message.channel.send("You can only either provide the name of a faction or @mention a role!");
+
+        let finalEmbedArray = [];
+
+        for (let faction of guild.factions) {
+
+            let finalText = `#Current standing: ${faction.points}\n`
+                + `\nGeneral Contributions: ${faction.contributions.general}\n`
+                + `\nMember Specific Contributions:\n`
+
+            let memberContribution = '';
+
+            for (let i = 0; i < faction.contributions.members.length; i++) {
+
+                let member = faction.contributions.members[i];
+
+                memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
+                    + ` has contributed =${member.points} points!>\n`
+            }
+
+            finalText += memberContribution;
+            finalEmbedArray.push({ name: faction.name, value: finalText });
+        }
+
+        MAIN.prettyEmbed(message, finalEmbedArray, { modifier: 'md' });
+    }
+    else if (message.mentions.roles.size > 0) {
+
+        let faction = guild.factions.find(element => element.role == message.mentions.roles.first().id);
+        if (!faction)
+            return message.channel.send(`**${MAIN.mentionRole(message.mentions.roles.first().id)}** is not assigned to any existing faction!`);
+
+        let finalText = `#Current standing: ${faction.points}\n`
+            + `\nGeneral Contributions: ${faction.contributions.general}\n`
+            + `\nMember Specific Contributions:\n`
+
+        let memberContribution = '';
+
+        for (let i = 0; i < faction.contributions.members.length; i++) {
+
+            let member = faction.contributions.members[i];
+
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
+                + ` has contributed =${member.points} points!>\n`
+        }
+
+        finalText += memberContribution;
+        MAIN.prettyEmbed(message, [{ name: faction.name, value: finalText }], { modifier: 'md' });
+
+    }
+    else if (message.mentions.users.size > 0) {
+
+        let memberRoles = message.guild.members.cache.get(message.mentions.users.first().id).roles.cache.keyArray();
+
+        let faction = guild.factions.find(element => memberRoles.includes(element.role));
+        if (!faction)
+            return message.channel.send(`${MAIN.mention(message.mentions.users.first().id)} is not part of any faction!`);
+
+        let finalText = `#Current standing: ${faction.points}\n`
+            + `\nGeneral Contributions: ${faction.contributions.general}\n`
+            + `\nMember Specific Contributions:\n`
+
+        let memberContribution = '';
+
+        for (let i = 0; i < faction.contributions.members.length; i++) {
+
+            let member = faction.contributions.members[i];
+
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
+                + ` has contributed =${member.points} points!>\n`
+        }
+
+        finalText += memberContribution;
+        MAIN.prettyEmbed(message, [{ name: faction.name, value: finalText }], { modifier: 'md' });
+    }
+    else if (args) {
+
+        let faction = guild.factions.find(element => element.name == args);
+        if (!faction) {
+
+            return MAIN.generalMatcher(message, args, user, guild.factions.reduce((acc, current, index) => {
+                acc.push(current.name);
+                return acc;
+            }, []), guild.factions.reduce((acc, current, index) => {
+                acc.push({ faction: current, looped: true });
+                return acc;
+            }, []), viewFaction, `**${args}** is not an existing faction! Please choose which one you meant: `);
+        }
+
+        let finalText = `#Current standing: ${faction.points}\n`
+            + `\nGeneral Contributions: ${faction.contributions.general}\n`
+            + `\nMember Specific Contributions:\n`
+
+        let memberContribution = '';
+
+        for (let i = 0; i < faction.contributions.members.length; i++) {
+
+            let member = faction.contributions.members[i];
+
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
+                + ` has contributed =${member.points} points!>\n`
+        }
+
+        finalText += memberContribution;
+        MAIN.prettyEmbed(message, [{ name: faction.name, value: finalText }], { modifier: 'md' });
+    }
+}
+exports.viewFaction = viewFaction;
 
 async function reactAnswers(message) {
 

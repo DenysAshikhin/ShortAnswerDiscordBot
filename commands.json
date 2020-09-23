@@ -1142,5 +1142,21 @@
             3
         ],
         "category": "Faction"
+    },
+    {
+        "title": "viewFaction",
+        "explanation": "Shows all the information about a specific faction or general overview of all the factions if not specified.",
+        "example": [
+            "1) viewFaction @nameOfRole",
+            "2) viewFaction nameOfFaction",
+            "3) viewFaction @factionMember",
+            "4) viewFaction"
+        ],
+        "subsection": [
+            1,
+            2,
+            3
+        ],
+        "category": "Faction"
     }
 ]
