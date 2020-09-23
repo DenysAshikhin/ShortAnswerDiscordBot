@@ -590,13 +590,19 @@ connectDB.once('open', async function () {
         }
     });
 
-    Client.on('guildMemberAdd', member => {
+    Client.on('guildMemberAdd', async member => {
 
         if (member.id == botID) {
             console.log("bot joined server!");
         }
-        else if (member.guild.systemChannelID)
+        else if (member.guild.systemChannelID) {
+
+            let permission = member.guild.systemChannelID.permissionsFor(await member.guild.members.fetch(botID));
+            if (!permission.has("SEND_MESSAGES"))
+                return -1;
+
             member.guild.channels.cache.get(member.guild.systemChannelID).send("Welcome to the server " + member.displayName + "!");
+        }
         checkExistance(member);
     });
 
@@ -659,7 +665,7 @@ connectDB.once('open', async function () {
 function arraysEqual(a, b) {
     if (a === b) return { result: true };
     if (a == null || b == null) return { result: false };
-   // if (a.length !== b.length) return { result: false };
+    // if (a.length !== b.length) return { result: false };
 
     a.sort();
     b.sort();
