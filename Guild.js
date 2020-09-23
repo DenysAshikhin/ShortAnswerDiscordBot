@@ -15,6 +15,10 @@ const GuildSchema = new mongoose.Schema({
     factions: {
         default: [],
         type: []
+    },
+    factionNewMemberAlert: {
+        default: '',
+        type: String
     }
 });
 

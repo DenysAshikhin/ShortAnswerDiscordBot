@@ -633,6 +633,11 @@ connectDB.once('open', async function () {
             if (faction) {
                 faction.points += 50;
                 faction.contributions.newMembers += 50;
+
+                newMember.guild.channels.cache.get(guild.factionNewMemberAlert).send(
+                    `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!`
+                    + `\nWith ${faction.contributions.newMembers} points from new members.`);
+
                 Guild.findOneAndUpdate({ id: newMember.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
             }
         }
@@ -740,6 +745,7 @@ function populateCommandMap() {
     commandMap.set(Commands[96].title.toUpperCase(), MISCELLANEOUS.viewFaction)
     commandMap.set(Commands[97].title.toUpperCase(), MISCELLANEOUS.deleteFaction)
     commandMap.set(Commands[98].title.toUpperCase(), MISCELLANEOUS.resetFactions)
+    commandMap.set(Commands[99].title.toUpperCase(), MISCELLANEOUS.factionNewMemberAlertChannel)
 
     exports.commandMap = commandMap;
 }
@@ -1043,6 +1049,11 @@ function mentionRole(id) {
     return "<@&" + id + ">"
 }
 exports.mentionRole = mentionRole;
+
+function mentionChannel(id) {
+    return "<#" + id + ">"
+}
+exports.mentionChannel = mentionChannel;
 
 function directMessage(message, memberID, game) {
 

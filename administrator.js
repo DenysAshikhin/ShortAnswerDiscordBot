@@ -1,5 +1,5 @@
 const MAIN = require('./short-answer.js');
-
+const Guild = require('./Guild.js')
 
 async function initialiseUsers(message) {
     if (message.channel.type == 'dm') return -1;

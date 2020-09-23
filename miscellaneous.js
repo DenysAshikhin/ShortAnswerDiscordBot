@@ -1147,7 +1147,11 @@ const viewFaction = async function (message, params, user) {
 
             let memberContribution = '';
 
-            for (let i = 0; i < faction.contributions.members.length; i++) {
+            faction.contributions.members.sort((a, b) => b.points - a.points)
+
+            let limit = faction.contributions.members.length > 5 ? 5 : faction.contributions.members.length;
+
+            for (let i = 0; i < limit; i++) {
 
                 let member = faction.contributions.members[i];
 
@@ -1343,6 +1347,24 @@ const resetFactions = async function (message, params, user) {
 }
 exports.resetFactions = resetFactions;
 
+const factionNewMemberAlertChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set faction new member alerts from inside a server text channel!");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set the channel for new member alerts!");
+
+    if (message.mentions.channels.size != 1)
+        message.channel.send("You can only have a single #channel mentioned!");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    guild.factionNewMemberAlert = message.mentions.channels.first().id;
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { factionNewMemberAlert: guild.factionNewMemberAlert } }, function (err, doc, res) { });
+
+    message.channel.send(`${MAIN.mentionChannel(guild.factionNewMemberAlert)} will now display new faction members!`);
+}
+exports.factionNewMemberAlertChannel = factionNewMemberAlertChannel;
 
 async function reactAnswers(message) {
 

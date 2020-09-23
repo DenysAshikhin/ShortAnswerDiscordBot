@@ -12,7 +12,7 @@
     },
     {
         "title": "search",
-        "explanation": "Searches the complete game list for the speicified game(s) you wish to find. You can search for multiple games at once, simply seperate by a comma.",
+        "explanation": "Searches the complete game list for the specified game(s) you wish to find. You can search for multiple games at once, simply seperate by a comma.",
         "example": [
             "1) search Counter",
             "2) search Counter, minerfct, tr@ve"
@@ -1133,7 +1133,7 @@
         "title": "factionPoints",
         "explanation": "Awards or removes points from a faction and/or faction member.",
         "example": [
-            "1) factionsPoints 25, @nameOfRole",
+            "1) factionPoints 25, @nameOfRole",
             "2) factionPoints -31, @userName"
         ],
         "subsection": [
@@ -1178,6 +1178,20 @@
         "explanation": "Resets all the factions points and member contribution to 0.",
         "example": [
             "1) resetFactions"
+        ],
+        "subsection": [
+            1,
+            2,
+            3,
+            5
+        ],
+        "category": "Faction"
+    },
+    {
+        "title": "factionNewMemberAlertChannel",
+        "explanation": "Sets which channel is used to notify when a faction gains a new member!",
+        "example": [
+            "1) factionNewMemberAlertChannel #channel"
         ],
         "subsection": [
             1,

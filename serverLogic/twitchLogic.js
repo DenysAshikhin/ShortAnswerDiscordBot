@@ -164,7 +164,7 @@ async function checkUsersTwitchStreams(users) {
 
                             sendArray.push({
                                 twitchNotifications: USER.twitchNotifications, userID: USER.id,
-                                alertMessage: `${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`
+                                alertMessage: `@everyone \n${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`
                             });
                         }
                     }

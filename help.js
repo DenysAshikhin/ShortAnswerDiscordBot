@@ -88,7 +88,15 @@ const generalHelpMessage = async function (message, tag, title, user) {
                 return a.name.localeCompare(b.name);
     })
 
-    let description = "```md\n" + `You can find out more information about any command by typing <${prefix}help Command>` + "```";
+    let description = ``;
+
+    switch (tag) {
+        case 1:
+            description += `Here you can find all the commands pertaining to organizing or summoning people to play games. Or contribute to current faction battles!`;
+    }
+
+    description = "```md\n" + `You can find out more information about any command by typing <${prefix}help Command>` + "```";
+
 
     if (!user.completedTutorials.includes(tag))
         switch (tag) {
@@ -96,34 +104,34 @@ const generalHelpMessage = async function (message, tag, title, user) {
                 description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
                 break;
             case 2:
-             //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}statsTutorial` + "```";
+                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}statsTutorial` + "```";
                 break;
             case 3:
-             //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}miscellaneousTutorial` + "```";
+                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}miscellaneousTutorial` + "```";
                 break;
             case 4:
-              //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}musicTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}musicTutorial` + "```";
                 break;
             case 5:
-              //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}administratorTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}administratorTutorial` + "```";
                 break;
             case 6:
-              //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}qofTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}qofTutorial` + "```";
                 break;
             case 7:
-              //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}helpTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}helpTutorial` + "```";
                 break;
             case 8:
-              //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}generalTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}generalTutorial` + "```";
                 break;
             case 9:
-              //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}tutorialsTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}tutorialsTutorial` + "```";
                 break;
             case 10:
-            //    description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                //    description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
                 break;
             case 11:
-               // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}twitchTutorial` + "```";
+                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}twitchTutorial` + "```";
                 break;
         }
 
@@ -162,7 +170,7 @@ function generalHelp(message, params, user) {
             [
                 { name: "Popular", value: "Games", inline: true },
                 { name: "Popular", value: "Music", inline: true },
-                {name: "Popular", value: "Twitch", inline: true},
+                { name: "Popular", value: "Twitch", inline: true },
                 // { name: "Guide", value: "Help", inline: true },
                 { name: "Guide", value: "Tutorials", inline: true },
                 { name: "Fun", value: "Stats", inline: true },
