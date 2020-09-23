@@ -1318,7 +1318,7 @@ const resetFactions = async function (message, params, user) {
                 faction.points = 0;
                 faction.contributions.general = 0;
                 faction.contributions.members = [];
-                faction.newMembers = 0;
+                faction.contributions.newMembers = 0;
                 // for (let member of faction.contributions.members) {
                 //     member.points = 0;
                 // }
