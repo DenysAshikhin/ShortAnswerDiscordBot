@@ -179,7 +179,8 @@ function generalHelp(message, params, user) {
                 { name: "Others", value: "QualityOfLife", inline: true },
                 { name: "Hush-Hush", value: "Admins", inline: true },
                 { name: "Hush-Hush", value: "Bugs/Suggestions", inline: true },
-                { name: "🔥**Invite Me Command**🔥", value: "invite"}
+                { name: "🔥**Invite Commands**🔥", value: "inviteMe"},
+                { name: "🔥**Invite Commands**🔥", value: "inviteSupportServer"}
             ], {
             description: description, startTally: 1, modifier: 1, title: `General Help`
         });

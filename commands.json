@@ -1215,10 +1215,22 @@
         "category": "Faction"
     },
     {
-        "title": "invite",
+        "title": "inviteMe",
         "explanation": "Creates an invite link to add me to your server!",
         "example": [
-            "1) invite"
+            "1) inviteMe"
+        ],
+        "subsection": [
+            3,
+            8
+        ],
+        "category": "Special"
+    },
+    {
+        "title": "inviteSupportServer",
+        "explanation": "Creates an invite link to my support server!",
+        "example": [
+            "1) inviteSupportServer"
         ],
         "subsection": [
             3,

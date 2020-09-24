@@ -474,6 +474,11 @@ const inviteLink = function (message) {
 }
 
 
+const inviteLinkServer = function (message) {
+    message.channel.send(`Here you go!\nhttps://discord.gg/nMj6UKH`);
+}
+
+
 connectDB.once('open', async function () {
 
 
@@ -785,6 +790,7 @@ function populateCommandMap() {
     commandMap.set(Commands[99].title.toUpperCase(), MISCELLANEOUS.factionNewMemberAlertChannel)
     commandMap.set(Commands[100].title.toUpperCase(), MISCELLANEOUS.createFactionRunningTally)
     commandMap.set(Commands[101].title.toUpperCase(), inviteLink)
+    commandMap.set(Commands[102].title.toUpperCase(), inviteLinkServer)
 
     exports.commandMap = commandMap;
 }
