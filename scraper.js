@@ -9,6 +9,7 @@ const Guild = require('./Guild.js')
 const http = require("http");
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const path = require('path');
 
 const fs = require('fs');
 var uniqid = require('uniqid');
@@ -19,6 +20,8 @@ var HOST;
 
 const { Client, Intents } = require('discord.js');
 const main = require('ytsr');
+const { create } = require('domain');
+const { isObject } = require('util');
 const myIntents = new Intents();
 myIntents.add('GUILDS', 'GUILD_MEMBERS');
 const client = new Client({ ws: { intents: myIntents } });
@@ -776,7 +779,30 @@ HTTPserver.listen(PORT, HOST, () => {
 });
 
 
+async function createBackUp() {
 
+    let userPath = path.join(__dirname, "backups", getDate() + ".json")
+    let guildPath = path.join(__dirname, "backups", "guilds", getDate() + ".json")
+
+    if (!fs.existsSync(userPath)) {
+
+        let users = await getUsers();
+
+        await fs.writeFile(userPath, JSON.stringify(users), function (err, result) {
+            if (err) console.log('error', err);
+        });
+    }
+
+    if (!fs.existsSync(guildPath)) {
+
+        let guilds = await getGuilds();
+
+        await fs.writeFile(guildPath, JSON.stringify(guilds), function (err, result) {
+            if (err) console.log('error', err);
+           // if (result) console.log(result)
+        });
+    }
+}//
 
 
 connectDB.once('open', async function () {
@@ -788,6 +814,8 @@ connectDB.once('open', async function () {
         console.log("Ready!");
         exports.Client = client;
         checkRL();
+        createBackUp();
+        setInterval(createBackUp, 6 * 60 * 60 * 1000);
     });
     client.on('message', async (message) => {
 
