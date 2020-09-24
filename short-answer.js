@@ -501,7 +501,14 @@ connectDB.once('open', async function () {
 
         if (message.author.bot) return;
 
-        console.log(message.content);
+
+        let content = message.content;
+
+        console.log(JSON.stringify(content));
+
+        let found = message.guild.emojis.cache.get(message.content.substring(message.content.indexOf(':', 3)+1, message.content.indexOf('>')));
+        console.log(found);
+
 
         let user = cachedUsers.get(message.author.id);
         if (!user) {
@@ -592,8 +599,9 @@ connectDB.once('open', async function () {
         else if (message.content.trim() == (defaultPrefix + "help")) {
             message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
         }
-        else if ((message.mentions.users.size == 1) && (message.mentions.users.get(botID))) {
-            message.channel.send("Your proper prefix - the proper one is: " + prefix
+        else if ((message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
+            
+            message.channel.send("Your proper prefix is: " + prefix
                 + "\n`" + `Type ${prefix}help` + "` for more help!");
         }
         else {//Command tracker stuff

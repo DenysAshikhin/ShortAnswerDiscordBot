@@ -3,7 +3,7 @@ const MAIN = require('./short-answer.js');
 const User = require('./User.js');
 
 var timers = new Map();
-
+var guildTimers = new Map();
 
 async function commandMonikers(message, params, user) {
 
@@ -138,7 +138,14 @@ async function setTimer(message, params, user) {
     else
         message = await message.channel.send(`Set a timer to go off in ${MAIN.timeConvert(args)}`)
 
-    return timers.set(user.id, { time: args, author: author, message: message });
+
+    //timers.set(user.id, { time: args, author: author, message: message })
+
+
+
+    if (!guildTimers.get(message.guild.id))
+        return guildTimers.set(message.guild.id, [{ time: args, author: author, message: message }])
+    return guildTimers.get(message.guild.id).push({ time: args, author: author, message: message });
 }
 exports.setTimer = setTimer;
 
@@ -185,16 +192,60 @@ async function setDefaultPrefix(message, params, user) {
 }
 exports.setDefaultPrefix = setDefaultPrefix;
 
-async function timerTrack() {
-    for (timer of timers.entries()) {
 
-        timer[1].time -= 2;
-        timer[1].message.edit(`Set a timer to go off in ${MAIN.timeConvert(timer[1].time)}`);
-        if (timer[1].time <= 0) {
-            timer[1].author.send("Your timer has finished!");
-            timers.delete(timer[0]);
-            timer[1].message.edit(":alarm_clock: *Ring* **Ring** *Ring* :alarm_clock:");
+
+
+async function timerTrack() {
+
+    for (let GUILDTimers of guildTimers.entries()) {
+
+        for (let timer of GUILDTimers[1]) {
+            if (timer.time <= 0)
+                continue;
+
+
+            timer.time -= 1;
         }
     }
 }
-setInterval(timerTrack, 2000);
+setInterval(timerTrack, 1000);
+
+const updateTimer = async function () {
+
+    let hardLimit = 1;
+
+    for (let GUILDTimers of guildTimers.entries()) {
+
+        let limit = GUILDTimers[1].length > hardLimit ? hardLimit : GUILDTimers[1].length;
+        let toDelete = [];
+
+        for (let i = 0; i < GUILDTimers[1].length; i++) {
+
+            let timer = GUILDTimers[1][i];
+            
+            if (i < limit) {
+                timer.message.edit(`Set a timer to go off in ${MAIN.timeConvert(timer.time)}`);
+                if (timer.time <= 0)
+                    toDelete.push(timer);
+            }
+            else if (timer.time <= 0) {
+
+                toDelete.push(timer);
+            }
+        }
+
+
+        for(let i = 0; i < limit; i++){
+            GUILDTimers[1].push(GUILDTimers[1].shift());
+        }
+
+        for (let purge of toDelete) {
+
+            await purge.author.send("Your timer has finished!");
+            await purge.message.edit(":alarm_clock: *Ring*" + MAIN.mention(purge.author.id) + "*Ring* :alarm_clock:");
+            GUILDTimers[1].splice(GUILDTimers[1].indexOf(purge))
+        }
+
+    }
+}
+setInterval(updateTimer, 2000);
