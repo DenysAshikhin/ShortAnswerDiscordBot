@@ -942,9 +942,8 @@
         "title": "leagueRank",
         "explanation": "Shows you your Leage of Legends stats, or the stats of another person. You have to specify the region and their summoner name seperated by a comma! **Default zone is 'na'!**",
         "example": [
-            "1) leagueRank",
-            "2) leagueRank TheLastSpark",
-            "3) leagueRank TheLastSpark, na"
+            "1) leagueRank TheLastSpark",
+            "2) leagueRank TheLastSpark, na"
         ],
         "subsection": [
             2
