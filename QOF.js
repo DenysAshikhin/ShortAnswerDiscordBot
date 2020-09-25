@@ -245,7 +245,6 @@ const updateTimer = async function () {
             await purge.message.edit(":alarm_clock: *Ring*" + MAIN.mention(purge.author.id) + "*Ring* :alarm_clock:");
             GUILDTimers[1].splice(GUILDTimers[1].indexOf(purge))
         }
-
     }
 }
 setInterval(updateTimer, 2000);

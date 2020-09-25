@@ -20,7 +20,11 @@ const GuildSchema = new mongoose.Schema({
         default: '',
         type: String
     },
-    factionLiveTally: {}
+    factionLiveTally: {},
+    autorole: {
+        type: [],
+        default: []
+    }
 });
 
 module.exports = mongoose.model('Guild', GuildSchema);

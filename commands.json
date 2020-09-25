@@ -1237,5 +1237,16 @@
             8
         ],
         "category": "Special"
+    },
+    {
+        "title": "autoRole",
+        "explanation": "Starts the setup for an autorole message! Complete with options such as:\n1) Unique: Only 1 reaction per user\n2) Static: Prevents other reactions\n3) Permenant: Limits a user to a single reaction for the message. They will not be able to change their mind.",
+        "example": [
+            "1) autoRole"
+        ],
+        "subsection": [
+            5
+        ],
+        "category": "Moderate"
     }
 ]

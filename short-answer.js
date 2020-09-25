@@ -106,6 +106,9 @@ var checkCommandsSearchArray = Commands.reduce((accum, curr) => {
 }, { upperCase: [], normal: [] });
 exports.commandsText = checkCommandsSearchArray;
 
+var runningCommands = new Map();
+
+
 var EMOJI = new Map();
 //EMOJI.set('bronze1', '725771774532517948');
 
@@ -473,14 +476,12 @@ const inviteLink = function (message) {
     message.channel.send(`Here you go!\nhttps://discordapp.com/oauth2/authorize?&client_id=689315272531902606&permissions=8&scope=bot`);
 }
 
-
 const inviteLinkServer = function (message) {
     message.channel.send(`Here you go!\nhttps://discord.gg/nMj6UKH`);
 }
 
 
 connectDB.once('open', async function () {
-
 
     await Client.login(token);
 
@@ -500,15 +501,6 @@ connectDB.once('open', async function () {
     Client.on("message", async (message) => {
 
         if (message.author.bot) return;
-
-
-        let content = message.content;
-
-        console.log(JSON.stringify(content));
-
-        let found = message.guild.emojis.cache.get(message.content.substring(message.content.indexOf(':', 3)+1, message.content.indexOf('>')));
-        console.log(found);
-
 
         let user = cachedUsers.get(message.author.id);
         if (!user) {
@@ -549,7 +541,7 @@ connectDB.once('open', async function () {
 
         }
         else if (!user) {//Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
-            message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in and then sending the command again?")
+            message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in, using the help command and then sending the command again?");
             return;
         }
         else {
@@ -562,7 +554,12 @@ connectDB.once('open', async function () {
         if (defaultPrefix == "##")
             prefix = "##";
 
-        if (message.content.substr(0, prefix.length) == prefix) {
+
+        if ((await triggerRunningCommand(message, user)) != -1) {
+
+            return console.log("Running command took over");
+        }
+        else if (message.content.substr(0, prefix.length) == prefix) {
 
             user = await findUser({ id: message.author.id });
             cachedUsers.set(user.id, user);
@@ -600,7 +597,7 @@ connectDB.once('open', async function () {
             message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
         }
         else if ((message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
-            
+
             message.channel.send("Your proper prefix is: " + prefix
                 + "\n`" + `Type ${prefix}help` + "` for more help!");
         }
@@ -803,6 +800,7 @@ function populateCommandMap() {
     commandMap.set(Commands[100].title.toUpperCase(), MISCELLANEOUS.createFactionRunningTally)
     commandMap.set(Commands[101].title.toUpperCase(), inviteLink)
     commandMap.set(Commands[102].title.toUpperCase(), inviteLinkServer)
+    commandMap.set(Commands[103].title.toUpperCase(), ADMINISTRATOR.autorole)
 
     exports.commandMap = commandMap;
 }
@@ -822,6 +820,44 @@ async function triggerCommandHandler(message, user, skipSearch, emoji) {
         }
         return result;
     }
+}
+
+/**
+ * 
+ * @params {command, commandParams}
+ */
+const createRunningCommand = async function (message, params, user) {
+
+    runningCommands.set(user.id, {
+        command: params.command,
+        guildID: message.guild.id,
+        channelID: message.channel.id,
+        params: params.commandParams
+    });
+    return 1;
+}
+exports.createRunningCommand = createRunningCommand;
+
+const triggerRunningCommand = async function (message, user) {
+
+    let currCommand = runningCommands.get(message.author.id);
+    if (!currCommand)
+        return -1;
+
+    if ((currCommand.guildID != message.guild.id) || (currCommand.channelID != message.channel.id))
+        return -1;
+
+
+    let commandReturn = (await currCommand.command.apply(null, [message, currCommand.params, user]));
+
+    if (commandReturn == 0) {
+
+        runningCommands.delete(message.author.id);
+        return 1;
+    }
+
+    if (commandReturn == -1)
+        return -1;
 }
 
 const getEmoji = function (EMOJI) {
