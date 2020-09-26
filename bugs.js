@@ -54,7 +54,7 @@ exports.officialServer = officialServer;
 const acceptSuggestion = async function (message, params, user) {
 
     if (user.id != MAIN.creatorID)
-        return 1;
+        return message.channel.send("Only the creator can use this command!");
 
     let arg = message.content.split(" ").slice(1).join(" ");
 

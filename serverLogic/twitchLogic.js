@@ -102,7 +102,7 @@ async function checkGuildTwitchStreams(guilds) {
 
                             sendArray.push({
                                 twitchNotifications: GUILD1.twitchNotifications, guildID: GUILD1.id,
-                                alertMessage: `@everyone \n${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`,
+                                alertMessage: `@here \n${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`,
                                 channelID: channel[1]
                             });
                         }
@@ -353,7 +353,7 @@ async function isStreamLive(id) {
 
 async function getTwitchChannel(streamer) {
     try {
-        const user = await twitchClient.helix.users.getUserByName(streamer);
+        const user = await twitchClient.helix.users.getUserByName(streamer.trim());
         return user;
     }
     catch (err) {

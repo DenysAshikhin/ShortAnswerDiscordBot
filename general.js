@@ -40,6 +40,8 @@ async function timeZone(message, params, user) {
 
     let args = message.content.split(" ").slice(1).join(" ").split(',');
 
+    if (!args[1])
+        return message.channel.send("You have to specify a time and time zone, refer to the help command `help timezone` for more info!");
     args[1] = args[1].trim();
     if (!args[1].includes(':')) return message.channel.send("You have entered an invalid time format!");
     if (!/^[:0-9]+$/.test((args[1]))) return message.channel.send("You have entered an invalid time format!");

@@ -550,7 +550,7 @@ async function linkTwitch(message, params, user) {
 
     if (!params.looped) {
 
-        let parsed = await MAIN.sendToServer({ command: 'link_twitch', params: [args, user.twitchLinks] });
+        let parsed = await MAIN.sendToServer({ command: 'link_twitch', params: [args.trim(), user.twitchLinks] });
 
         if (parsed.status) {
 
@@ -600,7 +600,7 @@ async function linkChannelWithTwitch(message, params, user) {
 
     let ID = message.mentions.channels.first().id
 
-    let parsed = await MAIN.sendToServer({ command: 'link_channel_with_twitch', params: [args[0], guild.channelTwitch, ID] });
+    let parsed = await MAIN.sendToServer({ command: 'link_channel_with_twitch', params: [args[0].trim(), guild.channelTwitch, ID] });
     let result;
     let status;
 

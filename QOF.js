@@ -151,6 +151,11 @@ exports.setTimer = setTimer;
 
 async function setServerPrefix(message, params, user) {
 
+    if ((message.mentions.channels.size != 0) || (message.mentions.crosspostedChannels.size != 0)
+        || (message.mentions.members.size != 0) || (message.mentions.users.size != 0)
+        || (message.mentions.roles.size != 0) || (message.mentions.everyone))
+        return message.channel.send("You cannot have a mention when setting a prefix!");
+
     if (params == message.content) {
         message.channel.send("You have to provide an actual prefix!");
         return -1;
@@ -173,6 +178,11 @@ async function setServerPrefix(message, params, user) {
 exports.setServerPrefix = setServerPrefix;
 
 async function setDefaultPrefix(message, params, user) {
+
+    if ((message.mentions.channels.size != 0) || (message.mentions.crosspostedChannels.size != 0)
+        || (message.mentions.members.size != 0) || (message.mentions.users.size != 0)
+        || (message.mentions.roles.size != 0) || (message.mentions.everyone))
+        return message.channel.send("You cannot have a mention when setting a prefix!");
 
     if (params == message.content) {
         message.channel.send("You have to provde an actual prefix!");

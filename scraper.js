@@ -844,7 +844,7 @@ const checkRL = async function () {
     //  console.log("GOT TO ENDDDD")
 }
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (err, promise) => {
 
 
     console.log("Caught unhandledRejectionWarning")
@@ -853,7 +853,7 @@ process.on('unhandledRejection', (reason, promise) => {
     
 });
 
-process.on('unhandledException', (reason, p) => {
+process.on('unhandledException', (err, p) => {
 
     console.log("Caught unhandledException")
     fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');

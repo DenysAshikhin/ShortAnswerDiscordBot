@@ -34,6 +34,12 @@ async function setDefaultServerPrefix(message, params, user) {
         return message.channel.send("You do not have the required permissions to set the default prefix for the server")
 
 
+    if ((message.mentions.channels.size != 0) || (message.mentions.crosspostedChannels.size != 0)
+        || (message.mentions.members.size != 0) || (message.mentions.users.size != 0)
+        || (message.mentions.roles.size != 0) || (message.mentions.everyone))
+        return message.channel.send("You cannot have a mention when setting a prefix!");
+
+
     if (params == message.content) {
         message.channel.send("You have to provde an actual prefix!");
         return -1;

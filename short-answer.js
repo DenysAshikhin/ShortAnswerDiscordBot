@@ -1821,21 +1821,26 @@ exports.selfDestructMessage = selfDestructMessage;
 
 
 //seal idan easter eggs
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (err, promise) => {
 
+    if (defaultPrefix != "##") {
+        console.log("Caught unhandledRejectionWarning")
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    }
+    else
+        console.log(err)
 
-    console.log("Caught unhandledRejectionWarning")
-    fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-
-  
 });
 
-process.on('unhandledException', (reason, p) => {
+process.on('unhandledException', (err, p) => {
 
-    console.log("Caught unhandledException")
-    fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    if (defaultPrefix != "##") {
+        console.log("Caught unhandledException")
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    }
+    else
+        console.log(err)
 
-   
 });
 
 
