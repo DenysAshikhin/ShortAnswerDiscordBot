@@ -2,6 +2,7 @@ const MAIN = require('./short-answer.js');
 const Guild = require('./Guild.js')
 
 var autoRoleMap = new Map();
+var autoRoleCollectors = [];
 
 async function initialiseUsers(message) {
     if (message.channel.type == 'dm') return -1;
@@ -650,7 +651,9 @@ const setEmojiCollecter = async function (autoroleObj, message) {
                 });
         else
             return emoji.message.send("A role that was used in the autorole message no longer exists, failed to remove the role.");
-    })
+    });
+
+    autoRoleCollectors.push(collector);
 }
 
 const setEmojiCollectorAll = async function (autoroleObj) {
@@ -692,5 +695,37 @@ const initialiseAdministrator = async function () {
         populateAutoRoleMap(guild.autorole);
         setEmojiCollectorAll(guild.autorole);
     }
+    setInterval(resetCollectors, 30 * 60 * 1000);
 }
 exports.initialiseAdministrator = initialiseAdministrator;
+
+const resetCollectors = async function () {
+
+    for (let collector of autoRoleCollectors) {
+        collector.resetTimer();
+    }
+}
+
+const welcomeMessages = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only configure welcome messages from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("You do not have the required permissions to configure welcome messages for the server");
+
+    const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
+
+    if ((args != 'off') && (args != 'on')) {
+
+        return message.channel.send("You have to specify either 'on' or 'off");
+    }
+
+    if (args == 'on') {
+        message.channel.send("Welcome message have been enabled.");
+        return Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: true } }, function (err, doc, res) { });
+    }
+
+    message.channel.send("Welcome message have been disabled.");
+    return Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: false } }, function (err, doc, res) { });
+}
+exports.welcomeMessages = welcomeMessages;

@@ -24,6 +24,10 @@ const GuildSchema = new mongoose.Schema({
     autorole: {
         type: [],
         default: []
+    },
+    welcomeMessages: {
+        type: Boolean,
+        default: false
     }
 });
 

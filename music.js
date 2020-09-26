@@ -795,8 +795,8 @@ async function play(message, params, user) {
             queueConstruct.connection = connection;
             playSong(message.guild, queueConstruct.songs[0], null, message);
         } catch (err) {
-            console.log(err);
-            Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+            
+            MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             queue.delete(message.guild.id)
             return message.channel.send("There was an error playing! " + err);
         }
@@ -1176,8 +1176,8 @@ async function cacheSong(song, GUILD, MESSAGE) {
                 //console.log("FINISHED: WRITE STREAM " + song.title);
                 mv(tempAudio, audioOutput, function (err) {
                     if (err) {
-                        console.log(err);
-                        MAIN.Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+                       
+                        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
                     }
                     serverDownload.songToDownload = null;
                     serverDownload.progress = 0;
@@ -1388,8 +1388,7 @@ async function removeSong(message, params, user) {
         params.playlist.songs.splice(params.index, 1);
         User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) {
             if (err) {
-                console.log(err);
-                Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+                MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
                 return -1;
             }
             else {
@@ -1490,8 +1489,7 @@ async function playUserPlayList(message, params, user) {
                 queueConstruct.songs[0].timePaused = 0;
                 playSong(message.guild, queueConstruct.songs[0], null, message);
             } catch (err) {
-                console.log(err);
-                Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+                MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
                 queue.delete(message.guild.id)
                 return message.channel.send("There was an error playing! " + err);
             }

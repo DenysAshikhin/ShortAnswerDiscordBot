@@ -1111,7 +1111,9 @@
         "example": [
             "1) acceptSuggestion Fall Guys"
         ],
-        "subsection": [10],
+        "subsection": [
+            10
+        ],
         "category": "*Other*"
     },
     {
@@ -1248,5 +1250,28 @@
             5
         ],
         "category": "Moderate"
+    },
+    {
+        "title": "privacyPolicy",
+        "explanation": "Shows the privacy policy.",
+        "example": [
+            "1) privacyPolicy"
+        ],
+        "subsection": [
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "welcomeMessages",
+        "explanation": "Turns the welcome messages on or off.",
+        "example": [
+            "1) welcomeMessages on",
+            "2) welcomeMessages off"
+        ],
+        "subsection": [
+            5
+        ],
+        "category": "**Other**"
     }
 ]

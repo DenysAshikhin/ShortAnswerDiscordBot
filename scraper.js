@@ -656,8 +656,7 @@ const getUsers = async function () {
     try {
         return await User.find({})
     } catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getUsers = getUsers;
@@ -666,8 +665,7 @@ const findUser = async function (params) {
     try {
         return await User.findOne(params)
     } catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.findUser = findUser;
@@ -676,8 +674,7 @@ const findGuild = async function (params) {
     try {
         return await Guild.findOne(params)
     } catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.findGuild = findGuild;
@@ -686,8 +683,7 @@ const getGuilds = async function () {
     try {
         return await Guild.find({})
     } catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getGuilds = getGuilds;
@@ -847,3 +843,20 @@ const checkRL = async function () {
     setTimeout(checkRL, ms)
     //  console.log("GOT TO ENDDDD")
 }
+
+process.on('unhandledRejection', (reason, promise) => {
+
+
+    console.log("Caught unhandledRejectionWarning")
+    fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+
+    
+});
+
+process.on('unhandledException', (reason, p) => {
+
+    console.log("Caught unhandledException")
+    fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+
+    
+});

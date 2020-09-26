@@ -62,6 +62,7 @@ const Commands = require('./commands.json');
 exports.Commands = Commands;
 const DATABASE = require('./backups/26-04-2020.json');
 const fs = require('fs');
+exports.fs = fs;
 const STATS = require('./stats.js');
 const MISCELLANEOUS = require('./miscellaneous.js')
 const GAMES = require('./games.js');
@@ -73,6 +74,7 @@ const GENERAL = require('./general.js');
 const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
 const ffmpeg = require('fluent-ffmpeg');
+var uniqid = require('uniqid');
 
 const Cache = require('caching-map');
 
@@ -383,8 +385,7 @@ const getUsers = async function () {
     try {
         return await User.find({})
     } catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getUsers = getUsers;
@@ -393,8 +394,7 @@ const findUser = async function (params) {
     try {
         return await User.findOne(params)
     } catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.findUser = findUser;
@@ -403,8 +403,7 @@ const findGuild = async function (params) {
     try {
         return await Guild.findOne(params)
     } catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.findGuild = findGuild;
@@ -413,8 +412,7 @@ const getGuilds = async function () {
     try {
         return await Guild.find({})
     } catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getGuilds = getGuilds;
@@ -424,8 +422,7 @@ const getUsersInGuild = async function (guildID) {
         return await User.find({ guilds: guildID });
     }
     catch (err) {
-        console.log(err);
-        Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err);
+        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getUsersInGuild = getUsersInGuild;
@@ -526,7 +523,7 @@ connectDB.once('open', async function () {
             if (!guild) {
 
                 guild = await findGuild({ id: message.guild.id });
-                cachedUsers.set(user.id, user);
+                cachedUsers.set(message.guild.id, guild);
             }
 
 
@@ -619,11 +616,20 @@ connectDB.once('open', async function () {
 
             checkExistance(member);
 
-            let permission = member.guild.systemChannel.permissionsFor(await member.guild.members.fetch(botID));
-            if (!permission.has("SEND_MESSAGES"))
-                return -1;
+            let guild = cachedGuilds.get(member.guild.id);
+            if (!guild) {
 
-            member.guild.systemChannel.send("Welcome to the server " + member.displayName + "!");
+                guild = await findGuild({ id: member.guild.id });
+                cachedUsers.set(member.guild.id, guild);
+            }
+
+            if (guild.welcomeMessages) {
+                let permission = member.guild.systemChannel.permissionsFor(await member.guild.members.fetch(botID));
+                if (!permission.has("SEND_MESSAGES"))
+                    return -1;
+
+                member.guild.systemChannel.send("Welcome to the server " + member.displayName + "!");
+            }
         }
     });
 
@@ -806,6 +812,8 @@ function populateCommandMap() {
     commandMap.set(Commands[101].title.toUpperCase(), inviteLink)
     commandMap.set(Commands[102].title.toUpperCase(), inviteLinkServer)
     commandMap.set(Commands[103].title.toUpperCase(), ADMINISTRATOR.autorole)
+    commandMap.set(Commands[104].title.toUpperCase(), MISCELLANEOUS.privacyPolicy)
+    commandMap.set(Commands[105].title.toUpperCase(), ADMINISTRATOR.welcomeMessages)
 
     exports.commandMap = commandMap;
 }
@@ -853,7 +861,7 @@ const triggerRunningCommand = async function (message, user) {
         return -1;
 
 
-    if(message.content == '-1'){
+    if (message.content == '-1') {
 
         message.channel.send("Your previous running command was removed!");
         runningCommands.delete(message.author.id);
@@ -1097,10 +1105,9 @@ function updateMessage(message, user) {
             }
         }, function (err, doc, res) {
             if (err) {
-                Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err.toString());
-                console.log(err);
+                MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             }
-            if (res) Client.guilds.cache.get(guildID).channels.cache.get(logID).send(res.toString())
+            if (res) MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
         });
 }
 
@@ -1241,10 +1248,9 @@ async function addGuild(member, memberDB) {
             }
         }, function (err, doc, res) {
             if (err) {
-                Client.guilds.cache.get(guildID).channels.cache.get(logID).send(err.toString());
-                console.log(err);
+                MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             }
-            if (res) Client.guilds.cache.get(guildID).channels.cache.get(logID).send(res.toString())
+            if (res) MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
         });
 
 
@@ -1812,16 +1818,26 @@ exports.selfDestructMessage = selfDestructMessage;
 
 
 
+
+
 //seal idan easter eggs
 process.on('unhandledRejection', (reason, promise) => {
-    console.log("FFFFFF   ", reason);
-    Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
+
+
+    console.log("Caught unhandledRejectionWarning")
+    fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+
+  
 });
 
 process.on('unhandledException', (reason, p) => {
-    console.log(";;;;;;;;;;; ", reason);
-    Client.guilds.cache.get(guildID).channels.cache.get(logID).send(("`" + reason.message + "`", "```" + reason.stack + "```", "`MESSAGE: " + lastMessage + "`"));
+
+    console.log("Caught unhandledException")
+    fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+
+   
 });
+
 
 
 

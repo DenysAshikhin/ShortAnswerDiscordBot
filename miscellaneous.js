@@ -1411,10 +1411,36 @@ const createFactionRunningTally = async function (message, params, user) {
 }
 exports.createFactionRunningTally = createFactionRunningTally;
 
-const createFactionTally = async function (faction) {
+const privacyPolicy = async function (message, params, user) {
 
+    return message.channel.send("1) The data collected: "
+        + "Short Answer Bot collects the background data about how you use discord (number of messages sent, date of last message, "
+        + "time spent in a voice channel, time spent in an AFK channel) and data that you provide with consent."
+        + "This includes the personall games list, music playlist, whether you want to be pinged/DM'ed for game summons. "
+        + "Moreover any setting related information such as prefixes, and completed tutorials."
 
+        + " 2) Why is this data required:"
+        + "The data is required and used strictly to enable greater and more complex features on the bot. Some of the more"
+        + " unique features would be down right impossible without knowing: your games list, music playlists, twitch follows"
+        + " (again all of this information is only known if you choose to give it to the bot)."
+
+        + "  3) How do I use this data:"
+        + "  The data is used only when the relevant commands are requested by the users of the bot. I.E.: If someone is trying to "
+        + "  find a people to play a game, then the bot check whether the requested game is in your games list."
+
+        + "  4) Other than discord and users of the bot, who else sees this data. No one. I store this on a mongoDB database,"
+        + "  however it is encrypted. As such, beyond discord and the bot users, no third party has access to this information."
+
+        + "  5) "
+        + " The most reliable way to contact me is on discord (The Last Spark#7586), however, I can also be reached by email at"
+        + " denysashikhin@gmail.com."
+
+        + "  6) How can you remove the stored information:"
+        + " With all commands that ask for information there is an associated command to remove that information. However, if you "
+        + " want to ensure all, or some specific personal data is destroyed, contact me as mentioned in point 5) and I will "
+        + " be more than happy to do so.")
 }
+exports.privacyPolicy = privacyPolicy;
 
 async function reactAnswers(message) {
 

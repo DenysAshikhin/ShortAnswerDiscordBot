@@ -222,7 +222,7 @@ const updateTimer = async function () {
         for (let i = 0; i < GUILDTimers[1].length; i++) {
 
             let timer = GUILDTimers[1][i];
-            
+
             if (i < limit) {
                 timer.message.edit(`Set a timer to go off in ${MAIN.timeConvert(timer.time)}`);
                 if (timer.time <= 0)
@@ -234,13 +234,14 @@ const updateTimer = async function () {
             }
         }
 
-
-        for(let i = 0; i < limit; i++){
+        for (let i = 0; i < limit; i++) {
             GUILDTimers[1].push(GUILDTimers[1].shift());
         }
 
         for (let purge of toDelete) {
 
+            if (purge.time >= 1)
+                continue;
             await purge.author.send("Your timer has finished!");
             await purge.message.edit(":alarm_clock: *Ring*" + MAIN.mention(purge.author.id) + "*Ring* :alarm_clock:");
             GUILDTimers[1].splice(GUILDTimers[1].indexOf(purge))

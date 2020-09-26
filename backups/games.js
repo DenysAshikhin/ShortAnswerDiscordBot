@@ -519,8 +519,7 @@ function excludeDM(message, params, user) {
     if (bool == "TRUE") {
         User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: true } }, function (err, doc, res) {
             if (err) {
-                console.log(err);
-                Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+                MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             }
         });
         message.channel.send(MAIN.mention(message.author.id) + " will be excluded from any further DMs.");
@@ -530,8 +529,7 @@ function excludeDM(message, params, user) {
 
         User.findOneAndUpdate({ id: message.author.id }, { $set: { excludeDM: false } }, function (err, doc, res) {
             if (err) {
-                console.log(err)
-                Client.guilds.cache.get(MAIN.guildID).channels.cache.get(MAIN.logID).send(err);
+                MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             }
         });
         message.channel.send(MAIN.mention(message.author.id) + " will be DM'ed once more.");
