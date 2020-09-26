@@ -493,8 +493,11 @@ connectDB.once('open', async function () {
 
         console.log("Ready!");
         exports.Client = Client;
-        if (defaultPrefix != '##')
+        if (defaultPrefix != '##') {
             gameSuggestControlEmoji();
+            ADMINISTRATOR.initialiseAdministrator();
+        }
+
         Client.user.setActivity("sa!help for information");
     });
 
@@ -557,7 +560,8 @@ connectDB.once('open', async function () {
 
         if ((await triggerRunningCommand(message, user)) != -1) {
 
-            return console.log("Running command took over");
+            return;
+            // console.log("Running command took over");
         }
         else if (message.content.substr(0, prefix.length) == prefix) {
 
@@ -662,9 +666,10 @@ connectDB.once('open', async function () {
                 faction.points += 50;
                 faction.contributions.newMembers += 50;
 
-                newMember.guild.channels.cache.get(guild.factionNewMemberAlert).send(
-                    `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!`
-                    + `\nWith ${faction.contributions.newMembers} points from new members.`);
+                if (guild.factionNewMemberAlert)
+                    (await newMember.guild.fetch()).channels.cache.get(guild.factionNewMemberAlert).send(
+                        `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!`
+                        + `\nWith ${faction.contributions.newMembers} points from new members.`);
 
                 Guild.findOneAndUpdate({ id: newMember.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
             }
@@ -847,6 +852,13 @@ const triggerRunningCommand = async function (message, user) {
     if ((currCommand.guildID != message.guild.id) || (currCommand.channelID != message.channel.id))
         return -1;
 
+
+    if(message.content == '-1'){
+
+        message.channel.send("Your previous running command was removed!");
+        runningCommands.delete(message.author.id);
+        return 1;
+    }
 
     let commandReturn = (await currCommand.command.apply(null, [message, currCommand.params, user]));
 
