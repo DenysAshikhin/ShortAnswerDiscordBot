@@ -68,13 +68,16 @@ const autorole = async function (message, params, user) {
 
     if (params.step) {
 
+        params.numMessages++;
+
         switch (params.step) {
 
             case 1://Comes from matcher
 
-                await message.channel.send(""`1) Please enter the title for the autorole message (Max. 250 characters):`
+                await message.channel.send(`1) Please enter the title for the autorole message (Max. 250 characters):`
                     + "\nThis is what the message currently will look like:");
                 await message.channel.send({ embed: { ...params.runningEmbed } });
+                params.numMessages += 2;
 
                 return MAIN.createRunningCommand(message, {
                     command: autorole, commandParams:
@@ -89,7 +92,7 @@ const autorole = async function (message, params, user) {
                 if ((message.content.length > 250)) {
 
                     await message.channel.send("The title is limited to 250 characters." + `Yours was ${message.content.length}! Try again.`)
-
+                    params.numMessages++;
                     return MAIN.createRunningCommand(message, {
                         command: autorole, commandParams:
                         {
@@ -102,7 +105,7 @@ const autorole = async function (message, params, user) {
 
                     await message.channel.send("This is what the message will currently look like:");
                     await message.channel.send({ embed: { ...params.runningEmbed, title: message.content } });
-
+                    params.numMessages += 4;//might cause issues
                     return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [
                         {
                             ...params, step: 3, title: message.content
@@ -118,7 +121,7 @@ const autorole = async function (message, params, user) {
                 if (params.title.length > 250) {
 
                     await message.channel.send("The title is limited to 250 characters." + `Yours was ${params.title.length}! Try again.`)
-
+                    params.numMessages++;
                     return MAIN.createRunningCommand(message, {
                         command: autorole, commandParams:
                         {
@@ -133,7 +136,7 @@ const autorole = async function (message, params, user) {
                     await message.channel.send("\nThis is what the message currently will look like:");
                     await message.channel.send({ embed: { ...params.runningEmbed } });
                     await message.channel.send("`2) Please enter the description for the autorole message (Max. 1000 characters):`");
-
+                    params.numMessages += 3;
 
 
                     return MAIN.createRunningCommand(message, {
@@ -147,7 +150,7 @@ const autorole = async function (message, params, user) {
                 else {
 
                     await message.channel.send("The description is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
-
+                    params.numMessages++;
                     return MAIN.createRunningCommand(message, {
                         command: autorole, commandParams:
                         {
@@ -163,7 +166,7 @@ const autorole = async function (message, params, user) {
                 if ((message.content.length > 1000)) {
 
                     await message.channel.send("The description is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
-
+                    params.numMessages++;
                     return MAIN.createRunningCommand(message, {
                         command: autorole, commandParams:
                         {
@@ -176,7 +179,7 @@ const autorole = async function (message, params, user) {
 
                     await message.channel.send("This is what the message will currently look like:");
                     await message.channel.send({ embed: { ...params.runningEmbed, description: message.content } });
-
+                    params.numMessages += 4;//might cause issues
                     return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [
                         {
                             ...params, step: 5, description: message.content, runningEmbed: { ...params.runningEmbed, description: message.content }
@@ -192,6 +195,7 @@ const autorole = async function (message, params, user) {
                     + "```*emoji*, @role```"
                     + "\nThis is what the message currently will look like:");
                 let tempy = await message.channel.send({ embed: { ...params.runningEmbed } });
+                params.numMessages += 2;
 
                 if (params.newEmoji) {
                     params.emojis.push(params.newEmoji);
@@ -215,7 +219,7 @@ const autorole = async function (message, params, user) {
 
                     await message.channel.send("You made an error in writing the emoji-@role. Refer to the example below!"
                         + "```*emoji*, @role```");
-
+                    params.numMessages++;
                     return MAIN.createRunningCommand(message, {
                         command: autorole, commandParams:
                         {
@@ -228,7 +232,7 @@ const autorole = async function (message, params, user) {
 
                     await message.channel.send("You made an error in writing the emoji-@role. Make sure to @mention only 1 role! Refer to the example below!"
                         + "```*emoji*, @role```");
-
+                    params.numMessages++;
                     return MAIN.createRunningCommand(message, {
                         command: autorole, commandParams:
                         {
@@ -247,7 +251,7 @@ const autorole = async function (message, params, user) {
                     if ((await giveRoleSelf(message, role)) != 1) {
 
                         await message.channel.send("Please fix my permissions for this role or try a different one.");
-
+                        params.numMessages++;
                         return MAIN.createRunningCommand(message, {
                             command: autorole, commandParams:
                             {
@@ -262,7 +266,7 @@ const autorole = async function (message, params, user) {
 
                         await message.channel.send(MAIN.mentionRole(role) +
                             " is already linked to an emoji in this message! Try again");
-
+                        params.numMessages++;
                         return MAIN.createRunningCommand(message, {
                             command: autorole, commandParams:
                             {
@@ -277,7 +281,7 @@ const autorole = async function (message, params, user) {
                     if (foundEmoji) {
 
                         await message.channel.send(`That emoji is already used for this message! Try again!`);
-
+                        params.numMessages++;
                         return MAIN.createRunningCommand(message, {
                             command: autorole, commandParams:
                             {
@@ -289,6 +293,7 @@ const autorole = async function (message, params, user) {
 
                     await message.channel.send("\nThis is what the message currently will look like:");
                     let tempMess = await message.channel.send({ embed: { ...params.runningEmbed } });
+                    params.numMessages += 2;
                     reactEmoji(tempMess, params.emojis);
 
                     if (emoji.includes(':')) {
@@ -301,7 +306,7 @@ const autorole = async function (message, params, user) {
 
                             await message.channel.send("You entered an invalid emoji, make sure its universal or from this server! Refer to the example below!"
                                 + "```*emoji*, @role```");
-
+                            params.numMessages++;
                             return MAIN.createRunningCommand(message, {
                                 command: autorole, commandParams:
                                 {
@@ -318,7 +323,7 @@ const autorole = async function (message, params, user) {
                         await tempMess.react(emoji);
 
                     await message.channel.send("Don't worry about the order, they will be fixed in the next step!");
-
+                    params.numMessages += 3;//might cause issues
                     return await MAIN.generalMatcher(message, -23, user, ['Add another pair', 'Change last pair', 'finish'], [
                         {
                             ...params, step: 5, newEmoji: { emoji: emoji, roleID: role, emojiID: emojiID }
@@ -345,7 +350,7 @@ const autorole = async function (message, params, user) {
                 await message.channel.send("This is what the message currently will look like:");
                 let tempy1 = await message.channel.send({ embed: { ...params.runningEmbed } });
                 reactEmoji(tempy1, params.emojis);
-
+                params.numMessages += 4;//might cause issues
 
                 return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permenant', 'Neither'], [
                     {
@@ -365,6 +370,7 @@ const autorole = async function (message, params, user) {
                 break;
             case 8:
 
+                params.numMessages += 2;//might cause issues
                 return await MAIN.generalMatcher(message, -23, user, ['Static', 'Not Static'], [
                     {
                         ...params, step: 9, static: true
@@ -383,6 +389,7 @@ const autorole = async function (message, params, user) {
                 await reactEmoji(finalMessage, params.emojis);
                 autoRoleMap.set(finalMessage.id, params);
                 setEmojiCollecter(params, finalMessage);
+                params.numMessages += 2;
 
                 let guild = await MAIN.findGuild({ id: message.guild.id });
 
@@ -390,12 +397,55 @@ const autorole = async function (message, params, user) {
 
                 Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { });
 
+                params.numMessages += 2;
+
+                return await MAIN.generalMatcher(message, -23, user, ['Remove Messages', 'Keep Messages'], [
+                    {
+                        ...params, step: 10, remove: true
+                    },
+                    {
+                        ...params, step: 10, remove: false
+                    }
+                ], autorole, "Would you like me to delete the previous setup message? Depending on how many mistakes were made, some messages might be left over."
+                + " However, only the setup messages will be removed.");
+
+
+                break;
+            case 10:
+
+                if (params.remove) {
+
+                    console.log(`Removing ${params.numMessages} messages!`);
+
+                    let messages = await message.channel.messages.fetch({ limit: params.numMessages })
+                    messages.delete(params.messageID);
+
+                    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+                    if (!permission.has("MANAGE_MESSAGES")) {
+
+                        params.numMessages += 2;
+
+                        return await MAIN.generalMatcher(message, -23, user, ['Try Again', "Don't Try Again"], [
+                            {
+                                ...params, step: 10, remove: true
+                            },
+                            {
+                                ...params, step: 10, remove: false
+                            }
+                        ], autorole, "I don't have the MANAGE_MESSAGES permission in this channel to delete messages. Would you like me to try again?");
+                    }
+
+                    message.channel.bulkDelete(messages).catch(err => {
+                        console.log("Error deleting bulk messages: " + err);
+                        message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                    });
+
+                }
                 break;
         }
 
     }
     else {
-
 
         if (message.author.id != MAIN.creatorID)
             return message.channel.send("This command is current under construction. Only the creator test it!");
@@ -427,7 +477,8 @@ const autorole = async function (message, params, user) {
                 emojis: [],
                 newEmoji: null,
                 users: [],
-                roles: []
+                roles: [],
+                numMessages: 5
             }
         }, user);
     }
@@ -447,10 +498,12 @@ const reactEmoji = async function (message, emojis) {
             //   console.log(id);
 
             let guildEmoji = message.guild.emojis.cache.get(id);
-            await message.react(guildEmoji);
+            await message.react(guildEmoji)
+                .catch(err => { });
         }
         else
-            await message.react(emojiPair.emoji);
+            await message.react(emojiPair.emoji)
+                .catch(err => { });
     }
 }
 
