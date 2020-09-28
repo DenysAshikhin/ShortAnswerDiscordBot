@@ -1338,6 +1338,17 @@
         "subsection": [
             5
         ],
-        "category": "**Other**"
+        "category": "Password Role"
+    },
+    {
+        "title": "activatePasswordRole",
+        "explanation": "Checks a guild-password combination to see if there is any role associated with the provided password. Must be sent as a Direct Message",
+        "example": [
+            "1) activatePasswordRole 728358459791245345, password123"
+        ],
+        "subsection": [
+            3
+        ],
+        "category": "Password Role"
     }
 ]

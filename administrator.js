@@ -909,12 +909,12 @@ const passwordLockRole = async function (message, params, user) {
                     message.channel.send("That password is already used! Try another one.");
 
 
-                    return MAIN.createRunningCommand(messy, { command: passwordLockRole, commandParams: params, DM: true }, user);
+                    return MAIN.createRunningCommand(message, { command: passwordLockRole, commandParams: params, DM: true }, user);
                 }
                 else if ((await giveRoleSelf(params.generalMessage, params.roleID)) != 1) {
 
                     await message.channel.send("I can't give or remove this role. Please fix my permissions or try a different role.");
-                    return MAIN.createRunningCommand(messy, { command: passwordLockRole, commandParams: params, DM: true }, user);
+                    return MAIN.createRunningCommand(message, { command: passwordLockRole, commandParams: params, DM: true }, user);
                 }
                 else {
 
@@ -958,3 +958,35 @@ const passwordLockRole = async function (message, params, user) {
     return MAIN.createRunningCommand(messy, { command: passwordLockRole, commandParams: params, DM: true }, user);
 }
 exports.passwordLockRole = passwordLockRole;
+
+const activatePasswordRole = async function (message, params, user) {
+
+    if (message.channel.type != 'dm')
+        return message.channel.send("This command can only be used in my Direct Messages! Try DM'ing me.");
+
+    let args = message.content.split(" ").slice(1).join(" ").trim().split(',');
+
+    if (args.length != 2)
+        return message.channel.send("Invalid password");
+
+    let guild = await MAIN.findGuild({ id: args[0] });
+    if (!guild)
+        return message.channel.send("Invalid password");
+
+    if (!guild.passwordLock)
+        return message.channel.send("Invalid password");
+
+
+    let roleID = guild.passwordLock.get(args[1].trim());
+
+    if (!roleID)
+        return message.channel.send("Invalid password");
+
+    let properGuild = await MAIN.Client.guilds.fetch(args[0]);
+    let guildMember = properGuild.members.cache.get(message.author.id);
+    let role = properGuild.roles.cache.get(roleID);
+    guildMember.roles.add(role);
+
+    return message.channel.send("Role given!");
+}
+exports.activatePasswordRole = activatePasswordRole;
