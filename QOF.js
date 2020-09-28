@@ -153,8 +153,11 @@ async function setServerPrefix(message, params, user) {
 
     if ((message.mentions.channels.size != 0) || (message.mentions.crosspostedChannels.size != 0)
         || (message.mentions.members.size != 0) || (message.mentions.users.size != 0)
-        || (message.mentions.roles.size != 0) || (message.mentions.everyone))
+        || (message.mentions.roles.size != 0) || (message.mentions.everyone)
+        || (message.content.includes('@everyone')) || (message.content.includes('@here')))
         return message.channel.send("You cannot have a mention when setting a prefix!");
+
+
 
     if (params == message.content) {
         message.channel.send("You have to provide an actual prefix!");
@@ -162,6 +165,9 @@ async function setServerPrefix(message, params, user) {
     }
     if (Array.isArray(params))
         params = params[0];
+
+    if (params.length > 5)
+        return message.channel.send("Prefixes are limited a max of 5 characters!");
 
     let index = user.guilds.indexOf(message.guild.id);
     user.prefix[index] = params;
@@ -181,7 +187,8 @@ async function setDefaultPrefix(message, params, user) {
 
     if ((message.mentions.channels.size != 0) || (message.mentions.crosspostedChannels.size != 0)
         || (message.mentions.members.size != 0) || (message.mentions.users.size != 0)
-        || (message.mentions.roles.size != 0) || (message.mentions.everyone))
+        || (message.mentions.roles.size != 0) || (message.mentions.everyone)
+        || (message.content.includes('@everyone')) || (message.content.includes('@here')))
         return message.channel.send("You cannot have a mention when setting a prefix!");
 
     if (params == message.content) {
@@ -190,6 +197,9 @@ async function setDefaultPrefix(message, params, user) {
     }
     if (Array.isArray(params))
         params = params[0];
+
+    if (params.length > 5)
+        return message.channel.send("Prefixes are limited a max of 5 characters!");
 
     if (params == -1) return message.channel.send(`You can't set your prefix to ${params}`);
 
@@ -203,7 +213,25 @@ async function setDefaultPrefix(message, params, user) {
 exports.setDefaultPrefix = setDefaultPrefix;
 
 
+const commandSuggestions = async function (message, params, user) {
 
+
+    const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
+
+    if ((args != 'off') && (args != 'on')) {
+
+        return message.channel.send("You have to specify either 'on' or 'off");
+    }
+
+    if (args == 'on') {
+        message.channel.send("Command suggestions have been enabled.");
+        return User.findOneAndUpdate({ id: user.id }, { $set: { commandSuggestions: true } }, function (err, doc, res) { });
+    }
+
+    message.channel.send("Command suggestions have been disabled.");
+    return User.findOneAndUpdate({ id: user.id }, { $set: { commandSuggestions: false } }, function (err, doc, res) { });
+}
+exports.commandSuggestions = commandSuggestions;
 
 async function timerTrack() {
 

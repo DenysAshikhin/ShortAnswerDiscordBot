@@ -127,11 +127,11 @@ async function Delete(message, params) {
     if (message.channel.type == 'dm') return -1;
 
     if (!message.channel.permissionsFor(message.member).has("MANAGE_MESSAGES"))
-        return message.channel.send("You do not have the required permissions to delete messages!")
+        return message.channel.send("You do not have the required permissions to delete messages in this channel! (MANAGE_MESSAGES)");
 
     let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.botID));
     if (!permission.has("MANAGE_MESSAGES"))
-        return message.channel.send("I do not have the required permissions to delete messages!")
+        return message.channel.send("I do not have the required permissions to delete messages in this channel! (MANAGE_MESSAGES)");
 
     let amount = 0;
     if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");

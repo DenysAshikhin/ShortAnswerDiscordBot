@@ -98,6 +98,10 @@ const UserSchema = new mongoose.Schema({
     suggestionBanDate: {
         type: String,
         default: '0-0-0000'
+    },
+    commandSuggestions: {
+        type: Boolean,
+        default: false
     }
 });
 

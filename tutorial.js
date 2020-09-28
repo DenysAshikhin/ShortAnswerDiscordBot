@@ -33,7 +33,7 @@ const IntroTutorial = {
     ],
     steps: [
         `Welcome to the general introduction. If nothing else, please remember that this bot breaks up commands into 3 parts`
-        + "```\n 1)The prefix\n2) The command itself\n3) Any (sometimes optional) parameters.```" + `By default, the prefix will be **sa!**`
+        + "```\n1)The prefix\n2) The command itself\n3) Any (sometimes optional) parameters.```" + `By default, the prefix will be **sa!**`
         + `\nThe command can be anything, for this example we will use helpGames. There are no parameters here, but they will be covered later.`
         + ` Please proceed by calling the command below.`,
 
@@ -216,7 +216,7 @@ const generalTutorial = async function (message, params, command, tutorial, tuto
                     if (!user.completedTutorials.includes(tutorial.id)) {
                         user.completedTutorials.push(tutorial.id);
                     }
-                    await User.findOneAndUpdate({ id: user.id },
+                    User.findOneAndUpdate({ id: user.id },
                         {
                             $set: {
                                 activeTutorial: -1,

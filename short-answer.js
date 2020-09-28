@@ -367,7 +367,9 @@ const tags = [
     8,// - general
     9,// - tutorials
     10,// - bugs/suggestions/improvements
-    11// - twitch
+    11,// - twitch
+    12,// - First Time,
+    13//Autorole stuff
 ]
 exports.tags = tags;
 
@@ -385,7 +387,7 @@ const getUsers = async function () {
     try {
         return await User.find({})
     } catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getUsers = getUsers;
@@ -394,7 +396,7 @@ const findUser = async function (params) {
     try {
         return await User.findOne(params)
     } catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.findUser = findUser;
@@ -403,7 +405,7 @@ const findGuild = async function (params) {
     try {
         return await Guild.findOne(params)
     } catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.findGuild = findGuild;
@@ -412,7 +414,7 @@ const getGuilds = async function () {
     try {
         return await Guild.find({})
     } catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getGuilds = getGuilds;
@@ -422,7 +424,7 @@ const getUsersInGuild = async function (guildID) {
         return await User.find({ guilds: guildID });
     }
     catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getUsersInGuild = getUsersInGuild;
@@ -492,9 +494,9 @@ connectDB.once('open', async function () {
         exports.Client = Client;
         if (defaultPrefix != '##') {
             gameSuggestControlEmoji();
-            ADMINISTRATOR.initialiseAdministrator();
-        }
 
+        }
+        ADMINISTRATOR.initialiseAdministrator();
         Client.user.setActivity("sa!help for information");
     });
 
@@ -597,7 +599,7 @@ connectDB.once('open', async function () {
         else if (message.content.trim() == (defaultPrefix + "help")) {
             message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
         }
-        else if ((message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
+        else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
 
             message.channel.send("Your proper prefix is: " + prefix
                 + "\n`" + `Type ${prefix}help` + "` for more help!");
@@ -814,6 +816,12 @@ function populateCommandMap() {
     commandMap.set(Commands[103].title.toUpperCase(), ADMINISTRATOR.autorole)
     commandMap.set(Commands[104].title.toUpperCase(), MISCELLANEOUS.privacyPolicy)
     commandMap.set(Commands[105].title.toUpperCase(), ADMINISTRATOR.welcomeMessages)
+    commandMap.set(Commands[106].title.toUpperCase(), QOF.commandSuggestions)
+    commandMap.set(Commands[107].title.toUpperCase(), HELP.helpFirstTime)
+    commandMap.set(Commands[108].title.toUpperCase(), ADMINISTRATOR.editAutoRoleTitle)
+    commandMap.set(Commands[109].title.toUpperCase(), ADMINISTRATOR.editAutoRoleDescription)
+    commandMap.set(Commands[110].title.toUpperCase(), ADMINISTRATOR.passwordLockRole)
+
 
     exports.commandMap = commandMap;
 }
@@ -837,15 +845,29 @@ async function triggerCommandHandler(message, user, skipSearch, emoji) {
 
 /**
  * 
- * @params {command, commandParams}
+ * @params {command, commandParams, DM}
  */
 const createRunningCommand = async function (message, params, user) {
 
+
+    if (!params.DM) {
+
+        runningCommands.set(user.id, {
+            command: params.command,
+            guildID: message.guild.id,
+            channelID: message.channel.id,
+            params: params.commandParams,
+            DM: params.DM
+        });
+        return 1;
+    }
+
     runningCommands.set(user.id, {
         command: params.command,
-        guildID: message.guild.id,
+        guildID: null,
         channelID: message.channel.id,
-        params: params.commandParams
+        params: params.commandParams,
+        DM: params.DM
     });
     return 1;
 }
@@ -857,8 +879,12 @@ const triggerRunningCommand = async function (message, user) {
     if (!currCommand)
         return -1;
 
-    if ((currCommand.guildID != message.guild.id) || (currCommand.channelID != message.channel.id))
+    if (currCommand.DM && (message.channel.type != 'dm'))
         return -1;
+
+    if (!currCommand.DM)
+        if ((currCommand.guildID != message.guild.id) || (currCommand.channelID != message.channel.id))
+            return -1;
 
 
     if (message.content == '-1') {
@@ -905,10 +931,14 @@ async function commandMatcher(message, command, params, user) {
     let check = await checkCommands(command, user);
 
     if (check == -1) {
-        message.channel.send(`I didn't recognize that command, please try again?`);
+        //message.channel.send(`I didn't recognize that command, please try again?`);
         return -1;
     }
-    else if (check.result[0].score != 0) {
+    else if ((check.result[0].score != 0)) {
+
+        if (!user.commandSuggestions) {
+            return -1;
+        }
 
         let fieldArray = new Array();
 
@@ -1105,9 +1135,9 @@ function updateMessage(message, user) {
             }
         }, function (err, doc, res) {
             if (err) {
-                MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+                fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(user) + "_____________" + message.guild.id + "_________" + JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             }
-            if (res) MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+            //   if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
         });
 }
 
@@ -1248,9 +1278,9 @@ async function addGuild(member, memberDB) {
             }
         }, function (err, doc, res) {
             if (err) {
-                MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+                fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(`custom: ${member.displayName} : ${member.id}` + "\n-------------\n\n" + err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             }
-            if (res) MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+            if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
         });
 
 
@@ -1770,13 +1800,26 @@ async function updateAll() {
 
     // for (let user of users) {
 
-    //     User.findOneAndUpdate({ id: user.id }, { $set: { commands: [] } }, () => { });
+
+    //     let index = user.guilds.indexOf(message.guild.id);
+
+
+    //     if(index == -1){
+    //         console.log(user.displayName);
+    //         console.log(user.id);
+    //         console.log("---------")
+    //     }
+
+    //     user.messages[index] = user.messages[index] + 1;
+
+
+
+    //     user.lastMessage[index] = getDate();
+
 
     // }//for user loop
 
-
     // console.log("CALLED UPDATE ALL");
-    //createBackUp();
 }
 async function createBackUp() {
 

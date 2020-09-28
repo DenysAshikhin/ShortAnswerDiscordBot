@@ -323,7 +323,7 @@
         "explanation": "If true, you will get a DM whenever a new feature/update/major fix is released!",
         "example": [
             "1) updateMe true",
-            "2) updateme false"
+            "2) updateMe false"
         ],
         "subsection": [
             6
@@ -331,11 +331,11 @@
         "category": "*Other*"
     },
     {
-        "title": "tutorials",
+        "title": "tutorialUpdates",
         "explanation": "Configure whether you get notified of a new tutorial release, or an addition/modification to one you have already completed. Setting to true will notify you, false will not.",
         "example": [
-            "1) tutorials true",
-            "2) tutorials false"
+            "1) tutorialUpdates true",
+            "2) tutorialUpdates false"
         ],
         "subsection": [
             9
@@ -1247,9 +1247,10 @@
             "1) autoRole"
         ],
         "subsection": [
-            5
+            5,
+            13
         ],
-        "category": "Moderate"
+        "category": "autoRole"
     },
     {
         "title": "privacyPolicy",
@@ -1268,6 +1269,71 @@
         "example": [
             "1) welcomeMessages on",
             "2) welcomeMessages off"
+        ],
+        "subsection": [
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "commandSuggestions",
+        "explanation": "Turns the command suggestions (in the case of typos) on or off.",
+        "example": [
+            "1) commandSuggestions on",
+            "2) commandSuggestions off"
+        ],
+        "subsection": [
+            6,
+            7,
+            8, 
+            12
+        ],
+        "category": "**Important**"
+    },
+    {
+        "title": "helpFirstTime",
+        "explanation": "Shows the useful commands to check out when it's your first time using the bot.",
+        "example": [
+            "1) helpFirstTime"
+        ],
+        "subsection": [
+            6,
+            7,
+            8, 
+            9,
+            12
+        ],
+        "category": "**Important**"
+    },
+    {
+        "title": "editAutoRoleTitle",
+        "explanation": "Changes an existing autorole's title (if the bot is the author of the message). Takes 2 parameters: messageID and the new title -> seperated by a comma",
+        "example": [
+            "1) editAutoRoleTitle 758444217017565244, This Is The New Title"
+        ],
+        "subsection": [
+            5,
+            13
+        ],
+        "category": "autoRole"
+    },
+    {
+        "title": "editAutoRoleDescription",
+        "explanation": "Changes an existing autorole's description (if the bot is the author of the message). Takes 2 parameters: messageID and the new description -> seperated by a comma",
+        "example": [
+            "1) editAutoRoleTitle 758444217017565244, Description goes here"
+        ],
+        "subsection": [
+            5,
+            13
+        ],
+        "category": "autoRole"
+    },
+    {
+        "title": "passwordLockRole",
+        "explanation": "Creates a password that when messages to the bot's DM, will assign that user a specific role. When setting up, the bot will prompt to send the password to the DM to avoid onlookers!",
+        "example": [
+            "1) passwordLockRole @role"
         ],
         "subsection": [
             5

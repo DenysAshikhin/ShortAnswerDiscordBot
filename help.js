@@ -62,7 +62,11 @@ function helpTwitch(message, params, user) {
 }
 exports.helpTwitch = helpTwitch;
 
+const helpFirstTime = async function (message, params, user) {
 
+    return generalHelpMessage(message, 12, `First Time Commands`, user);
+}
+exports.helpFirstTime = helpFirstTime;
 
 
 
@@ -133,6 +137,9 @@ const generalHelpMessage = async function (message, tag, title, user) {
             case 11:
                 // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}twitchTutorial` + "```";
                 break;
+            case 12:
+                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}twitchTutorial` + "```";
+                break;
         }
 
     MAIN.prettyEmbed(message, fields,
@@ -172,15 +179,16 @@ function generalHelp(message, params, user) {
                 { name: "Popular", value: "Music", inline: true },
                 { name: "Popular", value: "Twitch", inline: true },
                 // { name: "Guide", value: "Help", inline: true },
-                { name: "Guide", value: "Tutorials", inline: true },
+                { name: "Useful", value: "firstTime", inline: true },
+                { name: "Useful", value: "Tutorials", inline: true },
                 { name: "Fun", value: "Stats", inline: true },
                 { name: "Fun", value: "Miscellaneous", inline: true },
                 { name: "Others", value: "General", inline: true },
                 { name: "Others", value: "QualityOfLife", inline: true },
                 { name: "Hush-Hush", value: "Admins", inline: true },
                 { name: "Hush-Hush", value: "Bugs/Suggestions", inline: true },
-                { name: "🔥**Invite Commands**🔥", value: "inviteMe"},
-                { name: "🔥**Invite Commands**🔥", value: "inviteSupportServer"}
+                { name: "🔥**Invite Commands**🔥", value: "inviteMe" },
+                { name: "🔥**Invite Commands**🔥", value: "inviteSupportServer" }
             ], {
             description: description, startTally: 1, modifier: 1, title: `General Help`
         });

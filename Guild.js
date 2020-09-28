@@ -28,6 +28,11 @@ const GuildSchema = new mongoose.Schema({
     welcomeMessages: {
         type: Boolean,
         default: false
+    },
+    passwordLock: {
+
+        type: Map,
+        of: String
     }
 });
 

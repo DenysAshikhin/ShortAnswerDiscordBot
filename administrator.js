@@ -31,12 +31,14 @@ async function setDefaultServerPrefix(message, params, user) {
     if (message.channel.type == 'dm') return message.channel.send("You can only set the default server prefix from inside a server text channel");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("You do not have the required permissions to set the default prefix for the server")
+        return message.channel.send("Only admins can set the default prefix for the server")
+
 
 
     if ((message.mentions.channels.size != 0) || (message.mentions.crosspostedChannels.size != 0)
         || (message.mentions.members.size != 0) || (message.mentions.users.size != 0)
-        || (message.mentions.roles.size != 0) || (message.mentions.everyone))
+        || (message.mentions.roles.size != 0) || (message.mentions.everyone)
+        || (message.content.includes('@everyone')) || (message.content.includes('@here')))
         return message.channel.send("You cannot have a mention when setting a prefix!");
 
 
@@ -47,6 +49,8 @@ async function setDefaultServerPrefix(message, params, user) {
     if (Array.isArray(params))
         params = params[0];
 
+    if (params.length > 5)
+        return message.channel.send("Prefixes are limited a max of 5 characters!");
     // let index = user.guilds.indexOf(message.guild.id);
     // user.prefix[index] = params;
 
@@ -105,7 +109,7 @@ const autorole = async function (message, params, user) {
 
                     await message.channel.send("This is what the message will currently look like:");
                     await message.channel.send({ embed: { ...params.runningEmbed, title: message.content } });
-                    params.numMessages += 4;//might cause issues
+                    params.numMessages += 3;//might cause issues
                     return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [
                         {
                             ...params, step: 3, title: message.content
@@ -179,7 +183,7 @@ const autorole = async function (message, params, user) {
 
                     await message.channel.send("This is what the message will currently look like:");
                     await message.channel.send({ embed: { ...params.runningEmbed, description: message.content } });
-                    params.numMessages += 4;//might cause issues
+                    params.numMessages += 3;//might cause issues
                     return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [
                         {
                             ...params, step: 5, description: message.content, runningEmbed: { ...params.runningEmbed, description: message.content }
@@ -323,7 +327,7 @@ const autorole = async function (message, params, user) {
                         await tempMess.react(emoji);
 
                     await message.channel.send("Don't worry about the order, they will be fixed in the next step!");
-                    params.numMessages += 3;//might cause issues
+                    params.numMessages += 2;//might cause issues
                     return await MAIN.generalMatcher(message, -23, user, ['Add another pair', 'Change last pair', 'finish'], [
                         {
                             ...params, step: 5, newEmoji: { emoji: emoji, roleID: role, emojiID: emojiID }
@@ -350,9 +354,9 @@ const autorole = async function (message, params, user) {
                 await message.channel.send("This is what the message currently will look like:");
                 let tempy1 = await message.channel.send({ embed: { ...params.runningEmbed } });
                 reactEmoji(tempy1, params.emojis);
-                params.numMessages += 4;//might cause issues
+                params.numMessages += 3;//might cause issues
 
-                return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permenant', 'Neither'], [
+                return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permenant', 'Unlimited'], [
                     {
                         ...params, step: 8, unique: true, permenant: false, neither: false
                     },
@@ -370,7 +374,7 @@ const autorole = async function (message, params, user) {
                 break;
             case 8:
 
-                params.numMessages += 2;//might cause issues
+                params.numMessages += 1;//might cause issues
                 return await MAIN.generalMatcher(message, -23, user, ['Static', 'Not Static'], [
                     {
                         ...params, step: 9, static: true
@@ -397,7 +401,7 @@ const autorole = async function (message, params, user) {
 
                 Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { });
 
-                params.numMessages += 2;
+                params.numMessages += 1;
 
                 return await MAIN.generalMatcher(message, -23, user, ['Remove Messages', 'Keep Messages'], [
                     {
@@ -417,13 +421,13 @@ const autorole = async function (message, params, user) {
 
                     console.log(`Removing ${params.numMessages} messages!`);
 
-                    let messages = await message.channel.messages.fetch({ limit: params.numMessages })
+                    let messages = await message.channel.messages.fetch({ limit: params.numMessages - 1 })
                     messages.delete(params.messageID);
 
                     let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
                     if (!permission.has("MANAGE_MESSAGES")) {
 
-                        params.numMessages += 2;
+                        params.numMessages += 1;
 
                         return await MAIN.generalMatcher(message, -23, user, ['Try Again', "Don't Try Again"], [
                             {
@@ -447,15 +451,10 @@ const autorole = async function (message, params, user) {
     }
     else {
 
-        if (message.author.id != MAIN.creatorID)
-            return message.channel.send("This command is current under construction. Only the creator test it!");
-
         if (message.channel.type == 'dm') return message.channel.send("You can only create and autoRole Message from inside a server text channel");
 
         if (!message.member.permissions.has("ADMINISTRATOR"))
             return message.channel.send("Only admins may create an autorole message");
-
-
 
         await message.channel.send("Welcome to the autorole message creator. This is what the message will currently look like:");
 
@@ -740,6 +739,14 @@ const setEmojiCollectorAll = async function (autoroleObj) {
             continue;
 
         }
+
+
+        if (message.author.id != MAIN.Client.user.id) {
+
+            autoRoleMap.delete(message.id);
+            continue;
+        }
+
         setEmojiCollecter(AUTOROLE, message);
 
     }
@@ -765,12 +772,105 @@ const resetCollectors = async function () {
     }
 }
 
+const editAutoRoleTitle = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only change an autoRole message's title from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins may change an autoRole message's title");
+
+    let args = message.content.split(" ").slice(1).join(" ").split(',');
+
+
+    if (args.length != 2)
+        return message.channel.send("You have to provide the message ID and the new title seperated by a comma!");
+
+    let autoMessage = autoRoleMap.get(args[0]);
+
+    if (!autoMessage) {
+        return message.channel.send("That ID does not match any known autorole messages!");
+    }
+
+    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(args[0]);
+
+    if (!actualAutoMessage)
+        return message.channel.send("It seems like that autorole message no longer exists! It will be deleted from the database soon!");
+
+
+    if (actualAutoMessage.author.id != MAIN.Client.user.id) {
+
+        // console.log(actualAutoMessage.author.id)
+        // console.log(MAIN.Client.id)
+
+        return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its title or description!");
+    }
+
+    autoMessage.title = args[1];
+    autoMessage.runningEmbed.title = args[1];
+
+    actualAutoMessage.edit({ embed: autoMessage.runningEmbed });
+    updateAutoRoleObject(autoMessage, message.guild.id);
+
+}
+exports.editAutoRoleTitle = editAutoRoleTitle;
+
+const editAutoRoleDescription = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only change an autoRole message's description from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins may change an autoRole message's description");
+
+    let args = message.content.split(" ").slice(1).join(" ").split(',');
+
+
+    if (args.length != 2)
+        return message.channel.send("You have to provide the message ID and the new description seperated by a comma!");
+
+    let autoMessage = autoRoleMap.get(args[0]);
+
+    if (!autoMessage) {
+        return message.channel.send("That ID does not match any known autorole messages!");
+    }
+
+    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(args[0]);
+
+    if (!actualAutoMessage)
+        return message.channel.send("It seems like that autorole message no longer exists! It will be deleted from the database soon!");
+
+
+    if (actualAutoMessage.author.id != MAIN.Client.user.id) {
+
+
+        return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its title or description!");
+    }
+
+    autoMessage.description = args[1];
+    autoMessage.runningEmbed.description = args[1];
+
+    actualAutoMessage.edit({ embed: autoMessage.runningEmbed });
+    updateAutoRoleObject(autoMessage, message.guild.id);
+
+}
+exports.editAutoRoleDescription = editAutoRoleDescription;
+
+const updateAutoRoleObject = async function (autoRoleObj, guildID) {
+
+    let guild = await MAIN.findGuild({ id: guildID });
+
+    let index = guild.autorole.findIndex(element => element.messageID == autoRoleObj.messageID)
+
+    guild.autorole[index] = autoRoleObj;
+
+    return Guild.findOneAndUpdate({ id: guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { });
+}
+
 const welcomeMessages = async function (message, params, user) {
 
     if (message.channel.type == 'dm') return message.channel.send("You can only configure welcome messages from inside a server text channel");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("You do not have the required permissions to configure welcome messages for the server");
+        return message.channel.send("Only admins can configure welcome messages for the server");
 
     const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
 
@@ -788,3 +888,73 @@ const welcomeMessages = async function (message, params, user) {
     return Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: false } }, function (err, doc, res) { });
 }
 exports.welcomeMessages = welcomeMessages;
+
+
+const passwordLockRole = async function (message, params, user) {
+
+    if (params.step) {
+
+        let guild = await MAIN.findGuild({ id: params.guildID });
+        if (!guild.passwordLock)
+            guild.passwordLock = new Map();
+
+        switch (params.step) {
+
+            case 1:
+
+                let pass = message.content;
+
+                if (guild.passwordLock.get(pass)) {
+
+                    message.channel.send("That password is already used! Try another one.");
+
+
+                    return MAIN.createRunningCommand(messy, { command: passwordLockRole, commandParams: params, DM: true }, user);
+                }
+                else if ((await giveRoleSelf(params.generalMessage, params.roleID)) != 1) {
+
+                    await message.channel.send("I can't give or remove this role. Please fix my permissions or try a different role.");
+                    return MAIN.createRunningCommand(messy, { command: passwordLockRole, commandParams: params, DM: true }, user);
+                }
+                else {
+
+                    guild.passwordLock.set(pass, params.roleID);
+
+                    Guild.findOneAndUpdate({ id: params.guildID }, { $set: { passwordLock: guild.passwordLock } }, function (err, doc, res) { });
+                    return message.channel.send(`To have a member be assigned your chosen role, have them Direct Message me the following password: ${params.guildID}, ${pass}`);
+                }
+                break;
+        }
+    }
+
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only start the password-role from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can configure the password-role for the server");
+
+    //const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You can only @mention a single role to password lock at a time.")
+
+
+    params = {
+        step: 1,
+        roleID: message.mentions.roles.first().id,
+        guildID: message.guild.id,
+        generalMessage: message
+    }
+
+    if ((await giveRoleSelf(message, params.roleID)) != 1) {
+
+        await message.channel.send("I can't give or remove this role. Please fix my permissions or try a different role.");
+        return MAIN.createRunningCommand(message, { command: passwordLockRole, commandParams: params }, user);
+    }
+
+    let messy = await message.author.send("Please enter the password you would like to use:");
+    params.dm = messy;
+
+    return MAIN.createRunningCommand(messy, { command: passwordLockRole, commandParams: params, DM: true }, user);
+}
+exports.passwordLockRole = passwordLockRole;

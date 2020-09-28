@@ -632,6 +632,7 @@ async function shakeUser(message, params, user) {
 
     let targetMember = message.mentions.members.first();
     if (targetMember.id == MAIN.botID) return message.channel.send("I'm not going to shake myself!");
+
     if (!message.member.permissions.has("ADMINISTRATOR"))
         if (message.member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return message.channel.send("You can't shake a user with a higher role than yours (unless you're an admin)!");
