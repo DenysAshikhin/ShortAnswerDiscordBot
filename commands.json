@@ -1350,5 +1350,16 @@
             3
         ],
         "category": "Password Role"
+    },
+    {
+        "title": "viewPasswordLockRole",
+        "explanation": "Admin only command that sends you a list of all the passwords and the ID's of the role's they are linked to. The list will be sent to you Direct Messages. Must be called from a server text channel.",
+        "example": [
+            "1) viewPasswordLockRole"
+        ],
+        "subsection": [
+            3
+        ],
+        "category": "Password Role"
     }
 ]

@@ -921,7 +921,7 @@ const passwordLockRole = async function (message, params, user) {
                     guild.passwordLock.set(pass, params.roleID);
 
                     Guild.findOneAndUpdate({ id: params.guildID }, { $set: { passwordLock: guild.passwordLock } }, function (err, doc, res) { });
-                    return message.channel.send(`To have a member be assigned your chosen role, have them Direct Message me the following password: ${params.guildID}, ${pass}`);
+                    return message.channel.send(`To have a member be assigned your chosen role, have them Direct Message me the following password: sa!activatePasswordRole ${params.guildID}, ${pass}`);
                 }
                 break;
         }
@@ -990,3 +990,26 @@ const activatePasswordRole = async function (message, params, user) {
     return message.channel.send("Role given!");
 }
 exports.activatePasswordRole = activatePasswordRole;
+
+const viewPasswordLockRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can view the password-roleID pairs for the server");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.passwordLock)
+        return message.author.send("There are no password-roleID pairs for this server");
+
+    let messy = await message.author.send("Here are all the password-roleID pairs");
+
+
+    array = Array.from(guild.passwordLock, ([name, value]) => (`${name} - ${value}`));
+
+    console.log(array);
+
+    MAIN.prettyEmbed(messy, array, { startTally: 1 });
+}
+exports.viewPasswordLockRole = viewPasswordLockRole;

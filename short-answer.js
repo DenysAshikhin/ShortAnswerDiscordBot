@@ -822,8 +822,8 @@ function populateCommandMap() {
     commandMap.set(Commands[109].title.toUpperCase(), ADMINISTRATOR.editAutoRoleDescription)
     commandMap.set(Commands[110].title.toUpperCase(), ADMINISTRATOR.passwordLockRole)
     commandMap.set(Commands[111].title.toUpperCase(), ADMINISTRATOR.activatePasswordRole)
-
-
+    commandMap.set(Commands[112].title.toUpperCase(), ADMINISTRATOR.viewPasswordLockRole)
+    
     exports.commandMap = commandMap;
 }
 
