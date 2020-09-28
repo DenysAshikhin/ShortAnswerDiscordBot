@@ -1361,5 +1361,16 @@
             3
         ],
         "category": "Password Role"
+    },
+    {
+        "title": "deletePasswordLockRole",
+        "explanation": "Admin only command that deletes a certain password-roleID based on the provided password.",
+        "example": [
+            "1) deletePasswordLockRole password123"
+        ],
+        "subsection": [
+            3
+        ],
+        "category": "Password Role"
     }
 ]
