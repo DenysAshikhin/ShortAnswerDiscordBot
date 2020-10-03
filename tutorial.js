@@ -38,7 +38,7 @@ const IntroTutorial = {
         + ` Please proceed by calling the command below.`,
 
         `Now I will introduce a command which can take an unlimited number of parameters. Parameters are seperated from the prefix+command by a space.`
-        + ` In the case of needing/wanting to use multiple parameters, seperate each one by comma. ` + "`" + "To continue please use the command below with 2 or more" 
+        + ` In the case of needing/wanting to use multiple parameters, seperate each one by comma. ` + "`" + "To continue please use the command below with 2 or more"
         + ` parameters!` + "`",
 
         "Congratulations on finishing the introductory tutorial!"
@@ -164,7 +164,7 @@ exports.tutorialStarter = tutorialStarter;
 
 const generalTutorial = async function (message, params, command, tutorial, tutorialCommand, user) {
 
-    user = await MAIN.findUser({ id: user.id });
+    user = await MAIN.findUser(message.member);
 
     if (user.tutorialStep == -1) {
 

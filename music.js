@@ -109,20 +109,43 @@ async function spotifyPlaylist(message, params, user) {
     let steps = 0;
     let totalNumber = Object.keys(playlistTracks.items).length;
 
-    for (track in playlistTracks.items) {
+    let newOptions;
 
+
+    try {
+        newOptions = JSON.parse(JSON.stringify(MAIN.options));
+    }
+    catch (err) {
+        newOptions = JSON.parse(JSON.stringify(MAIN.options));
+    }
+
+
+
+    let count = 1;
+
+    console.log("over)", playlistTracks.items.length)
+    let orderPlaylist = [];
+    for (let trackID of playlistTracks.order) {
+        orderPlaylist.push(playlistTracks.items[trackID])
+    }
+
+    for (track of orderPlaylist) {
+
+        console.log("COUNT: ", count);
+
+        count++;
+        //   console.log(track.artists)
         let artists = "";
 
-        for (arty of playlistTracks.items[track].artists) {
+        for (arty of track.artists) {
             artists += " " + arty.name;
         }
 
-        let name = (artists + " " + playlistTracks.items[track].name).trim();
+        let name = (artists + " " + track.name).trim();
 
-        let newOptions = JSON.parse(JSON.stringify(MAIN.options));
         newOptions = {
             ...newOptions,
-            minMatchCharLength: name.length / 2,
+            minMatchCharLength: name.length / 3,
             findAllMatches: false,
             includeScore: true,
             isCaseSensitive: true,
@@ -130,6 +153,9 @@ async function spotifyPlaylist(message, params, user) {
             keys: ['title']
         }
 
+
+        console.log(name);
+        console.log(1)
         let searchResult = await ytsr(name, { limit: 5 });
 
         searchResult.items = searchResult.items.filter(element => element.type == 'video');
@@ -176,15 +202,131 @@ async function spotifyPlaylist(message, params, user) {
             searchyArray = searchyArray.filter(element => !element.title.toLowerCase().includes("studio"))
         }
 
+
+
+
+
         let fuse = new Fuse(searchyArray, newOptions);
         let result = fuse.search(name.replace(/([(){}&,\-])/g, '').replace(/\s{2,}/g, ' '));
+
+        if (result.length == 0) {
+
+
+            let FOUND = false;
+            for (let result of searchyArray) {
+
+                let counter = 0;
+
+                let cleanedTitle = (result.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ').toLowerCase());
+                cleanedName = cleanedName.replace('’', "'").replace(/\s{2,}/g, ' ');
+
+
+                for (let word of cleanedName.split(" ")) {
+
+                    if (cleanedTitle.includes(word))
+                        counter++;
+                }
+                if ((counter / cleanedName.split(" ").length) > 0.65) {
+                    await play(message, { custom: true, url: result.link, spoti: true }, user);
+                    numFound++;
+                    FOUND = true;
+                    continue;
+                }
+
+            }
+
+
+
+            if (FOUND) {
+
+                continue;
+            }
+            else {//name + fuzzy
+
+                let searchResult = await ytsr(track.name, { limit: 5 });
+                searchyResult = searchResult.items.filter(element => element.type == 'video');
+
+                let fuse = new Fuse(searchResult.items, newOptions);
+                let result = fuse.search(track.name);
+
+
+                if (result.length == 0) {
+                    missed.push({ original: track.name, found: "N/A", score: 'N/A', url: 'N/A' });
+                    continue;
+                }
+                else if ((result[0].score <= 0.2) && (result.length > 0)) {
+                    let topScores = result.filter(element => element.score <= 0.2);
+                    topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
+                    await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
+                    found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                    //               console.log("name + fuzzy")
+                }
+                else {
+
+                    let counter = 0;
+                    let cleanedName = track.name.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ');
+                    let cleanedTitle = result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ');
+                    for (word of cleanedName.split(" ")) {
+
+                        if (cleanedTitle.includes(word))
+                            counter++;
+                    }
+
+                    if ((counter / cleanedName.split(" ").length) > 0.8) {
+                        await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+                        found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                        // console.log("name word match")
+                        // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                    }
+                    else {
+
+                        let searchResult = await ytsr(track.artists[0].name + track.name, { limit: 5 });
+                        searchyResult = searchResult.items.filter(element => element.type == 'video');
+
+                        let fuse = new Fuse(searchResult.items, newOptions);
+                        let result = fuse.search(track.name);
+
+                        if ((result[0].score <= 0.2) && (result.length > 0)) {
+                            let topScores = result.filter(element => element.score <= 0.2);
+                            topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
+                            await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
+                            found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                            //               console.log("name + fuzzy")
+                        }
+                        else {
+
+                            let counter = 0;
+                            let cleanedName = track.artists[0].name.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ') + track.name.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ');
+                            let cleanedTitle = result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ');
+                            for (word of cleanedName.split(" ")) {
+
+                                if (cleanedTitle.includes(word))
+                                    counter++;
+                            }
+
+                            if ((counter / cleanedName.split(" ").length) > 0.8) {
+                                await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+                                found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                                // console.log("name word match")
+                                // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                            }
+                            else {
+                                missed.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
 
         if (result[0].score <= 0.2) {//artist + name fuzzy
             let topScores = result.filter(element => element.score <= 0.2);
             topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
             await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
             numFound++;
-            console.log("artist + name fuzzy")
+            //console.log("artist + name fuzzy")
 
         }
         else {//artist + name wordy match
@@ -204,24 +346,28 @@ async function spotifyPlaylist(message, params, user) {
             }
             else {//name + fuzzy
 
-                let searchResult = await ytsr(playlistTracks.items[track].name, { limit: 5 });
+                let searchResult = await ytsr(track.name, { limit: 5 });
                 searchyResult = searchResult.items.filter(element => element.type == 'video');
 
                 let fuse = new Fuse(searchResult.items, newOptions);
-                let result = fuse.search(playlistTracks.items[track].name);
+                let result = fuse.search(track.name);
 
 
-                if ((result[0].score <= 0.2) && (result.length > 0)) {
+                if (result.length == 0) {
+                    missed.push({ original: track.name, found: "N/A", score: 'N/A', url: 'N/A' });
+                    continue;
+                }
+                else if ((result[0].score <= 0.2) && (result.length > 0)) {
                     let topScores = result.filter(element => element.score <= 0.2);
                     topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
                     await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
                     found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
-                    console.log("name + fuzzy")
+                    //               console.log("name + fuzzy")
                 }
                 else {
 
                     let counter = 0;
-                    let cleanedName = playlistTracks.items[track].name.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ');
+                    let cleanedName = track.name.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ');
                     let cleanedTitle = result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ');
                     for (word of cleanedName.split(" ")) {
 
@@ -231,15 +377,51 @@ async function spotifyPlaylist(message, params, user) {
 
                     if ((counter / cleanedName.split(" ").length) > 0.8) {
                         await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
-                        found.push({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
-                        console.log("name word match")
-                        // console.log({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                        found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                        // console.log("name word match")
+                        // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
                     }
-                    else
-                        missed.push({ original: playlistTracks.items[track].name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                    else {
+                        let searchResult = await ytsr(track.artists[0].name + track.name, { limit: 5 });
+                        searchyResult = searchResult.items.filter(element => element.type == 'video');
+
+                        let fuse = new Fuse(searchResult.items, newOptions);
+                        let result = fuse.search(track.name);
+
+                        if ((result[0].score <= 0.2) && (result.length > 0)) {
+                            let topScores = result.filter(element => element.score <= 0.2);
+                            topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
+                            await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
+                            found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                            //               console.log("name + fuzzy")
+                        }
+                        else {
+
+                            let counter = 0;
+                            let cleanedName = track.artists[0].name.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ') + track.name.replace(/([(){}&\-])/g, '').replace('’', "'").replace(/\s{2,}/g, ' ');
+                            let cleanedTitle = result[0].item.title.replace(/([(){}&\-])/g, '').replace(/\s{2,}/g, ' ');
+                            for (word of cleanedName.split(" ")) {
+
+                                if (cleanedTitle.includes(word))
+                                    counter++;
+                            }
+
+                            if ((counter / cleanedName.split(" ").length) > 0.8) {
+                                await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+                                found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                                // console.log("name word match")
+                                // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                            }
+                            else {
+                                missed.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                            }
+                        }
+                    }
                 }
             }
         }
+
+
         numSongs++;
 
         if ((numSongs / totalNumber) > (steps * 0.05)) {
@@ -248,6 +430,8 @@ async function spotifyPlaylist(message, params, user) {
                 + "```md\n<" + `${Math.floor((numSongs / totalNumber) * 100)}% Complete!>` + "```");
         }
     }
+
+
 
     let finalReport = [];
 
@@ -281,6 +465,10 @@ async function spotifyPlaylist(message, params, user) {
 async function volume(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     const args = emoji ? emoji : Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
     if (args < 0) return message.channel.send("The volume cannot be set to 0!");
@@ -294,8 +482,11 @@ async function volume(message, params, user, emoji) {
 }
 exports.volume = volume;
 
-async function pause(message) {
+async function pause(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
 
     let guildQueue = queue.get(message.guild.id);
     if (guildQueue) {
@@ -309,8 +500,14 @@ async function pause(message) {
 }
 exports.pause = pause;
 
-async function resume(message) {
+async function resume(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
+
+
     let guildQueue = queue.get(message.guild.id);
 
     if (guildQueue) {
@@ -329,6 +526,11 @@ exports.resume = resume;
 async function skip(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("This is a server text-channel exclusive command!");
+
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     let guildQueue = queue.get(message.guild.id);
     let skipy = lastSkip.get(message.guild.id);
     const args = emoji ? 1 : Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
@@ -366,6 +568,10 @@ exports.skip = skip;
 async function reverse(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     let guildQueue = queue.get(message.guild.id);
     const args = emoji ? 1 : Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
@@ -394,8 +600,12 @@ async function reverse(message, params, user, emoji) {
 }
 exports.reverse = reverse;
 
-async function stop(message) {
+async function stop(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     let temp = queue.get(message.guild.id);
 
     if (temp) {
@@ -404,14 +614,18 @@ async function stop(message) {
         temp.collector.stop();
         await temp.voiceChannel.leave();
         queue.delete(message.guild.id);
+        console.log("Music bot has left");
         // download.delete(message.guild.id);
     }
 }
 exports.stop = stop;
 
-async function forward(message, params) {
+async function forward(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
     let guildQueue = queue.get(message.guild.id);
 
     if (guildQueue) {
@@ -449,9 +663,13 @@ async function forward(message, params) {
 }
 exports.forward = forward;
 
-async function rewind(message, params) {
+async function rewind(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     let guildQueue = queue.get(message.guild.id);
     let song = guildQueue.songs[guildQueue.index];
 
@@ -485,9 +703,13 @@ async function rewind(message, params) {
 }
 exports.rewind = rewind;
 
-async function seek(message, params) {
+async function seek(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     let guildQueue = queue.get(message.guild.id);
 
 
@@ -517,6 +739,10 @@ exports.seek = seek;
 async function shuffle(message, params, user, emoji) {
 
     if (message.channel.type == 'dm') return message.reply("This command must be called from a server text channel!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     let guildQueue = queue.get(message.guild.id);
     if (!guildQueue) return message.channel.send("There needs to be a song playing before seeing the shuffling!");
 
@@ -530,6 +756,9 @@ exports.shuffle = shuffle;
 async function goTo(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
 
     let guildQueue = queue.get(message.guild.id);
     if (!guildQueue) return message.channel.send("There needs to be a song playing!");
@@ -552,7 +781,12 @@ exports.goTo = goTo;
 
 async function repeat(message, params, user, emoji) {
 
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     let guildQueue = queue.get(message.guild.id);
+
+
 
     if (emoji) {
         if (emoji == -1)
@@ -622,6 +856,10 @@ params = {
 async function play(message, params, user) {
 
     if (message.channel.type == 'dm') return message.reply("You must be in a server voice channel and send the command from a server!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
@@ -671,12 +909,17 @@ async function play(message, params, user) {
     try {
         playlistID = await ytpl.getPlaylistID(args);
     }
-    catch(err){
+    catch (err) {
         console.log('not a playlist')
     }
 
     if (!params.spoti && ((await spotifyPlaylist(message, args, user)) != -1)) {
         console.log('it was spotify')
+
+        console.log(params.spoti)
+        console.log("args: ", args)
+        console.log(params);
+        //  console.log((await spotifyPlaylist(message, args, user)));
     }
     else if (ytdl.validateURL(args)) {
         songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
@@ -712,7 +955,7 @@ async function play(message, params, user) {
 
 
             if ((queueConstruct.songs.length > 1))
-                if (!params.spoti) { await message.channel.send(`${songInfo.title} has been added to the queue!`); }
+                if (!params.spoti) { await message.channel.send(`${songInfo.videoDetails.title} has been added to the queue!`); }
                 else { }
             else {
 
@@ -795,8 +1038,8 @@ async function play(message, params, user) {
             queueConstruct.connection = connection;
             playSong(message.guild, queueConstruct.songs[0], null, message);
         } catch (err) {
-            
-            MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+
+            MAIN.fs.promises.writeFile(`logs/${MAIN.uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             queue.delete(message.guild.id)
             return message.channel.send("There was an error playing! " + err);
         }
@@ -866,16 +1109,16 @@ async function checkControlsEmoji(message) {
         // }
         if (emoji.emoji.toString() == '⏪') {
 
-            reverse(emoji.message, '1', true);
+            reverse(emoji.message, '1', user, emoji);
         }
         else if (emoji.emoji.toString() == '⏯️') {
             if (exactQueue.songs[exactQueue.index].paused) {
-                resume(emoji.message);
+                resume(emoji.message, null, user);
             }
-            else pause(emoji.message);
+            else pause(emoji.message, null, user);
         }
         else if (emoji.emoji.toString() == '⏩') {
-            skip(emoji.message, '1', null, true)
+            skip(emoji.message, '1', user, emoji);
         }
         else if (emoji.emoji.toString() == '🔊') {
 
@@ -885,7 +1128,7 @@ async function checkControlsEmoji(message) {
             else {
                 exactQueue.volume += 0.5;
                 MAIN.selfDestructMessage(emoji.message, "Increased volume by 5%", 3, emoji);
-                volume(emoji.message, '', null, (exactQueue.volume * 20))
+                volume(emoji.message, (exactQueue.volume * 20), user, (exactQueue.volume * 20))
             }
 
         }
@@ -896,40 +1139,42 @@ async function checkControlsEmoji(message) {
             else {
                 exactQueue.volume -= 0.5;
                 MAIN.selfDestructMessage(emoji.message, "Decreased volume by 5%", 3, emoji);
-                volume(emoji.message, '', null, (exactQueue.volume * 20))
+                volume(emoji.message, '', user, (exactQueue.volume * 20))
             }
         }
         else if (emoji.emoji.toString() == '⏹️') {
 
-            stop(emoji.message);
+            stop(emoji.message, null, user);
         }
         else if (emoji.emoji.toString() == '🔀') {
 
-            shuffle(emoji.message, null, null, true);
+            shuffle(emoji.message, null, user, true);
         }
         else if (emoji.emoji.toString() == '🔁') {
 
             if (exactQueue.repeat == 1) {
-                repeat(emoji.message, null, null, 100);
+                repeat(emoji.message, 100, user, 100);
                 MAIN.selfDestructMessage(emoji.message, "Will repeat the entire playlist!", 3, true);
             }
             else if (exactQueue.repeat == 100) {
-                repeat(emoji.message, null, null, -1);
+                repeat(emoji.message, -1, user, -1);
                 MAIN.selfDestructMessage(emoji.message, "Repeat turned off!", 3, true);
             }
             else if (exactQueue.repeat == -1) {
-                repeat(emoji.message, null, null, 1);
+                repeat(emoji.message, null, user, 1);
                 MAIN.selfDestructMessage(emoji.message, "Will repeat the current song!", 3, true);
             }
         }
         else if (emoji.emoji.toString() == '↩️') {
+            if (!(await checkMusicPerm(user, message.guild, message)))
+                return -1;
             await exactQueue.message.delete();
             exactQueue.message = null;
             let newMessage = await emoji.message.channel.send("```md\nNow Playing\n#" + exactQueue.songs[exactQueue.index].title + "\n["
                 + '00:00'
                 + "](" + MAIN.timeConvert(Math.floor(exactQueue.songs[exactQueue.index].duration)) + ")```");
             exactQueue.message = newMessage;
-            songControlEmoji(newMessage)
+            await songControlEmoji(newMessage);
         }
         if (!(emoji.emoji.toString() == '↩️'))
             emoji.users.remove(user);
@@ -1176,7 +1421,7 @@ async function cacheSong(song, GUILD, MESSAGE) {
                 //console.log("FINISHED: WRITE STREAM " + song.title);
                 mv(tempAudio, audioOutput, function (err) {
                     if (err) {
-                       
+
                         MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
                     }
                     serverDownload.songToDownload = null;
@@ -1216,6 +1461,10 @@ exports.cacheSong = cacheSong;
  */
 async function addSong(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
 
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
@@ -1272,7 +1521,7 @@ async function addSong(message, params, user) {
         else if (ytdl.validateURL(params)) {
             songInfo = await ytdl.getInfo(params, { quality: 'highestaudio' });
 
-            if (songInfo.length_seconds) {
+            if (songInfo.videoDetails.lengthSeconds) {
                 //On version 3 its info.videoDetails.availableCountries
                 if (!songInfo.player_response.microformat.playerMicroformatRenderer.availableCountries.includes('US'))
                     return message.channel.send("This video is not available here! Please try another one.");
@@ -1286,12 +1535,12 @@ async function addSong(message, params, user) {
                 }
 
                 song = {
-                    title: songInfo.title,
-                    url: songInfo.video_url,
-                    duration: songInfo.length_seconds,
+                    title: songInfo.videoDetails.title,
+                    url: songInfo.videoDetails.video_url,
+                    duration: songInfo.videoDetails.lengthSeconds,
                     start: null,
                     offset: offset,
-                    id: songInfo.video_id,
+                    id: songInfo.videoDetails.videoId,
                     paused: null,
                     timePaused: 0,
                     progress: 0
@@ -1330,7 +1579,8 @@ async function addSong(message, params, user) {
         params.playlist.songs.push(params.song);
         user.playlists[params.index] = params.playlist;
         message.channel.send(`Succesfully added ${params.song.title} to ${params.playlist.title}`)
-        return User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+        User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+        return 1
     }
 }
 exports.addSong = addSong;
@@ -1370,7 +1620,8 @@ async function savePlayList(message, params, user) {
 
         user.playlists[params.index] = params.playlist;
         message.channel.send(`Succesfully added ${serverQueue.songs.length} songs to ${params.playlist.title}`)
-        return User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+        User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
+        return 1;
     }
 }
 exports.savePlayList = savePlayList;
@@ -1426,6 +1677,10 @@ exports.removeSong = removeSong;
 
 async function playUserPlayList(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("You must be in a voice channel!");
+
+    if (!(await checkMusicPerm(user, message.guild, message)))
+        return -1;
+
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
     let serverQueue = queue.get(message.guild.id);
 
@@ -1690,11 +1945,12 @@ removeTempSongs();
 
 async function checkEmptyChannel() {
 
-    if (queue.size > 0)
+    if (queue.size > 0) {
         for (server of queue.entries()) {
             if (!server[1].connection) {
                 download.delete(server[1].originMessage.guild.id);
                 queue.delete(server[0]);
+                console.log("Music bot has left");
                 continue;
             }
             if (server[1].connection.channel.members.size == 1) {
@@ -1704,9 +1960,35 @@ async function checkEmptyChannel() {
                 }
                 download.delete(server[1].originMessage.guild.id);
                 queue.delete(server[0]);
+                console.log("Music bot has left");
             }
         }
+
+        console.log(`There are ${queue.size} active music bots!`);
+    }
 }
+
+
+
+const checkMusicPerm = async function (user, guild, message) {
+
+
+    let guildDB = await MAIN.findGuild({ id: guild.id });
+
+    if (!guildDB.musicRole)
+        return true;
+
+    let role = guild.roles.cache.get(guildDB.musicRole);
+    let member = guild.members.cache.get(user.id);
+
+    if (member.roles.highest.comparePositionTo(role) < 0) {
+        message.channel.send("You don't have a high enough role to control the music functionalties!");
+        return false;
+    }
+
+    return true;
+}
+
 
 setInterval(authoriseSpotify, 50 * 60 * 1000);
 setInterval(checkEmptyChannel, 60 * 1000);

@@ -23,6 +23,9 @@
     "ffmpeg-static": "^4.2.7",
     "fluent-ffmpeg": "^2.1.2",
     "fuse.js": "^6.3.1",
+    "is-image-url": "^1.1.8",
+    "is-url": "^1.2.4",
+    "is-video": "^1.0.1",
     "mongodb": "^3.6.2",
     "mongoose": "^5.10.5",
     "mv": "^2.1.1",
@@ -38,7 +41,7 @@
     "uniqid": "^5.2.0",
     "ytdl-core": "^3.2.2",
     "ytpl": "^1.0.1",
-    "ytsr": "^0.1.21"
+    "ytsr": "^1.0.3"
   },
   "devDependencies": {},
   "repository": {

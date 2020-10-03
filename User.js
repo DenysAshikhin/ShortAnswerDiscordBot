@@ -102,6 +102,10 @@ const UserSchema = new mongoose.Schema({
     commandSuggestions: {
         type: Boolean,
         default: false
+    },
+    reps: {
+        type: Map,
+        of: String
     }
 });
 

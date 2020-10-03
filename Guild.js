@@ -30,9 +30,56 @@ const GuildSchema = new mongoose.Schema({
         default: false
     },
     passwordLock: {
-
         type: Map,
         of: String
+    },
+    channelImageThanker: {
+        type: [],
+        default: []
+    },
+    channelLinkThanker: {
+        type: [],
+        default: []
+    },
+    channelImage: {
+        type: [],
+        default: []
+    },
+    channelImageSource: {
+        type: [],
+        default: []
+    },
+    forwardImages: {
+        type: Boolean,
+        default: false
+    },
+    channelThankerMessage: {
+        type: String,
+        default: ''
+    },
+    autoRep: {
+        type: Boolean,
+        default: true
+    },
+    thankerAutoRep: {
+        type: Boolean,
+        default: true
+    },
+    repRolePairs: {
+        type: [],
+        default: []
+    },
+    blacklistedRepRoles: {
+        type: [],
+        default: []
+    },
+    commandChannelWhiteList: {
+        type: [],
+        default: []
+    },
+    musicRole: {
+        type: String,
+        default: ''
     }
 });
 

@@ -175,13 +175,17 @@ async function checkUsersTwitchStreams(users) {
     await Promise.all(promiseArray);
 
     for (entry of sendArray) {
-        for (let guild of MAIN.Client.guilds.cache.values()) {
+        for (let GUILD of MAIN.Client.guilds.cache.values()) {
+
+
+            let guild = await GUILD.fetch();
 
             let member = guild.members.cache.get(entry.userID);
             if (!member) continue;
             //  console.log("Trying to alert")
             member.send(entry.alertMessage);
             User.findOneAndUpdate({ id: entry.userID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+            break;
         }
     }
     return 1;

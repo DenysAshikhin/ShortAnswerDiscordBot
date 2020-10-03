@@ -75,12 +75,13 @@ const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
 const ffmpeg = require('fluent-ffmpeg');
 var uniqid = require('uniqid');
-
+exports.uniqid = uniqid;
 const Cache = require('caching-map');
 
 
-const cachedUsers = new Cache(100);
+const cachedUsers = new Cache(1000);
 const cachedGuilds = new Cache(100);
+exports.cachedGuilds = cachedGuilds;
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 var needle = require('needle');
@@ -92,6 +93,7 @@ const algorithm = 'aes-256-gcm',
 
 var osu = require('node-os-utils');
 const { executionAsyncResource } = require('async_hooks');
+const { isError } = require('util');
 var cpu = osu.cpu;
 var mem = osu.mem;
 
@@ -383,18 +385,31 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
 
-const getUsers = async function () {
+const getUsers = async function (params) {
     try {
-        return await User.find({})
+        if (params)
+            return await User.find(params);
+        else
+            return await User.find({});
     } catch (err) {
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getUsers = getUsers;
-
-const findUser = async function (params) {
+//{ games: { $gt: '' }, guilds: message.guild.id }
+const findUser = async function (member) {
     try {
-        return await User.findOne(params)
+        let usery = await User.findOne({ id: member.id });
+
+        if (!usery) {
+
+            await checkExistance(member)
+            return await User.findOne({ id: member.id });
+        }
+        else {
+            return usery;
+        }
+
     } catch (err) {
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
@@ -410,9 +425,12 @@ const findGuild = async function (params) {
 }
 exports.findGuild = findGuild;
 
-const getGuilds = async function () {
+const getGuilds = async function (params) {
     try {
-        return await Guild.find({})
+        if (params)
+            return await Guild.find(params);
+        else
+            return await Guild.find({});
     } catch (err) {
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
@@ -505,19 +523,23 @@ connectDB.once('open', async function () {
         if (message.author.bot) return;
 
         let user = cachedUsers.get(message.author.id);
+
         if (!user) {
 
-            user = await findUser({ id: message.author.id });
 
-            if (!user) {
+            if (!message.member) {
+                user = await User.findOne({ id: message.author.id });
 
-                await checkExistance(message.member);
-                user = await findUser({ id: message.author.id });
+                if (!user)
+                    return message.channel.send(`I don't seem to have you in my database, try sending any message in a server I am in, then try DM'ing me again!`);
             }
+            else
+                user = await findUser(message.member);
+
+
 
             cachedUsers.set(user.id, user);
         }
-
 
         if (message.channel.type != 'dm') {
 
@@ -525,15 +547,64 @@ connectDB.once('open', async function () {
             if (!guild) {
 
                 guild = await findGuild({ id: message.guild.id });
-                cachedUsers.set(message.guild.id, guild);
+                cachedGuilds.set(message.guild.id, guild);
             }
 
 
-            if (!user || !user.guilds.includes(message.guild.id)) {//Checking that the user exists in DB and they have a valid guild
+            if (!user.guilds.includes(message.guild.id)) {//Checking that the user exists in DB and they have a valid guild
                 await checkExistance(message.member);
-                user = await findUser({ id: message.member.id });
+                user = await findUser(message.member);
             }
             updateMessage(message, user);
+
+            if (guild.channelImageThanker.includes(message.channel.id)) {
+
+                ADMINISTRATOR.channelImageThanker(message, null, user);
+            }
+            if (guild.channelLinkThanker.includes(message.channel.id)) {
+
+                ADMINISTRATOR.channelLinkThanker(message, null, user);
+            }
+
+            if (guild.autoRep) {
+
+                if (ADMINISTRATOR.identifyThanks(message)) {
+
+                    let memberList = '';
+
+                    for (let userID of message.mentions.members.values()) {
+
+                        if (userID.id != message.author.id) {
+
+                            let newUser = await findUser(userID);
+
+                            try {
+                                let result = await ADMINISTRATOR.changeRep(newUser, message.guild.id, 1, message);
+                            }
+                            catch (err) {
+                                console.log(err)
+                                console.log('error thanking')
+                                continue;
+                            }
+
+                            memberList += mention(newUser.id) + ' ';
+                        }
+                    }
+
+                    if (memberList.length > 1)
+                        message.channel.send(`Gave +1 rep to ${memberList}`);
+                }
+            }
+
+            if (guild.channelImageSource.includes(message.channel.id)) {
+
+                ADMINISTRATOR.forwardImages(message, guild, null);
+            }
+            else if ((guild.channelImage.length > 0) && guild.forwardImages) {
+
+                ADMINISTRATOR.forwardImages(message, guild, null);
+            }
+
 
             let index = user.guilds.indexOf(message.guild.id);
             if (user.prefix[index] != "-1") prefix = user.prefix[index];
@@ -556,57 +627,87 @@ connectDB.once('open', async function () {
         if (defaultPrefix == "##")
             prefix = "##";
 
+        try {
+            if ((await triggerRunningCommand(message, user)) != -1) {
 
-        if ((await triggerRunningCommand(message, user)) != -1) {
+                //HERE
 
-            return;
-            // console.log("Running command took over");
-        }
-        else if (message.content.substr(0, prefix.length) == prefix) {
-
-            user = await findUser({ id: message.author.id });
-            cachedUsers.set(user.id, user);
-            exports.cachedUsers = cachedUsers;
-            console.log(`Number of cached users: ${cachedUsers.size}`);
-
-            if (message.channel.type != 'dm') {
-                let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
-                if (!permission.has("SEND_MESSAGES"))
-                    return message.author.send("I don't have the right permissions to send messages and embed links in that channel!");
-                if (!permission.has("EMBED_LINKS"))
-                    await message.channel.send("I don't have the right permissions to embed links in this channel, **some commands may not work!**");
-                if (!permission.has("ADD_REACTIONS"))
-                    await message.channel.send("I don't have the right permissions to add reactions, **some commands may not work!**");
-                if (!permission.has("USE_EXTERNAL_EMOJIS"))
-                    await message.channel.send("I don't have the right permissions to add reactions, **some commands may not work!**");
-
-
-
-                //add can't add custom emojis? and react to messages
+                return;
+                // console.log("Running command took over");
             }
+            else if (message.content.substr(0, prefix.length) == prefix) {
 
-            let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
-            exports.prefix = prefix;
+                if (message.guild) {
 
-            let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
+                    let guild = cachedGuilds.get(message.guild.id);
 
-            if (!params[0])
-                params[0] = "";
+                    if (guild.commandChannelWhiteList.length > 0) {
 
-            commandMatcher(message, command, params, user);
-            return;
+                        if (!guild.commandChannelWhiteList.includes(message.channel.id))
+                            return -1;
+                    }
+                }
+
+                if (!message.member) {
+                    user = await User.findOne({ id: message.author.id });
+
+                    if (!user)
+                        return message.channel.send(`I don't seem to have you in my database, try sending any message in a server I am in, then try DM'ing me again!`);
+                }
+                else
+                    user = await findUser(message.member);
+
+
+                cachedUsers.set(user.id, user);
+                exports.cachedUsers = cachedUsers;
+                console.log(`Number of cached users: ${cachedUsers.size}`);
+
+                if (message.channel.type != 'dm') {
+                    let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
+                    if (!permission.has("SEND_MESSAGES"))
+                        return message.author.send("I don't have the right permissions to send messages and embed links in that channel!");
+                    if (!permission.has("EMBED_LINKS"))
+                        await message.channel.send("I don't have the right permissions to embed links in this channel, **some commands may not work!**");
+                    if (!permission.has("ADD_REACTIONS"))
+                        await message.channel.send("I don't have the right permissions to add reactions, **some commands may not work!**");
+                    if (!permission.has("USE_EXTERNAL_EMOJIS"))
+                        await message.channel.send("I don't have the right permissions to add reactions, **some commands may not work!**");
+
+
+
+                    //add can't add custom emojis? and react to messages
+                }
+
+                let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
+                exports.prefix = prefix;
+
+                let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
+
+                if (!params[0])
+                    params[0] = "";
+
+                commandMatcher(message, command, params, user);
+                return;
+            }
+            else if (message.content.trim() == (defaultPrefix + "help")) {
+                message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
+            }
+            else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
+
+                message.channel.send("Your proper prefix is: " + prefix
+                    + "\n`" + `Type ${prefix}help` + "` for more help!");
+            }
+            else {//Command tracker stuff
+                triggerCommandHandler(message, user, false);
+            }
         }
-        else if (message.content.trim() == (defaultPrefix + "help")) {
-            message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
-        }
-        else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
+        catch (err) {
 
-            message.channel.send("Your proper prefix is: " + prefix
-                + "\n`" + `Type ${prefix}help` + "` for more help!");
+            console.log(err)
+            console.log(`prefix that broke: `, prefix)
+            console.log(`user that broke: `, user.id, user.displayName)
         }
-        else {//Command tracker stuff
-            triggerCommandHandler(message, user, false);
-        }
+
     });
 
     Client.on('guildMemberAdd', async member => {
@@ -638,7 +739,7 @@ connectDB.once('open', async function () {
     Client.on('guildMemberRemove', async member => {
 
         if (member.id != botID) {
-            let user = await findUser({ id: member.id });
+            let user = await findUser(member);
             if (!user) return -1;
             let index = user.guilds.indexOf(member.guild.id);
             user.kicked[index] = true;
@@ -649,7 +750,9 @@ connectDB.once('open', async function () {
     Client.on("guildCreate", async guild => {
 
         let searchedGuild = await findGuild({ id: guild.id });
-        if (!searchedGuild) createGuild(guild);
+        if (!searchedGuild) await createGuild(guild);
+
+        ADMINISTRATOR.initialiseUsers(guild, { guild: guild, silent: true })
     })
 
     Client.on("guildDelete", async guild => {
@@ -824,8 +927,30 @@ function populateCommandMap() {
     commandMap.set(Commands[111].title.toUpperCase(), ADMINISTRATOR.activatePasswordRole)
     commandMap.set(Commands[112].title.toUpperCase(), ADMINISTRATOR.viewPasswordLockRole)
     commandMap.set(Commands[113].title.toUpperCase(), ADMINISTRATOR.deletePasswordLockRole)
+    commandMap.set(Commands[114].title.toUpperCase(), ADMINISTRATOR.setChannelImageThanker)
+    commandMap.set(Commands[115].title.toUpperCase(), ADMINISTRATOR.unSetChannelImageThanker)
+    commandMap.set(Commands[116].title.toUpperCase(), ADMINISTRATOR.channelThankerMessage)
+    commandMap.set(Commands[117].title.toUpperCase(), ADMINISTRATOR.repScore)
+    commandMap.set(Commands[118].title.toUpperCase(), ADMINISTRATOR.addRep)
+    commandMap.set(Commands[119].title.toUpperCase(), ADMINISTRATOR.removeRep)
+    commandMap.set(Commands[120].title.toUpperCase(), ADMINISTRATOR.topRep)
+    commandMap.set(Commands[121].title.toUpperCase(), ADMINISTRATOR.setThankerAutoRep)
+    commandMap.set(Commands[122].title.toUpperCase(), ADMINISTRATOR.setImageChannel)
+    commandMap.set(Commands[123].title.toUpperCase(), ADMINISTRATOR.unSetImageChannel)
+    commandMap.set(Commands[124].title.toUpperCase(), ADMINISTRATOR.setImageSourceChannel)
+    commandMap.set(Commands[125].title.toUpperCase(), ADMINISTRATOR.unSetImageSourceChannel)
+    commandMap.set(Commands[126].title.toUpperCase(), ADMINISTRATOR.setImageForwarding)
+    commandMap.set(Commands[127].title.toUpperCase(), ADMINISTRATOR.setRepRolePair)
+    commandMap.set(Commands[128].title.toUpperCase(), ADMINISTRATOR.removeRepRolePair)
+    commandMap.set(Commands[129].title.toUpperCase(), ADMINISTRATOR.blacklistRepRole)
+    commandMap.set(Commands[130].title.toUpperCase(), ADMINISTRATOR.removeBlacklistedRepRole)
+    commandMap.set(Commands[131].title.toUpperCase(), ADMINISTRATOR.setCommandChannel)
+    commandMap.set(Commands[132].title.toUpperCase(), ADMINISTRATOR.unSetCommandChannel)
+    commandMap.set(Commands[133].title.toUpperCase(), ADMINISTRATOR.setMusicRole)
+    commandMap.set(Commands[134].title.toUpperCase(), ADMINISTRATOR.unSetMusicRole)
+    commandMap.set(Commands[135].title.toUpperCase(), ADMINISTRATOR.setChannelLinkThanker)
+    commandMap.set(Commands[136].title.toUpperCase(), ADMINISTRATOR.unSetChannelLinkThanker)
 
-    
 
     exports.commandMap = commandMap;
 }
@@ -879,23 +1004,54 @@ exports.createRunningCommand = createRunningCommand;
 
 const triggerRunningCommand = async function (message, user) {
 
-    let currCommand = runningCommands.get(message.author.id);
-    if (!currCommand)
-        return -1;
+    let currCommand;
 
-    if (currCommand.DM && (message.channel.type != 'dm'))
-        return -1;
+    if (message.channel.type != 'dm') {
 
-    if (!currCommand.DM)
-        if ((currCommand.guildID != message.guild.id) || (currCommand.channelID != message.channel.id))
+        let guild = await findGuild({ id: message.guild.id });
+
+        if (guild.commandChannelWhiteList.length > 0) {
+
+            if (!guild.commandChannelWhiteList.includes(message.channel.id))
+                return -1;
+        }
+
+        currCommand = runningCommands.get(message.author.id);
+        if (!currCommand)
+            return -1;
+
+        if (currCommand.DM && (message.channel.type != 'dm'))
+            return -1;
+
+        if (!currCommand.DM)
+            if ((currCommand.guildID != message.guild.id) || (currCommand.channelID != message.channel.id))
+                return -1;
+
+
+        if (message.content == '-1') {
+
+            message.channel.send("Your previous running command was removed!");
+            runningCommands.delete(message.author.id);
+            return 1;
+        }
+    }
+    else {
+
+        currCommand = runningCommands.get(message.author.id);
+
+        if (!currCommand)
+            return -1;
+
+        if (currCommand.DM && (message.channel.type != 'dm'))
             return -1;
 
 
-    if (message.content == '-1') {
+        if (message.content == '-1') {
 
-        message.channel.send("Your previous running command was removed!");
-        runningCommands.delete(message.author.id);
-        return 1;
+            message.channel.send("Your previous running command was removed!");
+            runningCommands.delete(message.author.id);
+            return 1;
+        }
     }
 
     let commandReturn = (await currCommand.command.apply(null, [message, currCommand.params, user]));
@@ -1124,12 +1280,32 @@ function findFurthestDate(date1, date2) {
 exports.findFurthestDate = findFurthestDate;
 
 
-function updateMessage(message, user) {
+async function updateMessage(message, user) {
 
     if (!user) return;
     let index = user.guilds.indexOf(message.guild.id);
-    user.messages[index] = user.messages[index] + 1;
-    user.lastMessage[index] = getDate();
+
+    if (index == -1) {
+
+
+        await checkExistance(message.member);
+        return updateMessage(message, (await findUser(message.member)));
+        // for (let x = 0; x < user.guilds.length; x++) {
+
+        //     if (isNaN(user.messages[x])) {
+
+        //         console.log(`on ${user.displayName} - #${i}`);
+        //         user.messages[x] = 0;
+        //         // User.findOneAndUpdate({ id: user.id }, { $set: { messages: user.messages } }).exec();
+        //         break;
+        //     }
+        // }
+    }
+    else {
+
+        user.messages[index] = user.messages[index] + 1;
+        user.lastMessage[index] = getDate();
+    }
 
     User.findOneAndUpdate({ id: user.id },
         {
@@ -1284,7 +1460,7 @@ async function addGuild(member, memberDB) {
             if (err) {
                 fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(`custom: ${member.displayName} : ${member.id}` + "\n-------------\n\n" + err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
             }
-            if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+            // if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
         });
 
 
@@ -1309,9 +1485,12 @@ async function createGuild(guild) {
  */
 async function checkExistance(member) {
 
-    let tempUser = await findUser({ id: member.id })
+    let tempUser = await User.findOne({ id: member.id });
     if (tempUser) {
 
+        // console.log(tempUser);
+        // console.log('-----')
+        // console.log(member.displayName)
         if (tempUser.guilds.includes(member.guild.id)) {
 
             let index = tempUser.guilds.indexOf(member.guild.id);
@@ -1398,6 +1577,8 @@ async function setEmojiCollector(message) {
 
         //  console.log("INSIDE OF NUMBA- ")
         let choice;
+
+
         let usery = await findUser({ id: user.id });
         if (emoji.emoji.toString() == '1️⃣') {
             choice = 1;
@@ -1417,8 +1598,15 @@ async function setEmojiCollector(message) {
         let finy = await triggerCommandHandler(emoji.message, usery, false, choice);
 
         if (finy == 1) {
-            emoji.message.reactions.removeAll();
-            emoji.message.delete();
+
+            let messagy = await emoji.message.fetch();
+
+            if (messagy) {
+                await messagy.reactions.removeAll();
+                await messagy.delete();
+            }
+
+
         }
         else {
             emoji.users.remove(user);
@@ -1799,42 +1987,55 @@ async function graphs() {
 
 async function updateAll() {
 
-
     // let users = await getUsers();
 
+    // let i = 0;
+
+
+    // let userMap = new Map();
+
+    // console.log("going through em all")
     // for (let user of users) {
 
+    //     for (let i = 0; i < user.guilds.length; i++) {
 
-    //     let index = user.guilds.indexOf(message.guild.id);
+    //         let guildy = user.guilds[i];
 
+    //         if (!user.kicked[i])
+    //             continue;
+    //         if (!userMap.get(guildy)) {
+    //             userMap.set(guildy, 1);
+    //             continue;
+    //         }
 
-    //     if(index == -1){
-    //         console.log(user.displayName);
-    //         console.log(user.id);
-    //         console.log("---------")
+    //         let val = userMap.get(guildy) + 1;
+
+    //         userMap.set(guildy, val);
+
     //     }
-
-    //     user.messages[index] = user.messages[index] + 1;
-
-
-
-    //     user.lastMessage[index] = getDate();
-
-
     // }//for user loop
 
+
+    // console.log(userMap)
+
+
+    // console.log('finished')
+    // var mapAsc = array = Array.from(totalGuildStats, ([name, value]) => ({ name, value }));
+
+    // mapAsc.sort(function (a, b) { return b.value.messages - a.value.messages });
+    // console.log(mapAsc);
     // console.log("CALLED UPDATE ALL");
 }
-async function createBackUp() {
+// async function createBackUp() {
 
-    let users = await getUsers();
+//     let users = await getUsers();
 
-    await fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
-        if (err) console.log('error', err);
-    });
+//     await fs.writeFile(__dirname + "/backups/" + getDate() + ".json", JSON.stringify(users), function (err, result) {
+//         if (err) console.log('error', err);
+//     });
 
-    console.log("CALLED BACKUP");
-}//
+//     console.log("CALLED BACKUP");
+// }//
 
 
 async function sleep(ms) {
@@ -1852,7 +2053,8 @@ async function selfDestructMessage(message, text, seconds, emoji) {
     let temp = await message.channel.send(text);
     await sleep(seconds * 1000);
     temp.delete();
-    if (!emoji) message.delete();
+    if (!emoji)
+        message.delete();
 }
 exports.selfDestructMessage = selfDestructMessage;
 

@@ -1,9 +1,19 @@
 const mongoose = require('mongoose');
 
-const BotSchema = new mongoose.Schema({
+const StatSchema = new mongoose.Schema({
 
-    name: String,
-    token: String
+    date: {
+        type: String
+    },
+    dailyActions: {
+        type: [],
+        default: []
+    },
+    dailyCommands: {
+
+        type: [],
+        default: []
+    }
 });
 
-module.exports = mongoose.model('Bot', BotSchema);
+module.exports = mongoose.model('Stats', StatSchema);

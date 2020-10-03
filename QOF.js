@@ -35,7 +35,8 @@ async function removeMoniker(message, params, user) {
         if (combo[1] == args) {
             message.channel.send(`Removing the moniker ${args} for the command ${combo[0]}!`);
             user.commands.splice(user.commands.indexOf(combo), 1);
-            return User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
+            User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
+            return 1;
         }
     }
 
@@ -85,7 +86,8 @@ async function setCommand(message, params, user) {
         if (combo[0] == args[0]) {
             message.channel.send(`Overwriting your old moniker (${combo[1]}) for ${args[0]} with ${args[1]}`);
             combo[1] = args[1];
-            return User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
+            User.findOneAndUpdate({ id: message.author.id }, { $set: { commands: user.commands } }, function (err, doc, res) { });
+            return 1;
         }
     }
 
@@ -225,11 +227,13 @@ const commandSuggestions = async function (message, params, user) {
 
     if (args == 'on') {
         message.channel.send("Command suggestions have been enabled.");
-        return User.findOneAndUpdate({ id: user.id }, { $set: { commandSuggestions: true } }, function (err, doc, res) { });
+        User.findOneAndUpdate({ id: user.id }, { $set: { commandSuggestions: true } }, function (err, doc, res) { });
+        return 1;
     }
 
     message.channel.send("Command suggestions have been disabled.");
-    return User.findOneAndUpdate({ id: user.id }, { $set: { commandSuggestions: false } }, function (err, doc, res) { });
+    User.findOneAndUpdate({ id: user.id }, { $set: { commandSuggestions: false } }, function (err, doc, res) { });
+    return 1;
 }
 exports.commandSuggestions = commandSuggestions;
 

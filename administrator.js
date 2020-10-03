@@ -1,28 +1,293 @@
 const MAIN = require('./short-answer.js');
 const Guild = require('./Guild.js')
 
+const isUrl = require('is-url');
+const needle = require('needle');
+const isImageUrl = require('is-image-url');
+const isVideo = require('is-video');
+const User = require('./User.js');
+
+
 var autoRoleMap = new Map();
 var autoRoleCollectors = [];
 
-async function initialiseUsers(message) {
+
+const channelImageThanker = async function (message, params, user) {
+
+    let image = false;
+    let video = false;
+    const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
+
+
+
+    if (message.attachments.size > 0)
+        for (let attachment of message.attachments.values()) {
+            if (isImageUrl(attachment.attachment)) {
+
+                image = true;
+                break;
+            }
+            else if (isVideo(attachment.attachment)) {
+                video = true;
+                break;
+            }
+        }
+
+    if (!image)
+        for (let string of args)
+            if (isImageUrl(string)) {
+                let result = await needle('get', string)
+                    .catch(err => { console.log("caught thanker error is image url") });
+                if (result) {
+                    image = true;
+                    break;
+                }
+            }
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (image && guild) {
+        if (guild.thankerAutoRep) {
+
+            changeRep(user, message.guild.id, 1, message);
+        }
+        return message.channel.send(channelThankerMessageConvert(message.author.id, `image and video`, guild));
+    }
+
+    if (image) {
+        if (guild.thankerAutoRep) {
+
+            changeRep(user, message.guild.id, 1, message);
+        }
+        return message.channel.send(channelThankerMessageConvert(message.author.id, `image`, guild));
+    }
+    if (video) {
+        if (guild.thankerAutoRep) {
+
+            changeRep(user, message.guild.id, 1, message);
+        }
+        return message.channel.send(channelThankerMessageConvert(message.author.id, `video`, guild));
+    }
+
+}
+exports.channelImageThanker = channelImageThanker;
+
+const channelLinkThanker = async function (message, params, user) {
+
+    const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
+
+    let link = false;
+
+    for (let string of args)
+        if (isUrl(string)) {
+
+            let result = await needle('get', string)
+                .catch(err => { console.log("caught thanker error link thanker") });
+            if (result) {
+
+                link = true;
+                break;
+            }
+        }
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+    if (link) {
+        if (guild.thankerAutoRep) {
+
+            changeRep(user, message.guild.id, 1, message);
+        }
+        return message.channel.send(channelThankerMessageConvert(message.author.id, `link`, guild));
+    }
+}
+exports.channelLinkThanker = channelLinkThanker;
+
+const setChannelImageThanker = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a channel thanker from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a channel thanker for the server")
+
+    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+    if (!permission.has("SEND_MESSAGES"))
+        return message.author.send("I don't have the right permissions to send messages in this channel!");
+
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (guild.channelImageThanker.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already being monitered for images!");
+    }
+
+    guild.channelImageThanker.push(message.channel.id);
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImageThanker: guild.channelImageThanker } }).exec();
+    return message.channel.send("This channel will now be monitered for images");
+}
+exports.setChannelImageThanker = setChannelImageThanker;
+
+const unSetChannelImageThanker = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a channel thanker from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a channel thanker for the server")
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.channelImageThanker.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already not being monitered for images!");
+    }
+
+    //  console.log(guild.channelThanker.indexOf(message.channel.id))
+
+    guild.channelImageThanker.splice(guild.channelImageThanker.indexOf(message.channel.id));
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImageThanker: guild.channelImageThanker } }).exec();
+    return message.channel.send("This channel will no longer be monitered for images");
+}
+exports.unSetChannelImageThanker = unSetChannelImageThanker;
+
+const setChannelLinkThanker = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a channel thanker from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a channel thanker for the server")
+
+    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+    if (!permission.has("SEND_MESSAGES"))
+        return message.author.send("I don't have the right permissions to send messages in this channel!");
+
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (guild.channelImageThanker.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already being monitered for link!");
+    }
+
+    guild.channelLinkThanker.push(message.channel.id);
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelLinkThanker: guild.channelLinkThanker } }).exec();
+    return message.channel.send("This channel will now be monitered for links");
+}
+exports.setChannelLinkThanker = setChannelLinkThanker;
+
+const unSetChannelLinkThanker = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a channel thanker from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a channel thanker for the server")
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.channelLinkThanker.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already not being monitered for links!");
+    }
+
+    //  console.log(guild.channelThanker.indexOf(message.channel.id))
+
+    guild.channelLinkThanker.splice(guild.channelLinkThanker.indexOf(message.channel.id));
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelLinkThanker: guild.channelLinkThanker } }).exec();
+    return message.channel.send("This channel will no longer be monitered for links");
+}
+exports.unSetChannelLinkThanker = unSetChannelLinkThanker;
+
+
+const channelThankerMessage = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a channel thanker message from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can change the channel thanker for the server")
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.channelThanker.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is not being monitered for links/images!");
+    }
+
+    //  console.log(guild.channelThanker.indexOf(message.channel.id))
+
+
+    let args = message.content.split(" ").slice(1).join(" ").trim();
+
+    if (args.length < 1) {
+        return message.channel.send("The message has to be at least 1 character long!");
+    }
+
+    guild.channelThankerMessage = args;
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelThankerMessage: guild.channelThankerMessage } }).exec();
+    await message.channel.send("Updated channel message to:");
+    return message.channel.send(channelThankerMessageConvert(message.author.id, `link and/or image`, guild));
+}
+exports.channelThankerMessage = channelThankerMessage;
+
+const channelThankerMessageConvert = function (userID, message, guild) {
+
+    let msg = `Thanks for the [] <>!`;
+
+    if (guild.channelThankerMessage.length > 0)
+        return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message);
+
+    return msg.replace('<>', MAIN.mention(userID)).replace('[]', message);
+}
+
+async function initialiseUsers(message, params) {
+
+    if (params.guild) {
+
+        let memberList = await params.guild.members.fetch();
+        let count = 0;
+        for (let MEMBER of memberList.values()) {
+
+            let member = MEMBER;
+
+            await (MAIN.checkExistance(member))
+            count++;
+
+        }
+        console.log(`members from a new guild: ${count}`);
+        return 1;
+    }
+
     if (message.channel.type == 'dm') return -1;
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can forcefully load all members from a server into the database"
+            + " (only adds them if they are missing i.e. user joined while bot is down for updates).");
+
+    if (!params.silent)
+        message.channel.send("Started checking if the members of this server are in my database...may take some time for larger servers."
+            + " I will let you know once I finish!");
+
     let newUsers = 0;
     let existingUsers = 0;
 
-    for (let MEMBER of message.channel.guild.members.cache) {
+    let memberList = await message.channel.guild.members.fetch();
 
-        let member = MEMBER[1];
+    for (let MEMBER of memberList.values()) {
+
+        let member = MEMBER;
 
         if (await (MAIN.checkExistance(member))) {//User exists with a matching guild in the DB
             existingUsers++;
         }
         else {
-
-            (await createUser(member));
             newUsers++;
         }
     }
-    message.channel.send("The server's users are now tracked!");
+
+    if (!params.silent)
+        message.channel.send("The server's users are now tracked!" + ` ${existingUsers} were already present and ${newUsers} were added!`);
 }
 exports.initialiseUsers = initialiseUsers;
 
@@ -399,6 +664,9 @@ const autorole = async function (message, params, user) {
 
                 guild.autorole.push(params);
 
+
+                MAIN.cachedGuilds.set(guild.id, guild);
+
                 Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { });
 
                 params.numMessages += 1;
@@ -608,7 +876,8 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
                 autoRoleMap.get(emoji.message.id).users.push(user.id);
 
-                return Guild.findOneAndUpdate({ id: guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { })
+                Guild.findOneAndUpdate({ id: guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { })
+                return 1;
 
             }
 
@@ -720,6 +989,12 @@ const setEmojiCollectorAll = async function (autoroleObj) {
     for (let AUTOROLE of autoroleObj) {
 
         let message;
+
+
+        //let guldss = await MAIN.Client.guilds.fetch();
+
+        if (!MAIN.Client.guilds.cache.get(AUTOROLE.guildID))
+            continue;
 
         try {
             message = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID).messages.fetch(AUTOROLE.messageID);
@@ -862,7 +1137,8 @@ const updateAutoRoleObject = async function (autoRoleObj, guildID) {
 
     guild.autorole[index] = autoRoleObj;
 
-    return Guild.findOneAndUpdate({ id: guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { });
+    return 1;
 }
 
 const welcomeMessages = async function (message, params, user) {
@@ -881,14 +1157,17 @@ const welcomeMessages = async function (message, params, user) {
 
     if (args == 'on') {
         message.channel.send("Welcome message have been enabled.");
-        return Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: true } }, function (err, doc, res) { });
+        MAIN.cachedGuilds.get(message.guild.id).welcomeMessages = true;
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: true } }, function (err, doc, res) { });
+        return 1;
     }
 
     message.channel.send("Welcome message have been disabled.");
-    return Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: false } }, function (err, doc, res) { });
+    MAIN.cachedGuilds.get(message.guild.id).welcomeMessages = false;
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: false } }, function (err, doc, res) { });
+    return 1;
 }
 exports.welcomeMessages = welcomeMessages;
-
 
 const passwordLockRole = async function (message, params, user) {
 
@@ -919,9 +1198,10 @@ const passwordLockRole = async function (message, params, user) {
                 else {
 
                     guild.passwordLock.set(pass, params.roleID);
-
+                    MAIN.cachedGuilds.set(params.guildID, guild);
                     Guild.findOneAndUpdate({ id: params.guildID }, { $set: { passwordLock: guild.passwordLock } }, function (err, doc, res) { });
-                    return message.channel.send(`To have a member be assigned your chosen role, have them Direct Message me the following password: sa!activatePasswordRole ${params.guildID}, ${pass}`);
+                    message.channel.send(`To have a member be assigned your chosen role, have them Direct Message me the following password: sa!activatePasswordRole ${params.guildID}, ${pass}`);
+                    return 0;
                 }
                 break;
         }
@@ -1007,6 +1287,9 @@ const viewPasswordLockRole = async function (message, params, user) {
 
     array = Array.from(guild.passwordLock, ([name, value]) => (`${name} - ${value}`));
 
+    if (array.length == 0)
+        messy.channel.send("There are no password-role pairs for that server!");
+
     MAIN.prettyEmbed(messy, array, { startTally: 1 });
 }
 exports.viewPasswordLockRole = viewPasswordLockRole;
@@ -1038,3 +1321,643 @@ const deletePasswordLockRole = async function (message, params, user) {
     return message.channel.send(`Successfuly deleted the password-roleID!`);
 }
 exports.deletePasswordLockRole = deletePasswordLockRole;
+
+
+const repScore = async function (message, perams, user) {
+
+    if (message.mentions.users.size != 1)
+        return message.channel.send(`You have to @mention only 1 user!`);
+
+    return message.channel.send(`${MAIN.mention(message.mentions.users.first().id)} has ${(await changeRep(
+        (await MAIN.findUser(message.mentions.members.first())),
+        message.guild.id, 0, message))} rep!`);
+}
+exports.repScore = repScore;
+
+const addRep = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can grant rep for the server");
+
+    const args = Number(message.content.split(" ").slice(1).join(" ").trim().split(' ')[0]);
+
+    if (!args)
+        return message.channel.send("Please write the rep amount first!");
+    if (isNaN(args))
+        return message.channel.send("That's not a valid number of rep to give!");
+
+    if (message.mentions.users.size != 1)
+        return message.channel.send("You can/have to only @mention a single user!");
+
+    let userID = message.mentions.users.first().id;
+    let editUser = await MAIN.findUser(message.mentions.members.first());
+
+    try {
+        return message.channel.send(`Gave ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args, message))}`);
+    }
+    catch (err) {
+        console.log(err)
+        console.log("blacklisted")
+    }
+}
+exports.addRep = addRep;
+
+const removeRep = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove rep for the server");
+
+    const args = Number(message.content.split(" ").slice(1).join(" ").trim().split(' ')[0]);
+
+    if (!args)
+        return message.channel.send("Please write the rep amount first!");
+    if (isNaN(args))
+        return message.channel.send("That's not a valid number of rep to remove!");
+
+    if (message.mentions.users.size != 1)
+        return message.channel.send("You can/have to only @mention a single user!");
+
+    let userID = message.mentions.users.first().id;
+    let editUser = await MAIN.findUser(message.mentions.members.first());
+
+    try {
+        return message.channel.send(`Took away ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args * -1, message))}`);
+    }
+    catch (err) {
+        console.log(err)
+        console.log('second blacklisted')
+    }
+}
+exports.removeRep = removeRep;
+
+const changeRep = async function (user, guildID, amount, message) {
+
+    let dbGuild = await MAIN.findGuild({ id: guildID });
+    // console.log(dbGuild)
+    let actualGuild = await MAIN.Client.guilds.cache.get(guildID);
+
+    let guildMember = actualGuild.members.cache.get(user.id);
+
+    if (amount > 0) {
+
+        for (let roleID of dbGuild.blacklistedRepRoles) {
+
+            if (guildMember.roles.cache.keyArray().includes(roleID)) {
+                message.channel.send(`${MAIN.mention(guildMember.id)} is blacklisted from receiving rep!`);
+                throw ('Blacklisted boi')
+                return -1;
+            }
+
+        }
+    }
+
+    if (!user.reps) {
+
+        user.reps = new Map();
+
+        user.reps.set(guildID, Number(amount));
+
+        checkRepThreshold(user.id, Number(amount), dbGuild, actualGuild);
+
+        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+        return user.reps.get(guildID);
+    }
+
+    let rep = user.reps.get(guildID);
+
+    if (!rep) {
+
+        user.reps.set(guildID, Number(amount));
+
+        checkRepThreshold(user.id, Number(amount), dbGuild, actualGuild);
+
+        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+        return user.reps.get(guildID);
+    }
+
+    if (amount != 0) {
+
+
+        user.reps.set(guildID, Number(rep) + Number(amount));
+
+        checkRepThreshold(user.id, Number(rep) + Number(amount), dbGuild, actualGuild);
+
+        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+    }
+    return user.reps.get(guildID);
+}
+exports.changeRep = changeRep;
+
+const blacklistRepRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can create blacklisted rep roles for the server");
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("Only 1 @role must be mentioned.");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    let roleID = message.mentions.roles.first().id;
+
+    if (guild.blacklistedRepRoles.includes(roleID))
+        return message.channel.send("This role is already blacklisted for receiving rep!");
+
+    guild.blacklistedRepRoles.push(roleID);
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { blacklistedRepRoles: guild.blacklistedRepRoles } }).exec();
+    message.channel.send("Role has been blacklisted for receiving rep!");
+}
+exports.blacklistRepRole = blacklistRepRole;
+
+const removeBlacklistedRepRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove blacklisted rep roles for the server");
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("Only 1 @role must be mentioned.");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    let roleID = message.mentions.roles.first().id;
+
+    if (!guild.blacklistedRepRoles.includes(roleID))
+        return message.channel.send("This role already not blacklisted for receiving rep!");
+
+
+    console.log(guild.blacklistedRepRoles)
+
+    guild.blacklistedRepRoles.splice(guild.blacklistedRepRoles.indexOf(roleID));
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { blacklistedRepRoles: guild.blacklistedRepRoles } }).exec();
+    message.channel.send("Role is no longer blacklisted for receiving rep!");
+}
+exports.removeBlacklistedRepRole = removeBlacklistedRepRole;
+
+const checkRepThreshold = async function (userID, value, dbGuild, actualGuild) {
+
+    for (let pair of dbGuild.repRolePairs) {
+
+        if (value >= pair.rep) {
+            actualGuild = await actualGuild.fetch();
+
+            actualGuild.members.cache.get(userID).roles.add(actualGuild.roles.cache.get(pair.roleID));
+        }
+    }
+}
+
+const topRep = async function (message, params, user) {
+
+    let users = await User.find({ guilds: message.guild.id });
+
+    let args = Number(message.content.split(" ").slice(1).join(" ").trim());
+
+    if (isNaN(args)) {
+        return message.channel.send(`You have provided an invalid number of top users to display! Or don't pass any value for a default top 10`);
+    }
+
+    let finalArr = [];
+
+    let members = await message.guild.members.fetch();
+
+    for (let user of users) {
+
+        let repy = await changeRep(user, message.guild.id, 0, message);
+
+        try {
+            members.get(user.id).displayName
+        }
+        catch (err) {
+            continue;
+        }
+
+        finalArr.push({
+
+            displayName: members.get(user.id).displayName,
+            rep: repy
+        });
+    }
+
+    finalArr = finalArr.filter(function (value) { return value.rep > 0 });
+    finalArr.sort(function (a, b) { return b.rep - a.rep });
+
+    let finalString = finalArr.reduce(function (acc, current, index) {
+        // acc.push({ value: `${index + 1}) ${current.displayName} has ${current.rep} rep` });
+        acc.push({ value: `${current.displayName} has ${current.rep} rep` });
+        return acc;
+    }, []);
+
+
+
+    if (!finalString)
+        return message.channel.send("No one in this server has above 0 rep!");
+
+    let limit = args ? args : 10;
+    if (limit > finalString.length)
+        limit = finalString.length;
+
+    let originalLength = finalString.length;
+
+    finalString.length = limit;
+
+    MAIN.prettyEmbed(message, finalString, { modifier: 'xl', title: `Below are the top ${limit} rep'ed users of ${originalLength} who have > 0 rep!` });
+}
+exports.topRep = topRep;
+
+const identifyThanks = function (message) {
+
+    if ((message.mentions.members.size > 3) || (message.mentions.members.size == 0))
+        return false;
+
+    let thanks = [
+        'thanks', 'thank you', ' ty ', 'tyvm', 'thx', 'tank u', 'thank u', 'thank yo', 'thank yu', 'tank yu'
+    ]
+
+
+    if (message.content.substring(0, 2) == 'ty')
+        if (message.content[2] == ' ')
+            return true;
+
+    for (let string of thanks) {
+
+        if (message.content.toLowerCase().includes(string))
+            return true;
+    }
+    return false;
+}
+exports.identifyThanks = identifyThanks;
+
+function setThankerAutoRep(message, params, user) {
+
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can disable/enable automatic rep from image/link thanks.");
+
+    if (!message.content.split(" ")[1]) {
+        message.channel.send("You must enter either true or false: **" + prefix + "setThankerAutoRep** *true/false*");
+        return -1;
+    }
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
+
+    if (bool == "TRUE") {
+
+        MAIN.cachedGuilds.get(message.guild.id).thankerAutoRep = true;
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { thankerAutoRep: true } }, function (err, doc, res) { });
+        message.channel.send("Rep will be automatically gained from channel thankers!");
+        return 1;
+    }
+    else if (bool == "FALSE") {
+
+        MAIN.cachedGuilds.get(message.guild.id).thankerAutoRep = false;
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { thankerAutoRep: false } }, function (err, doc, res) { });
+        message.channel.send("Rep will not be automatically gained from channel thankers!");
+        return 1;
+    }
+    else {
+        message.channel.send("You must enter either true or false: **" + prefix + "setThankerAutoRep** *true/false*");
+        return -1;
+    }
+}
+exports.setThankerAutoRep = setThankerAutoRep;
+
+function setImageForwarding(message, params, user) {
+
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can disable/enable image scanning to forward.");
+
+    if (!message.content.split(" ")[1]) {
+        message.channel.send("You must enter either true or false: **" + prefix + "setImageForwarding** *true/false*");
+        return -1;
+    }
+    let bool = message.content.split(" ")[1].toUpperCase().trim();
+
+    if (bool == "TRUE") {
+
+        MAIN.cachedGuilds.get(message.guild.id).forwardImages = true;
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { forwardImages: true } }, function (err, doc, res) { });
+        message.channel.send("Images will be automatically be forwarded to imageChannel!");
+        return 1;
+    }
+    else if (bool == "FALSE") {
+
+        MAIN.cachedGuilds.get(message.guild.id).forwardImages = false;
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { forwardImages: false } }, function (err, doc, res) { });
+        message.channel.send("Images will not be automatically be forwarded to imageChannel!");
+        return 1;
+    }
+    else {
+        message.channel.send("You must enter either true or false: **" + prefix + "setImageForwarding** *true/false*");
+        return -1;
+    }
+}
+exports.setImageForwarding = setImageForwarding;
+
+
+
+
+const setImageChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a channel to have images forwarded to it from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a channel to have images forwarded to it")
+
+    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+    if (!permission.has("SEND_MESSAGES"))
+        return message.author.send("I don't have the right permissions to send messages in this channel!");
+
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (guild.channelImage.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already having images forwarded to it");
+    }
+
+    guild.channelImage.push(message.channel.id);
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImage: guild.channelImage } }).exec();
+    return message.channel.send("This channel will now have images forwarded to it");
+}
+exports.setImageChannel = setImageChannel;
+
+const unSetImageChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a channel to have images forwarded to it from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a channel to have images forwarded to it")
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.channelImage.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already not being monitered for links/images!");
+    }
+
+    //  console.log(guild.channelThanker.indexOf(message.channel.id))
+
+    guild.channelImage.splice(guild.channelImage.indexOf(message.channel.id));
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImage: guild.channelImage } }).exec();
+    return message.channel.send("This channel will no longer have images forwarded to it");
+}
+exports.unSetImageChannel = unSetImageChannel;
+
+const forwardImages = async function (message, guild, user) {
+
+    if (message.attachments.size > 0)
+        for (let attachment of message.attachments.values())
+            if (isImageUrl(attachment.attachment)) {
+
+                let guildy = MAIN.Client.guilds.cache.get(guild.id);
+
+                for (let imageChan of guild.channelImage) {
+
+                    await guildy.channels.cache.get(imageChan).send(`Image from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
+                }
+            }
+
+    const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
+
+    for (let string of args)
+        if (isImageUrl(string)) {
+
+            let result = await needle('get', string)
+                .catch(err => { console.log("caught thanker error forward images") });
+            if (result) {
+                let guildy = MAIN.Client.guilds.cache.get(guild.id);
+                for (let imageChan of guild.channelImage) {
+
+                    await guildy.channels.cache.get(imageChan).send(`Image from ${MAIN.mention(message.author.id)}:\n${string}`);
+                }
+            }
+        }
+}
+exports.forwardImages = forwardImages;
+
+
+
+const setImageSourceChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a channel to be scanned for images to forward to it from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a channel to be scanned for images to forward")
+
+    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+    if (!permission.has("SEND_MESSAGES"))
+        return message.author.send("I don't have the right permissions to send messages in this channel!");
+
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (guild.channelImageSource.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already being scanned for images to forward");
+    }
+
+    guild.channelImageSource.push(message.channel.id);
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImageSource: guild.channelImageSource } }).exec();
+    return message.channel.send("This channel will now be scanned for images to forward");
+}
+exports.setImageSourceChannel = setImageSourceChannel;
+
+const unSetImageSourceChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only unSet a channel to be scanned for images to forward to it from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set unSet a channel to be scanned for images to forward")
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.channelImageSource.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already not being monitered for images!");
+    }
+
+    //  console.log(guild.channelThanker.indexOf(message.channel.id))
+
+    guild.channelImageSource.splice(guild.channelImageSource.indexOf(message.channel.id));
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImageSource: guild.channelImageSource } }).exec();
+    return message.channel.send("This channel will no longer be scanned for images to forward");
+}
+exports.unSetImageSourceChannel = unSetImageSourceChannel;
+
+
+const setRepRolePair = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a rep point - role Pair from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a rep point - role Pair")
+
+    const args = Number(message.content.split(" ").slice(1).join(" ").trim().split(' ')[0]);
+
+    if (!args)
+        return message.channel.send("Please write the rep amount first!");
+    if (isNaN(args))
+        return message.channel.send("That's not a valid number of rep to give!");
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You can/have to only @mention a single role!");
+
+
+    let roleID = message.mentions.roles.first().id;
+
+    let test = await giveRoleSelf(message, roleID);
+
+    if (!test)
+        return message.channel.send("I don't have the permissions to work with that role!");
+
+    let editGuild = await MAIN.findGuild({ id: message.guild.id });
+
+    let prevPair = editGuild.repRolePairs.find(element => element.roleID == roleID);
+
+    if (prevPair) {
+
+        prevPair.rep = args;
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { repRolePairs: editGuild.repRolePairs } }).exec();
+        return message.channel.send(`Overwriting the previous ${prevPair.rep} rep limit for this role to ${args}`);
+    }
+
+    editGuild.repRolePairs.push({ roleID: roleID, rep: args });
+    MAIN.cachedGuilds.set(message.guild.id, editGuild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { repRolePairs: editGuild.repRolePairs } }).exec();
+    return message.channel.send(`${MAIN.mentionRole(roleID)} will now be granted to members >= ${args} rep!`);
+}
+exports.setRepRolePair = setRepRolePair;
+
+const removeRepRolePair = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a rep point - role Pair from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a rep point - role Pair")
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You can/have to only @mention a single role!");
+
+
+    let roleID = message.mentions.roles.first().id;
+    let editGuild = await MAIN.findGuild({ id: message.guild.id });
+
+    let prevPair = editGuild.repRolePairs.find(element => element.roleID == roleID);
+    if (!prevPair)
+        return message.channel.send("That role didn't have a rep limit associated with it!");
+
+
+    editGuild.repRolePairs.splice(editGuild.repRolePairs.indexOf(prevPair));
+    MAIN.cachedGuilds.set(message.guild.id, editGuild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { repRolePairs: editGuild.repRolePairs } }).exec();
+    message.channel.send("The role has been removed from the rep autorole!");
+}
+exports.removeRepRolePair = removeRepRolePair;
+
+const setCommandChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only add a whitelisted channel for bot commands from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can whitelist a channel for bot commands")
+
+    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+    if (!permission.has("SEND_MESSAGES"))
+        return message.author.send("I don't have the right permissions to send messages in this channel!");
+
+    if (message.mentions.channels.size != 1)
+        return message.channel.send("You have to #mention exactly 1 channel to add to the whitelist");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    let channelID = message.mentions.channels.first().id;
+
+    if (guild.commandChannelWhiteList.includes(channelID)) {
+
+        return message.channel.send("This channel is already whitelisted for commands");
+    }
+
+    guild.commandChannelWhiteList.push(channelID);
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { commandChannelWhiteList: guild.commandChannelWhiteList } }).exec();
+    return message.channel.send(`${MAIN.mentionChannel(channelID)}` + " is now whitelisted for commands");
+}
+exports.setCommandChannel = setCommandChannel;
+
+const unSetCommandChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only remove a channel from bot commands whitelister from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove a whitelisted bot command channel")
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.commandChannelWhiteList.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already not whitelisted for commands");
+    }
+
+    guild.commandChannelWhiteList.splice(guild.commandChannelWhiteList.indexOf(message.channel.id));
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { commandChannelWhiteList: guild.commandChannelWhiteList } }).exec();
+    return message.channel.send("This channel will no longer be whitelisted for bot commands!");
+}
+exports.unSetCommandChannel = unSetCommandChannel;
+
+
+const setMusicRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a minimal role for music functionality from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a minimal role for music functionality")
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You have to @role exactly 1 role to add to set as the minimum");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    let roleID = message.mentions.roles.first().id;
+
+    guild.musicRole = roleID;
+
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { musicRole: guild.musicRole } }).exec();
+    return message.channel.send("The role has been set as the minimum for music commands!");
+}
+exports.setMusicRole = setMusicRole;
+
+const unSetMusicRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only remove the minimal role for music functionality from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove the a minimal role for music functionality")
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    guild.musicRole = '';
+
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { musicRole: guild.musicRole } }).exec();
+    return message.channel.send("The minimum role for music has been removed!");
+}
+exports.unSetMusicRole = unSetMusicRole

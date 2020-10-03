@@ -170,6 +170,128 @@ async function showResources() {
 
 
 
+
+
+async function createUser(member) {
+
+    let newUser = {
+        displayName: member.displayName,
+        id: member.id,
+        messages: [0],
+        lastMessage: ["0-0-0"],
+        timeTalked: [0],
+        lastTalked: ["0-0-0"],
+        games: [],
+        timeAFK: [0],
+        dateJoined: [getDate()],
+        excludePing: false,
+        excludeDM: false,
+        guilds: [member.guild.id],
+        activeTutorial: -1,
+        tutorialStep: -1,
+        previousTutorialStep: -1,
+        notifyUpdate: false,
+        notifyTutorial: true,
+        completedTutorials: [],
+        summoner: [0],
+        kicked: [false],
+        prefix: ["-1"],
+        defaultPrefix: "-1",
+        commands: []
+    }
+
+    let userModel = new User(newUser);
+    await userModel.save();
+    return userModel;
+}
+
+async function addGuild(member, memberDB) {
+
+    memberDB.guilds.push(member.guild.id);
+    memberDB.messages.push(0);
+    memberDB.lastMessage.push("0-0-0");
+    memberDB.timeTalked.push(0);
+    memberDB.lastTalked.push("0-0-0");
+    memberDB.timeAFK.push(0);
+    memberDB.dateJoined.push(getDate());
+    memberDB.summoner.push(0);
+    memberDB.kicked.push(false);
+    memberDB.prefix.push("-1");
+
+    // memberDB.set("guilds", memberDB.guilds)
+    // memberDB.set("messages", memberDB.messages)
+    // memberDB.set("lastMessage", memberDB.lastMessage)
+    // memberDB.set("timeTalked", memberDB.timeTalked)
+    // memberDB.set("lastTalked", memberDB.lastTalked)
+    // memberDB.set("timeAFK", memberDB.timeAFK)
+    // memberDB.set("dateJoined", memberDB.dateJoined)
+    // memberDB.set("summoner", memberDB.summoner)
+    // memberDB.set("kicked", memberDB.kicked)
+    // memberDB.set("prefix", memberDB.prefix)
+    // memberDB.save();
+
+    User.findOneAndUpdate({ id: member.id },
+        {
+            $set: {
+                guilds: memberDB.guilds,
+                messages: memberDB.messages,
+                lastMessage: memberDB.lastMessage,
+                timeTalked: memberDB.timeTalked,
+                lastTalked: memberDB.lastTalked,
+                timeAFK: memberDB.timeAFK,
+                dateJoined: memberDB.dateJoined,
+                summoner: memberDB.summoner,
+                kicked: memberDB.kicked,
+                prefix: memberDB.prefix,
+            }
+        }, function (err, doc, res) {
+            if (err) {
+                fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(`custom: ${member.displayName} : ${member.id}` + "\n-------------\n\n" + err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+            }
+            // if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        });
+
+
+}
+
+
+/**
+ * true = Existed in DB
+ * false = didn't exist in DB
+ */
+async function checkExistance(member) {
+
+    let tempUser = await findUser(member)
+    if (tempUser) {
+
+        if (tempUser.guilds.includes(member.guild.id)) {
+
+            let index = tempUser.guilds.indexOf(member.guild.id);
+            tempUser.kicked[index] = false;
+            User.findOneAndUpdate({ id: tempUser.id }, { $set: { kicked: tempUser.kicked } }, function (err, doc, res) { });
+            return true;
+        }
+        else {//The user exists, but not with a matching guild in the DB
+
+            await addGuild(member, tempUser)
+            return true;
+        }
+    }
+    else {
+        console.log("The user doesnt exist. " + member.displayName);
+        await createUser(member);
+        return false;
+    }
+}
+exports.checkExistance = checkExistance;
+
+
+
+
+
+
+
+
 async function countTalk() {
 
     for (let GUILD of client.guilds.cache) {
@@ -188,38 +310,42 @@ async function countTalk() {
                         continue;
                     }
                     let member = MEMBER[1];
-                    let user = findUser({ id: member.id })
+                    let user = findUser(member)
                         .then((usy) => {
                             if (!usy) {
-                                return console.log("Inside of count minute, user not found")
+                                console.log("Inside of count minute, user not found")
+                                checkExistance(member);
+                                return;
                             }
-                            let index = usy.guilds.indexOf(guild.id);
+                            else {
+                                let index = usy.guilds.indexOf(guild.id);
 
-                            if (channel.id == guild.afkChannelID) {
+                                if (channel.id == guild.afkChannelID) {
 
-                                let timeAFK = usy.timeAFK;
-                                timeAFK[index] += 1;
+                                    let timeAFK = usy.timeAFK;
+                                    timeAFK[index] += 1;
 
-                                User.findOneAndUpdate({ id: member.id },
-                                    {
-                                        $set: { timeAFK: timeAFK }
-                                    }, function (err, doc, res) {
-                                        //console.log(doc);
-                                    });
-                            } else {
+                                    User.findOneAndUpdate({ id: member.id },
+                                        {
+                                            $set: { timeAFK: timeAFK }
+                                        }, function (err, doc, res) {
+                                            //console.log(doc);
+                                        });
+                                } else {
 
-                                let timeTalked = usy.timeTalked;
-                                timeTalked[index] += 1;
+                                    let timeTalked = usy.timeTalked;
+                                    timeTalked[index] += 1;
 
-                                let lastTalked = usy.lastTalked;
-                                lastTalked[index] = getDate();
-                                //   console.log("Doing ")
-                                User.findOneAndUpdate({ id: member.id },
-                                    {
-                                        $set: { timeTalked: timeTalked, lastTalked: lastTalked }
-                                    }, function (err, doc, res) {
-                                        //console.log(doc);
-                                    });
+                                    let lastTalked = usy.lastTalked;
+                                    lastTalked[index] = getDate();
+                                    //   console.log("Doing ")
+                                    User.findOneAndUpdate({ id: member.id },
+                                        {
+                                            $set: { timeTalked: timeTalked, lastTalked: lastTalked }
+                                        }, function (err, doc, res) {
+                                            //console.log(doc);
+                                        });
+                                }
                             }
                         });
                     // if (!user) {
@@ -239,7 +365,7 @@ async function checkTwitch() {
 
     try {
         twitchLogic.checkGuildTwitchStreams(guilds);
-        twitchLogic.checkUsersTwitchStreams(await getUsers());
+        twitchLogic.checkUsersTwitchStreams((await getUsers({ twitchFollows: { $gt: '' } })));
         updateFactionTally(guilds);
     }
     catch (err) {
@@ -260,8 +386,31 @@ const updateFactionTally = async function (guilds) {
             continue;
 
 
-        let message = await client.guilds.cache.get(guild.id)
-            .channels.cache.get(guild.factionLiveTally.channelID).messages.fetch(guild.factionLiveTally.messageID);
+        let message = await client.guilds.fetch(guild.id)
+            .catch(err => console.log("Error fetching guild in updateFactionTally"));
+
+        if (!message) {
+
+            continue;
+        }
+
+        if (!message.channels.cache.get(guild.factionLiveTally.channelID)) {
+            console.log("Missing channel in faction tally")
+            continue;
+        }
+
+        message = await message.channels.cache.get(guild.factionLiveTally.channelID).messages.fetch(guild.factionLiveTally.messageID);
+
+        if (!message) {
+
+            console.log("Missing message in faction tally");
+            continue;
+        }
+
+        if (message.author.id != client.user.id)
+            continue;
+
+
 
         let factions = guild.factions;
 
@@ -652,20 +801,35 @@ function getDate() {
     return dayNumber + "-" + monthNumber + "-" + today.getFullYear();
 }
 exports.getDate = getDate;
+
+
 const getUsers = async function () {
     try {
-        return await User.find({})
+        if (params)
+            return await User.find(params);
+        else
+            return await User.find({});
     } catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getUsers = getUsers;
 
-const findUser = async function (params) {
+const findUser = async function (member) {
     try {
-        return await User.findOne(params)
+        let usery = await User.findOne({ id: member.id });
+
+        if (!usery) {
+
+            await checkExistance(member)
+            return await User.findOne({ id: member.id });
+        }
+        else {
+            return usery;
+        }
+
     } catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.findUser = findUser;
@@ -674,7 +838,7 @@ const findGuild = async function (params) {
     try {
         return await Guild.findOne(params)
     } catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.findGuild = findGuild;
@@ -683,7 +847,7 @@ const getGuilds = async function () {
     try {
         return await Guild.find({})
     } catch (err) {
-        MAIN.fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
 exports.getGuilds = getGuilds;
@@ -775,30 +939,30 @@ HTTPserver.listen(PORT, HOST, () => {
 });
 
 
-async function createBackUp() {
+// async function createBackUp() {
 
-    let userPath = path.join(__dirname, "backups", getDate() + ".json")
-    let guildPath = path.join(__dirname, "backups", "guilds", getDate() + ".json")
+//     let userPath = path.join(__dirname, "backups", getDate() + ".json")
+//     let guildPath = path.join(__dirname, "backups", "guilds", getDate() + ".json")
 
-    if (!fs.existsSync(userPath)) {
+//     if (!fs.existsSync(userPath)) {
 
-        let users = await getUsers();
+//         let users = await getUsers();
 
-        await fs.writeFile(userPath, JSON.stringify(users), function (err, result) {
-            if (err) console.log('error', err);
-        });
-    }
+//         await fs.writeFile(userPath, JSON.stringify(users), function (err, result) {
+//             if (err) console.log('error', err);
+//         });
+//     }
 
-    if (!fs.existsSync(guildPath)) {
+//     if (!fs.existsSync(guildPath)) {
 
-        let guilds = await getGuilds();
+//         let guilds = await getGuilds();
 
-        await fs.writeFile(guildPath, JSON.stringify(guilds), function (err, result) {
-            if (err) console.log('error', err);
-           // if (result) console.log(result)
-        });
-    }
-}//
+//         await fs.writeFile(guildPath, JSON.stringify(guilds), function (err, result) {
+//             if (err) console.log('error', err);
+//             // if (result) console.log(result)
+//         });
+//     }
+// }//
 
 
 connectDB.once('open', async function () {
@@ -810,8 +974,9 @@ connectDB.once('open', async function () {
         console.log("Ready!");
         exports.Client = client;
         checkRL();
-        createBackUp();
-        setInterval(createBackUp, 6 * 60 * 60 * 1000);
+        // createBackUp();
+        checkTwitch();
+        //setInterval(createBackUp, 6 * 60 * 60 * 1000);
     });
     client.on('message', async (message) => {
 
@@ -820,6 +985,7 @@ connectDB.once('open', async function () {
 });
 
 var county = 0;
+
 async function minuteCount() {
 
     if (process.argv.length == 3) {
@@ -850,7 +1016,7 @@ process.on('unhandledRejection', (err, promise) => {
     console.log("Caught unhandledRejectionWarning")
     fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
 
-    
+
 });
 
 process.on('unhandledException', (err, p) => {
@@ -858,5 +1024,5 @@ process.on('unhandledException', (err, p) => {
     console.log("Caught unhandledException")
     fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
 
-    
+
 });

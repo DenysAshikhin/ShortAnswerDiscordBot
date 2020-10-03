@@ -1285,7 +1285,7 @@
         "subsection": [
             6,
             7,
-            8, 
+            8,
             12
         ],
         "category": "**Important**"
@@ -1299,7 +1299,7 @@
         "subsection": [
             6,
             7,
-            8, 
+            8,
             9,
             12
         ],
@@ -1372,5 +1372,286 @@
             3
         ],
         "category": "Password Role"
+    },
+    {
+        "title": "setChannelImageThanker",
+        "explanation": "Thanks users for posting an image in the channel!",
+        "example": [
+            "1) setChannelImageThanker"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "unSetChannelImageThanker",
+        "explanation": "Admin only command that unmarks this channel for image (thank) checking.",
+        "example": [
+            "1) unSetChannelImageThanker"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "channelThankerMessage",
+        "explanation": "Admin only command that sets what the thank message should be. Indicate where/if a user should be @mentioned with <>. Inidicate where the message should say image/link/(image and link) with [].",
+        "example": [
+            "1) channelThankerMessage Thanks for the [] <>!",
+            "2) channelThankerMessage Nice []!",
+            "3) channelThankerMessage <> that's a nice []!"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "repScore",
+        "explanation": "Shows the rep amount of a user in the server.",
+        "example": [
+            "1) repScore @user"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Rep"
+    },
+    {
+        "title": "rep",
+        "explanation": "Admin only command that gives an @mentioned user the specified amount of rep.",
+        "example": [
+            "1) rep 3 @user"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Rep"
+    },
+    {
+        "title": "removeRep",
+        "explanation": "Admin only command that takes away an @mentioned user the specified amount of rep.",
+        "example": [
+            "1) removeRep 3 @user"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Rep"
+    },
+    {
+        "title": "topRep",
+        "explanation": "Shows a list of the top 10 users by rep. **The user must have at least 1 rep**. Can optionally display a larger amount by providing a number",
+        "example": [
+            "1) topRep",
+            "2) topRep 20"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Rep"
+    },
+    {
+        "title": "setThankerAutoRep",
+        "explanation": "Sets the automatic rep gain from the image/link thanker (must be turned on individually)",
+        "example": [
+            "1) setThankerAutoRep true",
+            "2) setThankerAutoRep false"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Rep"
+    },
+    {
+        "title": "setImageChannel",
+        "explanation": "Sets this channel to receive forwarded images!",
+        "example": [
+            "1) setImageChannel"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "unSetImageChannel",
+        "explanation": "UnSets this channel to receive forwarded images!",
+        "example": [
+            "1) unSetImageChannel"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "setImageSourceChannel",
+        "explanation": "Sets this channel to be scanned for images to be posted elsewhere on the server!",
+        "example": [
+            "1) setImageSourceChannel"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "unSetImageSourceChannel",
+        "explanation": "UnSets this channel to be scanned for images to be posted elsewhere on the server!",
+        "example": [
+            "1) unSetImageSourceChannel"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "setImageForwarding",
+        "explanation": "Tells the bot to (or not to) scan for images in all channels and forward them to the channel setup by imageChannel command!",
+        "example": [
+            "1) setImageForwarding true",
+            "2) setImageForwarding false"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "setRepRolePair",
+        "explanation": "Sets an autorole to automatically grant roles based on a threshold rep amount! Calling it on an existing rep-role pair will edit the rep threshold",
+        "example": [
+            "1) setRepRolePair 22 @role"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "removeRepRolePair",
+        "explanation": "Removes an autorole from automatically granting a role based on a threshold rep amount!",
+        "example": [
+            "1) removeRepRolePair @role"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "blacklistRepRole",
+        "explanation": "Add a role to the blacklist, preventing anyone with it from gaining rep!",
+        "example": [
+            "1) blacklistRepRole @role"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "removeBlacklistedRepRole",
+        "explanation": "Removes a role from the rep blacklist.",
+        "example": [
+            "1) removeBlacklistedRepRole @role"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "setCommandChannel",
+        "explanation": "Whitelists a channel for bot commands. If there is at least one channel whitelisted, the bot will ignore all other channels!",
+        "example": [
+            "1) setCommandChannel #channelName"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "unSetCommandChannel",
+        "explanation": "Removes a channel from the bot command whitelist. If there is at least one channel whitelisted, the bot will ignore all other channels!",
+        "example": [
+            "1) unSetCounSetCommandChannel"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "setMusicRole",
+        "explanation": "Sets the minimum role for anyone to use the music functionalities!",
+        "example": [
+            "1) setMusicRole @role"
+        ],
+        "subsection": [
+            4,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "unSetMusicRole",
+        "explanation": "Removes the minimum role for anyone to use the music functionalities!",
+        "example": [
+            "1) unSetMusicRole"
+        ],
+        "subsection": [
+            4,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "setChannelLinkThanker",
+        "explanation": "Admin only command that marks this channel for link checking. When a valid link is posted in the channel the user will be thanked using the thankerMessage (configurable)",
+        "example": [
+            "1) setChannelLinkThanker"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "unSetChannelLinkThanker",
+        "explanation": "Admin only command that unmarks this channel for link checking.",
+        "example": [
+            "1) unSetChannelLinkThanker"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "**Other**"
     }
 ]

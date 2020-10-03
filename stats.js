@@ -3,7 +3,7 @@ const MAIN = require('./short-answer.js');
 async function topStats(message) {
     //create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
     if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
-    let allUsers = await MAIN.getUsers();
+    let allUsers = await MAIN.getUsers({ guilds: message.guild.id });
     let guild = message.guild;
     let silentType;
     let silentTypeIndex;
@@ -121,7 +121,7 @@ exports.specificStats = specificStats;
 async function getStats(member, user) {
 
     if (!user)
-        user = await MAIN.findUser({ id: member.id });
+        user = await MAIN.findUser(member);
 
     let index = user.guilds.indexOf(member.guild.id);
 
@@ -131,13 +131,19 @@ async function getStats(member, user) {
         statsEmbed.date = new Date();
         statsEmbed.fields = [
             { name: "** **", value: "```md\n" + `Tracked since:\n#${user.dateJoined[index]}` + "```", inline: true },
-            { name: "** **", value: "```md\n" + `Total number of messages sent:\n#${user.messages[index]}\n\n` +  `Last message sent:\n#${user.lastMessage[index]}` + "```", inline: true },
-            { name: "** **", value: "```md\n" + `Last time you talked was:\n#${user.lastTalked[index]}\n\n` + `Total time spent talking (in minutes):\n#${user.timeTalked[index]}\n\n` 
-            + `Time spent AFK (in minutes):\n#${user.timeAFK[index]}` + "```", inline: true },
-            { name: "** **", value: "```md\n" + `Number of games you are signed up for:\n#${user.games.length}\n\n` + `Number of saved playlists:\n#${user.playlists.length}` + "```", 
-            inline: true },
-            { name: "** **", value: "```md\n" + `Whether you are excluded from pings:\n#${user.excludePing}\n\n` + `Whether you are excluded from DMs:\n#${user.excludeDM}` + "```", 
-            inline: true },
+            { name: "** **", value: "```md\n" + `Total number of messages sent:\n#${user.messages[index]}\n\n` + `Last message sent:\n#${user.lastMessage[index]}` + "```", inline: true },
+            {
+                name: "** **", value: "```md\n" + `Last time you talked was:\n#${user.lastTalked[index]}\n\n` + `Total time spent talking (in minutes):\n#${user.timeTalked[index]}\n\n`
+                    + `Time spent AFK (in minutes):\n#${user.timeAFK[index]}` + "```", inline: true
+            },
+            {
+                name: "** **", value: "```md\n" + `Number of games you are signed up for:\n#${user.games.length}\n\n` + `Number of saved playlists:\n#${user.playlists.length}` + "```",
+                inline: true
+            },
+            {
+                name: "** **", value: "```md\n" + `Whether you are excluded from pings:\n#${user.excludePing}\n\n` + `Whether you are excluded from DMs:\n#${user.excludeDM}` + "```",
+                inline: true
+            },
             { name: "** **", value: "```md\n" + `Number of succesful summons:\n#${user.summoner[index]}` + "```", inline: true }
         ];
 
