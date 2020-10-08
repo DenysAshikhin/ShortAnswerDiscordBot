@@ -481,6 +481,9 @@ const sendToServer = async function (data) {
     let resp = await needle('get', `${IP}:${PORT}`, null,
         { headers: { 'payload': encrypted.content, 'tag': encrypted.tag.toString('base64'), 'iv': encrypted.iv.toString('base64') } });
 
+
+console.log(resp.raw.toString('utf8'))
+
     let payload = JSON.parse(resp.raw.toString('utf8'));
     let decryptedPayload = decrypt({ content: payload.payload, tag: Buffer.from(payload.tag, 'base64'), iv: Buffer.from(payload.iv, 'base64') })
 

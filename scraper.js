@@ -5,6 +5,7 @@ const leagueScraper = require('./Scrapers/leagueLegends.js');
 const rocketScraper = require('./Scrapers/RocketLeague.js')
 const twitchLogic = require('./serverLogic/twitchLogic');
 const statLogic = require('./serverLogic/statLogic.js');
+const thankerLogic = require('./serverLogic/thankerLogic.js');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
 const http = require("http");
@@ -150,6 +151,7 @@ var commandMap = new Map();
     commandMap.set('rocket_league_tracker', rocketScraper.RLTracker);
     commandMap.set('topRep', statLogic.topRep);
     commandMap.set('topStats', statLogic.topStats);
+    commandMap.set('linkCheck', thankerLogic.checkLink)
 }
 
 var workQueue = {

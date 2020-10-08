@@ -76,28 +76,29 @@ const channelLinkThanker = async function (message, params, user) {
 
     const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
 
-    let link = 0;
 
-    for (let string of args)
-        if (isUrl(string)) {
-
-            let result = await needle('get', string)
-                .catch(err => { console.log("caught thanker error link thanker") });
-            if (result) {
-
-                link++;
-            }
-        }
+    let parsed = await MAIN.sendToServer({ command: 'linkCheck', params: [message.guild.id, message.channel.id, message.id, args] });
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
-    if (link) {
+
+    if (parsed.reposts) {
+
+        message.channel.send(`Your message contained ${parsed.reposts} reposted links`)
+    }
+    if (parsed.newLinks) {
 
         if (guild.thankerAutoRep) {
 
-            changeRep(user, message.guild.id, link, message);
+            changeRep(user, message.guild.id, parsed.newLinks, message);
         }
-        return message.channel.send(channelThankerMessageConvert(message.author.id, `link`, guild, link));
+
     }
+    else {
+
+        return 1;
+    }
+
+    return message.channel.send(channelThankerMessageConvert(message.author.id, `link`, guild, parsed.newLinks));
 }
 exports.channelLinkThanker = channelLinkThanker;
 
