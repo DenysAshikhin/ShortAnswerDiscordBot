@@ -1,105 +1,46 @@
+const { mem } = require('node-os-utils');
 const MAIN = require('./short-answer.js');
 
 async function topStats(message) {
     //create a stats channel to display peoples stats, top messages, loud mouth, ghost (AKF), MIA (longest not seen)
     if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
-    let allUsers = await MAIN.getUsers({ guilds: message.guild.id });
-    let guild = message.guild;
-    let silentType;
-    let silentTypeIndex;
 
-    let loudMouth;
-    let loudMouthIndex;
 
-    let ghost;
-    let ghostIndex;
-
-    let MIA;
-    let MIAIndex;
-
-    let summoner;
-    let summonerIndex;
-
-    let user = null;
-
-    for (let i = 0; i < allUsers.length; i++) {
-
-        if (allUsers[i].guilds.includes(guild.id)) {
-            user = allUsers[i];
-            let userIndex = user.guilds.indexOf(guild.id);
-
-            if (!user.kicked[userIndex]) {
-                if (!silentType) {
-                    silentType = user;
-                    silentTypeIndex = user.guilds.indexOf(guild.id);
-                }
-                if (!loudMouth) {
-                    loudMouth = user;
-                    loudMouthIndex = user.guilds.indexOf(guild.id);
-                }
-                if (!ghost) {
-                    ghost = user;
-                    ghostIndex = user.guilds.indexOf(guild.id);
-                }
-                if (!MIA) {
-                    MIA = user;
-                    MIAIndex = user.guilds.indexOf(guild.id);
-                }
-                if (!summoner) {
-                    summoner = user;
-                    summonerIndex = user.guilds.indexOf(guild.id);
-                }
-
-                if (Number(silentType.messages[silentTypeIndex]) < Number(user.messages[userIndex])) {
-                    silentType = user;
-                    silentTypeIndex = userIndex;
-                }
-
-                if (Number(loudMouth.timeTalked[loudMouthIndex]) < Number(user.timeTalked[userIndex])) {
-                    loudMouth = user;
-                    loudMouthIndex = userIndex;
-                }
-
-                if (Number(ghost.timeAFK[ghostIndex]) < Number(user.timeAFK[userIndex])) {
-                    ghost = user;
-                    ghostIndex = userIndex;
-                }
-
-                if (summoner.summoner[summonerIndex] < user.summoner[userIndex]) {
-                    summoner = user;
-                    summonerIndex = userIndex;
-                }
-
-                let userDate = MAIN.findFurthestDate(user.lastMessage[userIndex], user.lastTalked[userIndex]);
-                let MIADate = MAIN.findFurthestDate(MIA.lastMessage[MIAIndex], MIA.lastTalked[MIAIndex]);
-
-                if (userDate == MAIN.findFurthestDate(userDate, MIADate) && userDate != "0-0-0") {
-                    MIA = user;
-                    MIAIndex = userIndex;
-                }
-                else if (MIADate == "0-0-0" && userDate != "0-0-0") {
-                    MIA = user;
-                    MIAIndex = userIndex;
-                }
-            }
-        }
-    }
-
-    let statsEmbed = JSON.parse(JSON.stringify(MAIN.Embed));
-    statsEmbed.date = new Date();
-    statsEmbed.title = MAIN.Embed.title + ` - Top Stats for ${message.guild.name}!`;
-    statsEmbed.thumbnail.url = message.guild.iconURL();
-    statsEmbed.fields = [
-        { name: '** **', value: "```md\n" + `The Silent Type:\n#${silentType.displayName}\n` + `<${silentType.messages[silentTypeIndex]} messages sent.>` + "```" },
-        { name: '** **', value: "```md\n" + `The Loud Mouth:\n#${loudMouth.displayName}\n` + `<${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.>` + "```" },
-        { name: '** **', value: "```md\n" + `The Ghost:\n#${ghost.displayName}\n` + `<${ghost.timeAFK[ghostIndex]} minutes spent AFK.>` + "```" },
-        { name: '** **', value: "```md\n" + `The MIA:\n#${MIA.displayName}\n` + `<${MAIN.findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex])} last seen date.>` + "```" },
-        { name: '** **', value: "```md\n" + `The Summoner:\n#${summoner.displayName}\n` + `<${summoner.summoner[summonerIndex]} summoning rituals completed.>` + "```" }
-    ];
-
-    message.channel.send({ embed: statsEmbed });
+    let parsed = await MAIN.sendToServer({ command: 'topStats', params: [message.guild.id, message.channel.id] });
+    return 1;
 }
 exports.topStats = topStats;
+
+const botStats = async function (message, params, user) {
+
+    let guilds = MAIN.Client.guilds.cache;
+    let userCount = 0;
+    let memberMap = new Map();
+
+    for (let guild of guilds.values()) {
+
+
+
+        let members = await guild.members.fetch();
+
+        for (let member of members.values()) {
+
+            if (!member.user.bot) {
+                if (!memberMap.get(member.id))
+                    memberMap.set(member.id, true)
+            }
+        }
+
+        userCount += members.size;
+    }
+
+
+    message.channel.send(`Command currently under construction, here is a temporary print: ${memberMap.size} unique users across ${guilds.size} servers with ${MAIN.commandMap.size} unique commands!`);
+
+
+    console.log(userCount, guilds.size, MAIN.commandMap.size);
+}
+exports.botStats = botStats;
 
 async function specificStats(message) {
     if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");

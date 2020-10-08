@@ -10,7 +10,6 @@ const MAIN = require('../scraper.js');
 const fs = require('fs');
 const User = require('../User.js');
 const Guild = require('../Guild.js');
-const { send } = require('process');
 
 
 async function twitchInitiliasation() {
@@ -218,7 +217,7 @@ async function linkTwitch(params, socket) {
 
     let args = params[0];
 
-    let streamer = await getTwitchChannel(args);
+    let streamer = await getTwitchChannel(args.trim());
     if (!streamer) return { status: -1 };
 
     let follows = await streamer.getFollows();

@@ -12,6 +12,55 @@ var guildSquads = new Map();
 var guildTeams = new Map();
 
 
+var deleteMap = new Map();
+
+const delety = function (message, emoji, summon) {
+
+    if (!deleteMap.get(message.id)) {
+        deleteMap.set(message.id, JSON.parse(JSON.stringify({ guild: message.guild.id, channel: message.channel.id, message: message.id, emojiFinished: emoji, resetSummon: summon })))
+
+    }
+    else
+        return deleteMap.get(message.id)
+}
+
+const deleteSummon = async function (ID, emoji, summon) {
+
+    let messy = deleteMap.get(ID);
+    if (!messy)
+        return -1;
+
+    if (messy.deleted) {
+        // console.log('\nalready delete' + messy.message + '\n')
+        return 1;
+    }
+
+    if (emoji) {
+        if (messy.emojiFinished != emoji) {
+            messy.emojiFinished = true;
+            deleteMap.set(messy.id, JSON.parse(JSON.stringify(messy)));
+        }
+    }
+    if (summon) {
+        if (messy.resetSummon != summon) {
+            messy.resetSummon = true;
+            deleteMap.set(messy.id, JSON.parse(JSON.stringify(messy)));
+        }
+    }
+
+    if (messy.emojiFinished && messy.resetSummon) {
+
+        let guild = await MAIN.Client.guilds.fetch(messy.guild);
+        let channel = guild.channels.cache.get(messy.channel);
+        let message = await channel.messages.fetch(messy.message);
+        messy.deleted = true;
+        deleteMap.set(messy.id, JSON.parse(JSON.stringify(messy)));
+        await MAIN.sleep(2000);
+        await message.delete();
+    }
+
+}
+
 const updateGamesList = function () {
 
     gameJSON = require('./gameslist.json')
@@ -33,8 +82,18 @@ async function setControlEmoji(message) {
         await message.react('🕘');
         await message.react('🚷');
 
+
+        let result = delety(message, true, false);;
+        if (result)
+            if (result.deleted)
+                return 1;
+
+
+        deleteSummon(message.id, true, false);
     }
     catch (err) {
+        console.log(err)
+        console.log(message.id)
         console.log("CAUGHT ER")
         return -1;
     }
@@ -58,7 +117,7 @@ async function setEmojiCollector(message) {
         if (emoji.emoji == MAIN.getEmojiObject('queue')) {
 
             let result = await Queue(emoji.message, null, user, { displayName: user.username, id: user.id });
-            if (result && (result != -3))
+            if (result && ((result != -3) || (result != -4)))
                 emoji.users.remove(user);
             if (result == -1)
                 return MAIN.selfDestructMessage(message, "You're already a part of this summon!", 3, emoji);
@@ -66,11 +125,10 @@ async function setEmojiCollector(message) {
                 return MAIN.selfDestructMessage(message, "There is no more room in the summon!", 3, emoji);
             else if (result == -3) {
                 MAIN.selfDestructMessage(message, "Teams Made!", 3, true);
-
-                console.log(2)
                 return 1;
             }
-
+            else if (result == -4)
+                return 1
 
 
             await resetSummonRitual(message, user.id, null, true);
@@ -160,8 +218,8 @@ const resetSummonRitual = async function (message, summonerID, time, queue) {
 
     for (let squad of squads.values()) {
 
-        if ((squad.messageID == message.id) || (squad.summonerID == summonerID)) {
-
+        //if ((squad.messageID == message.id) || (squad.summonerID == summonerID)) {
+        if ((squad.messageID == message.id)) {
             let lastMessage = await message.channel.messages.fetch({ limit: 1 });
             lastMessage = lastMessage.first();
             let defaultDesc = squad.message.embeds[0].description
@@ -174,10 +232,6 @@ const resetSummonRitual = async function (message, summonerID, time, queue) {
                 }, [])
 
 
-                let messageToDelete = squad.message;
-
-                await messageToDelete.delete();
-
 
                 let summonMessage = await MAIN.prettyEmbed(message,
                     [{
@@ -186,48 +240,37 @@ const resetSummonRitual = async function (message, summonerID, time, queue) {
                     }], { description: defaultDesc, modifier: 1 });
 
 
-                // await MAIN.prettyEmbed(message, defaultDesc,
-                //     [{
-                //         name: `${message.guild.members.cache.get(squad.summonerID).displayName}'s Summon: ${squad.joinedIDS.length}/${squad.size}`,
-                //         value: squad.displayNames.reduce((acc, current, index) => {
-                //             acc.push(`${index + 1}) ${current}`);
-                //             return acc;
-                //         }, [])
-                //     }], -1, -1, 1,
-                //     null, null, null, 1);
 
+                let messageToDelete = squad.message;
+                let result = delety(messageToDelete, false, true);
 
+                if (result)
+                    if (result.deleted)
+                        return 1;
 
-                let loopy = queue.loop;
-                if (loopy) {
+        
+                squad.messageID = summonMessage.id;
+                squad.message = summonMessage;
+                deleteSummon(messageToDelete.id, false, true);
 
-                }
-                else if (queue) {
+                if (queue) {
                     if (time)
-                        message.channel.send(MAIN.mention(summonerID) + ` is joining in ${time} minutes!`);
+                        summonMessage.channel.send(MAIN.mention(summonerID) + ` is joining in ${time} minutes!`);
                     else
-                        message.channel.send(MAIN.mention(summonerID) + ` has joined!`);
+                        summonMessage.channel.send(MAIN.mention(summonerID) + ` has joined!`);
                 }
                 else {
-                    message.channel.send(MAIN.mention(summonerID) + ` has left!`);
+                    summonMessage.channel.send(MAIN.mention(summonerID) + ` has left!`);
                 }
 
                 squad.collector.stop();
 
 
+                // console.log(`PASSING ${summonMessage.id}`)
                 squad.collector = await setEmojiCollector(summonMessage).catch((err) => { console.log("IGNORING OTHER ERROR") })
-
-                await setControlEmoji(summonMessage).
-                    catch(err => console.log("Errored out setting emoji"));
-
-                // await squad.message.delete();
-
-
-                //await (await squad.message.channel.messages.fetch(squad.messageID)).delete();
-
-                //    .catch(err => console.log('squad message was already deleted!'));
-                squad.messageID = summonMessage.id;
-                squad.message = summonMessage;
+                // console.log("finished setting collector")
+                setControlEmoji(summonMessage)
+                    .catch(err => console.log("Errored out setting emoji"));
             }
             return 1;
         }
@@ -250,7 +293,13 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         return -1;
     }
 
-    let sizeLimit = message.content.split(',')[1];
+    let sizeLimit;
+
+    if (message.content.split(',').length == 2)
+        sizeLimit = message.content.split(',')[1].trim().split(' ')[0].trim();
+    else
+        sizeLimit = message.content.split(',')[0].trim();
+
     if (sizeLimit)
         sizeLimit.trim();
     let squadSize = !isNaN(sizeLimit) && sizeLimit.length > 0 ? Number(sizeLimit) : 5;
@@ -289,6 +338,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     }
     else {
 
+        let invisMembers = [];
         game = check.result[0].item;
         let commonUsers = [];
         let signedUp = "";
@@ -298,24 +348,54 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                 commonUsers.push(member[0]);
 
 
-        let users = await User.find({ games: game, guilds: message.guild.id });
-        for (let user of users) {
-            if (!user.kicked[user.guilds.indexOf(message.guild.id)] && (user.id != message.author.id)) {
+        let members = await message.guild.members.fetch();
 
-                if ((user.excludePing == false) && !(commonUsers.includes(user.id)))
-                    signedUp += MAIN.mention(user.id) + " ";
-                else
-                    signedUp += `**${message.guild.members.cache.get(user.id).displayName}** `;
+        if (message.mentions.roles.size > 0) {
 
-                if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
-                    MAIN.directMessage(message, user.id, game);
+
+            let role = message.mentions.roles.first();
+
+            if (role.members.size > 20)
+                signedUp = `${role.members.size} members from ${MAIN.mentionRole(role)}. Not listing everyone due to more than 20 members being part of the role!`;
+            else {
+                signedUp = `: `
+                for (let memby of role.members.values())
+                    signedUp += `**${memby.displayName}** :small_orange_diamond: `
+            }
+        }
+        else {
+
+
+
+            let users = await User.find({ games: game, guilds: message.guild.id });
+            for (let user of users) {
+                if ((user.id != message.author.id)) {
+
+                    let member = members.get(user.id);
+                    if (!member)
+                        continue;
+
+                    let permission = message.channel.permissionsFor(member);
+                    if (!permission.has("VIEW_CHANNEL")) {
+                        invisMembers.push(member);
+                        continue;
+                    }
+
+                    if ((user.excludePing == false) && !(commonUsers.includes(user.id)))
+                        signedUp += MAIN.mention(user.id) + " ";
+                    else
+                        signedUp += `**${message.guild.members.cache.get(user.id).displayName}** `;
+
+                    if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
+                        MAIN.directMessage(message, user.id, game);
+                }
             }
         }
 
-        if (signedUp.length > 3) {
+        let summonMessage;
 
-
-            let summonMessage = await MAIN.prettyEmbed(message,
+        if (signedUp.length > 3)
+            summonMessage = await MAIN.prettyEmbed(message,
                 [{
                     name: `${message.member.displayName}'s Summon: 1/${squadSize}`,
                     value: [user.displayName].reduce((acc, current, index) => {
@@ -326,34 +406,48 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                 description: message.member.displayName + " has summoned " + signedUp + " for some " + game
                     + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```", modifier: 1
             });
+        else
+            summonMessage = await MAIN.prettyEmbed(message,
+                [{
+                    name: `${message.member.displayName}'s Summon: 1/${squadSize}`,
+                    value: [user.displayName].reduce((acc, current, index) => {
+                        acc.push(`${index + 1}) ${current}`);
+                        return acc;
+                    }, [])
+                }], {
+                description: message.member.displayName + " wants to play " + `**${game}** but no one signed up for it! You can use the ` + "`signUp " + game + "`"
+                    + ` to be notifed the next time someone wants to play the game!`
+                    + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```", modifier: 1
+            });
+        setControlEmoji(summonMessage);
+        let collector = await setEmojiCollector(summonMessage);
 
-            // let summonMessage = await MAIN.prettyEmbed(message, message.member.displayName + " has summoned " + signedUp + " for some " + game
-            // + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```",
-            // [{
-            //     name: `${message.member.displayName}'s Summon: 1/${squadSize}`,
-            //     value: [user.displayName].reduce((acc, current, index) => {
-            //         acc.push(`${index + 1}) ${current}`);
-            //         return acc;
-            //     }, [])
-            // }], -1, -1, 1,
-            // null, null, null, 1);
+        let squads = guildSquads.get(message.guild.id);
 
-            setControlEmoji(summonMessage);
-            let collector = await setEmojiCollector(summonMessage);
-
-
-            let squads = guildSquads.get(message.guild.id);
-
-            if (squads) {
-                let squad = squads.find(element => element.summonerID == user.id);
-                if (squad) {
-                    squads.splice(squads.indexOf(squad), 1);
-                    message.channel.send("Overwriting your old summon!");
-                }
+        if (squads) {
+            let squad = squads.find(element => element.summonerID == user.id);
+            if (squad) {
+                squads.splice(squads.indexOf(squad), 1);
+                message.channel.send("Overwriting your old summon!");
             }
+        }
 
-            if (squads)
-                squads.push({
+        if (squads)
+            squads.push({
+                joinedIDS: [user.id],
+                message: summonMessage,
+                collector: collector,
+                messageID: summonMessage.id,
+                game: game,
+                displayNames: [user.displayName],
+                size: squadSize,
+                created: new Date(),
+                summoner: user.displayName,
+                summonerID: user.id
+            });
+        else
+            guildSquads.set(message.guild.id, [
+                {
                     joinedIDS: [user.id],
                     message: summonMessage,
                     collector: collector,
@@ -364,38 +458,19 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                     created: new Date(),
                     summoner: user.displayName,
                     summonerID: user.id
-                });
+                }]);
+
+
+        if (invisMembers.length > 1)
+            if (invisMembers.length <= 3)
+                message.channel.send(`The following members were not notified because they cannot see the chat: `
+                    + `${invisMembers.reduce(function (acc, current, index) {
+
+                        return acc += current.displayName + ' | '
+                    }, '')}`)
             else
-                guildSquads.set(message.guild.id, [
-                    {
-                        joinedIDS: [user.id],
-                        message: summonMessage,
-                        collector: collector,
-                        messageID: summonMessage.id,
-                        game: game,
-                        displayNames: [user.displayName],
-                        size: squadSize,
-                        created: new Date(),
-                        summoner: user.displayName,
-                        summonerID: user.id
-                    }])
+                message.channel.send(`There were ${invisMembers.length} members who were not invted because they cannot view this channel!`);
 
-
-            {     // for (let i = 0; i < 25; i++) {
-
-                //     let tempPlayers = [];
-
-                //     for (let j = 0; j < 7; j++) {
-
-                //         tempPlayers.push(`${user.displayName} ${i}-${j}`);
-                //     }
-                //     let squads = guildSquads.get(message.guild.id);
-                //     squads.push({ game: game, displayNames: JSON.parse(JSON.stringify(tempPlayers)), size: squadSize, created: new Date(), summoner: user.displayName + i, summonerID: user.id });
-                // }
-            }
-        }
-        else
-            message.channel.send("No one else has signed up for " + game + ".");
         let index = user.guilds.indexOf(message.guild.id);
         user.summoner[index] += 1;
         User.findOneAndUpdate({ id: user.id }, { $set: { summoner: user.summoner } }, function (err, doc, res) { });
@@ -665,7 +740,9 @@ async function gameStats(message, params, user) {
         }
 
         if (signedUp.length > 0) {
-            return MAIN.generalMatcher(message, -23, user, ['Yes', 'No'], [{ userList: signedUp, gameTitle: game }, null], gameStats, `There are **${signedUp.length}** user(s) signed up for ${game}. Would you like to see a list of the members who signed up?`);
+
+            return await MAIN.generalMatcher(message, -23, user, ['Yes', 'No'], [{ userList: signedUp, gameTitle: game }, null], gameStats, `There are **${signedUp.length}** user(s) signed up for ${game}. Would you like to see a list of the members who signed up?`);
+
         }
         else
             message.channel.send(`There are **${signedUp.length}** users signed up for ${game}.`);
@@ -678,7 +755,7 @@ exports.gameStats = gameStats;
 async function topGames(message, params) {
     if (message.channel.type == 'dm') return message.channel.send("This command is only available in server text channels!");
 
-    let users = await User.find({ guilds: message.guild.id });
+    let users = await User.find({ guilds: message.guild.id, games: { $gt: '' } });
 
     let gameMap = new Map();
     let description = '';
@@ -765,8 +842,11 @@ async function Queue(message, params, user, emoji) {
                         squad.displayNames.push(user.username);
                         squad.joinedIDS.push(user.id);
                         if (squad.joinedIDS.length == squad.size) {
-                            await infiniteQueue(message, { squad: squad });
-                            return -3;
+                            let res = await infiniteQueue(message, { squad: squad, joined: user.id });
+                            if (res != -1)
+                                return -3;
+                            else
+                                return -4;
                         }
                         return 1;
                     }
@@ -808,7 +888,7 @@ async function Queue(message, params, user, emoji) {
                 squad.displayNames.push(squad.message.guild.members.cache.get(user.id).displayName);
                 squad.joinedIDS.push(user.id)
                 if (squad.joinedIDS.length == squad.size) {
-                    await infiniteQueue(message, { squad: squad });
+                    await infiniteQueue(message, { squad: squad, joined: user.id });
                     return 1;
                 }
                 if (finalETA == -1)
@@ -827,7 +907,7 @@ async function Queue(message, params, user, emoji) {
                 squad.displayNames.push(squad.message.guild.members.cache.get(user.id).displayName);
                 squad.joinedIDS.push(user.id)
                 if (squad.joinedIDS.length == squad.size) {
-                    await infiniteQueue(message, { squad: squad });
+                    await infiniteQueue(message, { squad: squad, joined: user.id });
                     return 1;
                 }
                 if (finalETA == -1)
@@ -1477,52 +1557,101 @@ setInterval(squadTrack, 1000);
 
 
 
+const resetQueue = async function (oldSquad, queueType, tempMessage) {
+
+    let summonMessage;
+
+    let squads = guildSquads.get(oldSquad.message.guild.id);
+    oldSquad.collector.stop();
+
+    squads.splice(squads.indexOf(oldSquad), 1);
+
+
+    switch (queueType) {
+
+        //1 = random teams
+        case 1:
+            summonMessage = await MAIN.prettyEmbed(oldSquad.message,
+                [{
+                    name: `${oldSquad.summoner.displayName}'s Summon: 0/${oldSquad.size}`,
+                    value: `No one yet, be the first!`
+                }], {
+                description: oldSquad.summoner.displayName + " has started a repeating random team queue for " + oldSquad.game
+                    + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```", modifier: 1
+            });
+            break;
+    }
+
+
+
+    //maybe re-enable this later!
+
+    // oldSquad.message.delete();
+
+    setControlEmoji(summonMessage);
+    let collector = await setEmojiCollector(summonMessage);
+
+    if (squads) {
+        let squad = squads.find(element => element.summonerID == oldSquad.summonerID);
+        if (squad) {
+            squads.splice(squads.indexOf(squad), 1);
+            // message.channel.send("Overwriting your old summon!");
+        }
+    }
+
+    if (squads)
+        squads.push({
+            joinedIDS: [],
+            message: summonMessage,
+            collector: collector,
+            messageID: summonMessage.id,
+            game: oldSquad.game,
+            displayNames: [],
+            size: oldSquad.size,
+            created: new Date(),
+            summoner: oldSquad.summoner,
+            summonerID: oldSquad.summonerID,
+            split: oldSquad.split
+        });
+    else
+        guildSquads.set(message.guild.id, [
+            {
+                joinedIDS: [],
+                message: summonMessage,
+                collector: collector,
+                messageID: summonMessage.id,
+                game: oldSquad.game,
+                displayNames: [],
+                size: oldSquad.size,
+                created: new Date(),
+                summoner: oldSquad.summoner,
+                summonerID: oldSquad.summonerID,
+                split: oldSquad.split
+            }]);
+}
+
 const infiniteQueue = async function (message, params, user) {
+
+    let squad = params.squad;
 
     if (!params.step) {
 
-        let squad = params.squad;
-
-
         if (squad.split) {
 
-            let squad = params.squad;
-
-            shuffle(squad.joinedIDS);
-
-            var half_length = Math.ceil(squad.joinedIDS.length / 2);
-
-            var leftSide = squad.joinedIDS.splice(0, half_length);
-
-            let members = await squad.message.guild.members.fetch();
-
-            let finalArr = [];
-
-            for (let i = 0; i < squad.joinedIDS.length; i++) {
-
-                finalArr.push({ name: "**Team 1**", value: `${i + 1})` + members.get(squad.joinedIDS[i]).displayName });
-            }
-
-            for (let i = 0; i < leftSide.length; i++) {
-
-                finalArr.push({ name: "**Team 2**", value: `${i + 1})` + members.get(leftSide[i]).displayName });
-            }
-
-
-            squad.split = true;
-            squad.displayNames = [];
-            squad.joinedIDS = [];
-
-            await MAIN.prettyEmbed(squad.message, finalArr, { modifier: 'md' });
-            await resetSummonRitual(squad.message, squad.summonerID, null, { loopy: true })
+            await resetSummonRitual(message, params.joined, null, true);
+            await makeRandomTeam(squad);
+            await resetQueue(squad, 1, message);
+            return 1;
         }
         else {
 
             let summoner = await MAIN.findUser({ id: squad.summonerID });
 
-            let newMessage = await squad.message.channel.send("Teams have been formed!");
+            // let newMessage = await squad.message.channel.send("Teams have been formed!");
 
-            return MAIN.generalMatcher(newMessage, -23, summoner, ['Enable', 'Disable'],
+            await resetSummonRitual(squad.message, params.joined, null, true);
+
+            return await MAIN.generalMatcher(squad.message, -23, summoner, ['Enable', 'Disable'],
                 [
                     { enable: true, squad: squad, step: 1 },
                     { enable: false, step: -1 }
@@ -1534,38 +1663,19 @@ const infiniteQueue = async function (message, params, user) {
 
         switch (params.step) {
 
+            case -1:
+
+                return -1;
+
             case 1:
 
-                let squad = params.squad;
+                await makeRandomTeam(squad);
 
-                shuffle(squad.joinedIDS);
-
-                var half_length = Math.ceil(squad.joinedIDS.length / 2);
-
-                var leftSide = squad.joinedIDS.splice(0, half_length);
-
-                let members = await squad.message.guild.members.fetch();
-
-                let finalArr = [];
-
-                for (let i = 0; i < squad.joinedIDS.length; i++) {
-
-                    finalArr.push({ name: "**Team 1**", value: `${i + 1})` + members.get(squad.joinedIDS[i]).displayName });
-                }
-
-                for (let i = 0; i < leftSide.length; i++) {
-
-                    finalArr.push({ name: "**Team 2**", value: `${i + 1})` + members.get(leftSide[i]).displayName });
-                }
+                await resetQueue(squad, 1, squad.message);
+                // let squad = params.squad;
 
 
-
-                squad.split = true;
-                squad.displayNames = [];
-                squad.joinedIDS = [];
-
-                await MAIN.prettyEmbed(squad.message, finalArr, { modifier: 'md' });
-                await resetSummonRitual(squad.message, squad.summonerID, null, { loopy: true })
+                // await resetSummonRitual(squad.message, squad.summonerID, null, { loopy: true })
                 //here
                 break;
         }
@@ -1574,7 +1684,34 @@ const infiniteQueue = async function (message, params, user) {
 }
 
 
+const makeRandomTeam = async function (squad) {
 
+    shuffle(squad.joinedIDS);
+
+    var half_length = Math.ceil(squad.joinedIDS.length / 2);
+
+    var leftSide = squad.joinedIDS.splice(0, half_length);
+
+    let members = await squad.message.guild.members.fetch();
+
+    let finalArr = [];
+
+    for (let i = 0; i < squad.joinedIDS.length; i++) {
+
+        finalArr.push({ name: "**Team 1**", value: `${i + 1})` + members.get(squad.joinedIDS[i]).displayName });
+    }
+
+    for (let i = 0; i < leftSide.length; i++) {
+
+        finalArr.push({ name: "**Team 2**", value: `${i + 1})` + members.get(leftSide[i]).displayName });
+    }
+
+    squad.split = true;
+    squad.displayNames = [];
+    squad.joinedIDS = [];
+
+    await MAIN.prettyEmbed(squad.message, finalArr, { modifier: 'md' });
+}
 
 
 const shuffle = function (array) {

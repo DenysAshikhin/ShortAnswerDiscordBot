@@ -133,7 +133,19 @@ async function Delete(message, params) {
     if (!permission.has("MANAGE_MESSAGES"))
         return message.channel.send("I do not have the required permissions to delete messages in this channel! (MANAGE_MESSAGES)");
 
-    let amount = 0;
+
+    let args = message.content.split(" ").slice(1).join(" ").split(',');
+    let amount = args[0];
+
+    let self = false;
+    if (args[1])
+        if (args[1].toLowerCase().trim() == 'false')
+            self = false;
+        else if (args[1].toLowerCase().trim() == 'true')
+            self = true;
+        else
+            return message.channel.send("If providing the `self` argument, it must be either `true` or `false` seperated from the number with a `,` (comma)!");
+
     if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
     else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
     else if (params[0] > 99) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
@@ -141,12 +153,26 @@ async function Delete(message, params) {
     else {
 
         amount = Number(params[0]) + 1;
-        await message.channel.messages.fetch({ limit: amount }).then(messages => { // Fetches the messages
+        let messages = await message.channel.messages.fetch({ limit: amount });
+
+        if (self) {
+
+            for (let messy of messages.values()) {
+           
+                if (messy.author.id != MAIN.Client.user.id)
+                    messages.delete(messy.id)
+            }
             message.channel.bulkDelete(messages).catch(err => {
                 console.log("Error deleting bulk messages: " + err);
                 message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
             });
-        });
+        }
+        else
+            message.channel.bulkDelete(messages).catch(err => {
+                console.log("Error deleting bulk messages: " + err);
+                message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+            });
+
     }
 }
 exports.Delete = Delete;

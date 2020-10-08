@@ -1,6 +1,7 @@
 var PORT;
 var IP;
 
+var prefix = 'sa!';
 var defaultPrefix = "sa!";
 global.prefix;
 
@@ -73,6 +74,7 @@ const HELP = require('./help.js');
 const GENERAL = require('./general.js');
 const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
+const dbots = require('dbots');
 const ffmpeg = require('fluent-ffmpeg');
 var uniqid = require('uniqid');
 exports.uniqid = uniqid;
@@ -407,7 +409,8 @@ const findUser = async function (member) {
             return await User.findOne({ id: member.id });
         }
         else {
-            return usery;
+
+            return (await checkFix(usery));
         }
 
     } catch (err) {
@@ -502,11 +505,30 @@ connectDB.once('open', async function () {
 
     await Client.login(token);
 
-    updateAll();
+
     populateCommandMap();
     TUTORIAL.initialTutorialPopulate();
 
     Client.on("ready", () => {
+
+        updateAll();
+
+
+        const poster = new dbots.Poster({
+            client: Client,
+            apiKeys: {
+                dbots: 'PxWDhVYUsJEGv0rASxtFLX8v9UPBVRPcCpkhtjt0dqQzKwVT78lDM0fGGxa4PG9ILQ4Ni7fg7BtVjO9ClNiugKMGkTQuKJQNexT1TyGXLwdtBk2LMvuP8QeK3djdeFBm1KDM41DgJwVS7y1plK6h9xTF1Fg',
+                dbotlist: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0IjoxLCJpZCI6IjY4OTMxNTI3MjUzMTkwMjYwNiIsImlhdCI6MTYwMTkxOTQxMX0.VkVQJBlO655iA9U4S2TfodvkKp9U7lQMI8YLmVcm6rI',
+                bfd: '082c1c097b211985a68bcc6eca877896245505a36117274d575b23e9ac91955b430369207ee7da3b08a2879c8a6a494991316cf665f14bf8e2c9e17550f0c4c7',
+                bod: '96c8eb193567962e13566729d8651854'
+
+            },
+            clientLibrary: 'discord.js'
+        });
+
+        if (defaultPrefix != '##')
+            poster.startInterval();
+
 
         console.log("Ready!");
         exports.Client = Client;
@@ -520,12 +542,12 @@ connectDB.once('open', async function () {
 
     Client.on("message", async (message) => {
 
+
         if (message.author.bot) return;
 
         let user = cachedUsers.get(message.author.id);
 
         if (!user) {
-
 
             if (!message.member) {
                 user = await User.findOne({ id: message.author.id });
@@ -536,20 +558,22 @@ connectDB.once('open', async function () {
             else
                 user = await findUser(message.member);
 
-
-
             cachedUsers.set(user.id, user);
         }
 
+
+        let guild;
+        prefix = 'sa!';
+        exports.prefix = prefix;
+
         if (message.channel.type != 'dm') {
 
-            let guild = cachedGuilds.get(message.guild.id);
+            guild = cachedGuilds.get(message.guild.id);
             if (!guild) {
 
                 guild = await findGuild({ id: message.guild.id });
                 cachedGuilds.set(message.guild.id, guild);
             }
-
 
             if (!user.guilds.includes(message.guild.id)) {//Checking that the user exists in DB and they have a valid guild
                 await checkExistance(message.member);
@@ -607,10 +631,22 @@ connectDB.once('open', async function () {
 
 
             let index = user.guilds.indexOf(message.guild.id);
-            if (user.prefix[index] != "-1") prefix = user.prefix[index];
-            else if (guild.prefix != "-1") prefix = guild.prefix;
-            else if (user.defaultPrefix != "-1") prefix = user.defaultPrefix;
-            else prefix = defaultPrefix;
+            if (user.prefix[index] != "-1") {
+                prefix = user.prefix[index];
+                //  console.log('server prefix: ' + `${prefix}`)
+            }
+            else if (guild.prefix != "-1") {
+                prefix = guild.prefix;
+                //  console.log('server default prefix: ' + `${prefix}`)
+            }
+            else if (user.defaultPrefix != "-1") {
+                prefix = user.defaultPrefix;
+                //  console.log('default pre: ' + `${prefix}`)
+            }
+            else {
+                prefix = defaultPrefix;
+                //    console.log('none: ' + `${prefix}`)
+            }
 
         }
         else if (!user) {//Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
@@ -661,7 +697,7 @@ connectDB.once('open', async function () {
                 cachedUsers.set(user.id, user);
                 exports.cachedUsers = cachedUsers;
                 console.log(`Number of cached users: ${cachedUsers.size}`);
-
+                console.log(`guild:::: ${message.guild.name},,, user::::${message.author.username}`)
                 if (message.channel.type != 'dm') {
                     let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
                     if (!permission.has("SEND_MESSAGES"))
@@ -678,7 +714,34 @@ connectDB.once('open', async function () {
                     //add can't add custom emojis? and react to messages
                 }
 
+
+
+                //console.log(prefix)
+
+                if (defaultPrefix != '##') {
+                    let index = user.guilds.indexOf(message.guild.id);
+                    if (user.prefix[index] != "-1") {
+                        prefix = user.prefix[index];
+                        // console.log('server prefix: ' + `${prefix}`)
+                    }
+                    else if (guild.prefix != "-1") {
+                        prefix = guild.prefix;
+                        //  console.log('server default prefix: ' + `${prefix}`)
+                    }
+                    else if (user.defaultPrefix != "-1") {
+                        prefix = user.defaultPrefix;
+                        // console.log('default pre: ' + `${prefix}`)
+                    }
+                    else {
+                        prefix = defaultPrefix;
+                        //    console.log('none: ' + `${prefix}`)
+                    }
+                }
+                else
+                    prefix = '##';
                 let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
+                //  console.log('SECOND ATTEMPT DONE')
+
                 exports.prefix = prefix;
 
                 let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
@@ -705,9 +768,8 @@ connectDB.once('open', async function () {
 
             console.log(err)
             console.log(`prefix that broke: `, prefix)
-            console.log(`user that broke: `, user.id, user.displayName)
+            console.log(`user that broke: `, user.id, user.displayName, "----message----", message.content)
         }
-
     });
 
     Client.on('guildMemberAdd', async member => {
@@ -716,7 +778,8 @@ connectDB.once('open', async function () {
             console.log("bot joined server!");
         }
         else {
-
+            if (defaultPrefix == '##')
+                return 1
             checkExistance(member);
 
             let guild = cachedGuilds.get(member.guild.id);
@@ -724,6 +787,11 @@ connectDB.once('open', async function () {
 
                 guild = await findGuild({ id: member.guild.id });
                 cachedUsers.set(member.guild.id, guild);
+            }
+
+
+            if (guild.welcomeMessage != '-1') {
+                member.user.send(guild.welcomeMessage);
             }
 
             if (guild.welcomeMessages) {
@@ -739,6 +807,10 @@ connectDB.once('open', async function () {
     Client.on('guildMemberRemove', async member => {
 
         if (member.id != botID) {
+
+            if (defaultPrefix == '##')
+                return 1
+
             let user = await findUser(member);
             if (!user) return -1;
             let index = user.guilds.indexOf(member.guild.id);
@@ -748,7 +820,8 @@ connectDB.once('open', async function () {
     });
 
     Client.on("guildCreate", async guild => {
-
+        if (defaultPrefix == '##')
+            return 1
         let searchedGuild = await findGuild({ id: guild.id });
         if (!searchedGuild) await createGuild(guild);
 
@@ -756,11 +829,15 @@ connectDB.once('open', async function () {
     })
 
     Client.on("guildDelete", async guild => {
-
+        if (defaultPrefix == '##')
+            return 1
         console.log(`Bot has been kicked from ${guild.name}`);
     })
 
     Client.on("guildMemberUpdate", async function (oldMember, newMember) {
+
+        if (defaultPrefix == '##')
+            return 1
 
         let guild = await findGuild({ id: newMember.guild.id });
 
@@ -950,7 +1027,8 @@ function populateCommandMap() {
     commandMap.set(Commands[134].title.toUpperCase(), ADMINISTRATOR.unSetMusicRole)
     commandMap.set(Commands[135].title.toUpperCase(), ADMINISTRATOR.setChannelLinkThanker)
     commandMap.set(Commands[136].title.toUpperCase(), ADMINISTRATOR.unSetChannelLinkThanker)
-
+    commandMap.set(Commands[137].title.toUpperCase(), STATS.botStats)
+    commandMap.set(Commands[138].title.toUpperCase(), ADMINISTRATOR.welcomeMessage)
 
     exports.commandMap = commandMap;
 }
@@ -1270,8 +1348,26 @@ async function gameSuggestion(member) {//
 
 function findFurthestDate(date1, date2) {
 
-    let numberDate1 = Number(date1.substring(6)) * 365 + Number(date1.substring(3, 5)) * 30 + Number(date1.substring(0, 2));
-    let numberDate2 = Number(date2.substring(6)) * 365 + Number(date2.substring(3, 5)) * 30 + Number(date2.substring(0, 2));
+    let year1 = date1.lastIndexOf('-');
+    let dateDash1 = date1.indexOf('-');
+    let monthDash1 = date1.indexOf('-', dateDash1 + 1);
+    let numberDate1 = Number(date1.substring(year1 + 1)) * 365 + Number(date1.substring(dateDash1 + 1, monthDash1)) * 30 + Number(date1.substring(0, dateDash1));
+
+
+    let year2 = date2.lastIndexOf('-');
+    let dateDash2 = date2.indexOf('-');
+    let monthDash2 = date2.indexOf('-', dateDash2 + 1);
+    let numberDate2 = Number(date2.substring(year2 + 1)) * 365 + Number(date2.substring(dateDash2 + 1, monthDash2)) * 30 + Number(date2.substring(0, dateDash2));
+
+
+    if (numberDate1 == 0)
+        if (numberDate2 == 0)
+            return date1;
+        else
+            return date2;
+    else
+        if (numberDate2 == 0)
+            return date1;
 
     if (numberDate1 < numberDate2)
         return date1;
@@ -1280,32 +1376,16 @@ function findFurthestDate(date1, date2) {
 exports.findFurthestDate = findFurthestDate;
 
 
+
 async function updateMessage(message, user) {
 
     if (!user) return;
     let index = user.guilds.indexOf(message.guild.id);
 
-    if (index == -1) {
 
+    user.messages[index] = user.messages[index] + 1;
+    user.lastMessage[index] = getDate();
 
-        await checkExistance(message.member);
-        return updateMessage(message, (await findUser(message.member)));
-        // for (let x = 0; x < user.guilds.length; x++) {
-
-        //     if (isNaN(user.messages[x])) {
-
-        //         console.log(`on ${user.displayName} - #${i}`);
-        //         user.messages[x] = 0;
-        //         // User.findOneAndUpdate({ id: user.id }, { $set: { messages: user.messages } }).exec();
-        //         break;
-        //     }
-        // }
-    }
-    else {
-
-        user.messages[index] = user.messages[index] + 1;
-        user.lastMessage[index] = getDate();
-    }
 
     User.findOneAndUpdate({ id: user.id },
         {
@@ -1505,7 +1585,7 @@ async function checkExistance(member) {
         }
     }
     else {
-        console.log("The user doesnt exist. " + member.displayName);
+        //   console.log("The user doesnt exist. " + member.displayName);
         await createUser(member);
         return false;
     }
@@ -1985,38 +2065,128 @@ async function graphs() {
     }
 }
 
+
+
+const checkFix = async function (user) {
+
+    let issue = false;
+
+    for (let x = 0; x < user.guilds.length; x++) {
+
+        if (user.messages.length <= x) {
+            issue = true;
+
+            let diff = user.guilds.length - user.messages.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.messages.push(0)
+            }
+
+
+        }
+        if (user.lastMessage.length <= x) {
+            issue = true;
+
+
+            let diff = user.guilds.length - user.lastMessage.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.lastMessage.push('0-0-0')
+            }
+
+
+        }
+        if (user.timeTalked.length <= x) {
+            issue = true;
+
+            let diff = user.guilds.length - user.timeTalked.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.timeTalked.push(0)
+            }
+
+
+        }
+        if (user.lastTalked.length <= x) {
+            issue = true;
+            let diff = user.guilds.length - user.lastTalked.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.lastTalked.push('0-0-0')
+            }
+        }
+        if (user.timeAFK.length <= x) {
+            issue = true;
+            let diff = user.guilds.length - user.timeAFK.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.timeAFK.push(0)
+            }
+        }
+        if (user.dateJoined.length <= x) {
+            issue = true;
+            let diff = user.guilds.length - user.dateJoined.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.dateJoined.push(getDate())
+            }
+        }
+    }
+
+    if (issue) {
+        await User.findOneAndUpdate({ id: user.id }, {
+            $set: {
+                messages: user.messages,
+                lastMessage: user.lastMessage,
+                timeTalked: user.timeTalked,
+                lastTalked: user.lastTalked,
+                timeAFK: user.timeAFK,
+                dateJoined: user.dateJoined
+            }
+        });
+        return user;
+    }
+    return user;
+}
+
+const performFix = async function (user) {
+
+    // for (let x = 0; x < user.guilds.length; x++) {
+
+    //     if (user.messages.length <= x)
+    // }
+}
+
 async function updateAll() {
 
     // let users = await getUsers();
 
-    // let i = 0;
+    // // let i = 0;
 
 
-    // let userMap = new Map();
 
-    // console.log("going through em all")
+
+
+    // // let userMap = new Map();
+
+    // // console.log("going through em all")
     // for (let user of users) {
 
-    //     for (let i = 0; i < user.guilds.length; i++) {
+    //     let messy = user.dateJoined.find(function (val) {
+    //         if (typeof val === 'string' || val instanceof String)
+    //             return false
+    //         else
+    //             return true;
+    //     })
 
-    //         let guildy = user.guilds[i];
+    //     if (messy)
+    //         console.log(user)
 
-    //         if (!user.kicked[i])
-    //             continue;
-    //         if (!userMap.get(guildy)) {
-    //             userMap.set(guildy, 1);
-    //             continue;
-    //         }
 
-    //         let val = userMap.get(guildy) + 1;
-
-    //         userMap.set(guildy, val);
-
-    //     }
     // }//for user loop
 
 
-    // console.log(userMap)
+    // // console.log(userMap)
 
 
     // console.log('finished')
@@ -2045,7 +2215,7 @@ exports.sleep = sleep;
 
 /**
  * 
-
+ 
  * @param {*} emoji -> If exists, don't delete the message
  */
 async function selfDestructMessage(message, text, seconds, emoji) {

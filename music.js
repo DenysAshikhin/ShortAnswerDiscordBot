@@ -24,6 +24,11 @@ var activeSkips = new Map();
 var lastSkip = new Map();
 var needle = require('needle');
 
+
+const COOKIE = 'VISITOR_INFO1_LIVE=Xju2lyow_tE; LOGIN_INFO=AFmmF2swRQIhAMnGj7ivJT4pJ3B5iza5kvrrOH6zJQd05M0zz09S5hx3AiAGxqjVjkI_jKcD0xsb_k_GohzJRiQ6iOkBbLmz_MY3nQ:QUQ3MjNmelVfSGZpMF9uQnFLcnpVRDVFRklfOXdqa0E5TEFEYklsNE1Sc0ozVllHczNZY20zckREZlQ4Z2Mxa3dQMlBKVGw2SWR3MkFob1QxU05wTjhVa2xKdk5ORl9UMVlTUlVLRTZvTDZFQTdUTEpFNGVFMEZGZEFFNUtHRllpQzJES25QTk53SDZQVWIxOEhOekp4NXhxTDhPUFpDa05FVGdUdzJJMmRlQWQzSFF3b1R2akI4; _gcl_au=1.1.1003033667.1597286045; CONSENT=YES+CA.en+202008; HSID=A3MkSfyBS6rNjr9JQ; SSID=AYGthpza-pKJeWssz; APISID=shKKYsGhcHwb7K4r/ApR87ByKdcT2X9sWq; SAPISID=J_gsP1sPRsCyUhFF/A1zyzcCJQKLcxqlvp; __Secure-3PAPISID=J_gsP1sPRsCyUhFF/A1zyzcCJQKLcxqlvp; SID=1wfkKTz4LVxZhYav8OXlShOhwzPc0vBQNm3uHQdFor1wBDT6l7sqfqHYGTeiRjpYKAfwNA.; __Secure-3PSID=1wfkKTz4LVxZhYav8OXlShOhwzPc0vBQNm3uHQdFor1wBDT6WPUbncrSqdaGJiGfkWe7mg.; PREF=al=en&volume=15&library_tab_browse_id=FEmusic_liked_playlists&f5=30000; YSC=Vgd4LkwDis8; wide=1; SIDCC=AJi4QfGDRw_tkpfdE4SYiR6Vste5DkHZB8g_3WLcp-h9_mlUpHUcPiTunDzAQZ6IcHWWm4JIxB-z; __Secure-3PSIDCC=AJi4QfHNZzBnSOJ7jspqSy5ARsL8QVVvQqwVZe8PwpUOa_j11wzdSCUngBguFM_qzk8IU6HhoPLr'
+
+
+
 async function authoriseSpotify() {
 
     await new Promise(resolve => setTimeout(resolve, 3000));
@@ -475,10 +480,14 @@ async function volume(message, params, user, emoji) {
     if (args > 100) return message.channel.send("The max volume is 100!");
 
     let guildQueue = queue.get(message.guild.id);
+
     if (guildQueue) {
+
+        if (!guildQueue.connection.channel.members.get(user.id))
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
+
         guildQueue.dispatcher.setVolumeLogarithmic(args / 100);
     }
-
 }
 exports.volume = volume;
 
@@ -490,6 +499,8 @@ async function pause(message, params, user) {
 
     let guildQueue = queue.get(message.guild.id);
     if (guildQueue) {
+        if (!guildQueue.connection.channel.members.get(user.id))
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
         let song = guildQueue.songs[guildQueue.index];
         if (!song.paused) {
             song.paused = new Date();
@@ -511,7 +522,8 @@ async function resume(message, params, user) {
     let guildQueue = queue.get(message.guild.id);
 
     if (guildQueue) {
-
+        if (!guildQueue.connection.channel.members.get(user.id))
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
         let song = guildQueue.songs[guildQueue.index];
         if (song.paused) {
 
@@ -539,7 +551,8 @@ async function skip(message, params, user, emoji) {
     if (Number(params) == 0) { MAIN.selfDestructMessage(message, "0 is not a valid number!", 3, emoji); return -1; }
 
     if (guildQueue) {
-
+        if (!guildQueue.connection.channel.members.get(user.id))
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
         if (!skipy) lastSkip.set(message.guild.id, new Date());
         if (((new Date()) - skipy) <= 1000) {
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -579,7 +592,8 @@ async function reverse(message, params, user, emoji) {
     if (Number(params) == 0) { MAIN.selfDestructMessage(message, "0 is not a valid number!", 3, emoji); return -1; }
 
     if (guildQueue) {
-
+        if (!guildQueue.connection.channel.members.get(user.id))
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
         if ((args == 0) && (guildQueue.index != 0))
             guildQueue.index--;
         else if (args == 0) {
@@ -610,7 +624,9 @@ async function stop(message, params, user) {
 
     if (temp) {
         //queue.get(message.guild.id).dispatcher.destroy();
-
+        if (user.id != -1)
+            if (!temp.connection.channel.members.get(user.id))
+                return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
         temp.collector.stop();
         await temp.voiceChannel.leave();
         queue.delete(message.guild.id);
@@ -629,7 +645,8 @@ async function forward(message, params, user) {
     let guildQueue = queue.get(message.guild.id);
 
     if (guildQueue) {
-
+        if (!guildQueue.connection.channel.members.get(user.id))
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
         let song = guildQueue.songs[guildQueue.index];
 
         if (Array.isArray(params)) params = params[0];
@@ -674,7 +691,8 @@ async function rewind(message, params, user) {
     let song = guildQueue.songs[guildQueue.index];
 
     if (guildQueue) {
-
+        if (!guildQueue.connection.channel.members.get(user.id))
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
         if (Array.isArray(params)) params = params[0];
         params = params.trim();
         if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid rewind format!");
@@ -714,7 +732,8 @@ async function seek(message, params, user) {
 
 
     if (guildQueue) {
-
+        if (!guildQueue.connection.channel.members.get(user.id))
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
         let song = guildQueue.songs[guildQueue.index];
         if (Array.isArray(params)) params = params[0];
         if (!/^[:0-9]+$/.test(params)) return message.channel.send("You have entered an invalid seek format!");
@@ -762,7 +781,8 @@ async function goTo(message, params, user) {
 
     let guildQueue = queue.get(message.guild.id);
     if (!guildQueue) return message.channel.send("There needs to be a song playing!");
-
+    if (!guildQueue.connection.channel.members.get(user.id))
+        return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
     const args = Math.floor(Number(message.content.split(" ").slice(1).join(" ")));
 
     if (!args || isNaN(args)) return message.channel.send("You have to provide the number of the song to go to!");
@@ -786,7 +806,8 @@ async function repeat(message, params, user, emoji) {
 
     let guildQueue = queue.get(message.guild.id);
 
-
+    if (!guildQueue.connection.channel.members.get(user.id))
+        return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
 
     if (emoji) {
         if (emoji == -1)
@@ -862,6 +883,13 @@ async function play(message, params, user) {
 
     if (!params) return message.reply("You need to provide a song to play!");
     let serverQueue = queue.get(message.guild.id);
+
+    if (serverQueue)
+        if (serverQueue.connection)
+            if (serverQueue.connectionchannel)
+                if (!serverQueue.connection.channel.members.get(user.id))
+                    return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
+
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
     if (!args) return message.channel.send("You have to provide a link or title of song to play!");
 
@@ -922,7 +950,18 @@ async function play(message, params, user) {
         //  console.log((await spotifyPlaylist(message, args, user)));
     }
     else if (ytdl.validateURL(args)) {
-        songInfo = await ytdl.getInfo(args, { quality: 'highestaudio' });
+        songInfo = await ytdl.getInfo(args, {
+            requestOptions: {
+                headers: {
+                    cookie: COOKIE,
+                    // Optional. If not given, ytdl-core will try to find it.
+                    // You can find this by going to a video's watch page, viewing the source,
+                    // and searching for "ID_TOKEN".
+                    // 'x-youtube-identity-token': 1324,
+                },
+            },
+            quality: 'highestaudio'
+        });
 
         //console.log(songInfo)
         if (songInfo.videoDetails.lengthSeconds) {
@@ -1085,8 +1124,14 @@ async function refreshEmojiControls() {
     for (let messy of queue.values()) {
         if (messy.collector) {
             messy.collector.resetTimer();
-            messy.message.edit("```md\nNow Playing" + ` Song ${messy.index + 1}/${messy.songs.length}` + "\n#" + messy.songs[messy.index].title + "\n[" + MAIN.timeConvert(await currentSong(messy.message, null, null, true))
-                + "](" + MAIN.timeConvert(Math.floor(messy.songs[messy.index].duration)) + ")```");
+            try {
+                messy.message.edit("```md\nNow Playing" + ` Song ${messy.index + 1}/${messy.songs.length}` + "\n#" + messy.songs[messy.index].title + "\n[" + MAIN.timeConvert(await currentSong(messy.message, null, null, true))
+                    + "](" + MAIN.timeConvert(Math.floor(messy.songs[messy.index].duration)) + ")```");
+            }
+            catch (err) {
+                console.log("Error in refresh Emoji controls in music");
+                fs.promises.writeFile(`logs/${uniqid()}.json`, "Error in refresh Emoji controls in music" + JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+            }
         }
     }
 }
@@ -1103,6 +1148,11 @@ async function checkControlsEmoji(message) {
     collector.on('collect', async function (emoji, user) {
 
         let exactQueue = queue.get(emoji.message.guild.id);
+
+        if (!exactQueue.connection.channel.members.get(user.id)) {
+            emoji.users.remove(user);
+            return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
+        }
         // if (user.bot) {
         //     emoji.users.remove(user);
         //     return 111;
@@ -1204,7 +1254,7 @@ async function playSong(guild, sonG, skip, message) {
 
     if (!song) {
         message.channel.send(`No more songs queued, leaving!`);
-        stop(message);
+        stop(message, null, { id: -1 });
         return;
     }
 
@@ -1261,6 +1311,15 @@ async function playSong(guild, sonG, skip, message) {
         //Create a seperate read stream solely for buffering the audio so that it doesn't hold up the previous write stream
 
         let streamResolve = await ytdl(song.url, {
+            requestOptions: {
+                headers: {
+                    cookie: COOKIE,
+                    // Optional. If not given, ytdl-core will try to find it.
+                    // You can find this by going to a video's watch page, viewing the source,
+                    // and searching for "ID_TOKEN".
+                    // 'x-youtube-identity-token': 1324,
+                },
+            },
             format: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 }
         });
         // streamResolve.on('info', (info) => { console.log(); console.log('yeeeee') })
@@ -1393,7 +1452,18 @@ async function cacheSong(song, GUILD, MESSAGE) {
         "playabilityStatus": {
           "status": "OK
             */
-            let youtubeResolve = await downloadYTDL(song.url, { filter: 'audioonly', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 } });
+            let youtubeResolve = await downloadYTDL(song.url, {
+                requestOptions: {
+                    headers: {
+                        cookie: COOKIE,
+                        // Optional. If not given, ytdl-core will try to find it.
+                        // You can find this by going to a video's watch page, viewing the source,
+                        // and searching for "ID_TOKEN".
+                        // 'x-youtube-identity-token': 1324,
+                    },
+                },
+                filter: 'audioonly', highWaterMark: 1 << 25, requestOptions: { maxRedirects: 4 }
+            });
 
 
             let writeStream = fs.createWriteStream(tempAudio);
@@ -1435,6 +1505,10 @@ async function cacheSong(song, GUILD, MESSAGE) {
             });
 
             youtubeResolve.on('progress', (chunkLength, downloaded, total) => {
+
+                if (!currentSongsQueue.songs[currentSongsQueue.index])
+                    return 1;
+
                 currentSongsQueue.songs[currentSongsQueue.index].totalSize = (total - 50000);
                 const percent = downloaded / total;
                 readline.cursorTo(process.stdout, 0);
@@ -1519,7 +1593,18 @@ async function addSong(message, params, user) {
             song = serverQueue.songs[serverQueue.index];
         }
         else if (ytdl.validateURL(params)) {
-            songInfo = await ytdl.getInfo(params, { quality: 'highestaudio' });
+            songInfo = await ytdl.getInfo(params, {
+                requestOptions: {
+                    headers: {
+                        cookie: COOKIE,
+                        // Optional. If not given, ytdl-core will try to find it.
+                        // You can find this by going to a video's watch page, viewing the source,
+                        // and searching for "ID_TOKEN".
+                        // 'x-youtube-identity-token': 1324,
+                    },
+                },
+                quality: 'highestaudio'
+            });
 
             if (songInfo.videoDetails.lengthSeconds) {
                 //On version 3 its info.videoDetails.availableCountries
@@ -1683,6 +1768,12 @@ async function playUserPlayList(message, params, user) {
 
     if (user.playlists.length == 0) return message.channel.send("You don't have any playlists! Create one first by typing *" + prefix + "createPlaylist*");
     let serverQueue = queue.get(message.guild.id);
+
+    if (serverQueue)
+        if (serverQueue.connection)
+            if (serverQueue.connection.channel)
+                if (!serverQueue.connection.channel.members.get(user.id))
+                    return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
 
     const voiceChannel = message.member.voice.channel;
 

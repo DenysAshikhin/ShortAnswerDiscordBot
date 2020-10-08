@@ -76,7 +76,7 @@ const channelLinkThanker = async function (message, params, user) {
 
     const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
 
-    let link = false;
+    let link = 0;
 
     for (let string of args)
         if (isUrl(string)) {
@@ -85,18 +85,18 @@ const channelLinkThanker = async function (message, params, user) {
                 .catch(err => { console.log("caught thanker error link thanker") });
             if (result) {
 
-                link = true;
-                break;
+                link++;
             }
         }
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
     if (link) {
+
         if (guild.thankerAutoRep) {
 
-            changeRep(user, message.guild.id, 1, message);
+            changeRep(user, message.guild.id, link, message);
         }
-        return message.channel.send(channelThankerMessageConvert(message.author.id, `link`, guild));
+        return message.channel.send(channelThankerMessageConvert(message.author.id, `link`, guild, link));
     }
 }
 exports.channelLinkThanker = channelLinkThanker;
@@ -209,7 +209,8 @@ const channelThankerMessage = async function (message, params, user) {
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
 
-    if (!guild.channelThanker.includes(message.channel.id)) {
+
+    if ((!guild.channelImageThanker.includes(message.channel.id)) && (!guild.channelLinkThanker.includes(message.channel.id))) {
 
         return message.channel.send("This channel is not being monitered for links/images!");
     }
@@ -227,18 +228,26 @@ const channelThankerMessage = async function (message, params, user) {
     MAIN.cachedGuilds.set(guild.id, guild);
     Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelThankerMessage: guild.channelThankerMessage } }).exec();
     await message.channel.send("Updated channel message to:");
-    return message.channel.send(channelThankerMessageConvert(message.author.id, `link and/or image`, guild));
+    return message.channel.send(channelThankerMessageConvert(message.author.id, `link and/or image/video`, guild));
 }
 exports.channelThankerMessage = channelThankerMessage;
 
-const channelThankerMessageConvert = function (userID, message, guild) {
+const channelThankerMessageConvert = function (userID, message, guild, amount) {
 
-    let msg = `Thanks for the [] <>!`;
+    let msg = amount ? `Thanks for the [] <>! ()` : `Thanks for the [] <>! ()`;
+
+
 
     if (guild.channelThankerMessage.length > 0)
-        return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message);
+        if (amount)
+            return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${amount} rep!`)
+        else
+            return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${1} rep!`)
 
-    return msg.replace('<>', MAIN.mention(userID)).replace('[]', message);
+    if (amount)
+        return msg.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${amount} rep!`)
+    else
+        return msg.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${1} rep!`)
 }
 
 async function initialiseUsers(message, params) {
@@ -1445,7 +1454,6 @@ const changeRep = async function (user, guildID, amount, message) {
         user.reps.set(guildID, Number(rep) + Number(amount));
 
         checkRepThreshold(user.id, Number(rep) + Number(amount), dbGuild, actualGuild);
-
         User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
     }
     return user.reps.get(guildID);
@@ -1515,9 +1523,31 @@ const checkRepThreshold = async function (userID, value, dbGuild, actualGuild) {
     }
 }
 
+
+const welcomeMessage = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set the welcome message for new users!");
+
+    const args = message.content.split(" ").slice(1).join(" ").trim();
+
+    if (!args) {
+
+        message.channel.send("You must provide a message to send to new members, or **-1** to disable this feature.");
+    }
+
+    let guild = MAIN.cachedGuilds.get(message.guild.id);
+    guild.welcomeMessage = args;
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { welcomeMessage: guild.welcomeMessage } }).exec();
+    message.channel.send(`New users will receive the following message:\n${args}`);
+}
+exports.welcomeMessage = welcomeMessage;
+
 const topRep = async function (message, params, user) {
 
-    let users = await User.find({ guilds: message.guild.id });
 
     let args = Number(message.content.split(" ").slice(1).join(" ").trim());
 
@@ -1525,51 +1555,28 @@ const topRep = async function (message, params, user) {
         return message.channel.send(`You have provided an invalid number of top users to display! Or don't pass any value for a default top 10`);
     }
 
-    let finalArr = [];
-
-    let members = await message.guild.members.fetch();
-
-    for (let user of users) {
-
-        let repy = await changeRep(user, message.guild.id, 0, message);
-
-        try {
-            members.get(user.id).displayName
-        }
-        catch (err) {
-            continue;
-        }
-
-        finalArr.push({
-
-            displayName: members.get(user.id).displayName,
-            rep: repy
-        });
-    }
-
-    finalArr = finalArr.filter(function (value) { return value.rep > 0 });
-    finalArr.sort(function (a, b) { return b.rep - a.rep });
-
-    let finalString = finalArr.reduce(function (acc, current, index) {
-        // acc.push({ value: `${index + 1}) ${current.displayName} has ${current.rep} rep` });
-        acc.push({ value: `${current.displayName} has ${current.rep} rep` });
-        return acc;
-    }, []);
-
-
-
-    if (!finalString)
-        return message.channel.send("No one in this server has above 0 rep!");
-
     let limit = args ? args : 10;
-    if (limit > finalString.length)
-        limit = finalString.length;
 
-    let originalLength = finalString.length;
 
-    finalString.length = limit;
+    let parsed = await MAIN.sendToServer({ command: 'topRep', params: [message.guild.id, message.channel.id, limit] });
 
-    MAIN.prettyEmbed(message, finalString, { modifier: 'xl', title: `Below are the top ${limit} rep'ed users of ${originalLength} who have > 0 rep!` });
+    // if (parsed.status) {
+    //     if (parsed.status == -1) {
+    //         message.channel.send("I could not find that player+platform combination, try again?");
+    //         result = -1;
+    //     }
+    //     else {
+    //         message.channel.send("Such a ServerChannel - Player pair already exists!");
+    //         result = -2;
+    //     }
+    // }
+    // else {
+    //     Guild.findOneAndUpdate({ id: guild.id }, { $set: { RLTracker: parsed.RLTracker } }, function (err, doc, res) { if (err) console.log(err) });
+    //     message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
+    //     status = 1;
+    // }
+
+    // MAIN.prettyEmbed(message, finalString, { modifier: 'xl', title: `Below are the top ${limit} rep'ed users of ${originalLength} who have > 0 rep!` });
 }
 exports.topRep = topRep;
 
@@ -1577,6 +1584,24 @@ const identifyThanks = function (message) {
 
     if ((message.mentions.members.size > 3) || (message.mentions.members.size == 0))
         return false;
+
+    let quoteCheck = message.content.split('\n');
+
+    let messageContent = message.content;
+    if (quoteCheck.length > 1) {
+
+        for (let i = 0; i < quoteCheck.length; i++) {
+            let check = quoteCheck[i];
+            if (check[0] == '>')
+                if (check[1] == ' ')
+                    quoteCheck[i] = -1;
+        }
+
+        while (quoteCheck.includes(-1))
+            quoteCheck.splice(quoteCheck.indexOf(-1), 1)
+
+        messageContent = quoteCheck.join(' ').toLowerCase();
+    }
 
     let thanks = [
         'thanks', 'thank you', ' ty ', 'tyvm', 'thx', 'tank u', 'thank u', 'thank yo', 'thank yu', 'tank yu'
@@ -1589,7 +1614,7 @@ const identifyThanks = function (message) {
 
     for (let string of thanks) {
 
-        if (message.content.toLowerCase().includes(string))
+        if (messageContent.includes(string))
             return true;
     }
     return false;

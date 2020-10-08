@@ -4,6 +4,7 @@ const config = require('./config.json');
 const leagueScraper = require('./Scrapers/leagueLegends.js');
 const rocketScraper = require('./Scrapers/RocketLeague.js')
 const twitchLogic = require('./serverLogic/twitchLogic');
+const statLogic = require('./serverLogic/statLogic.js');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
 const http = require("http");
@@ -23,6 +24,7 @@ const main = require('ytsr');
 const { create } = require('domain');
 const { isObject } = require('util');
 const myIntents = new Intents();
+//myIntents.add('GUILDS');
 myIntents.add('GUILDS', 'GUILD_MEMBERS');
 const client = new Client({ ws: { intents: myIntents } });
 const logID = '712000077295517796';
@@ -146,6 +148,8 @@ var commandMap = new Map();
     commandMap.set('check_user_twitch_streams', twitchLogic.checkUsersTwitchStreams);
     commandMap.set('rocket_league_ranks', rocketScraper.rocketLeagueRanks);
     commandMap.set('rocket_league_tracker', rocketScraper.RLTracker);
+    commandMap.set('topRep', statLogic.topRep);
+    commandMap.set('topStats', statLogic.topStats);
 }
 
 var workQueue = {
@@ -289,7 +293,34 @@ exports.checkExistance = checkExistance;
 
 
 
+function findFurthestDate(date1, date2) {
 
+    let year1 = date1.lastIndexOf('-');
+    let dateDash1 = date1.indexOf('-');
+    let monthDash1 = date1.indexOf('-', dateDash1 + 1);
+    let numberDate1 = Number(date1.substring(year1 + 1)) * 365 + Number(date1.substring(dateDash1 + 1, monthDash1)) * 30 + Number(date1.substring(0, dateDash1));
+
+
+    let year2 = date2.lastIndexOf('-');
+    let dateDash2 = date2.indexOf('-');
+    let monthDash2 = date2.indexOf('-', dateDash2 + 1);
+    let numberDate2 = Number(date2.substring(year2 + 1)) * 365 + Number(date2.substring(dateDash2 + 1, monthDash2)) * 30 + Number(date2.substring(0, dateDash2));
+
+
+    if (numberDate1 == 0)
+        if (numberDate2 == 0)
+            return date1;
+        else
+            return date2;
+    else
+        if (numberDate2 == 0)
+            return date1;
+
+    if (numberDate1 < numberDate2)
+        return date1;
+    return date2;
+}
+exports.findFurthestDate = findFurthestDate;
 
 
 async function countTalk() {
@@ -803,7 +834,7 @@ function getDate() {
 exports.getDate = getDate;
 
 
-const getUsers = async function () {
+const getUsers = async function (params) {
     try {
         if (params)
             return await User.find(params);
@@ -852,32 +883,32 @@ const getGuilds = async function () {
 }
 exports.getGuilds = getGuilds;
 
-const server = net.createServer(async (socket) => {
+// const server = net.createServer(async (socket) => {
 
-    socket.on('data', async (data) => {
-        let dataParsed = JSON.parse(data.toString());
-        queue(commandMap.get(dataParsed.command), dataParsed.params, socket, true);
-        if (dataParsed.kill)
-            socket.destroy();
+//     socket.on('data', async (data) => {
+//         let dataParsed = JSON.parse(data.toString());
+//         queue(commandMap.get(dataParsed.command), dataParsed.params, socket, true);
+//         if (dataParsed.kill)
+//             socket.destroy();
 
-        // let result = await commandMap.get(dataParsed.command).apply(null, [dataParsed.params, socket]);
-        //     socket.write(JSON.stringify({ status: result }));
+//         // let result = await commandMap.get(dataParsed.command).apply(null, [dataParsed.params, socket]);
+//         //     socket.write(JSON.stringify({ status: result }));
 
-    })
-    socket.on('error', (err) => {
-        // Handle errors here.
-        // console.log(err);
-        // console.log("Caught socket error");
-    });
-    socket.on('close', (had_error) => {
-        // console.log("socket closed");
-        // console.log(had_error)
-        socket.destroy();
-        // console.log("destroyed the closed socket?");
-    })
-});
+//     })
+//     socket.on('error', (err) => {
+//         // Handle errors here.
+//         // console.log(err);
+//         // console.log("Caught socket error");
+//     });
+//     socket.on('close', (had_error) => {
+//         // console.log("socket closed");
+//         // console.log(had_error)
+//         socket.destroy();
+//         // console.log("destroyed the closed socket?");
+//     })
+// });
 
-server.on('error', (err) => { console.log("Caught server error") })
+// server.on('error', (err) => { console.log("Caught server error") })
 
 // Grab an arbitrary unused PORT.
 //'45.63.17.228'
@@ -978,10 +1009,6 @@ connectDB.once('open', async function () {
         checkTwitch();
         //setInterval(createBackUp, 6 * 60 * 60 * 1000);
     });
-    client.on('message', async (message) => {
-
-        //  console.log(message.content);
-    })
 });
 
 var county = 0;
@@ -1013,16 +1040,25 @@ const checkRL = async function () {
 process.on('unhandledRejection', (err, promise) => {
 
 
-    console.log("Caught unhandledRejectionWarning")
-    fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    if (defaultPrefix == '##') {
+        console.log(err)
+    }
+    else {
 
+        console.log("Caught unhandledRejectionWarning")
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    }
 
 });
 
 process.on('unhandledException', (err, p) => {
 
-    console.log("Caught unhandledException")
-    fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-
+    if (defaultPrefix != '##') {
+        console.log("Caught unhandledException")
+        fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    }
+    else {
+        console.log(err)
+    }
 
 });

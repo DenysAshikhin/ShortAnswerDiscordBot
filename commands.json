@@ -183,9 +183,10 @@
     },
     {
         "title": "delete",
-        "explanation": "Deletes [number] of the last messages. You and the bot must have the *Manage_Messages* permission in the channel you wish to run the command.",
+        "explanation": "Deletes [number] of the last messages. You and the bot must have the *Manage_Messages* permission in the channel you wish to run the command. Can optionally provide a true/false after the number to indicate for the bot to delete only its own messages",
         "example": [
-            "1) delete 4"
+            "1) delete 4",
+            "2) delete 10, true"
         ],
         "subsection": [
             8
@@ -1399,9 +1400,9 @@
     },
     {
         "title": "channelThankerMessage",
-        "explanation": "Admin only command that sets what the thank message should be. Indicate where/if a user should be @mentioned with <>. Inidicate where the message should say image/link/(image and link) with [].",
+        "explanation": "Admin only command that sets what the thank message should be. Indicate where/if a user should be @mentioned with <>. Inidicate where the message should say image/link/(image and link) with []. Inidicate where the bot should say +x rep! with (). For example, **That's a nice [] you got there <>, ()** would be converted to **That's a nice link you got there @TheLastSpark, +1 rep!",
         "example": [
-            "1) channelThankerMessage Thanks for the [] <>!",
+            "1) channelThankerMessage Thanks for the [] <>! ()",
             "2) channelThankerMessage Nice []!",
             "3) channelThankerMessage <> that's a nice []!"
         ],
@@ -1651,6 +1652,31 @@
         "subsection": [
             3,
             5
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "botStats",
+        "explanation": "Shows various information about the bot!",
+        "example": [
+            "1) botStats"
+        ],
+        "subsection": [
+            2,
+            8
+        ],
+        "category": "**Other**"
+    },
+    {
+        "title": "welcomeMessage",
+        "explanation": "Sets the message to DM to any new members joining the server. If set to **-1**, no message will be sent.",
+        "example": [
+            "1) welcomeMessage Welcome to Short Answer Bot's server! Please make sure to react in #role-assignment to get access to the right channels!",
+            "2) welcomeMessage -1"
+        ],
+        "subsection": [
+            5,
+            12
         ],
         "category": "**Other**"
     }

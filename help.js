@@ -99,46 +99,46 @@ const generalHelpMessage = async function (message, tag, title, user) {
             description += `Here you can find all the commands pertaining to organizing or summoning people to play games. Or contribute to current faction battles!`;
     }
 
-    description += "```md\n" + `You can find out more information about any command by typing <${prefix}help Command>` + "```";
+    description += "```md\n" + `You can find out more information about any command by typing <${MAIN.prefix}help Command>` + "```";
 
 
     if (!user.completedTutorials.includes(tag))
         switch (tag) {
             case 1:
-                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}gameTutorial` + "```";
                 break;
             case 2:
-                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}statsTutorial` + "```";
+                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}statsTutorial` + "```";
                 break;
             case 3:
-                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}miscellaneousTutorial` + "```";
+                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}miscellaneousTutorial` + "```";
                 break;
             case 4:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}musicTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}musicTutorial` + "```";
                 break;
             case 5:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}administratorTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}administratorTutorial` + "```";
                 break;
             case 6:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}qofTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}qofTutorial` + "```";
                 break;
             case 7:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}helpTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}helpTutorial` + "```";
                 break;
             case 8:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}generalTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}generalTutorial` + "```";
                 break;
             case 9:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}tutorialsTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}tutorialsTutorial` + "```";
                 break;
             case 10:
-                //    description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}gameTutorial` + "```";
+                //    description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}gameTutorial` + "```";
                 break;
             case 11:
-                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}twitchTutorial` + "```";
+                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}twitchTutorial` + "```";
                 break;
             case 12:
-                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${prefix}twitchTutorial` + "```";
+                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}twitchTutorial` + "```";
                 break;
         }
 
@@ -166,12 +166,12 @@ function generalHelp(message, params, user) {
 
     if (!args) {
 
-        let description = "```md\n" + `You can see a list of commands under each category by typing <${prefix}helpCommand> I.E.:\n` +
-            `1) <${prefix}helpMusic>` + "```";
+        let description = "```md\n" + `You can see a list of commands under each category by typing <${MAIN.prefix}helpCommand> I.E.:\n` +
+            `1) <${MAIN.prefix}helpMusic>` + "```";
 
         if (!user.completedTutorials.includes(100))
             description += "```fix\n" + `You have not completed the introductory tutorial which would teach you the basics of using the bot,`
-                + ` you can do so by typing ${prefix}introTutorial` + "```";
+                + ` you can do so by typing ${MAIN.prefix}introTutorial` + "```";
 
         return MAIN.prettyEmbed(message,
             [

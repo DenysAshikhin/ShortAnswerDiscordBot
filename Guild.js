@@ -80,6 +80,10 @@ const GuildSchema = new mongoose.Schema({
     musicRole: {
         type: String,
         default: ''
+    },
+    welcomeMessage: {
+        type: String,
+        default: '-1'
     }
 });
 
