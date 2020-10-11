@@ -99,11 +99,19 @@ async function checkGuildTwitchStreams(guilds) {
                             else
                                 GUILD1.twitchNotifications.push([stream._data.user_id, stream._data.id]);
 
-                            sendArray.push({
-                                twitchNotifications: GUILD1.twitchNotifications, guildID: GUILD1.id,
-                                alertMessage: `@here \n${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`,
-                                channelID: channel[1]
-                            });
+
+                            if (GUILD1.twitchHERE)
+                                sendArray.push({
+                                    twitchNotifications: GUILD1.twitchNotifications, guildID: GUILD1.id,
+                                    alertMessage: `@here \n${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name.split(' ').join('').trim()}`,
+                                    channelID: channel[1]
+                                });
+                            else
+                                sendArray.push({
+                                    twitchNotifications: GUILD1.twitchNotifications, guildID: GUILD1.id,
+                                    alertMessage: `${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name.split(' ').join('').trim()}`,
+                                    channelID: channel[1]
+                                });
                         }
                     }
                 });
@@ -163,7 +171,7 @@ async function checkUsersTwitchStreams(users) {
 
                             sendArray.push({
                                 twitchNotifications: USER.twitchNotifications, userID: USER.id,
-                                alertMessage: `${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name}`
+                                alertMessage: `${stream._data.user_name} is live at: https://www.twitch.tv/${stream._data.user_name.split(' ').join('').trim()}`
                             });
                         }
                     }
@@ -356,7 +364,7 @@ async function isStreamLive(id) {
 
 async function getTwitchChannel(streamer) {
     try {
-        const user = await twitchClient.helix.users.getUserByName(streamer.trim());
+        const user = await twitchClient.helix.users.getUserByName(streamers.split(' ').join('').trim());
         return user;
     }
     catch (err) {

@@ -1042,25 +1042,18 @@ const checkRL = async function () {
 process.on('unhandledRejection', (err, promise) => {
 
 
-    if (defaultPrefix == '##') {
-        console.log(err)
-    }
-    else {
-
+ 
         console.log("Caught unhandledRejectionWarning")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-    }
+
 
 });
 
 process.on('unhandledException', (err, p) => {
 
-    if (defaultPrefix != '##') {
+  
         console.log("Caught unhandledException")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-    }
-    else {
-        console.log(err)
-    }
+
 
 });

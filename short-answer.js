@@ -482,8 +482,6 @@ const sendToServer = async function (data) {
         { headers: { 'payload': encrypted.content, 'tag': encrypted.tag.toString('base64'), 'iv': encrypted.iv.toString('base64') } });
 
 
-console.log(resp.raw.toString('utf8'))
-
     let payload = JSON.parse(resp.raw.toString('utf8'));
     let decryptedPayload = decrypt({ content: payload.payload, tag: Buffer.from(payload.tag, 'base64'), iv: Buffer.from(payload.iv, 'base64') })
 
@@ -595,32 +593,62 @@ connectDB.once('open', async function () {
 
             if (guild.autoRep) {
 
-                if (ADMINISTRATOR.identifyThanks(message)) {
+                let allowedThanks = true;
+                let guildMember = message.member;
+                for (let roleID of guild.blacklistedGiveRepRoles) {
 
-                    let memberList = '';
-
-                    for (let userID of message.mentions.members.values()) {
-
-                        if (userID.id != message.author.id) {
-
-                            let newUser = await findUser(userID);
-
-                            try {
-                                let result = await ADMINISTRATOR.changeRep(newUser, message.guild.id, 1, message);
-                            }
-                            catch (err) {
-                                console.log(err)
-                                console.log('error thanking')
-                                continue;
-                            }
-
-                            memberList += mention(newUser.id) + ' ';
-                        }
+                    if (guildMember.roles.cache.keyArray().includes(roleID)) {
+                        // message.channel.send(`${MAIN.mention(guildMember.id)} is blacklisted from receiving rep!`);
+                        //throw ('Blacklisted boi')
+                        allowedThanks = false;
                     }
 
-                    if (memberList.length > 1)
-                        message.channel.send(`Gave +1 rep to ${memberList}`);
                 }
+
+
+                if (allowedThanks)
+
+                    if (ADMINISTRATOR.identifyThanks(message)) {
+
+                        let quoted = [];
+                        let quoteCheck = message.content.split('\n');
+                        if (quoteCheck.length > 1) {
+
+                            for (let i = 0; i < quoteCheck.length; i++) {
+                                let check = quoteCheck[i];
+                                if (check[0] == '>')
+                                    if (check[1] == ' ')
+                                        quoted.push(quoteCheck[i]);
+                            }
+                        }
+
+                        let memberList = '';
+
+                        for (let userID of message.mentions.members.values()) {
+
+                            if (userID.id != message.author.id) {
+
+                                if (quoted.find(element => element.includes(userID.id)))
+                                    continue;
+
+                                let newUser = await findUser(userID);
+
+                                try {
+                                    let result = await ADMINISTRATOR.changeRep(newUser, message.guild.id, 1, message);
+                                }
+                                catch (err) {
+                                    console.log(err)
+                                    console.log('error thanking')
+                                    continue;
+                                }
+
+                                memberList += mention(newUser.id) + ' ';
+                            }
+                        }
+
+                        if (memberList.length > 1)
+                            message.channel.send(`Gave +1 rep to ${memberList}`);
+                    }
             }
 
             if (guild.channelImageSource.includes(message.channel.id)) {
@@ -759,6 +787,30 @@ connectDB.once('open', async function () {
                 message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
             }
             else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
+
+
+
+                if (defaultPrefix != '##') {
+                    let index = user.guilds.indexOf(message.guild.id);
+                    if (user.prefix[index] != "-1") {
+                        prefix = user.prefix[index];
+                        // console.log('server prefix: ' + `${prefix}`)
+                    }
+                    else if (guild.prefix != "-1") {
+                        prefix = guild.prefix;
+                        //  console.log('server default prefix: ' + `${prefix}`)
+                    }
+                    else if (user.defaultPrefix != "-1") {
+                        prefix = user.defaultPrefix;
+                        // console.log('default pre: ' + `${prefix}`)
+                    }
+                    else {
+                        prefix = defaultPrefix;
+                        //    console.log('none: ' + `${prefix}`)
+                    }
+                }
+                else
+                    prefix = '##';
 
                 message.channel.send("Your proper prefix is: " + prefix
                     + "\n`" + `Type ${prefix}help` + "` for more help!");
@@ -1032,6 +1084,10 @@ function populateCommandMap() {
     commandMap.set(Commands[136].title.toUpperCase(), ADMINISTRATOR.unSetChannelLinkThanker)
     commandMap.set(Commands[137].title.toUpperCase(), STATS.botStats)
     commandMap.set(Commands[138].title.toUpperCase(), ADMINISTRATOR.welcomeMessage)
+    commandMap.set(Commands[139].title.toUpperCase(), ADMINISTRATOR.twitchHere)
+    commandMap.set(Commands[140].title.toUpperCase(), ADMINISTRATOR.blacklistGiveRepRole)
+    commandMap.set(Commands[141].title.toUpperCase(), ADMINISTRATOR.removeBlacklistedGiveRepRole)
+
 
     exports.commandMap = commandMap;
 }

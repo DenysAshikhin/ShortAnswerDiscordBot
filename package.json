@@ -24,6 +24,7 @@
     "ffmpeg-static": "^4.2.7",
     "fluent-ffmpeg": "^2.1.2",
     "fuse.js": "^6.3.1",
+    "get-youtube-channel-id": "0.0.4",
     "is-image-url": "^1.1.8",
     "is-url": "^1.2.4",
     "is-video": "^1.0.1",
@@ -40,6 +41,7 @@
     "teemojs": "^2.0.0-alpha.6",
     "twitch": "^4.2.2",
     "uniqid": "^5.2.0",
+    "yt-channel-info": "^1.1.4",
     "ytdl-core": "^3.2.2",
     "ytpl": "^1.0.1",
     "ytsr": "^1.0.3"

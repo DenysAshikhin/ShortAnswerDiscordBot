@@ -81,6 +81,7 @@ async function setControlEmoji(message) {
         await message.react('🕕');
         await message.react('🕘');
         await message.react('🚷');
+        await message.react('↩️')
 
 
         let result = delety(message, true, false);;
@@ -110,7 +111,8 @@ async function setEmojiCollector(message) {
     let collector = await message.createReactionCollector(function (reaction, user) {
         return (((reaction.emoji == MAIN.getEmojiObject('queue')) || (reaction.emoji == MAIN.getEmojiObject('dequeue')) ||
             (reaction.emoji.name === '🕒') || (reaction.emoji.name === '🕕') || (reaction.emoji.name === '🕘')
-            || (reaction.emoji.name === '🕛') || (reaction.emoji.name === '🚷') && (user.id != message.author.id)) && (!user.bot))
+            || (reaction.emoji.name === '🕛') || (reaction.emoji.name === '🚷') || (reaction.emoji.name === '↩️')
+            && (user.id != message.author.id)) && (!user.bot))
     }, { time: 29 * 60 * 1000 });
     collector.on('collect', async function (emoji, user) {
 
@@ -208,11 +210,15 @@ async function setEmojiCollector(message) {
             if (result == -1)
                 emoji.users.remove(user);
         }
+        else if ((emoji.emoji.toString() == '↩️')) {
+
+            await resetSummonRitual(message, user.id, null, { omit: true }, true);
+        }
     });
     return collector;
 }
 
-const resetSummonRitual = async function (message, summonerID, time, queue) {
+const resetSummonRitual = async function (message, summonerID, time, queue, resend) {
 
     let squads = guildSquads.get(message.guild.id);
 
@@ -220,8 +226,8 @@ const resetSummonRitual = async function (message, summonerID, time, queue) {
 
         //if ((squad.messageID == message.id) || (squad.summonerID == summonerID)) {
         if ((squad.messageID == message.id)) {
-            let lastMessage = await message.channel.messages.fetch({ limit: 1 });
-            lastMessage = lastMessage.first();
+            // let lastMessage = await message.channel.messages.fetch({ limit: 1 });
+            // lastMessage = lastMessage.first();
             let defaultDesc = squad.message.embeds[0].description
             //.substring(0,squad.message.embeds[0].description.indexOf("!```") + 4);
 
@@ -231,46 +237,68 @@ const resetSummonRitual = async function (message, summonerID, time, queue) {
                     return acc;
                 }, [])
 
+                //of true,
+
+                if (resend) {
 
 
-                let summonMessage = await MAIN.prettyEmbed(message,
-                    [{
-                        name: `${message.guild.members.cache.get(squad.summonerID).displayName}'s Summon: ${squad.joinedIDS.length}/${squad.size}`,
-                        value: value
-                    }], { description: defaultDesc, modifier: 1 });
+                    let summonMessage = await MAIN.prettyEmbed(message,
+                        [{
+                            name: `${message.guild.members.cache.get(squad.summonerID).displayName}'s Summon: ${squad.joinedIDS.length}/${squad.size}`,
+                            value: value
+                        }], { description: defaultDesc, modifier: 1 });
 
 
 
-                let messageToDelete = squad.message;
-                let result = delety(messageToDelete, false, true);
+                    let messageToDelete = squad.message;
+                    let result = delety(messageToDelete, false, true);
 
-                if (result)
-                    if (result.deleted)
-                        return 1;
+                    if (result)
+                        if (result.deleted)
+                            return 1;
 
-        
-                squad.messageID = summonMessage.id;
-                squad.message = summonMessage;
-                deleteSummon(messageToDelete.id, false, true);
+                    squad.messageID = summonMessage.id;
+                    squad.message = summonMessage;
+                    deleteSummon(messageToDelete.id, false, true);
 
-                if (queue) {
-                    if (time)
-                        summonMessage.channel.send(MAIN.mention(summonerID) + ` is joining in ${time} minutes!`);
-                    else
-                        summonMessage.channel.send(MAIN.mention(summonerID) + ` has joined!`);
+                    squad.collector.stop();
+
+
+                    // console.log(`PASSING ${summonMessage.id}`)
+                    squad.collector = await setEmojiCollector(summonMessage).catch((err) => { console.log("IGNORING OTHER ERROR") })
+                    // console.log("finished setting collector")
+                    setControlEmoji(summonMessage)
+                        .catch(err => console.log("Errored out setting emoji"));
                 }
                 else {
-                    summonMessage.channel.send(MAIN.mention(summonerID) + ` has left!`);
+
+
+
+                    let embed = await MAIN.prettyEmbed(message,
+                        [{
+                            name: `${message.guild.members.cache.get(squad.summonerID).displayName}'s Summon: ${squad.joinedIDS.length}/${squad.size}`,
+                            value: value
+                        }], { description: defaultDesc, modifier: 1, embed: true });
+                    squad.message.edit({ embed: embed });
                 }
 
-                squad.collector.stop();
 
 
-                // console.log(`PASSING ${summonMessage.id}`)
-                squad.collector = await setEmojiCollector(summonMessage).catch((err) => { console.log("IGNORING OTHER ERROR") })
-                // console.log("finished setting collector")
-                setControlEmoji(summonMessage)
-                    .catch(err => console.log("Errored out setting emoji"));
+                if (queue) {
+                    if (queue.omit) {
+
+                    }
+                    else
+                        if (time)
+                            squad.message.channel.send(MAIN.mention(summonerID) + ` is joining in ${time} minutes!`);
+                        else
+                            squad.message.channel.send(MAIN.mention(summonerID) + ` has joined!`);
+                }
+                else {
+                    squad.message.channel.send(MAIN.mention(summonerID) + ` has left!`);
+                }
+
+
             }
             return 1;
         }
@@ -1566,7 +1594,6 @@ const resetQueue = async function (oldSquad, queueType, tempMessage) {
 
     squads.splice(squads.indexOf(oldSquad), 1);
 
-
     switch (queueType) {
 
         //1 = random teams
@@ -1581,8 +1608,6 @@ const resetQueue = async function (oldSquad, queueType, tempMessage) {
             });
             break;
     }
-
-
 
     //maybe re-enable this later!
 

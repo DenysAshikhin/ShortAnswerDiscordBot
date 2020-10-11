@@ -10,6 +10,10 @@ const GuildSchema = new mongoose.Schema({
     Users: [],
     channelTwitch: [],
     twitchNotifications: [],
+    twitchHERE: {
+        type: Boolean,
+        default: true
+    },
     RLTracker: [],
     gameSuggest: [],
     factions: {
@@ -70,6 +74,10 @@ const GuildSchema = new mongoose.Schema({
         default: []
     },
     blacklistedRepRoles: {
+        type: [],
+        default: []
+    },
+    blacklistedGiveRepRoles: {
         type: [],
         default: []
     },

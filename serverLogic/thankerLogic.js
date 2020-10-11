@@ -34,14 +34,15 @@ const checkLink = async function (params) {
     }
 
 
-
-
     if (!Array.isArray(messageContent)) {
-        messageContent = [messageContent];
+        messageContent = messageContent.split(' ');
     }
+
+    
     let links = [];
 
     for (let string of messageContent) {
+
         if (isUrl(string)) {
 
             let stringy = string;

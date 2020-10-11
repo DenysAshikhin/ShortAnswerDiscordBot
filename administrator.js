@@ -46,7 +46,7 @@ const channelImageThanker = async function (message, params, user) {
 
     let guild = await MAIN.findGuild({ id: message.guild.id });
 
-    if (image && guild) {
+    if (image && video) {
         if (guild.thankerAutoRep) {
 
             changeRep(user, message.guild.id, 1, message);
@@ -1109,16 +1109,23 @@ const editAutoRoleDescription = async function (message, params, user) {
     let args = message.content.split(" ").slice(1).join(" ").split(',');
 
 
-    if (args.length != 2)
+
+
+    if (args.length < 2)
         return message.channel.send("You have to provide the message ID and the new description seperated by a comma!");
 
-    let autoMessage = autoRoleMap.get(args[0]);
+
+    let ID = args[0];
+    args.splice(0, 1);
+    let description = args.join(',');
+
+    let autoMessage = autoRoleMap.get(ID);
 
     if (!autoMessage) {
         return message.channel.send("That ID does not match any known autorole messages!");
     }
 
-    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(args[0]);
+    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(ID);
 
     if (!actualAutoMessage)
         return message.channel.send("It seems like that autorole message no longer exists! It will be deleted from the database soon!");
@@ -1130,8 +1137,8 @@ const editAutoRoleDescription = async function (message, params, user) {
         return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its title or description!");
     }
 
-    autoMessage.description = args[1];
-    autoMessage.runningEmbed.description = args[1];
+    autoMessage.description = description;
+    autoMessage.runningEmbed.description = description;
 
     actualAutoMessage.edit({ embed: autoMessage.runningEmbed });
     updateAutoRoleObject(autoMessage, message.guild.id);
@@ -1417,7 +1424,7 @@ const changeRep = async function (user, guildID, amount, message) {
         for (let roleID of dbGuild.blacklistedRepRoles) {
 
             if (guildMember.roles.cache.keyArray().includes(roleID)) {
-                message.channel.send(`${MAIN.mention(guildMember.id)} is blacklisted from receiving rep!`);
+               // message.channel.send(`${MAIN.mention(guildMember.id)} is blacklisted from receiving rep!`);
                 throw ('Blacklisted boi')
                 return -1;
             }
@@ -1511,6 +1518,60 @@ const removeBlacklistedRepRole = async function (message, params, user) {
     message.channel.send("Role is no longer blacklisted for receiving rep!");
 }
 exports.removeBlacklistedRepRole = removeBlacklistedRepRole;
+
+
+const blacklistGiveRepRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can create blacklisted rep roles for the server");
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("Only 1 @role must be mentioned.");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    let roleID = message.mentions.roles.first().id;
+
+    if (guild.blacklistedGiveRepRoles.includes(roleID))
+        return message.channel.send("This role is already blacklisted for giving rep!");
+
+    guild.blacklistedGiveRepRoles.push(roleID);
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { blacklistedGiveRepRoles: guild.blacklistedGiveRepRoles } }).exec();
+    message.channel.send("Role has been blacklisted for giving rep!");
+}
+exports.blacklistGiveRepRole = blacklistGiveRepRole;
+
+const removeBlacklistedGiveRepRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove blacklisted rep roles for the server");
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("Only 1 @role must be mentioned.");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    let roleID = message.mentions.roles.first().id;
+
+    if (!guild.blacklistedGiveRepRoles.includes(roleID))
+        return message.channel.send("This role already not blacklisted for giving rep!");
+
+
+    console.log(guild.blacklistedGiveRepRoles)
+
+    guild.blacklistedGiveRepRoles.splice(guild.blacklistedGiveRepRoles.indexOf(roleID));
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { blacklistedGiveRepRoles: guild.blacklistedGiveRepRoles } }).exec();
+    message.channel.send("Role is no longer blacklisted for giving rep!");
+}
+exports.removeBlacklistedGiveRepRole = removeBlacklistedGiveRepRole;
+
+
 
 const checkRepThreshold = async function (userID, value, dbGuild, actualGuild) {
 
@@ -1757,8 +1818,16 @@ const forwardImages = async function (message, guild, user) {
                     await guildy.channels.cache.get(imageChan).send(`Image from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
                 }
             }
+            else if (isVideo(attachment.attachment)) {
 
+                let guildy = MAIN.Client.guilds.cache.get(guild.id);
+                for (let imageChan of guild.channelImage) {
+
+                    await guildy.channels.cache.get(imageChan).send(`Video from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
+                }
+            }
     const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
+
 
     for (let string of args)
         if (isImageUrl(string)) {
@@ -1987,3 +2056,25 @@ const unSetMusicRole = async function (message, params, user) {
     return message.channel.send("The minimum role for music has been removed!");
 }
 exports.unSetMusicRole = unSetMusicRole
+
+
+const twitchHere = async function (message, params, user) {
+
+    const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
+
+    if ((args != 'off') && (args != 'on')) {
+
+        return message.channel.send("You have to specify either 'on' or 'off");
+    }
+
+    if (args == 'on') {
+        message.channel.send("`@here` for twitch notifications have been enabled.");
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { twitchHERE: true } }, function (err, doc, res) { });
+        return 1;
+    }
+
+    message.channel.send("`@here` for twitch notifications have been disabled.");
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { twitchHERE: false } }, function (err, doc, res) { });
+    return 1;
+}
+exports.twitchHere = twitchHere;
