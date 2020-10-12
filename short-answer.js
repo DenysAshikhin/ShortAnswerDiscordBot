@@ -602,7 +602,6 @@ connectDB.once('open', async function () {
                         //throw ('Blacklisted boi')
                         allowedThanks = false;
                     }
-
                 }
 
 
@@ -1087,6 +1086,9 @@ function populateCommandMap() {
     commandMap.set(Commands[139].title.toUpperCase(), ADMINISTRATOR.twitchHere)
     commandMap.set(Commands[140].title.toUpperCase(), ADMINISTRATOR.blacklistGiveRepRole)
     commandMap.set(Commands[141].title.toUpperCase(), ADMINISTRATOR.removeBlacklistedGiveRepRole)
+    commandMap.set(Commands[142].title.toUpperCase(), ADMINISTRATOR.youtubeChannelPair)
+    commandMap.set(Commands[143].title.toUpperCase(), ADMINISTRATOR.viewYoutubeChannelPairs)
+    commandMap.set(Commands[144].title.toUpperCase(), ADMINISTRATOR.deleteYoutubeChannelPair)
 
 
     exports.commandMap = commandMap;

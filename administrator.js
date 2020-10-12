@@ -1,7 +1,10 @@
 const MAIN = require('./short-answer.js');
-const Guild = require('./Guild.js')
+const Guild = require('./Guild.js');
+const BOT = require('./Bot.js');
 
 const isUrl = require('is-url');
+const getYoutubeChannelId = require('get-youtube-channel-id');
+const ytch = require('yt-channel-info')
 const needle = require('needle');
 const isImageUrl = require('is-image-url');
 const isVideo = require('is-video');
@@ -1186,6 +1189,208 @@ const welcomeMessages = async function (message, params, user) {
 }
 exports.welcomeMessages = welcomeMessages;
 
+
+
+
+const youtubeChannelPair = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command can only be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can setup youtube alerts for the server");
+
+
+    let args = message.content.split(" ").slice(1, 2)[0];
+    if (!args)
+        return message.channel.send("You have to provide the URL of the channel to setup the alerts for!");
+
+    if (message.mentions.channels.size != 1)
+        return message.channel.send("You have to #mention exactly 1 channel to include the youtube alerts in!");
+
+
+    result = await getYoutubeChannelId(args);
+
+    if (result !== false) {
+        if (result.error) {
+            return message.channel.send("Error getting ID from the provided URL!");
+        } else {
+            console.log(`Channel ID: ${result.id}`);
+        }
+    } else {
+        return message.channel.send('Invalid youtube channel URL');
+    }
+
+    let channelID = message.mentions.channels.first().id;
+    let youtuberID = result.id;
+    let youtuber = await ytch.getChannelInfo(youtuberID);
+    let vids = await ytch.getChannelVideos(youtuberID);
+
+
+    let bot = await BOT.findOne();
+
+    if (!bot.youtubeIDs) {
+        let mappy = new Map();
+        bot.youtubeIDs = mappy;
+    }
+
+    let map = bot.youtubeIDs;
+
+    let guildID = message.guild.id;
+
+
+
+    let guild = await MAIN.findGuild({ id: guildID });
+    if (!guild.youtubeAlerts) {
+        let mappy = new Map();
+        guild.youtubeAlerts = mappy;
+    }
+
+    let guildMap = guild.youtubeAlerts;
+
+    if (!guildMap.get(youtuberID)) {
+        guildMap.set(youtuberID, [[channelID, vids.items[0].videoId]]);
+    }
+    else {
+
+        for (let pair of guildMap.get(youtuberID))
+            if (pair[0] == channelID)
+                return message.channel.send("This pair already exists!");
+
+        let arr = guldMap.get(youtuberID);
+        arr.push([[channelID, vids.items[0].videoId]])
+    }
+
+
+
+    //The massive amount of checks before ensure that I don't need to repeat this for the
+    if (!map.get(youtuberID)) {//Never set a guild before
+        let guilds = {};
+        guilds[guildID] = true;
+        map.set(youtuberID, {
+            guilds: guilds,
+            users: []
+        })
+    }
+    else {
+
+        let temp = map.get(youtuberID);
+        if (!temp.guilds[guildID]) {//Never set a youtube alert for this guild for this channel
+
+            let guilds = { ...temp.guilds };
+            guilds[guildID] = true
+
+            temp.guilds = guilds;
+            map.set(youtuberID, temp);
+        }
+    }
+
+
+    BOT.findOneAndUpdate({}, { $set: { youtubeIDs: map } }).exec();
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeAlerts: guild.youtubeAlerts } }).exec();
+    return message.channel.send(`${MAIN.mentionChannel(message.mentions.channels.first().id)} will now have post alerts whenever **${youtuber.author}** posts a new video!`);
+}
+exports.youtubeChannelPair = youtubeChannelPair;
+
+const viewYoutubeChannelPairs = async function (message, params, user) {
+
+    let guild = await Guild.findOne({ id: message.guild.id });
+
+    let yArray = [];
+
+
+    if (!guild.youtubeAlerts)
+        return message.channel.send("There are no youtube-channel pairs for this server!");
+    if (guild.youtubeAlerts.size == 0)
+        return message.channel.send("There are no youtube-channel pairs for this server!");
+
+    for (let yChannel of guild.youtubeAlerts) {
+
+        let tChannels = yChannel[1];//Array containing the channelID, last vid
+        let youtuber = await ytch.getChannelInfo(yChannel[0]);
+
+        for (let tChannel of tChannels)
+            yArray.push({ name: '', value: `${MAIN.mentionChannel(tChannel[0])} is linked to **${youtuber.author}**\n` })
+
+    }
+
+    return MAIN.prettyEmbed(message, yArray, { description: "Here are the ServerChannel-Youtuber pairs:", startTally: 1 });
+}
+exports.viewYoutubeChannelPairs = viewYoutubeChannelPairs;
+
+const deleteYoutubeChannelPair = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command can only be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove youtube alerts for the server");
+
+    let guild = await Guild.findOne({ id: message.guild.id });
+
+    if (!guild.youtubeAlerts)
+        return message.channel.send("There are no youtube-channel pairs for this server!");
+    if (guild.youtubeAlerts.size == 0)
+        return message.channel.send("There are no youtube-channel pairs for this server!");
+
+    let args = message.content.split(" ").slice(1, 2)[0];
+    if (!args)
+        return message.channel.send("You have to provide the URL of the channel to remove the alerts for!");
+
+    if (message.mentions.channels.size != 1)
+        return message.channel.send("You have to #mention exactly 1 channel to remove the youtube alerts from!");
+
+
+    result = await getYoutubeChannelId(args);
+
+    if (result !== false) {
+        if (result.error) {
+            return message.channel.send("Error getting ID from the provided URL!");
+        } else {
+            console.log(`Channel ID: ${result.id}`);
+        }
+    } else {
+        return message.channel.send('Invalid youtube channel URL');
+    }
+
+    let channelID = message.mentions.channels.first().id;
+    let youtuberID = result.id;
+    let youtuber = await ytch.getChannelInfo(youtuberID);
+
+    let i = 0;
+    let x = 0
+    for (let yChannel of guild.youtubeAlerts) {
+        x = 0;
+
+        //yChannel[0] = actual youtuber (id)
+        let tChannels = yChannel[1];//Array containing the channelID, last vid
+
+        for (let tChannel of tChannels) {
+
+            if ((tChannel[0] == channelID) && (yChannel[0] == youtuberID)) {
+
+                tChannels.splice(x, 1);//Remove pair from guild
+                if (tChannels.length == 0) {//If it was last pair, remove it from map channel altogether
+                    guild.youtubeAlerts.delete(yChannel[0]);
+
+                    let bot = await BOT.findOne();
+                    let botMap = bot.youtubeIDs;
+                    let actualYoutuber = botMap.get(yChannel[0]);
+                    delete actualYoutuber.guilds[guild.id];
+
+                    BOT.findOneAndUpdate({}, { $set: { youtubeIDs: bot.youtubeIDs } }).exec();
+                }
+
+                Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeAlerts: guild.youtubeAlerts } }).exec();
+                return message.channel.send(`${MAIN.mentionChannel(tChannel[0])} is no longer linked to **${youtuber.author}**\n`)
+            }
+            x++;
+        }
+        i++;
+    }
+    return message.channel.send("No such pair was found! Try again?");
+}
+exports.deleteYoutubeChannelPair = deleteYoutubeChannelPair;
+
+
 const passwordLockRole = async function (message, params, user) {
 
     if (params.step) {
@@ -1424,7 +1629,7 @@ const changeRep = async function (user, guildID, amount, message) {
         for (let roleID of dbGuild.blacklistedRepRoles) {
 
             if (guildMember.roles.cache.keyArray().includes(roleID)) {
-               // message.channel.send(`${MAIN.mention(guildMember.id)} is blacklisted from receiving rep!`);
+                // message.channel.send(`${MAIN.mention(guildMember.id)} is blacklisted from receiving rep!`);
                 throw ('Blacklisted boi')
                 return -1;
             }

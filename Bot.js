@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
 
-const StatSchema = new mongoose.Schema({
+const BotSchema = new mongoose.Schema({
 
     date: {
         type: String
+    },
+    youtubeIDs: {
+        type: Map
     },
     dailyActions: {
         type: [],
@@ -16,4 +19,4 @@ const StatSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Stats', StatSchema);
+module.exports = mongoose.model('Bots', BotSchema);

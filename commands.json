@@ -1716,5 +1716,41 @@
             5
         ],
         "category": "*Other*"
+    },
+    {
+        "title": "youtubeChannelPair",
+        "explanation": "Posts alerts in the specified channel when a youtuber posts a new video.",
+        "example": [
+            "1) youtubeChannelPair https://www.youtube.com/channel/UCrDkAvwZum-UTjHmzDI2iIw #youtube-alerts"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Youtube"
+    },
+    {
+        "title": "viewYoutubeChannelPairs",
+        "explanation": "Shows all the youtuber-channel pairs for this server.",
+        "example": [
+            "1) viewYoutubeChannelPairs"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Youtube"
+    },
+    {
+        "title": "deleteYoutubeChannelPair",
+        "explanation": "Deletes a specific youtuber-TextChannel alert pair from this server.",
+        "example": [
+            "1) deleteYoutubeChannelPair https://www.youtube.com/channel/UCrDkAvwZum-UTjHmzDI2iIw #youtube-alerts"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Youtube"
     }
 ]

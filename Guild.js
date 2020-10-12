@@ -92,6 +92,9 @@ const GuildSchema = new mongoose.Schema({
     welcomeMessage: {
         type: String,
         default: '-1'
+    },
+    youtubeAlerts: {
+        type: Map
     }
 });
 
