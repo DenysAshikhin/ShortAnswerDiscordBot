@@ -1258,6 +1258,26 @@ const followYoutuber = async function (message, params, user) {
 }
 exports.followYoutuber = followYoutuber;
 
+const viewYoutbeFollows = async function (message, params, user) {
+
+    if (!user.youtubeAlerts)
+        return message.channel.send("You're not following any youtube channels!");
+    if (user.youtubeAlerts.size == 0)
+        return message.channel.send("You're not following any youtube channels!");
+
+    let yArray = [];
+
+    for (let yChannel of user.youtubeAlerts) {
+
+        let youtuber = await ytch.getChannelInfo(yChannel[0]);
+        yArray.push({ name: '', value: `**${youtuber.author}**\n` })
+    }
+
+    return MAIN.prettyEmbed(message, yArray, { description: "Here are the Youtube channels you are following:", startTally: 1 });
+}
+exports.viewYoutbeFollows = viewYoutbeFollows;
+
+
 const youtubeChannelPair = async function (message, params, user) {
 
     if (message.channel.type == 'dm') return message.channel.send("This command can only be called from inside a server text channel");

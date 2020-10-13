@@ -1764,5 +1764,17 @@
             5
         ],
         "category": "Youtube"
+    },
+    {
+        "title": "viewYoutubeFollows",
+        "explanation": "Shows all the youtubers you get DM notifications of new videos.",
+        "example": [
+            "1) viewYoutubeFollows"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Youtube"
     }
 ]
