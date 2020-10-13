@@ -702,8 +702,13 @@ const autorole = async function (message, params, user) {
 
                     console.log(`Removing ${params.numMessages} messages!`);
 
-                    let messages = await message.channel.messages.fetch({ limit: params.numMessages - 1 })
+                    // let messages = await message.channel.messages.fetch({ limit: params.numMessages - 1 })
+                    let messages = await message.channel.messages.fetch({ after: params.originalMessage })
+                    console.log(messages.size)
                     messages.delete(params.messageID);
+                    console.log(messages.size);
+
+
 
                     let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
                     if (!permission.has("MANAGE_MESSAGES")) {
@@ -758,7 +763,8 @@ const autorole = async function (message, params, user) {
                 newEmoji: null,
                 users: [],
                 roles: [],
-                numMessages: 5
+                numMessages: 5,
+                originalMessage: JSON.parse(JSON.stringify(message.id))
             }
         }, user);
     }
@@ -1277,6 +1283,49 @@ const viewYoutbeFollows = async function (message, params, user) {
 }
 exports.viewYoutbeFollows = viewYoutbeFollows;
 
+const deleteYoutubeFollow = async function (message, params, user) {
+
+
+    if (!user.youtubeAlerts)
+        return message.channel.send("You're not following any youtube channels!");
+    if (user.youtubeAlerts.size == 0)
+        return message.channel.send("You're not following any youtube channels!");
+
+    let args = message.content.split(" ").slice(1, 2)[0];
+    if (!args)
+        return message.channel.send("You have to provide the URL of the channel to remove the alerts for!");
+
+    result = await getYoutubeChannelId(args);
+
+    if (result !== false) {
+        if (result.error) {
+            return message.channel.send("Error getting ID from the provided URL!");
+        } else {
+            console.log(`Channel ID: ${result.id}`);
+        }
+    } else {
+        return message.channel.send('Invalid youtube channel URL');
+    }
+
+    let youtuberID = result.id;
+    let youtuber = await ytch.getChannelInfo(youtuberID);
+
+    let start = user.youtubeAlerts.size;
+    user.youtubeAlerts.delete(youtuberID);
+    console.log(user.youtubeAlerts)
+    if (start == user.youtubeAlerts.size)
+        return message.channel.send(`Error unfollowing ${youtuber.author}, you weren't following them in the first place!`);
+
+    let bot = await BOT.findOne();
+    let botMap = bot.youtubeIDs;
+    let actualYoutuber = botMap.get(youtuberID);
+    delete actualYoutuber.users[user.id];
+
+    BOT.findOneAndUpdate({}, { $set: { youtubeIDs: bot.youtubeIDs } }).exec();
+    User.findOneAndUpdate({ id: user.id }, { $set: { youtubeAlerts: user.youtubeAlerts } }).exec();
+    return message.channel.send(`Succesfuly unfollowed ${youtuber.author}!`);
+}
+exports.deleteYoutubeFollow = deleteYoutubeFollow;
 
 const youtubeChannelPair = async function (message, params, user) {
 
@@ -1456,6 +1505,7 @@ const deleteYoutubeChannelPair = async function (message, params, user) {
                 tChannels.splice(x, 1);//Remove pair from guild
                 if (tChannels.length == 0) {//If it was last pair, remove it from map channel altogether
                     guild.youtubeAlerts.delete(yChannel[0]);
+
 
                     let bot = await BOT.findOne();
                     let botMap = bot.youtubeIDs;

@@ -1109,9 +1109,9 @@ exports.nextSong = nextSong;
 async function songControlEmoji(message) {
 
     checkControlsEmoji(message);
-    await message.react('⏪')
+    await message.react('⏮️')
     await message.react('⏯️')
-    await message.react('⏩')
+    await message.react('⏭️')
     await message.react('🔉')
     await message.react('🔊')
     await message.react('⏹️')
@@ -1140,8 +1140,8 @@ setInterval(refreshEmojiControls, 5 * 1000);
 async function checkControlsEmoji(message) {
 
     let collector = await message.createReactionCollector(function (reaction, user) {
-        return (((reaction.emoji.name === '⏪') || (reaction.emoji.name === '⏯️') ||
-            (reaction.emoji.name === '⏩') || (reaction.emoji.name === '🔊') || (reaction.emoji.name === '🔉')
+        return (((reaction.emoji.name === '⏮️') || (reaction.emoji.name === '⏯️') ||
+            (reaction.emoji.name === '⏭️') || (reaction.emoji.name === '🔊') || (reaction.emoji.name === '🔉')
             || (reaction.emoji.name === '⏹️') || (reaction.emoji.name === '🔀') || (reaction.emoji.name === '↩️')
             || (reaction.emoji.name === '🔁')) && (!user.bot))
     }, { time: 60000 });
@@ -1157,7 +1157,7 @@ async function checkControlsEmoji(message) {
         //     emoji.users.remove(user);
         //     return 111;
         // }
-        if (emoji.emoji.toString() == '⏪') {
+        if (emoji.emoji.toString() == '⏮️') {
 
             reverse(emoji.message, '1', user, emoji);
         }
@@ -1167,7 +1167,7 @@ async function checkControlsEmoji(message) {
             }
             else pause(emoji.message, null, user);
         }
-        else if (emoji.emoji.toString() == '⏩') {
+        else if (emoji.emoji.toString() == '⏭️') {
             skip(emoji.message, '1', user, emoji);
         }
         else if (emoji.emoji.toString() == '🔊') {

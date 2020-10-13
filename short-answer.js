@@ -1091,7 +1091,7 @@ function populateCommandMap() {
     commandMap.set(Commands[144].title.toUpperCase(), ADMINISTRATOR.deleteYoutubeChannelPair)
     commandMap.set(Commands[145].title.toUpperCase(), ADMINISTRATOR.followYoutuber)
     commandMap.set(Commands[146].title.toUpperCase(), ADMINISTRATOR.viewYoutbeFollows)
-
+    commandMap.set(Commands[147].title.toUpperCase(), ADMINISTRATOR.deleteYoutubeFollow)
 
 
     exports.commandMap = commandMap;

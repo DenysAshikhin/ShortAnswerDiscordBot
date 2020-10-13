@@ -1776,5 +1776,17 @@
             5
         ],
         "category": "Youtube"
+    },
+    {
+        "title": "deleteYoutubeFollow",
+        "explanation": "Removes a specific youtube channel from your follow list (you will no longer receive DM's about new videos from them).",
+        "example": [
+            "1) deleteYoutubeFollow https://www.youtube.com/channel/UCrDkAvwZum-UTjHmzDI2iIw"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Youtube"
     }
 ]
