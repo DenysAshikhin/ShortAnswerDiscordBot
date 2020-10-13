@@ -106,6 +106,9 @@ const UserSchema = new mongoose.Schema({
     reps: {
         type: Map,
         of: String
+    },
+    youtubeAlerts: {
+        type: Map
     }
 });
 

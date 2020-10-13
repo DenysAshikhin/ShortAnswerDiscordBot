@@ -1190,7 +1190,73 @@ const welcomeMessages = async function (message, params, user) {
 exports.welcomeMessages = welcomeMessages;
 
 
+const followYoutuber = async function (message, params, user) {
 
+
+    let args = message.content.split(" ").slice(1, 2)[0];
+    if (!args)
+        return message.channel.send("You have to provide the URL of the channel to setup the alerts for!");
+
+
+
+    result = await getYoutubeChannelId(args);
+
+    if (result !== false) {
+        if (result.error) {
+            return message.channel.send("Error getting ID from the provided URL!");
+        } else {
+            console.log(`Channel ID: ${result.id}`);
+        }
+    } else {
+        return message.channel.send('Invalid youtube channel URL');
+    }
+
+    let youtuberID = result.id;
+    let youtuber = await ytch.getChannelInfo(youtuberID);
+    let vids = await ytch.getChannelVideos(youtuberID);
+    let bot = await BOT.findOne();
+
+
+
+    let userMap = user.youtubeAlerts;
+
+    if (!userMap) {
+        user.youtubeAlerts = new Map();
+        userMap = user.youtubeAlerts;
+    }
+
+    if (userMap.get(youtuberID))
+        return message.channel.send(`You're already following **${youtuber.author}**`);
+
+    userMap.set(youtuberID, vids.items[0].videoId);
+
+    let map = bot.youtubeIDs;
+
+    if (!map.get(youtuberID)) {//Never set a guild before
+        let users = {};
+        users[user.id] = true;
+        map.set(youtuberID, {
+            guilds: {},
+            users: users
+        })
+    }
+    else {
+
+        let temp = map.get(youtuberID);
+        if (!temp.users[user.id]) {//Never set a youtube alert for this guild for this channel
+
+            let users = { ...temp.users };
+            users[user.id] = true
+
+            temp.users = users;
+            map.set(youtuberID, temp);
+        }
+    }
+    BOT.findOneAndUpdate({}, { $set: { youtubeIDs: map } }).exec();
+    User.findOneAndUpdate({ id: user.id }, { $set: { youtubeAlerts: user.youtubeAlerts } }).exec()
+    return message.channel.send(`You will now get DMs whenever **${youtuber.author}** posts a new video!`);
+}
+exports.followYoutuber = followYoutuber;
 
 const youtubeChannelPair = async function (message, params, user) {
 
@@ -1268,7 +1334,7 @@ const youtubeChannelPair = async function (message, params, user) {
         guilds[guildID] = true;
         map.set(youtuberID, {
             guilds: guilds,
-            users: []
+            users: {}
         })
     }
     else {

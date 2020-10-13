@@ -1752,5 +1752,17 @@
             5
         ],
         "category": "Youtube"
+    },
+    {
+        "title": "followYoutuber",
+        "explanation": "Sends you a DM whenever the specified youtuber posts a new video.",
+        "example": [
+            "1) youtubeChannelPair https://www.youtube.com/channel/UCrDkAvwZum-UTjHmzDI2iIw"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "Youtube"
     }
 ]
