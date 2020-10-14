@@ -25,8 +25,7 @@ var lastSkip = new Map();
 var needle = require('needle');
 
 
-const COOKIE = 'VISITOR_INFO1_LIVE=Xju2lyow_tE; LOGIN_INFO=AFmmF2swRQIhAMnGj7ivJT4pJ3B5iza5kvrrOH6zJQd05M0zz09S5hx3AiAGxqjVjkI_jKcD0xsb_k_GohzJRiQ6iOkBbLmz_MY3nQ:QUQ3MjNmelVfSGZpMF9uQnFLcnpVRDVFRklfOXdqa0E5TEFEYklsNE1Sc0ozVllHczNZY20zckREZlQ4Z2Mxa3dQMlBKVGw2SWR3MkFob1QxU05wTjhVa2xKdk5ORl9UMVlTUlVLRTZvTDZFQTdUTEpFNGVFMEZGZEFFNUtHRllpQzJES25QTk53SDZQVWIxOEhOekp4NXhxTDhPUFpDa05FVGdUdzJJMmRlQWQzSFF3b1R2akI4; _gcl_au=1.1.1003033667.1597286045; CONSENT=YES+CA.en+202008; SID=2QfkKQ5mm0khab5B79HIjvPxMuxZl2aWFFmAUan9viAMAOkEhEdBrYTE81nSpcMJbeTpdQ.; __Secure-3PSID=2QfkKQ5mm0khab5B79HIjvPxMuxZl2aWFFmAUan9viAMAOkEDwxOeKTDvg5LwdE0Raol7w.; HSID=A40JY5XVSLkVYx0dz; SSID=AkDVmQ4jtR7tCRBVj; APISID=VtSoQkmDYUNu3j-y/AQ_PVYkgTyoaujMSJ; SAPISID=ScGUAWynTHuTIF63/ADmGqi50oosADET7-; __Secure-3PAPISID=ScGUAWynTHuTIF63/ADmGqi50oosADET7-; YSC=Y_Nj2TvXAdM; wide=1; PREF=al=en&volume=20&library_tab_browse_id=FEmusic_liked_playlists&f5=30000; SIDCC=AJi4QfFNOV3bc8IeOBx5MRo9xnWq0EtGCR-WpsWn-Jf8Ly5j4qHFtdmCl3D4FYHcCRq4SHJj6iRn; __Secure-3PSIDCC=AJi4QfGWRL3Va2q8qWOr4kKp-BfbG4TFJAEptLd3Ng-vF_Hq8vQw2-aKlreVF9Z1WHdO66uayUyP'
-
+const COOKIE = MAIN.config.youtubeCooke;
 
 
 async function authoriseSpotify() {
@@ -1929,7 +1928,7 @@ exports.myPlayLists = myPlayLists;
 
 function createPlaylist(message, params, user) {
     if (message.channel.type == 'dm') return message.reply("This command is exculsive to server channels!");
-   //if (message.content.toLowerCase() == (prefix + "createplaylist")) return message.channel.send("You need to provide a name for the new playlist.")
+    //if (message.content.toLowerCase() == (prefix + "createplaylist")) return message.channel.send("You need to provide a name for the new playlist.")
 
     let newName = message.content.split(" ").slice(1).join(" ").trim();
 

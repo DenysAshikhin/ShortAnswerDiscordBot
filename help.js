@@ -99,46 +99,46 @@ const generalHelpMessage = async function (message, tag, title, user) {
             description += `Here you can find all the commands pertaining to organizing or summoning people to play games. Or contribute to current faction battles!`;
     }
 
-    description += "```md\n" + `You can find out more information about any command by typing <${MAIN.prefix}help Command>` + "```";
+    description += "```md\n" + `You can find out more information about any command by typing <${(await MAIN.getPrefix(message, user))}help Command>` + "```";
 
 
     if (!user.completedTutorials.includes(tag))
         switch (tag) {
             case 1:
-                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}gameTutorial` + "```";
+                description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}gameTutorial` + "```";
                 break;
             case 2:
-                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}statsTutorial` + "```";
+                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}statsTutorial` + "```";
                 break;
             case 3:
-                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}miscellaneousTutorial` + "```";
+                //   description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}miscellaneousTutorial` + "```";
                 break;
             case 4:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}musicTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}musicTutorial` + "```";
                 break;
             case 5:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}administratorTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}administratorTutorial` + "```";
                 break;
             case 6:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}qofTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}qofTutorial` + "```";
                 break;
             case 7:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}helpTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}helpTutorial` + "```";
                 break;
             case 8:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}generalTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}generalTutorial` + "```";
                 break;
             case 9:
-                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}tutorialsTutorial` + "```";
+                //  description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}tutorialsTutorial` + "```";
                 break;
             case 10:
-                //    description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}gameTutorial` + "```";
+                //    description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}gameTutorial` + "```";
                 break;
             case 11:
-                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}twitchTutorial` + "```";
+                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await (await MAIN.getPrefix(message, user)))}twitchTutorial` + "```";
                 break;
             case 12:
-                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${MAIN.prefix}twitchTutorial` + "```";
+                // description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await (await MAIN.getPrefix(message, user)))}twitchTutorial` + "```";
                 break;
         }
 
@@ -152,32 +152,24 @@ const generalHelpMessage = async function (message, tag, title, user) {
 }
 
 
-
-
-
-
-
-
-
-
-function generalHelp(message, params, user) {
+async function generalHelp(message, params, user) {
 
     const args = message.content.split(" ").slice(1).join(" ");
 
     if (!args) {
 
-        let description = "```md\n" + `You can see a list of commands under each category by typing <${MAIN.prefix}helpCommand> I.E.:\n` +
-            `1) <${MAIN.prefix}helpMusic>` + "```";
+        let description = "```md\n" + `You can see a list of commands under each category by typing <${(await MAIN.getPrefix(message, user))}helpCommand> I.E.:\n` +
+            `1) <${(await MAIN.getPrefix(message, user))}helpMusic>` + "```";
 
         if (!user.completedTutorials.includes(100))
             description += "```fix\n" + `You have not completed the introductory tutorial which would teach you the basics of using the bot,`
-                + ` you can do so by typing ${MAIN.prefix}introTutorial` + "```";
+                + ` you can do so by typing ${(await MAIN.getPrefix(message, user))}introTutorial` + "```";
 
         return MAIN.prettyEmbed(message,
             [
                 { name: "Popular", value: "Games", inline: true },
                 { name: "Popular", value: "Music", inline: true },
-                { name: "Popular", value: "Twitch", inline: true },
+                { name: "Popular", value: "Twitch/Youtube", inline: true },
                 // { name: "Guide", value: "Help", inline: true },
                 { name: "Useful", value: "firstTime", inline: true },
                 { name: "Useful", value: "Tutorials", inline: true },

@@ -6,6 +6,7 @@ const rocketScraper = require('./Scrapers/RocketLeague.js')
 const twitchLogic = require('./serverLogic/twitchLogic');
 const statLogic = require('./serverLogic/statLogic.js');
 const thankerLogic = require('./serverLogic/thankerLogic.js');
+const youtubeLogic = require('./serverLogic/youtubeLogic.js');
 const User = require('./User.js');
 const Guild = require('./Guild.js')
 const http = require("http");
@@ -1009,6 +1010,7 @@ connectDB.once('open', async function () {
         checkRL();
         // createBackUp();
         checkTwitch();
+        youtubeLogic.alertYoutube();
         //setInterval(createBackUp, 6 * 60 * 60 * 1000);
     });
 });
@@ -1020,6 +1022,7 @@ async function minuteCount() {
     if (process.argv.length == 3) {
         countTalk();
         checkTwitch();
+        youtubeLogic.alertYoutube();
         // console.log(county++)
     }
 }
@@ -1042,18 +1045,23 @@ const checkRL = async function () {
 process.on('unhandledRejection', (err, promise) => {
 
 
- 
+    if (defaultPrefix != '##') {
         console.log("Caught unhandledRejectionWarning")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-
+    }
+    else
+        console.log(err);
 
 });
 
 process.on('unhandledException', (err, p) => {
 
-  
+
+    if (defaultPrefix != '##') {
         console.log("Caught unhandledException")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
 
-
+    }
+    else
+        console.log(err);
 });

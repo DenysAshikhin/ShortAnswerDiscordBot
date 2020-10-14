@@ -14,6 +14,10 @@ const GuildSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    youtubeHERE: {
+        type: Boolean,
+        default: true
+    },
     RLTracker: [],
     gameSuggest: [],
     factions: {

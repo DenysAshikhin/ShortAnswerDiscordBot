@@ -1,9 +1,8 @@
 var PORT;
 var IP;
 
-var prefix = 'sa!';
+
 var defaultPrefix = "sa!";
-global.prefix;
 
 var uri = "";
 var token = "";
@@ -15,6 +14,7 @@ var config = null;
 try {
 
     config = require('./config.json');
+    exports.config = config;
     // if (defaultPrefix != '##')
     //     twitchInitiliasation();
 
@@ -371,7 +371,7 @@ const tags = [
     8,// - general
     9,// - tutorials
     10,// - bugs/suggestions/improvements
-    11,// - twitch
+    11,// - twitch/Youtube
     12,// - First Time,
     13//Autorole stuff
 ]
@@ -561,11 +561,9 @@ connectDB.once('open', async function () {
 
             cachedUsers.set(user.id, user);
         }
-
+        let prefix = await getPrefix(message, user);
 
         let guild;
-        prefix = 'sa!';
-        exports.prefix = prefix;
 
         if (message.channel.type != 'dm') {
 
@@ -660,23 +658,7 @@ connectDB.once('open', async function () {
             }
 
 
-            let index = user.guilds.indexOf(message.guild.id);
-            if (user.prefix[index] != "-1") {
-                prefix = user.prefix[index];
-                //  console.log('server prefix: ' + `${prefix}`)
-            }
-            else if (guild.prefix != "-1") {
-                prefix = guild.prefix;
-                //  console.log('server default prefix: ' + `${prefix}`)
-            }
-            else if (user.defaultPrefix != "-1") {
-                prefix = user.defaultPrefix;
-                //  console.log('default pre: ' + `${prefix}`)
-            }
-            else {
-                prefix = defaultPrefix;
-                //    console.log('none: ' + `${prefix}`)
-            }
+           
 
         }
         else if (!user) {//Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
@@ -748,31 +730,31 @@ connectDB.once('open', async function () {
 
                 //console.log(prefix)
 
-                if (defaultPrefix != '##') {
-                    let index = user.guilds.indexOf(message.guild.id);
-                    if (user.prefix[index] != "-1") {
-                        prefix = user.prefix[index];
-                        // console.log('server prefix: ' + `${prefix}`)
-                    }
-                    else if (guild.prefix != "-1") {
-                        prefix = guild.prefix;
-                        //  console.log('server default prefix: ' + `${prefix}`)
-                    }
-                    else if (user.defaultPrefix != "-1") {
-                        prefix = user.defaultPrefix;
-                        // console.log('default pre: ' + `${prefix}`)
-                    }
-                    else {
-                        prefix = defaultPrefix;
-                        //    console.log('none: ' + `${prefix}`)
-                    }
-                }
-                else
-                    prefix = '##';
+                // if (defaultPrefix != '##') {
+                //     let index = user.guilds.indexOf(message.guild.id);
+                //     if (user.prefix[index] != "-1") {
+                //         prefix = user.prefix[index];
+                //         // console.log('server prefix: ' + `${prefix}`)
+                //     }
+                //     else if (guild.prefix != "-1") {
+                //         prefix = guild.prefix;
+                //         //  console.log('server default prefix: ' + `${prefix}`)
+                //     }
+                //     else if (user.defaultPrefix != "-1") {
+                //         prefix = user.defaultPrefix;
+                //         // console.log('default pre: ' + `${prefix}`)
+                //     }
+                //     else {
+                //         prefix = defaultPrefix;
+                //         //    console.log('none: ' + `${prefix}`)
+                //     }
+                // }
+                // else
+                //     prefix = '##';
                 let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
                 //  console.log('SECOND ATTEMPT DONE')
 
-                exports.prefix = prefix;
+                // exports.prefix = prefix;
 
                 let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
@@ -1092,7 +1074,7 @@ function populateCommandMap() {
     commandMap.set(Commands[145].title.toUpperCase(), ADMINISTRATOR.followYoutuber)
     commandMap.set(Commands[146].title.toUpperCase(), ADMINISTRATOR.viewYoutbeFollows)
     commandMap.set(Commands[147].title.toUpperCase(), ADMINISTRATOR.deleteYoutubeFollow)
-
+    commandMap.set(Commands[148].title.toUpperCase(), ADMINISTRATOR.youtubeHere)
 
     exports.commandMap = commandMap;
 }
@@ -1440,6 +1422,59 @@ function findFurthestDate(date1, date2) {
 exports.findFurthestDate = findFurthestDate;
 
 
+
+const getPrefix = async function (message, user) {
+
+    let prefix = 'sa!';
+
+
+    if (message.channel.type != 'dm') {
+
+        let guild;
+
+        if (message.channel.type != 'dm') {
+
+            guild = cachedGuilds.get(message.guild.id);
+            if (!guild) {
+
+                guild = await findGuild({ id: message.guild.id });
+                cachedGuilds.set(message.guild.id, guild);
+            }
+
+
+            let index = user.guilds.indexOf(message.guild.id);
+            if (user.prefix[index] != "-1") {
+                prefix = user.prefix[index];
+                //  console.log('server prefix: ' + `${prefix}`)
+            }
+            else if (guild.prefix != "-1") {
+                prefix = guild.prefix;
+                //  console.log('server default prefix: ' + `${prefix}`)
+            }
+            else if (user.defaultPrefix != "-1") {
+                prefix = user.defaultPrefix;
+                //  console.log('default pre: ' + `${prefix}`)
+            }
+            else {
+                prefix = defaultPrefix;
+                //    console.log('none: ' + `${prefix}`)
+            }
+            return prefix;
+        }
+        else {
+            if (user.defaultPrefix != "-1") {
+                prefix = user.defaultPrefix;
+                //  console.log('default pre: ' + `${prefix}`)
+            }
+            else {
+                prefix = defaultPrefix;
+                //    console.log('none: ' + `${prefix}`)
+            }
+            return prefix;
+        }
+    }
+}
+exports.getPrefix = getPrefix;
 
 async function updateMessage(message, user) {
 

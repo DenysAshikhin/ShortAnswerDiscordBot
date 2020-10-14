@@ -858,7 +858,7 @@
         "subsection": [
             11
         ],
-        "category": "*Other*"
+        "category": "Twitch"
     },
     {
         "title": "unlinkTwitch",
@@ -869,7 +869,7 @@
         "subsection": [
             11
         ],
-        "category": "*Other*"
+        "category": "Twitch"
     },
     {
         "title": "viewTwitchFollows",
@@ -880,7 +880,7 @@
         "subsection": [
             11
         ],
-        "category": "*Other*"
+        "category": "Twitch"
     },
     {
         "title": "unfollowTwitchChannel",
@@ -891,7 +891,7 @@
         "subsection": [
             11
         ],
-        "category": "*Other*"
+        "category": "Twitch"
     },
     {
         "title": "followTwitchChannel",
@@ -902,7 +902,7 @@
         "subsection": [
             11
         ],
-        "category": "*Other*"
+        "category": "Twitch"
     },
     {
         "title": "pairChannelWithTwitch",
@@ -914,7 +914,7 @@
             5,
             11
         ],
-        "category": "Channel Pair"
+        "category": "Twitch"
     },
     {
         "title": "showChannelTwitchPairs",
@@ -925,7 +925,7 @@
         "subsection": [
             11
         ],
-        "category": "*Other*"
+        "category": "Twitch"
     },
     {
         "title": "removeChannelTwitchPairs",
@@ -937,7 +937,7 @@
             5,
             11
         ],
-        "category": "Channel Pair"
+        "category": "Twitch"
     },
     {
         "title": "leagueRank",
@@ -1045,10 +1045,10 @@
         "category": "*Other*"
     },
     {
-        "title": "helpTwitch",
-        "explanation": "Shows the list of commands involving twitch functionalities.",
+        "title": "helpTwitch/Youtube",
+        "explanation": "Shows the list of commands involving twitch/youtube functionalities.",
         "example": [
-            "1) helpTwitch"
+            "1) helpTwitch/Youtube"
         ],
         "subsection": [
             7,
@@ -1724,8 +1724,8 @@
             "1) youtubeChannelPair https://www.youtube.com/channel/UCrDkAvwZum-UTjHmzDI2iIw #youtube-alerts"
         ],
         "subsection": [
-            3,
-            5
+            5,
+            11
         ],
         "category": "Youtube"
     },
@@ -1736,8 +1736,7 @@
             "1) viewYoutubeChannelPairs"
         ],
         "subsection": [
-            3,
-            5
+            11
         ],
         "category": "Youtube"
     },
@@ -1748,8 +1747,8 @@
             "1) deleteYoutubeChannelPair https://www.youtube.com/channel/UCrDkAvwZum-UTjHmzDI2iIw #youtube-alerts"
         ],
         "subsection": [
-            3,
-            5
+            5,
+            11
         ],
         "category": "Youtube"
     },
@@ -1760,8 +1759,7 @@
             "1) youtubeChannelPair https://www.youtube.com/channel/UCrDkAvwZum-UTjHmzDI2iIw"
         ],
         "subsection": [
-            3,
-            5
+            11
         ],
         "category": "Youtube"
     },
@@ -1772,8 +1770,7 @@
             "1) viewYoutubeFollows"
         ],
         "subsection": [
-            3,
-            5
+            11
         ],
         "category": "Youtube"
     },
@@ -1784,8 +1781,20 @@
             "1) deleteYoutubeFollow https://www.youtube.com/channel/UCrDkAvwZum-UTjHmzDI2iIw"
         ],
         "subsection": [
-            3,
-            5
+            11
+        ],
+        "category": "Youtube"
+    },
+    {
+        "title": "youtubeHerePing",
+        "explanation": "Enables or disables the `@here` ping for youtube twitch notifications in text channels",
+        "example": [
+            "1) youtubeHerePing on",
+            "2) youtubeHerePing off"
+        ],
+        "subsection": [
+            5,
+            11
         ],
         "category": "Youtube"
     }

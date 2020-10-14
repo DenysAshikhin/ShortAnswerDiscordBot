@@ -1073,23 +1073,21 @@ const editAutoRoleTitle = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins may change an autoRole message's title");
 
+
     let args = message.content.split(" ").slice(1).join(" ").split(',');
+    let ID = args[0];
+    args.splice(0, 1);
+    let title = args.join(',');
+
+    let autoMessage = autoRoleMap.get(ID);
 
 
-    if (args.length != 2)
-        return message.channel.send("You have to provide the message ID and the new title seperated by a comma!");
 
-    let autoMessage = autoRoleMap.get(args[0]);
+    if (!autoMessage)
+        return message.channel.send("I could not find an autorole message of that ID. Please ensure you are sending the ID first, title 2nd (after a comma).");
 
-    if (!autoMessage) {
-        return message.channel.send("That ID does not match any known autorole messages!");
-    }
 
-    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(args[0]);
-
-    if (!actualAutoMessage)
-        return message.channel.send("It seems like that autorole message no longer exists! It will be deleted from the database soon!");
-
+    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(ID);
 
     if (actualAutoMessage.author.id != MAIN.Client.user.id) {
 
@@ -1099,12 +1097,11 @@ const editAutoRoleTitle = async function (message, params, user) {
         return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its title or description!");
     }
 
-    autoMessage.title = args[1];
-    autoMessage.runningEmbed.title = args[1];
+    autoMessage.title = title;
+    autoMessage.runningEmbed.title = title;
 
     actualAutoMessage.edit({ embed: autoMessage.runningEmbed });
     updateAutoRoleObject(autoMessage, message.guild.id);
-
 }
 exports.editAutoRoleTitle = editAutoRoleTitle;
 
@@ -1116,8 +1113,6 @@ const editAutoRoleDescription = async function (message, params, user) {
         return message.channel.send("Only admins may change an autoRole message's description");
 
     let args = message.content.split(" ").slice(1).join(" ").split(',');
-
-
 
 
     if (args.length < 2)
@@ -1347,7 +1342,7 @@ const youtubeChannelPair = async function (message, params, user) {
 
     if (result !== false) {
         if (result.error) {
-            return message.channel.send("Error getting ID from the provided URL!");
+            return message.channel.send("Error getting ID from the provided URL! Make sure you provided the **CHANNEL** url, and not the `user` url!");
         } else {
             console.log(`Channel ID: ${result.id}`);
         }
@@ -2419,3 +2414,24 @@ const twitchHere = async function (message, params, user) {
     return 1;
 }
 exports.twitchHere = twitchHere;
+
+const youtubeHere = async function (message, params, user) {
+
+    const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
+
+    if ((args != 'off') && (args != 'on')) {
+
+        return message.channel.send("You have to specify either 'on' or 'off");
+    }
+
+    if (args == 'on') {
+        message.channel.send("`@here` for youtube notifications have been enabled.");
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHere: true } }, function (err, doc, res) { });
+        return 1;
+    }
+
+    message.channel.send("`@here` for youtube notifications have been disabled.");
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHere: false } }, function (err, doc, res) { });
+    return 1;
+}
+exports.youtubeHere = youtubeHere;
