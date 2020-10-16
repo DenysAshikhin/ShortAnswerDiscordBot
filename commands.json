@@ -1243,7 +1243,7 @@
     },
     {
         "title": "autoRole",
-        "explanation": "Starts the setup for an autorole message! Complete with options such as:\n1) Unique: Only 1 reaction per user\n2) Static: Prevents other reactions\n3) Permenant: Limits a user to a single reaction for the message. They will not be able to change their mind.\nAnd if they remove the reaction, the role will be removed from them as well (unless permenent was enabled)",
+        "explanation": "Starts the setup for an autorole message! Complete with options such as:\n1) Unique: Only 1 reaction per user\n2) Static: Prevents other reactions\n3) Permanent: Limits a user to a single reaction for the message. They will not be able to change their mind.\nAnd if they remove the reaction, the role will be removed from them as well (unless permenent was enabled)",
         "example": [
             "1) autoRole"
         ],
@@ -1787,7 +1787,7 @@
     },
     {
         "title": "youtubeHerePing",
-        "explanation": "Enables or disables the `@here` ping for youtube twitch notifications in text channels",
+        "explanation": "Enables or disables the `@here` ping for youtube notifications in text channels",
         "example": [
             "1) youtubeHerePing on",
             "2) youtubeHerePing off"

@@ -26,6 +26,6 @@ Oh and a stupid simple autorole generator with powerful options such as
 1) Unique: Only 1 reaction per user
 2) Static: Prevents other reactions
 3) Permenant: Limits a user to a single reaction for the message. They will not be able to change their mind.
-And if they remove the reaction, the role will be removed from them as well (unless permenant was enabled)
+And if they remove the reaction, the role will be removed from them as well (unless permanent was enabled)
 ```
 Still curious but unsure? You can reach out to test the bot or ask any question in the support server: https://discord.gg/nMj6UKH

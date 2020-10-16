@@ -96,6 +96,7 @@ const algorithm = 'aes-256-gcm',
 var osu = require('node-os-utils');
 const { executionAsyncResource } = require('async_hooks');
 const { isError } = require('util');
+const { mainModule } = require('process');
 var cpu = osu.cpu;
 var mem = osu.mem;
 
@@ -562,6 +563,7 @@ connectDB.once('open', async function () {
             cachedUsers.set(user.id, user);
         }
         let prefix = await getPrefix(message, user);
+       // console.log("THE RETURNED PREFIX:::" + prefix);
 
         let guild;
 
@@ -861,7 +863,7 @@ connectDB.once('open', async function () {
         let searchedGuild = await findGuild({ id: guild.id });
         if (!searchedGuild) await createGuild(guild);
 
-        ADMINISTRATOR.initialiseUsers(guild, { guild: guild, silent: true })
+       ADMINISTRATOR.initialiseUsers(guild, { guild: guild, silent: true })
     })
 
     Client.on("guildDelete", async guild => {
@@ -1427,7 +1429,6 @@ const getPrefix = async function (message, user) {
 
     let prefix = 'sa!';
 
-
     if (message.channel.type != 'dm') {
 
         let guild;
@@ -1440,7 +1441,6 @@ const getPrefix = async function (message, user) {
                 guild = await findGuild({ id: message.guild.id });
                 cachedGuilds.set(message.guild.id, guild);
             }
-
 
             let index = user.guilds.indexOf(message.guild.id);
             if (user.prefix[index] != "-1") {
@@ -2135,11 +2135,13 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
     }
 }
 
-function sendHelpMessage(Index, message) {
+async function sendHelpMessage(Index, message, user) {
 
     let examples = "```md\n";
 
     examples += Commands[Index].explanation + "\n\n";
+
+    let prefix = await getPrefix(message, user);
 
     for (example of Commands[Index].example) {
 

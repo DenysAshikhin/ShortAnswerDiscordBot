@@ -86,6 +86,9 @@ const Embed = {
 };
 exports.Embed = Embed;
 
+
+var defaultPrefix = 'sa!';
+
 if (process.argv.length == 3) {
 
     uri = config.uri;
@@ -1013,7 +1016,70 @@ connectDB.once('open', async function () {
         youtubeLogic.alertYoutube();
         //setInterval(createBackUp, 6 * 60 * 60 * 1000);
     });
+
+    client.on("guildCreate", async guild => {
+
+        initialiseUsers(guild, { guild: guild, silent: true })
+    })
 });
+
+
+
+async function initialiseUsers(message, params) {
+
+    if (params.guild) {
+
+        let memberList = await params.guild.members.fetch();
+        let count = 0;
+        for (let MEMBER of memberList.values()) {
+
+            let member = MEMBER;
+
+            await (MAIN.checkExistance(member))
+            count++;
+
+        }
+        console.log(`members from a new guild: ${count}`);
+        return 1;
+    }
+
+    if (message.channel.type == 'dm') return -1;
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can forcefully load all members from a server into the database"
+            + " (only adds them if they are missing i.e. user joined while bot is down for updates).");
+
+    if (!params.silent)
+        message.channel.send("Started checking if the members of this server are in my database...may take some time for larger servers."
+            + " I will let you know once I finish!");
+
+    let newUsers = 0;
+    let existingUsers = 0;
+
+    let memberList = await message.channel.guild.members.fetch();
+
+    for (let MEMBER of memberList.values()) {
+
+        let member = MEMBER;
+
+        if (await (MAIN.checkExistance(member))) {//User exists with a matching guild in the DB
+            existingUsers++;
+        }
+        else {
+            newUsers++;
+        }
+    }
+
+    if (!params.silent)
+        message.channel.send("The server's users are now tracked!" + ` ${existingUsers} were already present and ${newUsers} were added!`);
+}
+
+
+
+
+
+
+
 
 var county = 0;
 

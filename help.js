@@ -187,7 +187,7 @@ async function generalHelp(message, params, user) {
     }
 
     if (params.index != null) {
-        return MAIN.sendHelpMessage(params.index, message);
+        return MAIN.sendHelpMessage(params.index, message, user);
     }
     else {
 

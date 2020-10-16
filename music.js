@@ -25,7 +25,7 @@ var lastSkip = new Map();
 var needle = require('needle');
 
 
-const COOKIE = MAIN.config.youtubeCooke;
+const COOKIE = MAIN.config.youtubeCookie;
 
 
 async function authoriseSpotify() {

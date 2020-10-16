@@ -42,10 +42,12 @@ const alertYoutube = async function (params) {
 
 
                 if (!alertCache.get(youtuberID))
-                    alertCache.set(youtuberID, vidID)
+                    alertCache.set(youtuberID, [vidID])
                 else
-                    if (alertCache.get(youtuberID) == vidID)
+                    if (alertCache.get(youtuberID).includes(vidID))
                         return 1;
+
+                alertCache.get(youtuberID).push(vidID)
 
                 for (guild of Object.entries(combo[1].guilds)) {
 
@@ -93,7 +95,7 @@ const alertYoutube = async function (params) {
                     if (pair[1] != guildArray[i].vidID) {//check the the pair hasnt already been notified of this song
 
                         if (dbGuild.youtubeHERE)
-                            legitGuild.channels.cache.get(pair[0]).send('@here' + guildArray[i].message);
+                            legitGuild.channels.cache.get(pair[0]).send('@here ' + guildArray[i].message);
                         else
                             legitGuild.channels.cache.get(pair[0]).send(guildArray[i].message);
 

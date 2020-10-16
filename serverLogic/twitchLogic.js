@@ -364,7 +364,7 @@ async function isStreamLive(id) {
 
 async function getTwitchChannel(streamer) {
     try {
-        const user = await twitchClient.helix.users.getUserByName(streamers.split(' ').join('').trim());
+        const user = await twitchClient.helix.users.getUserByName(streamer.split(' ').join('').trim());
         return user;
     }
     catch (err) {

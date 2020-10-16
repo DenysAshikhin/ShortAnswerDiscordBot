@@ -169,7 +169,7 @@ const generalTutorial = async function (message, params, command, tutorial, tuto
     if (user.tutorialStep == -1) {
 
         message.channel.send(tutorial.steps[0]);
-        MAIN.sendHelpMessage(MAIN.commandsText.normal.indexOf(tutorial.expectedCommand[0]), message);
+        MAIN.sendHelpMessage(MAIN.commandsText.normal.indexOf(tutorial.expectedCommand[0]), message, user);
 
         await User.findOneAndUpdate({ id: user.id },
             {
@@ -190,7 +190,7 @@ const generalTutorial = async function (message, params, command, tutorial, tuto
                 let Index = MAIN.commandsText.normal.indexOf(tutorial.expectedCommand[user.tutorialStep]);
 
                 console.log(tutorial.expectedCommand[user.tutorialStep])
-                MAIN.sendHelpMessage(Index, message);
+                MAIN.sendHelpMessage(Index, message, user);
                 return 1;
             }
             else if ((user.tutorialStep - user.previousTutorialStep) == 1) {//If the user completed a previous step succesfuly, give the new prompt
@@ -198,7 +198,7 @@ const generalTutorial = async function (message, params, command, tutorial, tuto
                 if (user.tutorialStep != (tutorial.steps.length - 1)) {
 
                     message.channel.send(tutorial.steps[user.tutorialStep]);
-                    MAIN.sendHelpMessage(MAIN.commandsText.normal.indexOf(tutorial.expectedCommand[user.tutorialStep]), message);
+                    MAIN.sendHelpMessage(MAIN.commandsText.normal.indexOf(tutorial.expectedCommand[user.tutorialStep]), message, user);
                     await User.findOneAndUpdate({ id: user.id },
                         {
                             $set: {
@@ -247,7 +247,7 @@ const generalTutorial = async function (message, params, command, tutorial, tuto
             }
         }
         else {
-            message.channel.send(`You are already doing a different tutorial, to quit it type **${prefix}quitTutorial**`);
+            message.channel.send(`You are already doing a different tutorial, to quit it type **${(await MAIN.getPrefix(message, user))}quitTutorial**`);
             return 1;
         }
     }
@@ -284,7 +284,10 @@ function quitTutorial(message, params, user) {
 }
 exports.quitTutorial = quitTutorial;
 
-function setNotifyTutorials(message, params, user) {
+async function setNotifyTutorials(message, params, user) {
+
+
+    let prefix = await MAIN.getPrefix(message, user);
 
     if (!message.content.split(" ")[1]) {
         message.channel.send("You must enter either true or false: **" + prefix + "tutorials** *true/false*");
@@ -310,7 +313,7 @@ function setNotifyTutorials(message, params, user) {
 }
 exports.setNotifyTutorials = setNotifyTutorials;
 
-function createTutorialEmbed(tutorialStep) {
+async function createTutorialEmbed(tutorialStep) {
 
     let prompt = GameTutorial.steps[tutorialStep];
     let index = MAIN.Commands.commands.indexOf(GameTutorial.expectedCommand[tutorialStep]);
@@ -318,6 +321,8 @@ function createTutorialEmbed(tutorialStep) {
 
     if (index != -1) {
         for (let i = 0; i < MAIN.Commands.example[index].length; i++) {
+
+            let prefix = await MAIN.getPrefix(message, user);
 
             fieldArray.push({
                 name: `Example ${i + 1})`,

@@ -634,7 +634,7 @@ const autorole = async function (message, params, user) {
                 reactEmoji(tempy1, params.emojis);
                 params.numMessages += 3;//might cause issues
 
-                return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permenant', 'Unlimited'], [
+                return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permanent', 'Unlimited'], [
                     {
                         ...params, step: 8, unique: true, permenant: false, neither: false
                     },
@@ -646,7 +646,7 @@ const autorole = async function (message, params, user) {
                     }
                 ], autorole, `What kind of mode should this message enforce?\n`
                 + "```" + `\n1) Unique: Limit each user to 1 reaction (they can change their reaction to gain/loose the role`
-                + `\n\n2) Permenant: Limit each user to a single reaction for the lifetime of this message. They cannot change their mind after reacting.`
+                + `\n\n2) Permanent: Limit each user to a single reaction for the lifetime of this message. They cannot change their mind after reacting.`
                 + `\n\n3) Unlimited: Let everyone react to as many emojis as they want!` + "```");
 
                 break;
@@ -964,6 +964,9 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
         let tempEmoji = emoji._emoji;
         let autorole = autoRoleMap.get(emoji.message.id);
+
+        if (autorole.permenant)
+            return -1;
 
         let matchedPair = autorole.emojis.find(function (element) {
 
@@ -1985,7 +1988,7 @@ const identifyThanks = function (message) {
 
     let quoteCheck = message.content.split('\n');
 
-    let messageContent = message.content;
+    let messageContent = message.content.toLowerCase();
     if (quoteCheck.length > 1) {
 
         for (let i = 0; i < quoteCheck.length; i++) {
@@ -2426,12 +2429,12 @@ const youtubeHere = async function (message, params, user) {
 
     if (args == 'on') {
         message.channel.send("`@here` for youtube notifications have been enabled.");
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHere: true } }, function (err, doc, res) { });
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHERE: true } }, function (err, doc, res) { });
         return 1;
     }
 
     message.channel.send("`@here` for youtube notifications have been disabled.");
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHere: false } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHERE: false } }, function (err, doc, res) { });
     return 1;
 }
 exports.youtubeHere = youtubeHere;
