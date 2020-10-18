@@ -89,6 +89,10 @@ const GuildSchema = new mongoose.Schema({
         type: [],
         default: []
     },
+    thankerMessageChannel: {
+        type: [],
+        default: []
+    },
     musicRole: {
         type: String,
         default: ''

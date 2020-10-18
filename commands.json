@@ -1797,5 +1797,29 @@
             11
         ],
         "category": "Youtube"
+    },
+    {
+        "title": "setThankerLogChannel",
+        "explanation": "Whitelists a channel for thank logs. If there is at least one channel whitelisted, the bot will not post rep updates in any other non-whitelisted channels!",
+        "example": [
+            "1) setThankerLogChannel #channelName"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "*Other*"
+    },
+    {
+        "title": "unSetThankerLogChannel",
+        "explanation": "Removes a channel from the bot thanker log channel list. If there is at least one channel whitelisted, the bot will not post rep updates in any other non-whitelisted channels!",
+        "example": [
+            "1) unSetThankerLogChannel"
+        ],
+        "subsection": [
+            3,
+            5
+        ],
+        "category": "*Other*"
     }
 ]

@@ -54,6 +54,17 @@ const channelImageThanker = async function (message, params, user) {
 
             changeRep(user, message.guild.id, 1, message);
         }
+
+        if (guild.thankerMessageChannel.length > 0) {
+
+            for (let channy of guild.thankerMessageChannel) {
+
+                let channel = message.guild.channels.cache.get(channy);
+                if (channel)
+                    channel.send(channelThankerMessageConvert(message.author.id, `image and video`, guild));
+            }
+            return guild.thankerMessageChannel.length > 0;
+        }
         return message.channel.send(channelThankerMessageConvert(message.author.id, `image and video`, guild));
     }
 
@@ -62,12 +73,34 @@ const channelImageThanker = async function (message, params, user) {
 
             changeRep(user, message.guild.id, 1, message);
         }
+
+        if (guild.thankerMessageChannel.length > 0) {
+
+            for (let channy of guild.thankerMessageChannel) {
+
+                let channel = message.guild.channels.cache.get(channy);
+                if (channel)
+                    channel.send(channelThankerMessageConvert(message.author.id, `image`, guild));
+            }
+            return guild.thankerMessageChannel.length > 0;
+        }
         return message.channel.send(channelThankerMessageConvert(message.author.id, `image`, guild));
     }
     if (video) {
         if (guild.thankerAutoRep) {
 
             changeRep(user, message.guild.id, 1, message);
+        }
+
+        if (guild.thankerMessageChannel.length > 0) {
+
+            for (let channy of guild.thankerMessageChannel) {
+
+                let channel = message.guild.channels.cache.get(channy);
+                if (channel)
+                    channel.send(channelThankerMessageConvert(message.author.id, `video`, guild));
+            }
+            return guild.thankerMessageChannel.length > 0;
         }
         return message.channel.send(channelThankerMessageConvert(message.author.id, `video`, guild));
     }
@@ -94,11 +127,21 @@ const channelLinkThanker = async function (message, params, user) {
 
             changeRep(user, message.guild.id, parsed.newLinks, message);
         }
-
     }
     else {
 
         return 1;
+    }
+
+    if (guild.thankerMessageChannel.length > 0) {
+
+        for (let channy of guild.thankerMessageChannel) {
+
+            let channel = message.guild.channels.cache.get(channy);
+            if (channel)
+                channel.send(channelThankerMessageConvert(message.author.id, `link`, guild, parsed.newLinks));
+        }
+        return guild.thankerMessageChannel.length > 0;
     }
 
     return message.channel.send(channelThankerMessageConvert(message.author.id, `link`, guild, parsed.newLinks));
@@ -2355,6 +2398,66 @@ const unSetCommandChannel = async function (message, params, user) {
     return message.channel.send("This channel will no longer be whitelisted for bot commands!");
 }
 exports.unSetCommandChannel = unSetCommandChannel;
+
+
+
+
+
+const setThankerLogChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only add a thanker log channel from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can add a thanker log channel")
+
+    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+    if (!permission.has("SEND_MESSAGES"))
+        return message.author.send("I don't have the right permissions to send messages in this channel!");
+
+    if (message.mentions.channels.size != 1)
+        return message.channel.send("You have to #mention exactly 1 channel to add to make the log channel");
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    let channelID = message.mentions.channels.first().id;
+
+    if (guild.thankerMessageChannel.includes(channelID)) {
+
+        return message.channel.send("This channel is already set to receive thanker logs");
+    }
+
+    guild.thankerMessageChannel.push(channelID);
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { thankerMessageChannel: guild.thankerMessageChannel } }).exec();
+    return message.channel.send(`${MAIN.mentionChannel(channelID)}` + " will now be used for thanks logs.");
+}
+exports.setThankerLogChannel = setThankerLogChannel;
+
+const unSetThankerLogChannel = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only remove a thanker log channel from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove a thanker log channel")
+
+    let guild = await MAIN.findGuild({ id: message.guild.id });
+
+    if (!guild.thankerMessageChannel.includes(message.channel.id)) {
+
+        return message.channel.send("This channel is already not set to receive thanker logs");
+    }
+
+    guild.thankerMessageChannel.splice(guild.thankerMessageChannel.indexOf(message.channel.id));
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { thankerMessageChannel: guild.thankerMessageChannel } }).exec();
+    return message.channel.send("This channel will no longer be not be used for thanks logs.");
+}
+exports.unSetThankerLogChannel = unSetThankerLogChannel;
+
+
+
+
+
 
 
 const setMusicRole = async function (message, params, user) {

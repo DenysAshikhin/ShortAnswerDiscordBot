@@ -563,7 +563,7 @@ connectDB.once('open', async function () {
             cachedUsers.set(user.id, user);
         }
         let prefix = await getPrefix(message, user);
-       // console.log("THE RETURNED PREFIX:::" + prefix);
+        // console.log("THE RETURNED PREFIX:::" + prefix);
 
         let guild;
 
@@ -641,12 +641,24 @@ connectDB.once('open', async function () {
                                     continue;
                                 }
 
-                                memberList += mention(newUser.id) + ' ';
+                                //memberList += mention(newUser.id) + ' ';
+                                memberList += '**' + userID.displayName + '** ';
                             }
                         }
 
                         if (memberList.length > 1)
-                            message.channel.send(`Gave +1 rep to ${memberList}`);
+
+                            if (guild.thankerMessageChannel.length > 0) {
+
+                                for (let channy of guild.thankerMessageChannel) {
+
+                                    let channel = message.guild.channels.cache.get(channy);
+                                    if (channel)
+                                        channel.send(`Gave +1 rep to ${memberList}`);
+                                }
+                            }
+                            else
+                                message.channel.send(`Gave +1 rep to ${memberList}`);
                     }
             }
 
@@ -660,7 +672,7 @@ connectDB.once('open', async function () {
             }
 
 
-           
+
 
         }
         else if (!user) {//Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
@@ -772,7 +784,6 @@ connectDB.once('open', async function () {
             else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
 
 
-
                 if (defaultPrefix != '##') {
                     let index = user.guilds.indexOf(message.guild.id);
                     if (user.prefix[index] != "-1") {
@@ -863,7 +874,7 @@ connectDB.once('open', async function () {
         let searchedGuild = await findGuild({ id: guild.id });
         if (!searchedGuild) await createGuild(guild);
 
-       ADMINISTRATOR.initialiseUsers(guild, { guild: guild, silent: true })
+        //ADMINISTRATOR.initialiseUsers(guild, { guild: guild, silent: true })
     })
 
     Client.on("guildDelete", async guild => {
@@ -1077,6 +1088,9 @@ function populateCommandMap() {
     commandMap.set(Commands[146].title.toUpperCase(), ADMINISTRATOR.viewYoutbeFollows)
     commandMap.set(Commands[147].title.toUpperCase(), ADMINISTRATOR.deleteYoutubeFollow)
     commandMap.set(Commands[148].title.toUpperCase(), ADMINISTRATOR.youtubeHere)
+    commandMap.set(Commands[149].title.toUpperCase(), ADMINISTRATOR.setThankerLogChannel)
+    commandMap.set(Commands[150].title.toUpperCase(), ADMINISTRATOR.unSetThankerLogChannel)
+
 
     exports.commandMap = commandMap;
 }
@@ -1429,50 +1443,46 @@ const getPrefix = async function (message, user) {
 
     let prefix = 'sa!';
 
+    let guild;
+
     if (message.channel.type != 'dm') {
 
-        let guild;
+        guild = cachedGuilds.get(message.guild.id);
+        if (!guild) {
 
-        if (message.channel.type != 'dm') {
+            guild = await findGuild({ id: message.guild.id });
+            cachedGuilds.set(message.guild.id, guild);
+        }
 
-            guild = cachedGuilds.get(message.guild.id);
-            if (!guild) {
-
-                guild = await findGuild({ id: message.guild.id });
-                cachedGuilds.set(message.guild.id, guild);
-            }
-
-            let index = user.guilds.indexOf(message.guild.id);
-            if (user.prefix[index] != "-1") {
-                prefix = user.prefix[index];
-                //  console.log('server prefix: ' + `${prefix}`)
-            }
-            else if (guild.prefix != "-1") {
-                prefix = guild.prefix;
-                //  console.log('server default prefix: ' + `${prefix}`)
-            }
-            else if (user.defaultPrefix != "-1") {
-                prefix = user.defaultPrefix;
-                //  console.log('default pre: ' + `${prefix}`)
-            }
-            else {
-                prefix = defaultPrefix;
-                //    console.log('none: ' + `${prefix}`)
-            }
-            return prefix;
+        let index = user.guilds.indexOf(message.guild.id);
+        if (user.prefix[index] != "-1") {
+            prefix = user.prefix[index];
+            //  console.log('server prefix: ' + `${prefix}`)
+        }
+        else if (guild.prefix != "-1") {
+            prefix = guild.prefix;
+            //  console.log('server default prefix: ' + `${prefix}`)
+        }
+        else if (user.defaultPrefix != "-1") {
+            prefix = user.defaultPrefix;
+            //  console.log('default pre: ' + `${prefix}`)
         }
         else {
-            if (user.defaultPrefix != "-1") {
-                prefix = user.defaultPrefix;
-                //  console.log('default pre: ' + `${prefix}`)
-            }
-            else {
-                prefix = defaultPrefix;
-                //    console.log('none: ' + `${prefix}`)
-            }
-            return prefix;
+            prefix = defaultPrefix;
+            //    console.log('none: ' + `${prefix}`)
         }
     }
+    else {
+        if (user.defaultPrefix != "-1") {
+            prefix = user.defaultPrefix;
+            //  console.log('default pre: ' + `${prefix}`)
+        }
+        else {
+            prefix = defaultPrefix;
+            //    console.log('none: ' + `${prefix}`)
+        }
+    }
+    return prefix;
 }
 exports.getPrefix = getPrefix;
 
