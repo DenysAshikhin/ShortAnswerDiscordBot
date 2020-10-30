@@ -40,9 +40,27 @@ const alertYoutube = async function (params) {
                 let vidID = vids.items[0].videoId;
                 //  console.log(vids.items[0].videoId)
 
+                if (vids.items[0].premiere)
+                    return 1;
 
-                if (!alertCache.get(youtuberID))
-                    alertCache.set(youtuberID, [vidID])
+                if (!vidID)
+                    return 1;
+
+                if (!alertCache.get(youtuberID)) {
+
+                    let overallLimit = 10;
+                    
+                    let limit = vids.items.length > overallLimit ? overallLimit : vids.items.length;
+                    let vidArr = [];
+                    for (let i = 0; i < limit; i++) {
+
+                        if (!vids.items[i].premiere)
+                            vidArr.push(vids.items[i].videoId)
+                    }
+
+                    alertCache.set(youtuberID, vidArr)
+                }
+
                 else
                     if (alertCache.get(youtuberID).includes(vidID))
                         return 1;

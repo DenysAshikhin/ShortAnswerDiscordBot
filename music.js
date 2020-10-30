@@ -26,7 +26,7 @@ var needle = require('needle');
 
 
 const COOKIE = MAIN.config.youtubeCookie;
-
+const TOKEN = MAIN.config.youtubeID;
 
 async function authoriseSpotify() {
 
@@ -953,6 +953,7 @@ async function play(message, params, user) {
             requestOptions: {
                 headers: {
                     cookie: COOKIE,
+                    'x-youtube-identity-token': TOKEN
                     // Optional. If not given, ytdl-core will try to find it.
                     // You can find this by going to a video's watch page, viewing the source,
                     // and searching for "ID_TOKEN".
@@ -1059,15 +1060,24 @@ async function play(message, params, user) {
         let titleArray = [];
         let urlArray = [];
 
-        for (let i = 0; i < searchResult.items.length || titleArray.length == 5; i++) {
+        for (let i = 0; i < searchResult.items.length; i++) {
 
-            if (searchResult.items[i].type == 'video') {
-                titleArray.push(searchResult.items[i].title);
-                urlArray.push({ url: searchResult.items[i].link, custom: true });
-            }
+            if (searchResult.items[i])
+                if (searchResult.items[i].type == 'video') {
+                    titleArray.push(searchResult.items[i].title);
+                    urlArray.push({ url: searchResult.items[i].link, custom: true });
+                }
+
+            if (titleArray.length == 5)
+                break;
         }
 
-        return MAIN.generalMatcher(message, searchResult.query, user, titleArray, urlArray, play, "Please enter the number matching the video you wish to play!");
+        if (searchResult.items.length == 0) {
+            return message.channel.send("I did not find any matches for **" + args + "**");
+        }
+
+
+        return MAIN.generalMatcher(message, -23, user, titleArray, urlArray, play, "Please enter the number matching the video you wish to play!");
     }
 
     if (callPlay) {
@@ -1245,9 +1255,9 @@ async function playSong(guild, sonG, skip, message) {
             songControlEmoji(serverQueue.message)
         }
     }
-    else if (sonG) serverQueue.message.edit("```md\nNow Playing" + ` Song ${serverQueue.index + 1}/${serverQueue.songs.length}` + "\n#" + sonG.title + "\n["
-        + '00:00'
-        + "](" + MAIN.timeConvert(Math.floor(sonG.duration)) + ")```");
+    // else if (sonG) serverQueue.message.edit("```md\nNow Playing" + ` Song ${serverQueue.index + 1}/${serverQueue.songs.length}` + "\n#" + sonG.title + "\n["
+    //     + '00:00'
+    //     + "](" + MAIN.timeConvert(Math.floor(sonG.duration)) + ")```");
 
     let song = sonG;
 
@@ -1313,6 +1323,7 @@ async function playSong(guild, sonG, skip, message) {
             requestOptions: {
                 headers: {
                     cookie: COOKIE,
+                    'x-youtube-identity-token': TOKEN
                     // Optional. If not given, ytdl-core will try to find it.
                     // You can find this by going to a video's watch page, viewing the source,
                     // and searching for "ID_TOKEN".
@@ -1455,6 +1466,7 @@ async function cacheSong(song, GUILD, MESSAGE) {
                 requestOptions: {
                     headers: {
                         cookie: COOKIE,
+                        'x-youtube-identity-token': TOKEN
                         // Optional. If not given, ytdl-core will try to find it.
                         // You can find this by going to a video's watch page, viewing the source,
                         // and searching for "ID_TOKEN".
@@ -1596,6 +1608,7 @@ async function addSong(message, params, user) {
                 requestOptions: {
                     headers: {
                         cookie: COOKIE,
+                        'x-youtube-identity-token': TOKEN
                         // Optional. If not given, ytdl-core will try to find it.
                         // You can find this by going to a video's watch page, viewing the source,
                         // and searching for "ID_TOKEN".

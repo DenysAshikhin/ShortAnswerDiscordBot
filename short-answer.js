@@ -36,7 +36,7 @@ try {
         token = config.TesterToken;
         IP = '127.0.0.1';
         PORT = config.PORT;
-        defaultPrefix = "##";
+        // defaultPrefix = "##";
     }
 }
 catch (err) {
@@ -79,7 +79,6 @@ const ffmpeg = require('fluent-ffmpeg');
 var uniqid = require('uniqid');
 exports.uniqid = uniqid;
 const Cache = require('caching-map');
-
 
 const cachedUsers = new Cache(1000);
 const cachedGuilds = new Cache(100);
@@ -145,6 +144,7 @@ exports.gameSuggest = gameSuggest;
 var gameSuggestCollecter;
 
 async function gameSuggestControlEmoji() {
+
 
     let message = await Client.guilds.cache.get(gameSuggest.guildID).channels.cache.get(gameSuggest.channelID).messages.fetch(gameSuggest.messageID);
 
@@ -279,6 +279,10 @@ const modifiedSuggestionAccept = async function (game) {
     );
 
     GAMES.games.push(game);
+    GAMES.games.sort();
+
+    Bot.findOneAndUpdate({}, { $set: { games: GAMES.games } }).exec();
+
 
     let guild = await findGuild({ id: gameSuggest.guildID });
     guild.gameSuggest.shift();
@@ -400,18 +404,22 @@ const getUsers = async function (params) {
 }
 exports.getUsers = getUsers;
 //{ games: { $gt: '' }, guilds: message.guild.id }
-const findUser = async function (member) {
+const findUser = async function (member, force) {
     try {
         let usery = await User.findOne({ id: member.id });
 
-        if (!usery) {
+        if (!usery || force) {
 
             await checkExistance(member)
-            return await User.findOne({ id: member.id });
+            let tempUser = await User.findOne({ id: member.id });
+            cachedUsers.set(tempUser.id, tempUser);
+            return tempUser;
         }
         else {
 
-            return (await checkFix(usery));
+            let tempUser = await checkFix(usery);
+            cachedUsers.set(tempUser.id, tempUser);
+            return tempUser;
         }
 
     } catch (err) {
@@ -422,7 +430,19 @@ exports.findUser = findUser;
 
 const findGuild = async function (params) {
     try {
-        return await Guild.findOne(params)
+
+        let guildy = await Guild.findOne(params);
+
+        if (!guildy) {
+
+            await createGuild(params);
+            return await Guild.findOne(params);
+        }
+        else {
+            return guildy;
+        }
+
+
     } catch (err) {
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
@@ -554,15 +574,29 @@ connectDB.once('open', async function () {
             if (!message.member) {
                 user = await User.findOne({ id: message.author.id });
 
+                console.log("Dm'ed by: " + message.author.username)
+
                 if (!user)
                     return message.channel.send(`I don't seem to have you in my database, try sending any message in a server I am in, then try DM'ing me again!`);
             }
             else
                 user = await findUser(message.member);
 
-            cachedUsers.set(user.id, user);
+            //cachedUsers.set(user.id, user);
         }
-        let prefix = await getPrefix(message, user);
+        let prefix = 'sa!';
+
+        try {
+            prefix = await getPrefix(message, user);
+        }
+        catch (err) {
+
+            console.log(err);
+            console.log(`error getting prefix: message = ${message.content} - guild = ${message.guild.name} = id = ${message.guild.id}`);
+        }
+
+
+
         // console.log("THE RETURNED PREFIX:::" + prefix);
 
         let guild;
@@ -582,16 +616,27 @@ connectDB.once('open', async function () {
             }
             updateMessage(message, user);
 
-            if (guild.channelImageThanker.includes(message.channel.id)) {
+            if (guild.channelImageSource.includes(message.channel.id)) {
 
-                ADMINISTRATOR.channelImageThanker(message, null, user);
+                ADMINISTRATOR.forwardImages(message, guild, null);
             }
-            if (guild.channelLinkThanker.includes(message.channel.id)) {
+            else if ((guild.channelImage.length > 0) && guild.forwardImages) {
 
-                ADMINISTRATOR.channelLinkThanker(message, null, user);
+                ADMINISTRATOR.forwardImages(message, guild, null);
             }
+
 
             if (guild.autoRep) {
+
+                if (guild.channelImageThanker.includes(message.channel.id)) {
+
+                    ADMINISTRATOR.channelImageThanker(message, null, user);
+                }
+                if (guild.channelLinkThanker.includes(message.channel.id)) {
+
+                    ADMINISTRATOR.channelLinkThanker(message, null, user);
+                }
+
 
                 let allowedThanks = true;
                 let guildMember = message.member;
@@ -606,7 +651,6 @@ connectDB.once('open', async function () {
 
 
                 if (allowedThanks)
-
                     if (ADMINISTRATOR.identifyThanks(message)) {
 
                         let quoted = [];
@@ -661,19 +705,6 @@ connectDB.once('open', async function () {
                                 message.channel.send(`Gave +1 rep to ${memberList}`);
                     }
             }
-
-            if (guild.channelImageSource.includes(message.channel.id)) {
-
-                ADMINISTRATOR.forwardImages(message, guild, null);
-            }
-            else if ((guild.channelImage.length > 0) && guild.forwardImages) {
-
-                ADMINISTRATOR.forwardImages(message, guild, null);
-            }
-
-
-
-
         }
         else if (!user) {//Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
             message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in, using the help command and then sending the command again?");
@@ -741,30 +772,6 @@ connectDB.once('open', async function () {
                 }
 
 
-
-                //console.log(prefix)
-
-                // if (defaultPrefix != '##') {
-                //     let index = user.guilds.indexOf(message.guild.id);
-                //     if (user.prefix[index] != "-1") {
-                //         prefix = user.prefix[index];
-                //         // console.log('server prefix: ' + `${prefix}`)
-                //     }
-                //     else if (guild.prefix != "-1") {
-                //         prefix = guild.prefix;
-                //         //  console.log('server default prefix: ' + `${prefix}`)
-                //     }
-                //     else if (user.defaultPrefix != "-1") {
-                //         prefix = user.defaultPrefix;
-                //         // console.log('default pre: ' + `${prefix}`)
-                //     }
-                //     else {
-                //         prefix = defaultPrefix;
-                //         //    console.log('none: ' + `${prefix}`)
-                //     }
-                // }
-                // else
-                //     prefix = '##';
                 let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
                 //  console.log('SECOND ATTEMPT DONE')
 
@@ -1090,6 +1097,8 @@ function populateCommandMap() {
     commandMap.set(Commands[148].title.toUpperCase(), ADMINISTRATOR.youtubeHere)
     commandMap.set(Commands[149].title.toUpperCase(), ADMINISTRATOR.setThankerLogChannel)
     commandMap.set(Commands[150].title.toUpperCase(), ADMINISTRATOR.unSetThankerLogChannel)
+    commandMap.set(Commands[151].title.toUpperCase(), ADMINISTRATOR.autoRepToggle)
+    commandMap.set(Commands[152].title.toUpperCase(), ADMINISTRATOR.gameRolePing)
 
 
     exports.commandMap = commandMap;
@@ -1455,6 +1464,17 @@ const getPrefix = async function (message, user) {
         }
 
         let index = user.guilds.indexOf(message.guild.id);
+
+        if (index == -1) {
+            // console.log("Could not find a guild when searching for user");
+            // console.log(`guilds: ${user.guilds} :::: ${message.guild.id}`);
+            user = await findUser(message.member, true);
+           // console.log(user);
+            index = user.guilds.indexOf(message.guild.id);
+            if (index == -1)
+                console.log("this should even be possible")
+        }
+
         if (user.prefix[index] != "-1") {
             prefix = user.prefix[index];
             //  console.log('server prefix: ' + `${prefix}`)
@@ -1603,6 +1623,7 @@ async function createUser(member) {
 
     let userModel = new User(newUser);
     await userModel.save();
+    cachedUsers.set(userModel.id, userModel);
     return userModel;
 }
 
@@ -1695,7 +1716,7 @@ async function checkExistance(member) {
     }
     else {
         //   console.log("The user doesnt exist. " + member.displayName);
-        await createUser(member);
+       //return (await createUser(member));
         return false;
     }
 }
@@ -2273,6 +2294,7 @@ async function updateAll() {
     // let users = await getUsers();
 
     // // let i = 0;
+
 
 
 

@@ -103,6 +103,10 @@ const GuildSchema = new mongoose.Schema({
     },
     youtubeAlerts: {
         type: Map
+    },
+    gameRolePing: {
+        type: Boolean,
+        default: false
     }
 });
 

@@ -16,6 +16,10 @@ const BotSchema = new mongoose.Schema({
 
         type: [],
         default: []
+    },
+    games:{
+        type: [String],
+        default: []
     }
 });
 

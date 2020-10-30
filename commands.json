@@ -1821,5 +1821,30 @@
             5
         ],
         "category": "*Other*"
+    },
+    {
+        "title": "toggleAutoRep",
+        "explanation": "Enables or disables the autoRep (thanks) feature",
+        "example": [
+            "1) toggleAutoRep on",
+            "2) toggleAutoRep off"
+        ],
+        "subsection": [
+            5
+        ],
+        "category": "*Other*"
+    },
+    {
+        "title": "toggleGameRolePing",
+        "explanation": "Enables or disables sending a DM to every person part of the role during a game ping.",
+        "example": [
+            "1) toggleGameRolePing on",
+            "2) toggleGameRolePing off"
+        ],
+        "subsection": [
+            1,
+            5
+        ],
+        "category": "*Other*"
     }
 ]

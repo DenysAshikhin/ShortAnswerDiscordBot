@@ -1263,8 +1263,6 @@ const followYoutuber = async function (message, params, user) {
     let vids = await ytch.getChannelVideos(youtuberID);
     let bot = await BOT.findOne();
 
-
-
     let userMap = user.youtubeAlerts;
 
     if (!userMap) {
@@ -2052,7 +2050,7 @@ const identifyThanks = function (message) {
     ]
 
 
-    if (message.content.substring(0, 2) == 'ty')
+    if (message.content.substring(0, 2).toLowerCase() == 'ty')
         if (message.content[2] == ' ')
             return true;
 
@@ -2100,8 +2098,10 @@ function setThankerAutoRep(message, params, user) {
 }
 exports.setThankerAutoRep = setThankerAutoRep;
 
-function setImageForwarding(message, params, user) {
+async function setImageForwarding(message, params, user) {
 
+
+    let prefix = await MAIN.getPrefix(message, user);
 
     if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
 
@@ -2116,15 +2116,15 @@ function setImageForwarding(message, params, user) {
 
     if (bool == "TRUE") {
 
-        MAIN.cachedGuilds.get(message.guild.id).forwardImages = true;
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { forwardImages: true } }, function (err, doc, res) { });
+      
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { forwardImages: true } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res)});
         message.channel.send("Images will be automatically be forwarded to imageChannel!");
         return 1;
     }
     else if (bool == "FALSE") {
 
-        MAIN.cachedGuilds.get(message.guild.id).forwardImages = false;
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { forwardImages: false } }, function (err, doc, res) { });
+       // MAIN.cachedGuilds.get(message.guild.id).forwardImages = false;
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { forwardImages: false } }, function (err, doc, res) {MAIN.cachedGuilds.set(message.guild.id, res) });
         message.channel.send("Images will not be automatically be forwarded to imageChannel!");
         return 1;
     }
@@ -2502,24 +2502,62 @@ exports.unSetMusicRole = unSetMusicRole
 
 const twitchHere = async function (message, params, user) {
 
+    if (message.channel.type == 'dm') return message.channel.send("You can only toggle the here ping for twitch notifications from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can toggle the here ping for twitch notifications");
+
+
     const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
 
     if ((args != 'off') && (args != 'on')) {
 
-        return message.channel.send("You have to specify either 'on' or 'off");
+        return message.channel.send("You have to specify either 'on' or 'off'");
     }
 
     if (args == 'on') {
         message.channel.send("`@here` for twitch notifications have been enabled.");
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { twitchHERE: true } }, function (err, doc, res) { });
+      //  MAIN.cachedGuilds.set(message.guild.id, guild);
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { twitchHERE: true } }, function (err, doc, res) {  MAIN.cachedGuilds.set(message.guild.id, res);});
         return 1;
     }
 
     message.channel.send("`@here` for twitch notifications have been disabled.");
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { twitchHERE: false } }, function (err, doc, res) { });
+   // MAIN.cachedGuilds.set(message.guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { twitchHERE: false } }, function (err, doc, res) {  MAIN.cachedGuilds.set(message.guild.id, res);});
     return 1;
 }
 exports.twitchHere = twitchHere;
+
+const autoRepToggle = async function (message, params, user) {
+
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only toggle the autoRep from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can toggle the autoRep");
+
+
+    const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
+
+    if ((args != 'off') && (args != 'on')) {
+
+        return message.channel.send("You have to specify either 'on' or 'off'");
+    }
+
+    if (args == 'on') {
+        message.channel.send("AutoRep has been enabled.");
+       
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { autoRep: true } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+        return 1;
+    }
+
+    message.channel.send("AutoRep has been disabled.");
+  //  MAIN.cachedGuilds.set(message.guild.id, guild);
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { autoRep: false } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+    return 1;
+}
+exports.autoRepToggle = autoRepToggle;
 
 const youtubeHere = async function (message, params, user) {
 
@@ -2532,12 +2570,35 @@ const youtubeHere = async function (message, params, user) {
 
     if (args == 'on') {
         message.channel.send("`@here` for youtube notifications have been enabled.");
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHERE: true } }, function (err, doc, res) { });
+     //   MAIN.cachedGuilds.set(gmessage.guild.id, guild);
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHERE: true } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
         return 1;
     }
-
+   // MAIN.cachedGuilds.set(message.guild.id, guild);
     message.channel.send("`@here` for youtube notifications have been disabled.");
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHERE: false } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHERE: false } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
     return 1;
 }
 exports.youtubeHere = youtubeHere;
+
+const gameRolePing = async function (message, params, user) {
+
+    const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
+
+    if ((args != 'off') && (args != 'on')) {
+
+        return message.channel.send("You have to specify either 'on' or 'off");
+    }
+
+    if (args == 'on') {
+        message.channel.send("Users will now be DM'ed when their ROLE is pinged for a game.");
+        //MAIN.cachedGuilds.set(gmessage.guild.id, guild);
+        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameRolePing: true } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+        return 1;
+    }
+   // MAIN.cachedGuilds.set(message.guild.id, guild);
+   message.channel.send("Users will not be DM'ed when their ROLE is pinged for a game.");
+    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameRolePing: false } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+    return 1;
+}
+exports.gameRolePing = gameRolePing;

@@ -1,6 +1,7 @@
 const net = require('net');
 var os = require('os-utils');
 const config = require('./config.json');
+exports.config = config
 const leagueScraper = require('./Scrapers/leagueLegends.js');
 const rocketScraper = require('./Scrapers/RocketLeague.js')
 const twitchLogic = require('./serverLogic/twitchLogic');
@@ -12,6 +13,8 @@ const Guild = require('./Guild.js')
 const http = require("http");
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const DASHBOARD = require('./dashboard/server.js');
+DASHBOARD.initialise();
 const path = require('path');
 
 const fs = require('fs');
@@ -22,9 +25,7 @@ var PORT;
 var HOST;
 
 const { Client, Intents } = require('discord.js');
-const main = require('ytsr');
-const { create } = require('domain');
-const { isObject } = require('util');
+
 const myIntents = new Intents();
 //myIntents.add('GUILDS');
 myIntents.add('GUILDS', 'GUILD_MEMBERS');
@@ -969,10 +970,12 @@ const requestListener = async function (req, res) {
 };
 
 const HTTPserver = http.createServer(requestListener);
+
+
+
+
 HTTPserver.listen(PORT, HOST, () => {
     console.log(`Server is running on http://${HOST}:${PORT}`);
-
-    console.log(decrypt(encrypt("WeeeOOO")))
 });
 
 
@@ -1008,6 +1011,8 @@ connectDB.once('open', async function () {
 
     client.on("ready", () => {
 
+        //DASHBOARD.initialise();
+
         console.log("Ready!");
         exports.Client = client;
         checkRL();
@@ -1035,7 +1040,7 @@ async function initialiseUsers(message, params) {
 
             let member = MEMBER;
 
-            await (MAIN.checkExistance(member))
+            await (checkExistance(member))
             count++;
 
         }
@@ -1062,7 +1067,7 @@ async function initialiseUsers(message, params) {
 
         let member = MEMBER;
 
-        if (await (MAIN.checkExistance(member))) {//User exists with a matching guild in the DB
+        if (await (checkExistance(member))) {//User exists with a matching guild in the DB
             existingUsers++;
         }
         else {

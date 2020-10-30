@@ -2,6 +2,8 @@ var gameJSON = require('./gameslist.json');
 const MAIN = require('./short-answer.js');
 const Fuse = require('fuse.js');
 const User = require('./User.js');
+const Bot = require('./Bot.js');
+const Guild = require('./Guild');
 //const Commands = require('./commands.json');
 
 
@@ -61,13 +63,21 @@ const deleteSummon = async function (ID, emoji, summon) {
 
 }
 
-const updateGamesList = function () {
+const updateGamesList = async function () {
 
-    gameJSON = require('./gameslist.json')
+    //gameJSON = require('./gameslist.json')
 
-    games = gameJSON;
+
+    let botty = await Bot.findOne();
+
+    games = botty.games;
+
+
+    // games = gameJSON;
     games.sort();
     exports.games = games;
+
+    // Bot.findOneAndUpdate({}, { $set: { games: games } }).exec();
 }
 exports.updateGamesList = updateGamesList;
 
@@ -414,8 +424,11 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                     continue;
                 }
 
-                if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
-                    MAIN.directMessage(message, user.id, game);
+                let guildy = await Guild.findOne({ id: message.guild.id });
+
+                if (guildy.gameRolePing)
+                    if ((user.excludeDM == false) && !(commonUsers.includes(user.id)))
+                        MAIN.directMessage(message, user.id, game);
             }
 
             if (role.members.size > 20)
