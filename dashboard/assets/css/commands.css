@@ -1,0 +1,17 @@
+li {
+    cursor: pointer;
+}
+
+.commands li {
+    margin: 5px 0;
+    border-radius: 5px;
+    border: 1px solid lightgray !important;
+}
+
+#searchLabel {
+    margin-bottom: 0;
+    margin-top: 27px;
+    max-height: 15px;
+    display: flex;
+    align-items: center;
+}

@@ -4,67 +4,67 @@ const Commands = require('./commands.json');
 
 function gameHelp(message, params, user) {
 
-    return generalHelpMessage(message, 1, `Games Commands`, user);
+    return generalHelpMessage(message, 'games', `Games Commands`, user);
 }
 exports.gameHelp = gameHelp;
 
 async function helpStats(message, params, user) {
 
-    return generalHelpMessage(message, 2, `Stats Commands`, user);
+    return generalHelpMessage(message, 'stats', `Stats Commands`, user);
 }
 exports.helpStats = helpStats;
 
 function helpMiscellaneous(message, params, user) {
 
-    return generalHelpMessage(message, 3, `Miscellaneous Commands`, user);
+    return generalHelpMessage(message, 'miscellaneous', `Miscellaneous Commands`, user);
 }
 exports.helpMiscellaneous = helpMiscellaneous;
 
 function helpMusic(message, params, user) {
 
-    return generalHelpMessage(message, 4, `Music Commands`, user);
+    return generalHelpMessage(message, 'music', `Music Commands`, user);
 }
 exports.helpMusic = helpMusic;
 
 function helpAdministrator(message, params, user) {
 
-    return generalHelpMessage(message, 5, `Admin Commands`, user);
+    return generalHelpMessage(message, 'admin', `Admin Commands`, user);
 }
 exports.helpAdministrator = helpAdministrator;
 
 function helpQOF(message, params, user) {
 
-    return generalHelpMessage(message, 6, `Quality of Life Commands`, user);
+    return generalHelpMessage(message, 'qof', `Quality of Life Commands`, user);
 }
 exports.helpQOF = helpQOF;
 
 function helpGeneral(message, params, user) {
 
-    return generalHelpMessage(message, 8, `General Commands`, user);
+    return generalHelpMessage(message, 'general', `General Commands`, user);
 }
 exports.helpGeneral = helpGeneral;
 
 function helpTutorials(message, params, user) {
 
-    return generalHelpMessage(message, 9, `Tutorial Commands`, user);
+    return generalHelpMessage(message, 'tutorial', `Tutorial Commands`, user);
 }
 exports.helpTutorials = helpTutorials;
 
 function helpBugsSuggestions(message, params, user) {
 
-    return generalHelpMessage(message, 10, `Bugs/Suggestion Commands`, user);
+    return generalHelpMessage(message, 'bugs', `Bugs/Suggestion Commands`, user);
 }
 exports.helpBugsSuggestions = helpBugsSuggestions;
 
 function helpTwitch(message, params, user) {
 
-    return generalHelpMessage(message, 11, `Twitch Commands`, user);
+    return generalHelpMessage(message, 'notifications', `Notification Commands`, user);
 }
 exports.helpTwitch = helpTwitch;
 
 const helpFirstTime = async function (message, params, user) {
 
-    return generalHelpMessage(message, 12, `First Time Commands`, user);
+    return generalHelpMessage(message, 'firstTime', `First Time Commands`, user);
 }
 exports.helpFirstTime = helpFirstTime;
 
@@ -104,7 +104,7 @@ const generalHelpMessage = async function (message, tag, title, user) {
 
     if (!user.completedTutorials.includes(tag))
         switch (tag) {
-            case 1:
+            case 'games':
                 description += "```fix\nYou have not completed the tutorial for this section, you can do so by typing " + `${(await MAIN.getPrefix(message, user))}gameTutorial` + "```";
                 break;
             case 2:
@@ -171,7 +171,7 @@ async function generalHelp(message, params, user) {
             [
                 { name: "Popular", value: "Games", inline: true },
                 { name: "Popular", value: "Music", inline: true },
-                { name: "Popular", value: "Twitch/Youtube", inline: true },
+                { name: "Popular", value: "Notifications", inline: true },
                 // { name: "Guide", value: "Help", inline: true },
                 { name: "Useful", value: "firstTime", inline: true },
                 { name: "Useful", value: "Tutorials", inline: true },

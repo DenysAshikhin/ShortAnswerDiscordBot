@@ -1,0 +1,5 @@
+mixin category(name, icon)
+    li.list-group-item(id = name.toLowerCase()) #[i(class=icon)] #{name}
+
+mixin command(command)
+    li.list-group-item(class=command.subsection id=command.title) #{command.title}

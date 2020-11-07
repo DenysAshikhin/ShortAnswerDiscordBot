@@ -41,10 +41,10 @@
     "puppeteer": "^4.0.0",
     "puppeteer-extra": "^3.1.15",
     "teemojs": "^2.0.0-alpha.6",
-    "twitch": "^4.2.2",
+    "twitch": "^4.2.7",
     "uniqid": "^5.2.0",
     "yt-channel-info": "^1.1.4",
-    "ytdl-core": "^3.2.2",
+    "ytdl-core": "^4.0.0",
     "ytpl": "^1.0.1",
     "ytsr": "^1.0.3"
   },

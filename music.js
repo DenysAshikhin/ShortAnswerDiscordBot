@@ -162,8 +162,9 @@ async function spotifyPlaylist(message, params, user) {
         console.log(1)
         let searchResult = await ytsr(name, { limit: 5 });
 
-        searchResult.items = searchResult.items.filter(element => element.type == 'video');
 
+        searchResult.items = searchResult.items.filter(element => element.type == 'video');
+        console.log(searchResult.items.length)
 
         let searchyArray = searchResult.items.reduce((accum, current) => {
             current.title = current.title.replace(/([(){}&,\-])/g, '').replace(/\s{2,}/g, ' ');
@@ -215,6 +216,7 @@ async function spotifyPlaylist(message, params, user) {
 
         if (result.length == 0) {
 
+            console.log(`entered empty length`)
 
             let FOUND = false;
             for (let result of searchyArray) {
@@ -237,6 +239,10 @@ async function spotifyPlaylist(message, params, user) {
                     continue;
                 }
 
+                if (FOUND) {
+                    console.log("FOUND BREAK")
+                    break;
+                }
             }
 
 
@@ -325,7 +331,10 @@ async function spotifyPlaylist(message, params, user) {
         }
 
 
-        if (result[0].score <= 0.2) {//artist + name fuzzy
+        // console.log(result[0])
+        // console.log('wwwwww')
+
+        else if (result[0].score <= 0.2) {//artist + name fuzzy
             let topScores = result.filter(element => element.score <= 0.2);
             topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
             await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
@@ -452,6 +461,8 @@ async function spotifyPlaylist(message, params, user) {
                 accum.push({ name: "Probably correct song(s)", value: `${index + 1}) ` + current.original + '\n' });
                 return accum;
             }, []));
+
+    numSongs = orderPlaylist.length;
 
     if (finalReport.length > 0)
         MAIN.prettyEmbed(message, finalReport, {

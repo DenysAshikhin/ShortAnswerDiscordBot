@@ -1,10 +1,16 @@
-include includes/header.pug
+doctype
+html(lang='en')
+    head
+        include includes/header.pug
+        link(rel='stylesheet', href='/css/index.css')
 
-body
-    include includes/navbar.pug
-    .jumbotron.text-center.bg-light
-        h1.display-3 I got no clue what is going on
-        p.lead Test
-        button.btn.btn-dark wow
-    wow
+    body
+        include includes/navbar.pug
+        
+        .jumbotron.text-center.bg-transparent
+            h1.display-3 I got no clue what is going on
+            p.lead Test 
+                i.fas.fa-star
+            button.btn.btn-dark wow
+        wow
         

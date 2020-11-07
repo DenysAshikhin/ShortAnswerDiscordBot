@@ -12,6 +12,7 @@ var alertCache = new Map();
 
 const alertYoutube = async function (params) {
 
+ //  return 1;
     let userArray = [];
     let guildArray = [];
     let promiseArray = [];
@@ -78,6 +79,7 @@ const alertYoutube = async function (params) {
 
             });
         promiseArray.push(legitYoutuber);
+        await new Promise(r => setTimeout(r, 20));
     }
 
     await Promise.all(promiseArray);
@@ -107,15 +109,23 @@ const alertYoutube = async function (params) {
                 }
                 //Might not cache of guilds above since I'd only ever run across the same guild once...?
 
+              //  console.log(`${guildArray[i].youtuberID} -- is who we wanted -- ${dbGuild.name} is where we at`)
+
+
+                if(!dbGuild.name){
+
+                    console.log('wow')
+                    console.log(1)
+                }
 
                 for (let pair of dbGuild.youtubeAlerts.get(guildArray[i].youtuberID)) {//For ever youtube/channel pair in the guildDB
 
                     if (pair[1] != guildArray[i].vidID) {//check the the pair hasnt already been notified of this song
 
-                        if (dbGuild.youtubeHERE)
-                            legitGuild.channels.cache.get(pair[0]).send('@here ' + guildArray[i].message);
-                        else
-                            legitGuild.channels.cache.get(pair[0]).send(guildArray[i].message);
+                       if (dbGuild.youtubeHERE)
+                           legitGuild.channels.cache.get(pair[0]).send('@here ' + guildArray[i].message);
+                       else
+                           legitGuild.channels.cache.get(pair[0]).send(guildArray[i].message);
 
                         pair[1] = guildArray[i].vidID;
 

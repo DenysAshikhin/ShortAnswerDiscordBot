@@ -1737,6 +1737,7 @@ const infiniteQueue = async function (message, params, user) {
         }
         else {
 
+            console.log('infinite queue triggered')
             let summoner = await MAIN.findUser({ id: squad.summonerID });
 
             // let newMessage = await squad.message.channel.send("Teams have been formed!");

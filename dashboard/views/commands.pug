@@ -1,0 +1,39 @@
+doctype
+html(lang='en')
+    head
+        include includes/header.pug
+        script.
+            var searchCommands = !{JSON.stringify(completeCommands)}
+        script(src='/js/commands.js', defer)
+        script(src='https://cdn.jsdelivr.net/npm/fuse.js@6.4.3', defer)
+        //- script(defer).
+            
+        //-     console.log(#{commands[0]}.title)
+        link(rel='stylesheet' href='/css/commands.css')
+    body
+        include includes/navbar.pug
+        include includes/mixins
+        .container
+            .jumbotron.text-center.bg-transparent
+                h1.display-3 #{subtitle || "Rip"}
+                p.lead View the commands! 
+                    i.fas.fa-star
+                hr
+            section#commands
+                .d-flex.justify-content-center
+                    //p(id='searchLabel') Search:
+                    
+                    #searchBox.form-group.p-3
+                        input.form-control(type='search' placeholder="Type to search..." aria-label="Recipient's username")
+                    align-middle(id='searchLabel' ).fas.fa-search
+                    //button.btn.btn-info(id='searchButton') #[i.fas.fa-search]
+                .row
+                    .col-sm-3.categories
+                       ul.list-group.mb-2
+                            each category in categories
+                              +category(category.name, category.icon)
+                    .col-sm-9
+                        ul.list-group.commands
+                            i(id='noResults' style='display: none') No search results!
+                            each command in completeCommands
+                               +command(command)

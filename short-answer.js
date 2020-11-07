@@ -36,7 +36,7 @@ try {
         token = config.TesterToken;
         IP = '127.0.0.1';
         PORT = config.PORT;
-        // defaultPrefix = "##";
+        defaultPrefix = "##";
     }
 }
 catch (err) {
@@ -96,6 +96,7 @@ var osu = require('node-os-utils');
 const { executionAsyncResource } = require('async_hooks');
 const { isError } = require('util');
 const { mainModule } = require('process');
+const Bot = require('./Bot');
 var cpu = osu.cpu;
 var mem = osu.mem;
 
@@ -220,7 +221,8 @@ async function checkControlsEmoji(message) {
                 );
 
                 GAMES.games.push(gameSuggest.suggestQueue[0].game);
-
+                GAMES.games.sort();
+                Bot.findOneAndUpdate({}, { $set: { games: GAMES.games } }, function (err, doc, res) { if (err) console.log(err); if (res) console.log(res); if (doc) console.log(doc) })
 
                 let guild = await findGuild({ id: gameSuggest.guildID });
                 guild.gameSuggest.shift();
@@ -281,7 +283,7 @@ const modifiedSuggestionAccept = async function (game) {
     GAMES.games.push(game);
     GAMES.games.sort();
 
-    Bot.findOneAndUpdate({}, { $set: { games: GAMES.games } }).exec();
+    Bot.findOneAndUpdate({}, { $set: { games: GAMES.games } }, function (err, doc, res) { if (err) console.log(err); if (res) console.log(res); if (doc) console.log(doc) })
 
 
     let guild = await findGuild({ id: gameSuggest.guildID });
@@ -366,19 +368,19 @@ const Embed = {
 exports.Embed = Embed;
 
 const tags = [
-    1,// - games
-    2,// - stats
-    3,// - miscellaneous
-    4,// - music
-    5,// - administrator
-    6,// - quality of life
-    7,// - help
-    8,// - general
-    9,// - tutorials
-    10,// - bugs/suggestions/improvements
-    11,// - twitch/Youtube
-    12,// - First Time,
-    13//Autorole stuff
+    'games',
+    'stats',
+    'miscellaneous',
+    'music',
+    'admin',
+    'qof',
+    'help',
+    'general',
+    'tutorials',
+    'bugs',
+    'notifications',
+    'firstTime',
+    'autoRole'
 ]
 exports.tags = tags;
 
@@ -412,6 +414,10 @@ const findUser = async function (member, force) {
 
             await checkExistance(member)
             let tempUser = await User.findOne({ id: member.id });
+            if (!tempUser) {
+                console.log(`Found null user: ${member}`)
+                console.log(`followed by: ${member.id}`)
+            }
             cachedUsers.set(tempUser.id, tempUser);
             return tempUser;
         }
@@ -1469,10 +1475,13 @@ const getPrefix = async function (message, user) {
             // console.log("Could not find a guild when searching for user");
             // console.log(`guilds: ${user.guilds} :::: ${message.guild.id}`);
             user = await findUser(message.member, true);
-           // console.log(user);
+            // console.log(user);
             index = user.guilds.indexOf(message.guild.id);
-            if (index == -1)
+            if (index == -1) {
+
                 console.log("this should even be possible")
+                console.log(`guild tried to index of: ${message.guild.id}`)
+            }
         }
 
         if (user.prefix[index] != "-1") {
@@ -1716,7 +1725,7 @@ async function checkExistance(member) {
     }
     else {
         //   console.log("The user doesnt exist. " + member.displayName);
-       //return (await createUser(member));
+        await createUser(member);
         return false;
     }
 }
@@ -2291,12 +2300,30 @@ const performFix = async function (user) {
 
 async function updateAll() {
 
-    // let users = await getUsers();
 
-    // // let i = 0;
+    //console.log("someday")
+
+    //     let users = await getUsers();
+
+    //     // // let i = 0;
 
 
+    //     let last = 0;
+    //     let step = 0.05
+    //     tempArr = [];
+    // console.log('we go')
+    //     for (let i = 0; i < users.length; i++) {
 
+    //         if (((i / users.length) - last) >= step) {
+    //             console.log(`${i / users.length}% Done`);
+    //             last = i / users.length;
+    //         }
+
+    //         if (tempArr.includes(users[i].displayName))
+    //             console.log(`Found repeat: ${users[i].displayName}`)
+    //         tempArr.push(users[i].displayName)
+
+    //     }
 
 
 

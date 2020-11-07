@@ -64,14 +64,27 @@ twitchInitiliasation();
 
 async function checkGuildTwitchStreams(guilds) {
     //  console.log("CGHECKING GUILD")
+    //return 1;
     let sendArray = [];
     let promiseArray = [];
     for (guild of guilds) {
         for (channel1 of guild.channelTwitch) {
             let GUILD1 = guild;
             let channel = channel1;
+            // console.log(GUILD1.name)
             let channelByID = getTwitchChannelByID(channel[0])
                 .then(async (streamer) => {
+                    //   console.log('Got response for: ', GUILD1.name, '  ', GUILD1.id)
+                    if (!streamer) {
+
+                        GUILD1.channelTwitch.splice(GUILD1.channelTwitch.indexOf(channel1, 1));
+                        Guild.findOneAndUpdate({ id: GUILD1.id }, { $set: { channelTwitch: GUILD1.channelTwitch } }).exec()
+                        console.log('found null')
+                        console.log(1)
+                        fs.promises.writeFile(`logs/twitch-${uniqid()}.json`, JSON.stringify(`Deleted a twitch from: ${GUILD1.name}\n${GUILD1.id}`), 'UTF-8');
+                        return;
+                    }
+                    //console.log(streamer.displayName)
                     let stream = await streamer.getStream();
 
                     if (stream) {
@@ -144,6 +157,19 @@ async function checkUsersTwitchStreams(users) {
             let USER = user1;
             let twitchByChannel = getTwitchChannelByID(channel)
                 .then(async (streamer) => {
+
+
+                    if (!streamer) {
+
+                        GUILD1.channelTwitch.splice(GUILD1.channelTwitch.indexOf(channel1, 1));
+                        Guild.findOneAndUpdate({ id: GUILD1.id }, { $set: { channelTwitch: GUILD1.channelTwitch } }).exec()
+                        console.log('found null')
+                        console.log(1)
+                        fs.promises.writeFile(`logs/twitch-${uniqid()}.json`, JSON.stringify(`Deleted a twitch from: ${USER.displayName}\n${USER.id}`), 'UTF-8');
+                        return;
+                    }
+
+
                     let stream = await streamer.getStream();
                     if (stream) {
                         let found = false;

@@ -95,6 +95,7 @@ if (process.argv.length == 3) {
     uri = config.uri;
     token = config.token;
     HOST = config.IP;
+    //HOST = '127.0.0.1';
     PORT = config.PORT;
 }
 else {
@@ -345,6 +346,7 @@ async function countTalk() {
 
                 for (let MEMBER of channel.members) {
                     if ((channel.members.size < 2) && (channel.id != guild.afkChannelID)) {
+                        console.log('didnt count')
                         continue;
                     }
                     let member = MEMBER[1];
@@ -362,6 +364,7 @@ async function countTalk() {
 
                                     let timeAFK = usy.timeAFK;
                                     timeAFK[index] += 1;
+                                    console.log('logged afk for: ', member.displayName)
 
                                     User.findOneAndUpdate({ id: member.id },
                                         {
@@ -376,12 +379,19 @@ async function countTalk() {
 
                                     let lastTalked = usy.lastTalked;
                                     lastTalked[index] = getDate();
+
+
+                                    // if(member.id == '99615909085220864')
+                                    // console.log("found him")
+
                                     //   console.log("Doing ")
-                                    User.findOneAndUpdate({ id: member.id },
+                                    User.findOneAndUpdate({ id: usy.id },
                                         {
                                             $set: { timeTalked: timeTalked, lastTalked: lastTalked }
                                         }, function (err, doc, res) {
                                             //console.log(doc);
+                                            // if (err) console.log(err)
+                                            // if (res) console.log(res);
                                         });
                                 }
                             }
@@ -1094,7 +1104,7 @@ async function minuteCount() {
         countTalk();
         checkTwitch();
         youtubeLogic.alertYoutube();
-        // console.log(county++)
+       // console.log(county++)
     }
 }
 setInterval(minuteCount, 60 * 1000);
@@ -1114,7 +1124,7 @@ const checkRL = async function () {
 }
 
 process.on('unhandledRejection', (err, promise) => {
-
+    //  console.log(err);
 
     if (defaultPrefix != '##') {
         console.log("Caught unhandledRejectionWarning")
@@ -1127,7 +1137,7 @@ process.on('unhandledRejection', (err, promise) => {
 
 process.on('unhandledException', (err, p) => {
 
-
+    // console.log(err);
     if (defaultPrefix != '##') {
         console.log("Caught unhandledException")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');

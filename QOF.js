@@ -245,7 +245,6 @@ async function timerTrack() {
             if (timer.time <= 0)
                 continue;
 
-
             timer.time -= 1;
         }
     }
@@ -286,7 +285,9 @@ const updateTimer = async function () {
                 continue;
             await purge.author.send("Your timer has finished!");
             await purge.message.edit(":alarm_clock: *Ring*" + MAIN.mention(purge.author.id) + "*Ring* :alarm_clock:");
-            GUILDTimers[1].splice(GUILDTimers[1].indexOf(purge))
+
+            GUILDTimers[1].splice(GUILDTimers[1].indexOf(purge), 1)
+
         }
     }
 }
