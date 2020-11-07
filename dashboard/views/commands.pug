@@ -29,9 +29,10 @@ html(lang='en')
                     //button.btn.btn-info(id='searchButton') #[i.fas.fa-search]
                 .row
                     .col-sm-3.categories
-                       ul.list-group.mb-2
+                        //-    ul.list-group.mb-2
+                        #accordion
                             each category in categories
-                              +category(category.name, category.icon)
+                              +category(category.name, category.icon, category.subSectionCategories, category.exactCategory)
                     .col-sm-9
                         ul.list-group.commands
                             i(id='noResults' style='display: none') No search results!

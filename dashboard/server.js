@@ -46,12 +46,14 @@ const initialise = async function () {
 
         for (let subSection of Commands[i].subsection) {
 
-            let subArr = subCategoryMap.get(subCategory);//See if there is an array in the map for this subSection
+            let subArr = subCategoryMap.get(subSection);//See if there is an array in the map for this subSection
             if (!subArr)
                 subCategoryMap.set(subSection, [subCategory]);
             else
-                if (!subArr.includes(subCategory))
+                if (!subArr.includes(subCategory)) {
                     subArr.push(subCategory);
+                    subArr.sort();
+                }
         }
 
 
@@ -60,13 +62,17 @@ const initialise = async function () {
 
     // console.log(Commands)
 
+
+    // console.log(subCategoryMap.get('games'))
+
+
     app.get('/commands', function (req, res) {
         res.render('commands', {
             subtitle: 'Commands',
-            categories: [{ name: 'Games', icon: 'fas fa-users' },
-            { name: 'Music', icon: 'fas fa-music' },
-            { name: 'Notifications', icon: 'fas fa-bell' },
-            { name: 'Stats', icon: 'fas fa-info-circle' }],
+            categories: [{ name: 'Games', icon: 'fas fa-users', subSectionCategories: subCategoryMap.get('games'), exactCategory: 'games' },
+            { name: 'Music', icon: 'fas fa-music', subSectionCategories: subCategoryMap.get('music'), exactCategory: 'music' },
+            { name: 'Notifications', icon: 'fas fa-bell', subSectionCategories: subCategoryMap.get('notifications'), exactCategory: 'notifications' },
+            { name: 'Stats', icon: 'fas fa-info-circle', subSectionCategories: subCategoryMap.get('stats'), exactCategory: 'stats' }],
             //commands: checkCommandsSearchArray.normal
             completeCommands: Commands,
             subSectionCategories: subCategoryMap

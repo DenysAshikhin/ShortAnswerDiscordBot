@@ -3,7 +3,7 @@ var lastActive = 'games';
 
 $('#searchBox').on('input', function (e) {
 
-  // console.log('called 1')
+    // console.log('called 1')
 
     if (e.target.value.length == 0) {
         setCategory({ category: lastActive });
@@ -47,26 +47,63 @@ $('#searchBox').on('input', function (e) {
 
 
 
-const setCategory = function (params) {
+const setCategory = function (category) {
 
     //console.log('called 2')
 
-    $('.categories li').removeClass('active');
+    //$('.categories li').removeClass('active');
 
     $(`#noResults`).hide();
 
-    const selected = params.category ? $(`#${params.category}`) : $(this);
-    lastActive = selected.attr('id')
-    selected.addClass('active');
+    // const selected = params.category ? $(`#${params.category}`) : $(this);
+    // // lastActive = selected.attr('id')
+    // // selected.addClass('active');
+    // // selected.children().show();
 
-    const category = selected[0].id
+    // const category = selected[0].id
 
     const catToShow = $(`.commands .${category}`);
 
     $('.commands li').hide();
     catToShow.show();
+
     // catToShow[0].style.borderTopWidth = "1px";
 }
-setCategory({ category: lastActive });
+//setCategory({ category: lastActive });
 
-$('.categories li').on('click', setCategory);
+//$('.categories li').on('click', setCategory);
+
+
+
+
+
+const setCategory1 = function (params) {
+
+    // console.log('called 3')
+
+
+    console.log($(this).parent().parent().parent().attr('exactcategory'));
+
+
+    let exactCategory = $(this).parent().parent().parent().attr('exactcategory');
+    setCategory(exactCategory );
+
+    // $('.categories li').removeClass('active');
+
+    // $(`#noResults`).hide();
+
+    // const selected = params.category ? $(`#${params.category}`) : $(this);
+    // lastActive = selected.attr('id')
+    // selected.addClass('active');
+    // selected.children().show();
+
+    // const category = selected[0].id
+
+    // const catToShow = $(`.commands .${category}`);
+
+    // $('.commands li').hide();
+    // catToShow.show();
+
+    // // catToShow[0].style.borderTopWidth = "1px";
+}
+$('.categoryButton').on('click', setCategory1);

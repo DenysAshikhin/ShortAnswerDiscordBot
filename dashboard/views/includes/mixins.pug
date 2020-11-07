@@ -1,5 +1,16 @@
-mixin category(name, icon)
-    li.list-group-item(id = name.toLowerCase()) #[i(class=icon)] #{name}
+mixin category(name, icon, sections, exactCategory)
+    //- li.list-group-item(id = name.toLowerCase()) #[i(class=icon)] #{name}  
+    //-     p.fas.fa-caret-down
+    .card.categoryCard.text-center(exactCategory= `${exactCategory}`)
+        div(id=`${name}Card`).card-header
+            h5.mb-0
+                button.btn.btn-link.collapsed.categoryButton(id=`${name}CategoryButton` data-toggle='collapse' data-target=`#${name}Collapse` aria-expanded='true' aria-controls=`${name}Collapse`) #[i(class=icon)] #{name}      
+                    .fas.fa-caret-down
+        div.collapse(id=`${name}Collapse` aria-labelledby=`${name}Card` data-parent='#accordion')
+            .card-body
+                ul.list-group.categories
+                    each category in sections
+                        li.list-group-item #{category}
 
 mixin command(command)
     li.list-group-item(class=command.subsection id=command.title) #{command.title}
