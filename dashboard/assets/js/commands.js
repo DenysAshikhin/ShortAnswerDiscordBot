@@ -48,7 +48,8 @@ $('#searchBox').on('input', function (e) {
 
 
 
-const setCategory = function (category) {
+
+const setCategory = function (category, subCategory) {
 
     //console.log('called 2')
 
@@ -59,11 +60,15 @@ const setCategory = function (category) {
     // const selected = params.category ? $(`#${params.category}`) : $(this);
     // // lastActive = selected.attr('id')
     // // selected.addClass('active');
-    // // selected.children().show();
+    // // );
 
     // const category = selected[0].id
 
-    const catToShow = $(`.commands .${category}`);
+
+    const catToShow = $(`.list-group-item.${category}.${subCategory}`);
+
+
+    //  = $(`.commands .${category}`);
 
     $('.commands li').hide();
     catToShow.show();
@@ -73,25 +78,46 @@ const setCategory = function (category) {
 //setCategory({ category: lastActive });
 
 
-const setSubsection = function(){
+const setSubsection = function () {
 
+    // console.log('clicky setSubSection')
+    $(`#noResults`).hide();
+    $('.categoryItem').removeClass('active');
+    $('.list-group-item.commands').hide();
+    const selected = $(this);
+    selected.addClass('active');
 
+    const exactCategory = selected.attr('exactcategory');
+    const subCategory = selected.attr('subCategory').split(' ').join('-pp-');
 
+    console.log(exactCategory)
+    console.log(subCategory)
+
+    const foundCommands = $(`.${exactCategory}.${subCategory}`);
+    foundCommands.show();
 }
+//setSubsection('games', 'Faction');
 
 $('.categoryItem').on('click', setSubsection);
 
 
 const setCategory1 = function (params) {
 
-    // console.log('called 3')
+    console.log('called 3')
 
 
-    console.log($(this).parent().parent().parent().attr('exactcategory'));
+    //console.log($(this).parent().parent().parent().attr('exactcategory'));
 
 
     let exactCategory = $(this).parent().parent().parent().attr('exactcategory');
-    setCategory(exactCategory );
+    setCategory(exactCategory);
+
+
+    let subCategoryList = $(this).parent().parent().next().find('.categoryItem')[0].click();
+    console.log(subCategoryList);
+    //.children()[0].children()[0].children()[0].click();
+
+
 
     // $('.categories li').removeClass('active');
 
@@ -117,4 +143,5 @@ $('.categoryButton').on('click', setCategory1);
 
 
 $(`#gamesCategoryButton`).click();
-setCategory('games')
+//$(`#gamesCategoryButton`).trigger();
+//setCategory('games')

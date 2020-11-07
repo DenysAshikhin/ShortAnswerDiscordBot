@@ -8,9 +8,9 @@ mixin category(name, icon, sections, exactCategory)
                     .fas.fa-caret-down
         div.collapse(id=`${exactCategory}Collapse` aria-labelledby=`${exactCategory}Card` data-parent='#accordion')
             .card-body
-                ul.list-group.categories
-                    each category in sections
-                        li.list-group-item.categoryItem #{category}
+                ul.list-group.list-group-flush.categories
+                    each section in sections
+                        li.list-group-item.categoryItem(exactCategory= `${exactCategory}` subCategory= `${section}`) #{section}
 
 mixin command(command)
-    li.list-group-item(class=command.subsection class=command.category.split(' ').join('-') id=command.title) #{command.title}
+    li.list-group-item.commands(class=command.subsection class=command.category.split(' ').join('-pp-') id=command.title) #{command.title}

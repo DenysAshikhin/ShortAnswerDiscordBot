@@ -41,6 +41,7 @@ const initialise = async function () {
 
     for (let i = 0; i < Commands.length; i++) {
 
+        Commands[i].category = Commands[i].category.split('*').join('').split('/').join('-');
 
         let subCategory = Commands[i].category;//Get the commands category
 
@@ -53,12 +54,12 @@ const initialise = async function () {
                 if (!subArr.includes(subCategory)) {
                     subArr.push(subCategory);
                     subArr.sort(function (a, b) {
-                        if (a[0] == '*')
-                            if (b[0] == '*')
+                        if (a == 'Other')
+                            if (b[0] == 'Other')
                                 return 0;
                             else
                                 return 1;
-                        if (b[0] == '*')
+                        if (b[0] == 'Other')
                             return -1;
 
                         else
