@@ -1,6 +1,7 @@
 $('.categories li')[0].classList.add('active');
 var lastActive = 'games';
 
+
 $('#searchBox').on('input', function (e) {
 
     // console.log('called 1')
@@ -71,10 +72,14 @@ const setCategory = function (category) {
 }
 //setCategory({ category: lastActive });
 
-//$('.categories li').on('click', setCategory);
+
+const setSubsection = function(){
 
 
 
+}
+
+$('.categoryItem').on('click', setSubsection);
 
 
 const setCategory1 = function (params) {
@@ -107,3 +112,9 @@ const setCategory1 = function (params) {
     // // catToShow[0].style.borderTopWidth = "1px";
 }
 $('.categoryButton').on('click', setCategory1);
+
+
+
+
+$(`#gamesCategoryButton`).click();
+setCategory('games')

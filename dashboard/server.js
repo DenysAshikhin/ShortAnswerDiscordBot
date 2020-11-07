@@ -52,7 +52,18 @@ const initialise = async function () {
             else
                 if (!subArr.includes(subCategory)) {
                     subArr.push(subCategory);
-                    subArr.sort();
+                    subArr.sort(function (a, b) {
+                        if (a[0] == '*')
+                            if (b[0] == '*')
+                                return 0;
+                            else
+                                return 1;
+                        if (b[0] == '*')
+                            return -1;
+
+                        else
+                            return a.localeCompare(b);
+                    });
                 }
         }
 
