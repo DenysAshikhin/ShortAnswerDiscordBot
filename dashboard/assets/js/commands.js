@@ -1,13 +1,18 @@
 $('.categories li')[0].classList.add('active');
-var lastActive = 'games';
-
+var lastActiveCategory = 'games';
+var lastActiveSubCategory = 'Faction';
+var lastActiveCategoryElement;
+var lastActiveSubCategoryElement;
 
 $('#searchBox').on('input', function (e) {
 
     // console.log('called 1')
 
     if (e.target.value.length == 0) {
-        setCategory({ category: lastActive });
+        setCategory(lastActiveCategory, lastActiveSubCategory);
+        if (lastActiveCategoryElement.hasClass('collapsed'))
+            lastActiveCategoryElement.click();
+        lastActiveSubCategoryElement.click();
         return 1;
     }
 
@@ -47,35 +52,17 @@ $('#searchBox').on('input', function (e) {
 });
 
 
-
-
 const setCategory = function (category, subCategory) {
 
     //console.log('called 2')
 
-    //$('.categories li').removeClass('active');
-
     $(`#noResults`).hide();
-
-    // const selected = params.category ? $(`#${params.category}`) : $(this);
-    // // lastActive = selected.attr('id')
-    // // selected.addClass('active');
-    // // );
-
-    // const category = selected[0].id
-
 
     const catToShow = $(`.list-group-item.${category}.${subCategory}`);
 
-
-    //  = $(`.commands .${category}`);
-
     $('.commands li').hide();
     catToShow.show();
-
-    // catToShow[0].style.borderTopWidth = "1px";
 }
-//setCategory({ category: lastActive });
 
 
 const setSubsection = function () {
@@ -88,10 +75,9 @@ const setSubsection = function () {
     selected.addClass('active');
 
     const exactCategory = selected.attr('exactcategory');
+    lastActiveCategory = exactCategory;
     const subCategory = selected.attr('subCategory').split(' ').join('-pp-');
-
-    console.log(exactCategory)
-    console.log(subCategory)
+    lastActiveSubCategory = subCategory;
 
     const foundCommands = $(`.${exactCategory}.${subCategory}`);
     foundCommands.show();
@@ -103,45 +89,16 @@ $('.categoryItem').on('click', setSubsection);
 
 const setCategory1 = function (params) {
 
-    console.log('called 3')
-
-
-    //console.log($(this).parent().parent().parent().attr('exactcategory'));
-
+    //console.log('called 3')
 
     let exactCategory = $(this).parent().parent().parent().attr('exactcategory');
-    setCategory(exactCategory);
+    lastActiveCategoryElement = $(this);
+    //setCategory(exactCategory);
 
-
-    let subCategoryList = $(this).parent().parent().next().find('.categoryItem')[0].click();
-    console.log(subCategoryList);
-    //.children()[0].children()[0].children()[0].click();
-
-
-
-    // $('.categories li').removeClass('active');
-
-    // $(`#noResults`).hide();
-
-    // const selected = params.category ? $(`#${params.category}`) : $(this);
-    // lastActive = selected.attr('id')
-    // selected.addClass('active');
-    // selected.children().show();
-
-    // const category = selected[0].id
-
-    // const catToShow = $(`.commands .${category}`);
-
-    // $('.commands li').hide();
-    // catToShow.show();
-
-    // // catToShow[0].style.borderTopWidth = "1px";
+    let subCategoryList = $(this).parent().parent().next().find('.categoryItem')[0];
+    lastActiveSubCategoryElement = subCategoryList;
+    subCategoryList.click();
 }
 $('.categoryButton').on('click', setCategory1);
 
-
-
-
 $(`#gamesCategoryButton`).click();
-//$(`#gamesCategoryButton`).trigger();
-//setCategory('games')
