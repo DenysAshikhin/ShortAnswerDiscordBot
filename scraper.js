@@ -95,6 +95,7 @@ if (process.argv.length == 3) {
     uri = config.uri;
     token = config.token;
     HOST = config.IP;
+    
     //HOST = '127.0.0.1';
     PORT = config.PORT;
 }
@@ -105,6 +106,8 @@ else {
     HOST = '127.0.0.1';
     PORT = config.PORT;
 }
+
+exports.HOST = HOST;
 
 // const Cryptr = require('cryptr');
 // const cryptr = new Cryptr(config.KEY);

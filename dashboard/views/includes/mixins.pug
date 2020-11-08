@@ -13,4 +13,15 @@ mixin category(name, icon, sections, exactCategory)
                         li.list-group-item.categoryItem(exactCategory= `${exactCategory}` subCategory= `${section}`) #{section}
 
 mixin command(command)
-    li.list-group-item.commands(class=command.subsection class=command.category.split(' ').join('-pp-') id=command.title) #{command.title}
+    //- li.list-group-item.commands(class=command.subsection class=command.category.split(' ').join('-pp-') id=command.title) #{command.title}
+    .card.commandCard.text-center(class=command.subsection class=command.category.split(' ').join('-pp-') id=command.title exactCommand=`${command.title}`)
+        div(id=`${command.title}Card`).card-header
+            h5.mb-0
+                div.collapsed.commandButton(id=`${command.title}CommandButton` data-toggle='collapse' data-target=`#${command.title}Collapse` aria-expanded='true' aria-controls=`${command.title}Collapse`) #{command.title}      
+                    .fas.fa-caret-down
+        div.collapse(id=`${command.title}Collapse` aria-labelledby=`${command.title}Card` data-parent='#commandAccordian')
+            .card-body
+                .div.text-left.font-weight-bold #{command.explanation}
+                .d-flex.flex-column.exampleColumn
+                    each examply in command.example
+                        .commandExamples.text-left.text-info #{examply}

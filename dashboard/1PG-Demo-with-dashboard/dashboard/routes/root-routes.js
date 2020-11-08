@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', (req, res) => res.render('index'));
 
 router.get('/commands', (req, res) => res.render('commands', {
-  subtitle: 'Commands',
+  subtitle: '"Short Answer Bot Commands',
   categories: [
     { name: 'Auto Mod', icon: 'fas fa-gavel' },
     { name: 'Economy', icon: 'fas fa-coins' }, 

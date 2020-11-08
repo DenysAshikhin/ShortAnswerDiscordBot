@@ -6,6 +6,15 @@ li {
     cursor: pointer;
 }
 
+.exampleColumn {
+    padding-top: 30px;
+}
+
+.commandExamples {
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+
 .commands li {
     margin: 5px 0;
     border-radius: 5px;

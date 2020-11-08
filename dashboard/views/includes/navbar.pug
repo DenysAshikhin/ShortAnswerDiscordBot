@@ -4,7 +4,7 @@ nav.navbar.navbar-expand-lg.navbar-light
     span.navbar-toggler-icon
   #navbarNavAltMarkup.collapse.navbar-collapse
     .navbar-nav
-        a.nav-link.active(href='#')        | Home Remove later
+        a.nav-link(href='#') Home Remove later
         span.sr-only (current)
     .float-right
         a.nav-link(href='commands') Commands
@@ -13,8 +13,8 @@ nav.navbar.navbar-expand-lg.navbar-light
     //.navbar-nav
     a.nav-link(href="/login") Login
     .float-right
-        a.nav-link.disabled(href='#' tabindex='-1' aria-disabled='true') Disabled WTF IS DISABLED?
-        
-        a.text wow
+        a.nav-link Disabled Text1
+        a.text.disabled( aria-disabled='true') Disabled Text2
+        a.text Text2
         br
-        a.text mommmmmmmmmm
+        a.text Text3

@@ -34,7 +34,8 @@ html(lang='en')
                             each category in categories
                               +category(category.name, category.icon, category.subSectionCategories, category.exactCategory)
                     .col-sm-9
-                        ul.list-group.commands
+                        //- ul.list-group.commands
+                        #commandAccordian
                             i(id='noResults' style='display: none') No search results!
                             each command in completeCommands
                                +command(command)

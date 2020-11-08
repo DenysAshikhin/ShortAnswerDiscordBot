@@ -906,7 +906,7 @@
     },
     {
         "title": "pairChannelWithTwitch",
-        "explanation": "Tells the bot to put a notification in the @mentioned channel when the specified twitch streamer goes live!",
+        "explanation": "Tells the bot to put a notification in the #mentioned channel when the specified twitch streamer goes live!",
         "example": [
             "1) pairChannelWithTwitch summit1g, #nameOfTextChannel"
         ],

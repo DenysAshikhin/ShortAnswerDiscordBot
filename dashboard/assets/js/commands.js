@@ -17,7 +17,7 @@ $('#searchBox').on('input', function (e) {
     }
 
     $(`#noResults`).hide();
-    $('.commands li').hide();
+    $('.commandCard').hide();
     $('.categories li').removeClass('active');
 
     const options = {
@@ -70,9 +70,11 @@ const setSubsection = function () {
     // console.log('clicky setSubSection')
     $(`#noResults`).hide();
     $('.categoryItem').removeClass('active');
-    $('.list-group-item.commands').hide();
+    $('.commandCard').hide();
     const selected = $(this);
     selected.addClass('active');
+
+    lastActiveSubCategoryElement = selected;
 
     const exactCategory = selected.attr('exactcategory');
     lastActiveCategory = exactCategory;
