@@ -42,7 +42,7 @@ $('#searchBox').on('input', function (e) {
 
     if (result.length != 0)
 
-        for (let i = result.length - 1; i > 0; i--) {
+        for (let i = result.length - 1; i >= 0; i--) {
             let foundCommand = result[i];
 
             let exactCommand = $(`#${foundCommand.item.title}`);
