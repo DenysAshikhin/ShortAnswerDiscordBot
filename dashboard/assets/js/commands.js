@@ -42,9 +42,11 @@ $('#searchBox').on('input', function (e) {
 
     if (result.length != 0)
 
-        for (foundCommand of result) {
+        for (let i = result.length - 1; i > 0; i--) {
+            let foundCommand = result[i];
 
             let exactCommand = $(`#${foundCommand.item.title}`);
+            exactCommand.parent().prepend(exactCommand);
             exactCommand.show();
         }
     else

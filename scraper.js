@@ -13,8 +13,7 @@ const Guild = require('./Guild.js')
 const http = require("http");
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const DASHBOARD = require('./dashboard/server.js');
-DASHBOARD.initialise();
+
 const path = require('path');
 
 const fs = require('fs');
@@ -23,6 +22,8 @@ var token;
 var uri;
 var PORT;
 var HOST;
+var REDIRECT_URL;
+exports.HOST = HOST;
 
 const { Client, Intents } = require('discord.js');
 
@@ -95,9 +96,11 @@ if (process.argv.length == 3) {
     uri = config.uri;
     token = config.token;
     HOST = config.IP;
-    
+
     //HOST = '127.0.0.1';
     PORT = config.PORT;
+    REDIRECT_URL = config.dashboardURLLive;
+    console.log(config.dashboardURLLive)
 }
 else {
     uri = config.uri;
@@ -105,9 +108,16 @@ else {
     defaultPrefix = "##";
     HOST = '127.0.0.1';
     PORT = config.PORT;
-}
+    REDIRECT_URL = config.dashboardURLTest;
+    console.log(config.dashboardURLTest)
 
+}
 exports.HOST = HOST;
+exports.REDIRECT_URL = REDIRECT_URL;
+
+const DASHBOARD = require('./dashboard/server.js');
+
+DASHBOARD.initialise();
 
 // const Cryptr = require('cryptr');
 // const cryptr = new Cryptr(config.KEY);
@@ -1107,7 +1117,7 @@ async function minuteCount() {
         countTalk();
         checkTwitch();
         youtubeLogic.alertYoutube();
-       // console.log(county++)
+        // console.log(county++)
     }
 }
 setInterval(minuteCount, 60 * 1000);

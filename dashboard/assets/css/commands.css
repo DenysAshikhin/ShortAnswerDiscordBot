@@ -21,6 +21,14 @@ li {
     border: 1px solid lightgray !important;
 }
 
+#accordion {
+    padding-top: 16px;
+}
+
+#commandContainer {
+    padding-top: 20px;
+}
+
 #searchLabel {
     margin-bottom: 0;
     margin-top: 27px;

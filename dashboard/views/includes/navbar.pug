@@ -1,20 +1,23 @@
 nav.navbar.navbar-expand-lg.navbar-light
   a.navbar-brand(href='/') Short Answer Bot
-  button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbarNavAltMarkup' aria-controls='navbarNavAltMarkup' aria-expanded='false' aria-label='Toggle navigation')
+  button.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbar', aria-controls='navbar', aria-expanded='false', aria-label='Toggle navigation')
     span.navbar-toggler-icon
-  #navbarNavAltMarkup.collapse.navbar-collapse
+  #navbar.collapse.navbar-collapse
     .navbar-nav
-        a.nav-link(href='#') Home Remove later
-        span.sr-only (current)
-    .float-right
-        a.nav-link(href='commands') Commands
-    .navbar-nav.ml-auto    
-        a.nav-link(href='#') Pricing
-    //.navbar-nav
-    a.nav-link(href="/login") Login
-    .float-right
-        a.nav-link Disabled Text1
-        a.text.disabled( aria-disabled='true') Disabled Text2
-        a.text Text2
-        br
-        a.text Text3
+      a.nav-link(href='/commands')
+        i.fas.fa-code
+        span.pl-1 Commands
+    .navbar-nav.ml-auto
+      if user
+        .dropdown.mr-2
+          .dropdown-toggle(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+            img.user-avatar.round(src=user.avatarUrl(32)) 
+            span.pl-2 #{user.username}
+          .dropdown-menu(aria-labelledby='dropdownMenuButton')
+            a.dropdown-item(href='/dashboard') Dashboard
+            hr
+            a.dropdown-item(href='/logout') Logout
+      else
+        a.nav-link(href='/login') 
+          i.fas.fa-sign-in-alt
+          span.pl-1 Login

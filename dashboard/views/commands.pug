@@ -14,19 +14,12 @@ html(lang='en')
         include includes/navbar.pug
         include includes/mixins
         .container
-            .jumbotron.text-center.bg-transparent
-                h1.display-3 #{subtitle || "Rip"}
-                p.lead View the commands! 
+            .d-flex.flex-column.justify-content-center
+                h1.text-center.display-3 #{subtitle || "Rip"}
+                p.text-center.lead Browse the commands! 
                     i.fas.fa-star
-                hr
-            section#commands
-                .d-flex.justify-content-center
-                    //p(id='searchLabel') Search:
-                    
-                    #searchBox.form-group.p-3
-                        input.form-control(type='search' placeholder="Type to search..." aria-label="Recipient's username")
-                    align-middle(id='searchLabel' ).fas.fa-search
-                    //button.btn.btn-info(id='searchButton') #[i.fas.fa-search]
+        #commandContainer.container 
+            section#commands              
                 .row
                     .col-sm-3.categories
                         //-    ul.list-group.mb-2
@@ -34,6 +27,11 @@ html(lang='en')
                             each category in categories
                               +category(category.name, category.icon, category.subSectionCategories, category.exactCategory)
                     .col-sm-9
+                        
+                        .d-flex.justify-content-center    
+                            #searchBox.form-group.p-3
+                                input.form-control(type='search' placeholder="Type to search..." aria-label="Recipient's username")
+                            align-middle(id='searchLabel' ).fas.fa-search
                         //- ul.list-group.commands
                         #commandAccordian
                             i(id='noResults' style='display: none') No search results!
