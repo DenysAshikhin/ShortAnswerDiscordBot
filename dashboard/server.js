@@ -23,18 +23,14 @@ app.use(Cookies.express('a', 'b', 'c'));
 app.locals.basedir = `${__dirname}/assets`;
 
 
-app.use((req, res, next) => {
+const checkHTTP = function (req, res, next) {
+
     if (req.protocol === 'http') {
         res.redirect(301, `https://${req.headers.host}${req.url}`);
     }
     else
         next();
-});
-
-
-
-
-
+}
 
 
 const sslPath = path.join(__dirname, '..', 'ssl');
@@ -57,10 +53,12 @@ var httpsServer
 const initialise = async function () {
 
     app.use('/',
+        middleware.checkHTTP,
         middleware.updateUser,
         rootRoutes,
-        authRoutes);
-    app.use('/dashboard', middleware.validateUser, dashboardRoutes);
+        authRoutes,
+        middleware.validateUser, middleware.updateGuilds, dashboardRoutes);
+
     app.get('*', (req, res) => res.render('errors/404'));
 
 

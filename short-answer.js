@@ -1479,8 +1479,14 @@ const getPrefix = async function (message, user) {
             index = user.guilds.indexOf(message.guild.id);
             if (index == -1) {
 
-                console.log("this should even be possible")
-                console.log(`guild tried to index of: ${message.guild.id}`)
+                user = await findUser(message.member, true);
+                // console.log(user);
+                index = user.guilds.indexOf(message.guild.id);
+
+                if (index == -1) {
+                    console.log("this should even be possible")
+                    console.log(`guild tried to index of: ${message.guild.id}`)
+                }
             }
         }
 

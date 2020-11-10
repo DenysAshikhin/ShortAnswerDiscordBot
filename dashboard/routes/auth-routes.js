@@ -16,9 +16,6 @@ router.get('/auth', async function (req, res) {
         const code = req.query.code;
         const token = await authClient.getAccess(code);
 
-        console.log('trying to set')
-        console.log(token);
-
         //res.Cookies.set('key', token);
         res.cookies.set('key', token)
         res.redirect('/dashboard');
@@ -32,7 +29,6 @@ router.get('/auth', async function (req, res) {
 
 router.get('/logout', function (req, res) {
 
-
     console.log('deleting key and redirecting');
 
     res.cookies.set('key', '');
@@ -40,5 +36,9 @@ router.get('/logout', function (req, res) {
     res.redirect('/');
 });
 
+router.get('/invite', function (req, res){
 
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=689315272531902606&redirect_uri=${MAIN.REDIRECT_URL}/dashboard&response_type=code&permissions=8&scope=bot`);
+
+});
 module.exports = router;

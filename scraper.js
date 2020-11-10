@@ -100,7 +100,6 @@ if (process.argv.length == 3) {
     //HOST = '127.0.0.1';
     PORT = config.PORT;
     REDIRECT_URL = config.dashboardURLLive;
-    console.log(config.dashboardURLLive)
 }
 else {
     uri = config.uri;
@@ -109,7 +108,6 @@ else {
     HOST = '127.0.0.1';
     PORT = config.PORT;
     REDIRECT_URL = config.dashboardURLTest;
-    console.log(config.dashboardURLTest)
 
 }
 exports.HOST = HOST;
@@ -117,7 +115,7 @@ exports.REDIRECT_URL = REDIRECT_URL;
 
 const DASHBOARD = require('./dashboard/server.js');
 
-DASHBOARD.initialise();
+
 
 // const Cryptr = require('cryptr');
 // const cryptr = new Cryptr(config.KEY);
@@ -184,8 +182,8 @@ async function updateResources() {
     os.cpuUsage((v) => { cpu = v; return true; });
     memory = os.freemem();
 }
-updateResources();
-setInterval(updateResources, 5000)
+// updateResources();
+// setInterval(updateResources, 5000)
 
 async function showResources() {
     console.log(cpu)
@@ -1042,6 +1040,7 @@ connectDB.once('open', async function () {
         // createBackUp();
         checkTwitch();
         youtubeLogic.alertYoutube();
+        DASHBOARD.initialise();
         //setInterval(createBackUp, 6 * 60 * 60 * 1000);
     });
 
