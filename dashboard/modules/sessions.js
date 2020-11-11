@@ -27,7 +27,7 @@ const update = async function (key) {
         authUser: await authClient.getUser(key),
         guilds: getManageableGuilds(await authClient.getGuilds(key))
     },
-        { ttl: 6 * 60 * 1000 });
+        { ttl: 24* 60 * 60 * 1000 });
 }
 
 
@@ -43,7 +43,7 @@ const getManageableGuilds = function (authGuilds) {
 
         const tempGuild = authGuilds.get(id);
 
-        if (!guild || !isManager) {
+        if (!guild) {
             continue;
         }
 

@@ -14,6 +14,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "body-parser": "^1.19.0",
     "caching-map": "^1.0.2",
     "cheerio": "^1.0.0-rc.3",
     "cookies": "^0.8.0",
@@ -31,6 +32,7 @@
     "is-image-url": "^1.1.8",
     "is-url": "^1.2.4",
     "is-video": "^1.0.1",
+    "method-override": "^3.0.0",
     "mongodb": "^3.6.2",
     "mongoose": "^5.10.5",
     "mv": "^2.1.1",

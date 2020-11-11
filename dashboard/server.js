@@ -1,4 +1,6 @@
 const express = require('express');
+const bodyParser = require('body-parser').urlencoded({ extended: true });
+const methodOverride = require('method-override');
 const app = express();
 const path = require('path');
 const MAIN = require('../scraper.js');
@@ -33,6 +35,8 @@ const initialise = async function () {
     app.set('view engine', 'pug')
     app.use(express.static(`${__dirname}/assets`));
     app.use(Cookies.express('a', 'b', 'c'));
+    app.use(bodyParser);
+    app.use(methodOverride('_method'));
     app.locals.basedir = `${__dirname}/assets`;
 
 

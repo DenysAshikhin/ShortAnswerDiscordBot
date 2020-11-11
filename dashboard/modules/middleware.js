@@ -5,6 +5,7 @@ const authClient = require('./auth-client.js');
 const sessions = require('./sessions');
 
 const MAIN = require('../../scraper.js');
+const Guild = require('../../Guild.js');
 
 
 module.exports.checkHTTP = function (req, res, next) {
@@ -50,11 +51,51 @@ module.exports.updateUser = async function (req, res, next) {
 
 module.exports.validateGuild = async function (req, res, next) {
 
-    console.log(res.locals.guilds.find(guildy => guildy.id === req.params.id))
+    res.locals.guild = res.locals.guilds.find(function (guildy) {
 
-    res.locals.guild = res.locals.guilds.find(guildy => guildy.id === req.params.id)
-    if (res.locals.guild)
+        return guildy.id === req.params.id
+    });
+
+
+    if (res.locals.guild) {
+
+        let promiseArray = [MAIN.findUser({ id: res.locals.user.id }), Guild.findOne({ id: res.locals.guild.id })]
+
+        let finishArray = await Promise.all(promiseArray);
+
+        res.locals.dbUser = finishArray[0];
+        res.locals.dbGuild = finishArray[1];
+        console.log(`Setting user: ${res.locals.dbUser.displayName}`)
+        console.log(`Setting Guild: ${res.locals.dbGuild.name}`)
+
+
+        if (res.locals.dbGuild.prefix == '-1')
+            res.locals.guildPrefix = 'sa!';
+        else
+            res.locals.guildPrefix = res.locals.dbGuild.prefix;
+
+        let index = res.locals.dbUser.guilds.indexOf(res.locals.dbGuild.id);
+
+        if (index == -1) {
+            console.log("This bug is ridunculous")
+            res.locals.userPrefix = 'sa!';
+        }
+        else
+            res.locals.userPrefix = res.locals.dbUser.prefix[index];
+
+
+
+
+
+        if (res.locals.guild.members.cache.get(res.locals.dbUser.id).hasPermission("ADMINISTRATOR")) {
+            console.log('IS ADMIN')
+            res.locals.admin = true;
+        }
+        else
+            res.locals.admin = false;
+
         next();
+    }
     else
         res.render('errors/404');
 }
@@ -75,7 +116,7 @@ module.exports.updateGuilds = async function (req, res, next) {
 
         console.log(err)
         console.log('error setting the GUILD');
-        res.locals.user = null;
+        res.locals.guilds = null;
     }
     finally {
         next();

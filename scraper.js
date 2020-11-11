@@ -27,12 +27,19 @@ var HOST;
 var REDIRECT_URL;
 exports.HOST = HOST;
 
-const { Client, Intents } = require('discord.js');
+const {
+    Client,
+    Intents
+} = require('discord.js');
 
 const myIntents = new Intents();
 //myIntents.add('GUILDS');
 myIntents.add('GUILDS', 'GUILD_MEMBERS');
-const client = new Client({ ws: { intents: myIntents } });
+const client = new Client({
+    ws: {
+        intents: myIntents
+    }
+});
 const logID = '712000077295517796';
 exports.logID = logID;
 const creatorID = '99615909085220864';
@@ -104,8 +111,7 @@ if (process.argv.length == 3) {
     PORT = config.PORT;
     REDIRECT_URL = config.dashboardURLLive;
     SECRET = config.clienSecret;
-}
-else {
+} else {
     uri = config.uri;
     token = config.TesterToken;
     defaultPrefix = "##";
@@ -155,11 +161,13 @@ function decrypt(encrypted) {
 
 
 
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
-var commandMap = new Map();
-{
+var commandMap = new Map(); {
     commandMap.set('league_stats', leagueScraper.leagueStats);
     commandMap.set('follow_twitch_channel', twitchLogic.followTwitchChannel);
     commandMap.set('unfollow_twitch_channel', twitchLogic.unfollowTwitchChannel);
@@ -185,7 +193,10 @@ var workQueue = {
 var cpu;
 var memory;
 async function updateResources() {
-    os.cpuUsage((v) => { cpu = v; return true; });
+    os.cpuUsage((v) => {
+        cpu = v;
+        return true;
+    });
     memory = os.freemem();
 }
 // updateResources();
@@ -259,26 +270,27 @@ async function addGuild(member, memberDB) {
     // memberDB.set("prefix", memberDB.prefix)
     // memberDB.save();
 
-    User.findOneAndUpdate({ id: member.id },
-        {
-            $set: {
-                guilds: memberDB.guilds,
-                messages: memberDB.messages,
-                lastMessage: memberDB.lastMessage,
-                timeTalked: memberDB.timeTalked,
-                lastTalked: memberDB.lastTalked,
-                timeAFK: memberDB.timeAFK,
-                dateJoined: memberDB.dateJoined,
-                summoner: memberDB.summoner,
-                kicked: memberDB.kicked,
-                prefix: memberDB.prefix,
-            }
-        }, function (err, doc, res) {
-            if (err) {
-                fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(`custom: ${member.displayName} : ${member.id}` + "\n-------------\n\n" + err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-            }
-            // if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-        });
+    User.findOneAndUpdate({
+        id: member.id
+    }, {
+        $set: {
+            guilds: memberDB.guilds,
+            messages: memberDB.messages,
+            lastMessage: memberDB.lastMessage,
+            timeTalked: memberDB.timeTalked,
+            lastTalked: memberDB.lastTalked,
+            timeAFK: memberDB.timeAFK,
+            dateJoined: memberDB.dateJoined,
+            summoner: memberDB.summoner,
+            kicked: memberDB.kicked,
+            prefix: memberDB.prefix,
+        }
+    }, function (err, doc, res) {
+        if (err) {
+            fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(`custom: ${member.displayName} : ${member.id}` + "\n-------------\n\n" + err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        }
+        // if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    });
 
 
 }
@@ -290,23 +302,29 @@ async function addGuild(member, memberDB) {
  */
 async function checkExistance(member) {
 
-    let tempUser = await findUser(member)
+    let tempUser = await User.findOne({
+        id: member.id
+    });
     if (tempUser) {
 
         if (tempUser.guilds.includes(member.guild.id)) {
 
             let index = tempUser.guilds.indexOf(member.guild.id);
             tempUser.kicked[index] = false;
-            User.findOneAndUpdate({ id: tempUser.id }, { $set: { kicked: tempUser.kicked } }, function (err, doc, res) { });
+            User.findOneAndUpdate({
+                id: tempUser.id
+            }, {
+                $set: {
+                    kicked: tempUser.kicked
+                }
+            }, function (err, doc, res) {});
             return true;
-        }
-        else {//The user exists, but not with a matching guild in the DB
+        } else { //The user exists, but not with a matching guild in the DB
 
             await addGuild(member, tempUser)
             return true;
         }
-    }
-    else {
+    } else {
         console.log("The user doesnt exist. " + member.displayName);
         await createUser(member);
         return false;
@@ -338,8 +356,8 @@ function findFurthestDate(date1, date2) {
         else
             return date2;
     else
-        if (numberDate2 == 0)
-            return date1;
+    if (numberDate2 == 0)
+        return date1;
 
     if (numberDate1 < numberDate2)
         return date1;
@@ -373,8 +391,7 @@ async function countTalk() {
                                 console.log("Inside of count minute, user not found")
                                 checkExistance(member);
                                 return;
-                            }
-                            else {
+                            } else {
                                 let index = usy.guilds.indexOf(guild.id);
 
                                 if (channel.id == guild.afkChannelID) {
@@ -383,12 +400,15 @@ async function countTalk() {
                                     timeAFK[index] += 1;
                                     console.log('logged afk for: ', member.displayName)
 
-                                    User.findOneAndUpdate({ id: member.id },
-                                        {
-                                            $set: { timeAFK: timeAFK }
-                                        }, function (err, doc, res) {
-                                            //console.log(doc);
-                                        });
+                                    User.findOneAndUpdate({
+                                        id: member.id
+                                    }, {
+                                        $set: {
+                                            timeAFK: timeAFK
+                                        }
+                                    }, function (err, doc, res) {
+                                        //console.log(doc);
+                                    });
                                 } else {
 
                                     let timeTalked = usy.timeTalked;
@@ -402,14 +422,18 @@ async function countTalk() {
                                     // console.log("found him")
 
                                     //   console.log("Doing ")
-                                    User.findOneAndUpdate({ id: usy.id },
-                                        {
-                                            $set: { timeTalked: timeTalked, lastTalked: lastTalked }
-                                        }, function (err, doc, res) {
-                                            //console.log(doc);
-                                            // if (err) console.log(err)
-                                            // if (res) console.log(res);
-                                        });
+                                    User.findOneAndUpdate({
+                                        id: usy.id
+                                    }, {
+                                        $set: {
+                                            timeTalked: timeTalked,
+                                            lastTalked: lastTalked
+                                        }
+                                    }, function (err, doc, res) {
+                                        //console.log(doc);
+                                        // if (err) console.log(err)
+                                        // if (res) console.log(res);
+                                    });
                                 }
                             }
                         });
@@ -430,14 +454,17 @@ async function checkTwitch() {
 
     try {
         twitchLogic.checkGuildTwitchStreams(guilds);
-        twitchLogic.checkUsersTwitchStreams((await getUsers({ twitchFollows: { $gt: '' } })));
+        twitchLogic.checkUsersTwitchStreams((await getUsers({
+            twitchFollows: {
+                $gt: ''
+            }
+        })));
         updateFactionTally(guilds);
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err);
         console.log("Error with twitch checks!");
     }
-}//eventualy check this to only get the guilds this shard or whatever is a part of
+} //eventualy check this to only get the guilds this shard or whatever is a part of
 
 const updateFactionTally = async function (guilds) {
 
@@ -483,10 +510,10 @@ const updateFactionTally = async function (guilds) {
 
         for (let faction of guild.factions) {
 
-            let finalText = `#Current standing: ${faction.points}\n`
-                + `\nGeneral Contributions: ${faction.contributions.general}\n`
-                + `\nNew Member Points: ${faction.contributions.newMembers}`
-                + `\nMember Specific Contributions:\n`
+            let finalText = `#Current standing: ${faction.points}\n` +
+                `\nGeneral Contributions: ${faction.contributions.general}\n` +
+                `\nNew Member Points: ${faction.contributions.newMembers}` +
+                `\nMember Specific Contributions:\n`
 
             let memberContribution = '';
 
@@ -501,22 +528,32 @@ const updateFactionTally = async function (guilds) {
                 let actualyMember = await client.guilds.cache.get(guild.id).members.fetch(member.userID);
 
 
-                memberContribution += `${i + 1})<${actualyMember.displayName.replace(/\s/g, '_')}`
-                    + ` has contributed =${member.points} points!>\n`
+                memberContribution += `${i + 1})<${actualyMember.displayName.replace(/\s/g, '_')}` +
+                    ` has contributed =${member.points} points!>\n`
             }
 
             finalText += memberContribution;
-            finalEmbedArray.push({ name: faction.name, value: finalText });
+            finalEmbedArray.push({
+                name: faction.name,
+                value: finalText
+            });
         }
 
-        let returnedEmbed = await prettyEmbed(null, finalEmbedArray, { modifier: 'md', embed: true });
-        message.edit({ embed: returnedEmbed });
+        let returnedEmbed = await prettyEmbed(null, finalEmbedArray, {
+            modifier: 'md',
+            embed: true
+        });
+        message.edit({
+            embed: returnedEmbed
+        });
     }
 }
 
 const getEmoji = function (EMOJI) {
     EMOJI = EMOJI.trim().replace(' ', '');
-    let emoji = client.guilds.cache.get(guildID).emojis.cache.find(emo => { return emo.name == EMOJI });
+    let emoji = client.guilds.cache.get(guildID).emojis.cache.find(emo => {
+        return emo.name == EMOJI
+    });
     if (!emoji) return '';
     // console.log("FINISHED EMOJI: ")
     // console.log(`<:${EMOJI}:${emoji.id}>`)
@@ -526,7 +563,9 @@ exports.getEmoji = getEmoji;
 
 const getLeagueEmoji = function (EMOJI) {
     EMOJI = EMOJI.trim().replace(' ', '');
-    let emoji = client.guilds.cache.get('689313920107675714').emojis.cache.find(emo => { return emo.name == EMOJI });
+    let emoji = client.guilds.cache.get('689313920107675714').emojis.cache.find(emo => {
+        return emo.name == EMOJI
+    });
     if (!emoji) return '';
     // console.log("FINISHED EMOJI: ")
     // console.log(`<:${EMOJI}:${emoji.id}>`)
@@ -594,7 +633,11 @@ async function prettyEmbed(message, array, extraParams) {
 
             runningString = "";
             groupNumber++;
-            field = { name: "", value: [], inline: true };
+            field = {
+                name: "",
+                value: [],
+                inline: true
+            };
         }
 
         if ((runningString.length < maxLength) || (field == null)) {
@@ -614,19 +657,16 @@ async function prettyEmbed(message, array, extraParams) {
                         for (newSplit of tempElement.split('\n')) {
                             if (newSplit.length > maxLength) {
                                 client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send(`${newSplit} is too long to be included in the embeds. If this occured from normal use, please notify the creator with the **suggest** command!`);
-                            }
-                            else
+                            } else
                                 tempRun += newSplit + "\n";
                             if (tempRun.length > maxLength) break;
                         }
 
                         tempElement = tempElement.substring(tempRun.length);
                         element = element.substring(0, tempRun.length);
-                    }
-                    else
+                    } else
                         client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send("Found an unsplittable message body, odds of that happening naturally are next-to-none so stop testing me D:< However, if this is indeed from normal use, please notify the creator with the **suggest** command.");
-                }
-                else {
+                } else {
                     tempElement = -1;
                 }
 
@@ -639,20 +679,21 @@ async function prettyEmbed(message, array, extraParams) {
                     array.splice(array.indexOf(item) + 1, 0, tempItem)
                 }
                 BIGSPLIT = true;
-            }
-            {
+            } {
                 runningString += element;
 
-                field = field == null ? { name: "", value: [], inline: true } : field;
+                field = field == null ? {
+                    name: "",
+                    value: [],
+                    inline: true
+                } : field;
                 if (itemName != '') {
                     field.name = itemName;
                     previousName = itemName;
-                }
-                else if (part == -1) {
+                } else if (part == -1) {
                     field.name = '** **';
                     previousName = '';
-                }
-                else {
+                } else {
                     field.name = `${part} ${groupNumber}`;
                     previousName = `${part} ${groupNumber}`;
                 }
@@ -673,7 +714,11 @@ async function prettyEmbed(message, array, extraParams) {
 
                 runningString = "";
                 groupNumber++;
-                field = { name: "", value: [], inline: true };
+                field = {
+                    name: "",
+                    value: [],
+                    inline: true
+                };
             }
         }
         tally++;
@@ -683,8 +728,7 @@ async function prettyEmbed(message, array, extraParams) {
         field.name = field.name;
     else if (part == -1) {
         field.name = '** **';
-    }
-    else
+    } else
         field.name = `${part} ${groupNumber}`;
     if (field.value.length != 0)
         fieldArray.push(JSON.parse(JSON.stringify(field)));
@@ -695,7 +739,11 @@ exports.prettyEmbed = prettyEmbed;
 function createThreeQueue(array, cutOff) {
 
     let threeQueue = {
-        queue: [[], [], []],
+        queue: [
+            [],
+            [],
+            []
+        ],
         index: 0
     };
 
@@ -712,34 +760,48 @@ function createThreeQueue(array, cutOff) {
                 threeQueue.queue[0] = [array[0], array[1]];
                 threeQueue.queue[1] = [array[2], array[3]];
                 break;
-            }
-            else {
+            } else {
                 threeQueue.queue[0].push(array[j]);
 
                 if (!array[j + (rows)])
-                    threeQueue.queue[1].push({ name: "** **", value: "** **", inline: true });
+                    threeQueue.queue[1].push({
+                        name: "** **",
+                        value: "** **",
+                        inline: true
+                    });
                 else
                     threeQueue.queue[1].push(array[j + (rows)]);
 
                 if (!array[j + (2 * rows)])
-                    threeQueue.queue[2].push({ name: "** **", value: "** **", inline: true });
+                    threeQueue.queue[2].push({
+                        name: "** **",
+                        value: "** **",
+                        inline: true
+                    });
                 else
                     threeQueue.queue[2].push(array[j + (2 * rows)]);
             }
         }
-    }
-    else {
+    } else {
         for (let x = 0; x < array.length; x += 3) {
 
             threeQueue.queue[0].push(array[x]);
 
             if (!array[x + 1])
-                threeQueue.queue[1].push({ name: "** **", value: "** **", inline: true });
+                threeQueue.queue[1].push({
+                    name: "** **",
+                    value: "** **",
+                    inline: true
+                });
             else
                 threeQueue.queue[1].push(array[x + 1]);
 
             if (!array[x + 2])
-                threeQueue.queue[2].push({ name: "** **", value: "** **", inline: true });
+                threeQueue.queue[2].push({
+                    name: "** **",
+                    value: "** **",
+                    inline: true
+                });
             else
                 threeQueue.queue[2].push(array[x + 2]);
         }
@@ -767,23 +829,22 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
         if (!field) {
             if (threeQueue.index == 0) {
                 break;
-            }
-            else {
-                newEmbed.fields.push({ name: "** **", value: "** **", inline: true })
+            } else {
+                newEmbed.fields.push({
+                    name: "** **",
+                    value: "** **",
+                    inline: true
+                })
                 threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
                 continue;
             }
         }
 
-        if (!Array.isArray(field.value)) {
-        }
-        else if (modifier == -1) {
+        if (!Array.isArray(field.value)) {} else if (modifier == -1) {
             field.value = field.value.join('\n');
-        }
-        else if (modifier == 1) {
+        } else if (modifier == 1) {
             field.value = "```" + "\n" + field.value.join('\n') + "```";
-        }
-        else if (modifier) {
+        } else if (modifier) {
             field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
         }
         newEmbed.fields.push(field);
@@ -792,17 +853,22 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
 
 
     if (ARR.length > 0) {
-        client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({ embed: newEmbed });
+        client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({
+            embed: newEmbed
+        });
         return testy(ARR, description, message, modifier);
     }
 
     if (embedReturn) {
         return newEmbed;
-    }
-    else if (!selector) {
-        return await client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({ embed: newEmbed });
+    } else if (!selector) {
+        return await client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({
+            embed: newEmbed
+        });
     } else {
-        let temp = await client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({ embed: newEmbed });
+        let temp = await client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({
+            embed: newEmbed
+        });
         setControlEmoji(temp);
         return 20;
     }
@@ -816,15 +882,22 @@ async function queue(command, params, socket, newWork) {
     if (newWork) {
         //  if ((cpu < 0.9) && (memory > 50)) {
         if (workQueue.active.length < workQueue.limit) {
-            workQueue.active.push({ command: command, params: params, socket: socket });
+            workQueue.active.push({
+                command: command,
+                params: params,
+                socket: socket
+            });
             return await queue(null, null, null, false);
 
-        }
-        else {
-            workQueue.backlog.push({ command: command, params: params, socket: socket });
+        } else {
+            workQueue.backlog.push({
+                command: command,
+                params: params,
+                socket: socket
+            });
             return -1;
         }
-    }//Need to write the result to a socket....
+    } //Need to write the result to a socket....
     if (workQueue.active.length > 0) {
         let currentTask = workQueue.active.shift();
         let result = await currentTask.command.apply(null, [currentTask.params, currentTask.socket]);
@@ -836,13 +909,20 @@ async function queue(command, params, socket, newWork) {
 
         queue(null, null, null, false);
 
-        if (!isNaN(result)) return { number: result };
-        else return { status: result };
-    }
-    else if (workQueue.backlog.length > 0) {
+        if (!isNaN(result)) return {
+            number: result
+        };
+        else return {
+            status: result
+        };
+    } else if (workQueue.backlog.length > 0) {
 
         let currentTask = workQueue.backlog.shift();
-        workQueue.active.push({ command: currentTask.command, params: currentTask.params, socket: currentTask.socket });
+        workQueue.active.push({
+            command: currentTask.command,
+            params: currentTask.params,
+            socket: currentTask.socket
+        });
         queue(null, null, false);
         return 2;
     }
@@ -882,14 +962,17 @@ exports.getUsers = getUsers;
 
 const findUser = async function (member) {
     try {
-        let usery = await User.findOne({ id: member.id });
+        let usery = await User.findOne({
+            id: member.id
+        });
 
         if (!usery) {
 
             await checkExistance(member)
-            return await User.findOne({ id: member.id });
-        }
-        else {
+            return await User.findOne({
+                id: member.id
+            });
+        } else {
             return usery;
         }
 
@@ -970,11 +1053,12 @@ const requestListener = async function (req, res) {
     //Buffer.from(bufStr, 'utf8')
 
     try {
-        payload = JSON.parse(decrypt(
-            { content: req.headers.payload, tag: Buffer.from(req.headers.tag, 'base64'), iv: Buffer.from(req.headers.iv, 'base64') }
-        ));
-    }
-    catch (err) {
+        payload = JSON.parse(decrypt({
+            content: req.headers.payload,
+            tag: Buffer.from(req.headers.tag, 'base64'),
+            iv: Buffer.from(req.headers.iv, 'base64')
+        }));
+    } catch (err) {
         console.log(err);
         console.log("error trying to decrypt");
         return res.end();
@@ -991,19 +1075,35 @@ const requestListener = async function (req, res) {
         let functionRes = await commandMap.get(payload.command).apply(null, [payload.params]);
         let encrypted = encrypt(JSON.stringify(functionRes));
 
-        return res.end(JSON.stringify({ payload: encrypted.content, tag: encrypted.tag.toString('base64'), iv: encrypted.iv.toString('base64') }));
+        return res.end(JSON.stringify({
+            payload: encrypted.content,
+            tag: encrypted.tag.toString('base64'),
+            iv: encrypted.iv.toString('base64')
+        }));
     }
     res.end();
 };
 
 const HTTPserver = http.createServer(requestListener);
 
-
-
-
 HTTPserver.listen(PORT, HOST, () => {
     console.log(`Server is running on http://${HOST}:${PORT}`);
 });
+
+
+
+const formUpdates = async function (req, res) {
+
+    console.log("HOLLLYYY IT WORKEDD");
+}
+
+const HTTPFormServer = http.createServer(formUpdates);
+
+HTTPFormServer.listen(34444, '127.0.0.1', () => {
+    console.log(`BIG BOIIIII http://${'127.0.0.1'}:${34444}`);
+});
+
+
 
 
 // async function createBackUp() {
@@ -1036,7 +1136,7 @@ connectDB.once('open', async function () {
 
     await client.login(token);
 
-    client.on("ready", () => {
+    client.on("ready", async () => {
 
         //DASHBOARD.initialise();
 
@@ -1046,6 +1146,16 @@ connectDB.once('open', async function () {
         // createBackUp();
         checkTwitch();
         youtubeLogic.alertYoutube();
+
+
+        let promiseArray = [];
+
+        for (let guildy of client.guilds.cache.values())
+            promiseArray.push(guildy.members.fetch());
+
+        await Promise.all(promiseArray);
+
+
         const DASHBOARD = require('./dashboard/server.js');
         DASHBOARD.initialise();
         //setInterval(createBackUp, 6 * 60 * 60 * 1000);
@@ -1053,7 +1163,10 @@ connectDB.once('open', async function () {
 
     client.on("guildCreate", async guild => {
 
-        initialiseUsers(guild, { guild: guild, silent: true })
+        initialiseUsers(guild, {
+            guild: guild,
+            silent: true
+        })
     })
 });
 
@@ -1080,12 +1193,12 @@ async function initialiseUsers(message, params) {
     if (message.channel.type == 'dm') return -1;
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("Only admins can forcefully load all members from a server into the database"
-            + " (only adds them if they are missing i.e. user joined while bot is down for updates).");
+        return message.channel.send("Only admins can forcefully load all members from a server into the database" +
+            " (only adds them if they are missing i.e. user joined while bot is down for updates).");
 
     if (!params.silent)
-        message.channel.send("Started checking if the members of this server are in my database...may take some time for larger servers."
-            + " I will let you know once I finish!");
+        message.channel.send("Started checking if the members of this server are in my database...may take some time for larger servers." +
+            " I will let you know once I finish!");
 
     let newUsers = 0;
     let existingUsers = 0;
@@ -1096,10 +1209,9 @@ async function initialiseUsers(message, params) {
 
         let member = MEMBER;
 
-        if (await (checkExistance(member))) {//User exists with a matching guild in the DB
+        if (await (checkExistance(member))) { //User exists with a matching guild in the DB
             existingUsers++;
-        }
-        else {
+        } else {
             newUsers++;
         }
     }
@@ -1131,7 +1243,14 @@ setInterval(minuteCount, 60 * 1000);
 
 const checkRL = async function () {
 
-    let guilds = await Guild.find({ RLTracker: { $exists: true, $not: { $size: 0 } } });
+    let guilds = await Guild.find({
+        RLTracker: {
+            $exists: true,
+            $not: {
+                $size: 0
+            }
+        }
+    });
     // console.log(guilds);
     rocketScraper.checkRLTrackers(guilds);
 
@@ -1148,8 +1267,7 @@ process.on('unhandledRejection', (err, promise) => {
     if (defaultPrefix != '##') {
         console.log("Caught unhandledRejectionWarning")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-    }
-    else
+    } else
         console.log(err);
 
 });
@@ -1161,7 +1279,6 @@ process.on('unhandledException', (err, p) => {
         console.log("Caught unhandledException")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
 
-    }
-    else
+    } else
         console.log(err);
 });

@@ -6,6 +6,7 @@ html(lang='en')
         link(rel='stylesheet', href='/css/sidebar.css')
         script(src='/js/sidebar.js', defer)
         script(src='/js/guild.js', defer)
+        script(src='/js/submit.js', defer)
 
     body
         include ../includes/sidebar.pug
@@ -18,6 +19,7 @@ html(lang='en')
                     else
                         p.abbr #{guild.nameAcronym}
                 h4.pt-2 #{guild.name}
+
             .tabs.navbar-nav
                 .category Modules
                 a#automod.cursor-pointer(href='#') #[i.fas.fa-gavel.pr-1.text-muted] Auto-mod

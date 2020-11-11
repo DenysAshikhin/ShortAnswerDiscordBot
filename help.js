@@ -161,7 +161,6 @@ async function generalHelp(message, params, user) {
         let description = "```md\n" + `You can see a list of commands under each category by typing <${(await MAIN.getPrefix(message, user))}helpCommand> I.E.:\n` +
             `1) <${(await MAIN.getPrefix(message, user))}helpMusic>` + "```";
 
-        console.log('wtf')
 
        // if (!user.completedTutorials.includes(100))
            // description += "```fix\n" + `You have not completed the introductory tutorial which would teach you the basics of using the bot,`
