@@ -5,12 +5,13 @@ html(lang='en')
         //link(rel='stylesheet', href='/css/index.css')
         link(rel='stylesheet', href='/css/sidebar.css')
         script(src='/js/sidebar.js', defer)
+        script(src='/js/guild.js', defer)
 
     body
         include ../includes/sidebar.pug
 
         #sidebarExtension.bg-light
-            header.text-center.pt-4 
+            header.text-center.pt-4#overview
                 .large-icon.bg-white.round
                     if guild.icon
                         img.round(src=guild.iconURL({size: 128, dynamic: true}), alt=guild.name)
@@ -19,12 +20,17 @@ html(lang='en')
                 h4.pt-2 #{guild.name}
             .tabs.navbar-nav
                 .category Modules
-                a(href='#') #[i.fas.fa-gavel.pr-1.text-muted] Auto-mod
-                a(href='#') #[i.fas.fa-coins.pr-1.text-muted] Economy
-                a(href='#') #[i.fas.fa-star.pr-1.text-muted] General
-                a(href='#') #[i.fas.fa-music.pr-1.text-muted] Music
+                a#automod.cursor-pointer(href='#') #[i.fas.fa-gavel.pr-1.text-muted] Auto-mod
+                a#economy.cursor-pointer(href='#') #[i.fas.fa-coins.pr-1.text-muted] Economy
+                a#general.cursor-pointer(href='#') #[i.fas.fa-star.pr-1.text-muted] General
+                a#music.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Music
 
         include ../includes/navbar.pug
         
-        .jumbotron.text-center.bg-transparent
-            h1.display-3 #{guild.name}
+        include modules/overview
+        include modules/auto-mod
+        include modules/economy
+        include modules/general
+        include modules/music
+        //- .jumbotron.text-center.bg-transparent
+        //-     h1.display-3 #{guild.name}

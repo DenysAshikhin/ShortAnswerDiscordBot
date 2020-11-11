@@ -47,6 +47,18 @@ module.exports.updateUser = async function (req, res, next) {
     }
 }
 
+
+module.exports.validateGuild = async function (req, res, next) {
+
+    console.log(res.locals.guilds.find(guildy => guildy.id === req.params.id))
+
+    res.locals.guild = res.locals.guilds.find(guildy => guildy.id === req.params.id)
+    if (res.locals.guild)
+        next();
+    else
+        res.render('errors/404');
+}
+
 module.exports.updateGuilds = async function (req, res, next) {
 
     try {
