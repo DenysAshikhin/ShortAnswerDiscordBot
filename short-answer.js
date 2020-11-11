@@ -1484,8 +1484,8 @@ const getPrefix = async function (message, user) {
                 index = user.guilds.indexOf(message.guild.id);
 
                 if (index == -1) {
-                    console.log("this should even be possible")
-                    console.log(`guild tried to index of: ${message.guild.id}`)
+                    message.channel.send(`Something went wrong! Please try again. If the issue persists, please let the creator know through the`
+                        + ` support server using the ` + "`inviteSupportServer` command!");
                 }
             }
         }

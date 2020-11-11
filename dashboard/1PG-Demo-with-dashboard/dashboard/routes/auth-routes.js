@@ -15,6 +15,11 @@ router.get('/auth-guild', async (req, res) => {
   try {
     const key = res.cookies.get('key');
     await sessions.update(key);
+
+  } catch (err) {
+
+    console.log(err);
+    console.log('error in /auth-guild')
   } finally {
     res.redirect('/dashboard');
   }
@@ -28,6 +33,8 @@ router.get('/auth', async (req, res) => {
     res.cookies.set('key', key);
     res.redirect('/dashboard');
   } catch {
+    console.log(err)
+    console.log('error in /auth')
     res.redirect('/');
   }
 });

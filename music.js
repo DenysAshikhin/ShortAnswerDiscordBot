@@ -963,12 +963,7 @@ async function play(message, params, user) {
         songInfo = await ytdl.getInfo(args, {
             requestOptions: {
                 headers: {
-                    cookie: COOKIE,
-                    'x-youtube-identity-token': TOKEN
-                    // Optional. If not given, ytdl-core will try to find it.
-                    // You can find this by going to a video's watch page, viewing the source,
-                    // and searching for "ID_TOKEN".
-                    // 'x-youtube-identity-token': 1324,
+                    cookie: COOKIE
                 },
             },
             quality: 'highestaudio'

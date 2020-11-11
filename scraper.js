@@ -1,4 +1,6 @@
 const net = require('net');
+require('ofe').call();
+
 var os = require('os-utils');
 const config = require('./config.json');
 exports.config = config
@@ -88,6 +90,7 @@ const Embed = {
 };
 exports.Embed = Embed;
 
+var SECRET;
 
 var defaultPrefix = 'sa!';
 
@@ -100,6 +103,7 @@ if (process.argv.length == 3) {
     //HOST = '127.0.0.1';
     PORT = config.PORT;
     REDIRECT_URL = config.dashboardURLLive;
+    SECRET = config.clienSecret;
 }
 else {
     uri = config.uri;
@@ -108,12 +112,14 @@ else {
     HOST = '127.0.0.1';
     PORT = config.PORT;
     REDIRECT_URL = config.dashboardURLTest;
+    SECRET = config.TesterSecret;
 
 }
 exports.HOST = HOST;
+exports.SECRET = SECRET;
 exports.REDIRECT_URL = REDIRECT_URL;
 
-const DASHBOARD = require('./dashboard/server.js');
+
 
 
 
@@ -1040,6 +1046,7 @@ connectDB.once('open', async function () {
         // createBackUp();
         checkTwitch();
         youtubeLogic.alertYoutube();
+        const DASHBOARD = require('./dashboard/server.js');
         DASHBOARD.initialise();
         //setInterval(createBackUp, 6 * 60 * 60 * 1000);
     });
