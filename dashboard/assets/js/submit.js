@@ -6,7 +6,10 @@ $('#generalSubmitBtn').on('click', function () {
     let userPrefixVal = $('#userPrefix').val();
 
     // fetch('https://127.0.0.1/formUpdate', {
-    fetch('https://www.shortanswerbot.ca/formUpdate', {
+    
+    console.log(`${url}/formUpdate`)
+
+    fetch(`${url}/formUpdate`, {
         method: "POST",
         body: JSON.stringify({
             'userID': dbUser.id,
