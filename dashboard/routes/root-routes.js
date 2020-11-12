@@ -14,6 +14,12 @@ router.get('/', function (req, res) {
     //res.send('Hello World')
 });
 
+router.post('/formUpdate', function(req, res){
+
+    console.log(req.body)
+    console.log('WE GO SOMETHING')
+})
+
 let subCategoryMap = new Map();
 let subCategoryArr = [];
 

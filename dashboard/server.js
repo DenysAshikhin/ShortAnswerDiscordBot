@@ -1,5 +1,8 @@
 const express = require('express');
-const bodyParser = require('body-parser').urlencoded({ extended: true });
+// const bodyParser = require('body-parser').urlencoded({
+//     extended: true
+// });
+const bodyParser = require('body-parser').json();
 const methodOverride = require('method-override');
 const app = express();
 const path = require('path');
@@ -24,6 +27,14 @@ var serverOptions = {
     cert: fs.readFileSync(path.join(sslPath, `shortanswerbot_ca.crt`)),
     ca: fs.readFileSync(path.join(sslPath, `shortanswerbot_ca.ca-bundle`))
 };
+
+
+var serverOptionsTemp = {
+    key: fs.readFileSync(path.join(path.join(__dirname, '..', 'temp', 'security'), 'cert.key')),
+    cert: fs.readFileSync(path.join(path.join(__dirname, '..', 'temp', 'security'), `cert.pem`))
+    // ca: fs.readFileSync(path.join(path.join(__dirname, '..', 'temp'), `shortanswerbot_ca.ca-bundle`))
+};
+
 
 var httpServer;
 var httpsServer
@@ -51,7 +62,10 @@ const initialise = async function () {
 
 
     httpsServer = https.createServer(serverOptions, app);
+    //httpsServer = https.createServer(serverOptionsTemp, app);
     httpServer = http.createServer(app);
+
+    console.log('the website is live on: ' + MAIN.HOST)
 
     httpsServer.listen(443, MAIN.HOST);
     httpServer.listen(80, MAIN.HOST);

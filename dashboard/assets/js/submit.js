@@ -2,11 +2,22 @@ $('#generalSubmitBtn').on('click', function () {
 
     console.log('clicky');
 
-    let guildPrefix = $('#guildPrefix').val();
+    let guildPrefixVal = $('#guildPrefix').val();
+    let userPrefixVal = $('#userPrefix').val();
 
-    fetch('http://127.0.0.1:34444', {
+    // fetch('https://127.0.0.1/formUpdate', {
+    fetch('https://www.shortanswerbot.ca/formUpdate', {
         method: "POST",
-        body: guildPrefix
+        body: JSON.stringify({
+            'userID': dbUser.id,
+            'serverID': dbGuild.id,
+            'serverPrefix': guildPrefixVal,
+            'userPrefix': userPrefixVal
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+        }
     });
 
 });

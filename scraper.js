@@ -1092,16 +1092,7 @@ HTTPserver.listen(PORT, HOST, () => {
 
 
 
-const formUpdates = async function (req, res) {
 
-    console.log("HOLLLYYY IT WORKEDD");
-}
-
-const HTTPFormServer = http.createServer(formUpdates);
-
-HTTPFormServer.listen(34444, '127.0.0.1', () => {
-    console.log(`BIG BOIIIII http://${'127.0.0.1'}:${34444}`);
-});
 
 
 
