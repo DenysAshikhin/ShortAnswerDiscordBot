@@ -6,7 +6,7 @@ const Guild = require('../Guild.js');
 
 /** 
  * @params = [guildID, channelID, amount]
-*/
+ */
 const topRep = async function (params) {
 
     let finalArr = [];
@@ -16,15 +16,15 @@ const topRep = async function (params) {
 
     let messy = await channel.send("Fetching all of the rep scores.... 0% complete!");
 
-    let users = await User.find({ guilds: guild.id });
+    let users = await User.find({
+        guilds: guild.id
+    });
 
     let members = await guild.members.fetch();
 
     let count = 0;
     let updated = 1;
     let step = 0.25;
-
-
 
     for (let user of users) {
 
@@ -35,12 +35,13 @@ const topRep = async function (params) {
             updated++;
         }
 
-        let repy = await changeRep(user, guild.id, 0, { channel: channel });
+        let repy = await changeRep(user, guild.id, 0, {
+            channel: channel
+        });
 
         try {
             members.get(user.id).displayName
-        }
-        catch (err) {
+        } catch (err) {
             continue;
         }
 
@@ -51,22 +52,28 @@ const topRep = async function (params) {
         });
     }
 
-    finalArr = finalArr.filter(function (value) { return value.rep > 0 });
-    finalArr.sort(function (a, b) { return b.rep - a.rep });
+    finalArr = finalArr.filter(function (value) {
+        return value.rep > 0
+    });
+    finalArr.sort(function (a, b) {
+        return b.rep - a.rep
+    });
 
     let finalString = finalArr.reduce(function (acc, current, index) {
         // acc.push({ value: `${index + 1}) ${current.displayName} has ${current.rep} rep` });
-        acc.push({ value: `${current.displayName} has ${current.rep} rep` });
+        acc.push({
+            value: `${current.displayName} has ${current.rep} rep`
+        });
         return acc;
     }, []);
 
 
     if (!finalString) {
         channel.send("No one in this server has above 0 rep!");
-        return { status: 1 };
+        return {
+            status: 1
+        };
     }
-
-
 
     let originalLength = finalString.length;
 
@@ -78,15 +85,119 @@ const topRep = async function (params) {
 
     finalString.length = limit;
     await messy.edit("Fetching all of the rep scores...." + ` ${100}% complete!`);
-    MAIN.prettyEmbed({ guildID: guild.id, channelID: channel.id }, finalString, { modifier: 'xl', title: `Below are the top ${limit} rep'ed users of ${originalLength} who have > 0 rep!` });
-    return { status: 1 };
+
+    MAIN.prettyEmbed({
+        guildID: guild.id,
+        channelID: channel.id
+    }, finalString, {
+        modifier: 'xl',
+        title: `Below are the top ${limit} rep'ed users of ${originalLength} who have > 0 rep!`
+    });
+    return {
+        status: 1
+    };
 }
 exports.topRep = topRep;
 
 
-const changeRep = async function (user, guildID, amount, message) {
+/**
+ * 
+ * @param {[guildID], [channelID], [ratio]} params 
+ */
+const repToFaction = async function (params) {
 
-    let dbGuild = await MAIN.findGuild({ id: guildID });
+    let guild = await MAIN.Client.guilds.fetch(params[0]);
+    let channel = guild.channels.cache.get(params[1]);
+
+    let messy = await channel.send("Fetching all of the rep scores.... 0% complete!");
+
+    let users = await User.find({
+        guilds: guild.id
+    });
+
+    let dbGuild = await Guild.findOne({
+        id: params[0]
+    });
+
+    let members = await guild.members.fetch();
+
+    let count = 0;
+    let updated = 1;
+    let step = 0.25;
+
+    for (let user of users) {
+
+        count++;
+
+        if ((count / users.length) > (updated * step)) {
+            await messy.edit("Converting all of the rep scores...." + ` ${(updated * (step)) * 100}% complete!`);
+            updated++;
+        }
+
+        let repy = await changeRep(user, guild.id, 0, {
+            channel: channel
+        }, true);
+
+        try {
+            members.get(user.id).displayName
+        } catch (err) {
+            continue;
+        }
+
+        if (repy != 0) {
+
+            repy *= params[2];
+
+            let memberRoles = guild.members.cache.get(user.id).roles.cache.keyArray();
+
+            let factionModify = dbGuild.factions.findIndex(element => memberRoles.includes(element.role));
+            if (factionModify == -1)
+                continue;
+
+            //wtf about the persons personal points??
+            dbGuild.factions[factionModify].points += repy;
+            //dbGuild.factions[factionModify].contributions.general += repy;
+
+            let specificUser = dbGuild.factions[factionModify].contributions.members;
+            specificUser = dbGuild.factions[factionModify].contributions.members.find(element => element.userID == user.id);
+            if (specificUser) //might need cleaning up at some point but w/e
+                specificUser.points += repy;
+            else {
+
+                dbGuild.factions[factionModify].contributions.members.push({
+                    userID: user.id,
+                    points: repy
+                });
+            }
+        }
+    }
+
+
+    Guild.findOneAndUpdate({
+        id: dbGuild.id
+    }, {
+        $set: {
+            factions: dbGuild.factions
+        }
+    }, function (err, doc, res) {});
+
+
+    await messy.edit("Converting all of the rep scores...." + ` ${100}% complete!\nEveryone's rep scores have been reset to 0 and their respective factions (if applicable)` +
+        ` got the appropriate amount of points!`);
+
+    return {
+        status: 1
+    };
+}
+exports.repToFaction = repToFaction;
+
+
+
+const changeRep = async function (user, guildID, amount, message, resetPoints) {
+
+    let dbGuild = await MAIN.findGuild({
+        id: guildID
+    });
     // console.log(dbGuild)
     let actualGuild = await MAIN.Client.guilds.fetch(guildID);
 
@@ -113,7 +224,13 @@ const changeRep = async function (user, guildID, amount, message) {
 
         //   checkRepThreshold(user.id, Number(amount), dbGuild, actualGuild);
 
-        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                reps: user.reps
+            }
+        }).exec();
         return user.reps.get(guildID);
     }
 
@@ -125,17 +242,44 @@ const changeRep = async function (user, guildID, amount, message) {
 
         //checkRepThreshold(user.id, Number(amount), dbGuild, actualGuild);
 
-        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                reps: user.reps
+            }
+        }).exec();
         return user.reps.get(guildID);
     }
 
     if (amount != 0) {
 
-
         user.reps.set(guildID, Number(rep) + Number(amount));
 
         //checkRepThreshold(user.id, Number(rep) + Number(amount), dbGuild, actualGuild);
-        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                reps: user.reps
+            }
+        }).exec();
+    } else if (resetPoints) {
+
+        let oldRep = user.reps.get(guildID);
+
+        user.reps.set(guildID, 0);
+
+        //checkRepThreshold(user.id, Number(rep) + Number(amount), dbGuild, actualGuild);
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                reps: user.reps
+            }
+        }).exec();
+
+        return oldRep;
     }
     return user.reps.get(guildID);
 }
@@ -143,7 +287,7 @@ exports.changeRep = changeRep;
 
 /** 
  * @params = [guildID, channelID]
-*/
+ */
 async function topStats(params) {
 
 
@@ -151,7 +295,9 @@ async function topStats(params) {
     let channel = guild.channels.cache.get(params[1]);
 
     channel.send("Collecting all the stats....");
-    let allUsers = await MAIN.getUsers({ guilds: guild.id });
+    let allUsers = await MAIN.getUsers({
+        guilds: guild.id
+    });
 
     let silentType;
     let silentTypeIndex;
@@ -226,8 +372,7 @@ async function topStats(params) {
                 if (userDate == MAIN.findFurthestDate(userDate, MIADate) && userDate != "0-0-0") {
                     MIA = user;
                     MIAIndex = userIndex;
-                }
-                else if (MIADate == "0-0-0" && userDate != "0-0-0") {
+                } else if (MIADate == "0-0-0" && userDate != "0-0-0") {
                     MIA = user;
                     MIAIndex = userIndex;
                 }
@@ -240,16 +385,34 @@ async function topStats(params) {
     statsEmbed.title = MAIN.Embed.title + ` - Top Stats for ${guild.name}!`;
     statsEmbed.thumbnail.url = guild.iconURL();
     let members = await guild.members.fetch();
-    statsEmbed.fields = [
-        { name: '** **', value: "```md\n" + `The Silent Type:\n#${members.get(silentType.id).displayName}\n` + `<${silentType.messages[silentTypeIndex]} messages sent.>` + "```" },
-        { name: '** **', value: "```md\n" + `The Loud Mouth:\n#${members.get(loudMouth.id).displayName}\n` + `<${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.>` + "```" },
-        { name: '** **', value: "```md\n" + `The Ghost:\n#${members.get(ghost.id).displayName}\n` + `<${ghost.timeAFK[ghostIndex]} minutes spent AFK.>` + "```" },
-        { name: '** **', value: "```md\n" + `The MIA:\n#${members.get(MIA.id).displayName}\n` + `<${MAIN.findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex])} last seen date.>` + "```" },
-        { name: '** **', value: "```md\n" + `The Summoner:\n#${members.get(summoner.id).displayName}\n` + `<${summoner.summoner[summonerIndex]} summoning rituals completed.>` + "```" }
+    statsEmbed.fields = [{
+            name: '** **',
+            value: "```md\n" + `The Silent Type:\n#${members.get(silentType.id).displayName}\n` + `<${silentType.messages[silentTypeIndex]} messages sent.>` + "```"
+        },
+        {
+            name: '** **',
+            value: "```md\n" + `The Loud Mouth:\n#${members.get(loudMouth.id).displayName}\n` + `<${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.>` + "```"
+        },
+        {
+            name: '** **',
+            value: "```md\n" + `The Ghost:\n#${members.get(ghost.id).displayName}\n` + `<${ghost.timeAFK[ghostIndex]} minutes spent AFK.>` + "```"
+        },
+        {
+            name: '** **',
+            value: "```md\n" + `The MIA:\n#${members.get(MIA.id).displayName}\n` + `<${MAIN.findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex])} last seen date.>` + "```"
+        },
+        {
+            name: '** **',
+            value: "```md\n" + `The Summoner:\n#${members.get(summoner.id).displayName}\n` + `<${summoner.summoner[summonerIndex]} summoning rituals completed.>` + "```"
+        }
     ];
 
-    channel.send({ embed: statsEmbed });
+    channel.send({
+        embed: statsEmbed
+    });
 
-    return { status: 1 };
+    return {
+        status: 1
+    };
 }
 exports.topStats = topStats;

@@ -183,6 +183,8 @@ var commandMap = new Map(); {
     commandMap.set('topRep', statLogic.topRep);
     commandMap.set('topStats', statLogic.topStats);
     commandMap.set('linkCheck', thankerLogic.checkLink)
+    commandMap.set('repToFaction', statLogic.repToFaction)
+
 }
 
 var workQueue = {

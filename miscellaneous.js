@@ -9,10 +9,18 @@ const Guild = require('./Guild.js')
 const studyArray = new Array();
 const net = require('net');
 var needle = require('needle');
-const { parse } = require('path');
-const { create } = require('./User.js');
-const { mem } = require('node-os-utils');
-const { reset } = require('nodemon');
+const {
+    parse
+} = require('path');
+const {
+    create
+} = require('./User.js');
+const {
+    mem
+} = require('node-os-utils');
+const {
+    reset
+} = require('nodemon');
 
 //http://ddragon.leagueoflegends.com/cdn/10.12.1/data/en_US/champion.json
 
@@ -94,7 +102,9 @@ async function populateDataDragon() {
                                 championKeys.set(Number(resp1.body.data[champ].key), resp1.body.data[champ]);
                             }
                         }
-                        dataDragon.set(regionsExact[I], { championInfo: resp1.body.data })
+                        dataDragon.set(regionsExact[I], {
+                            championInfo: resp1.body.data
+                        })
                     })
             });
     }
@@ -121,14 +131,19 @@ async function getLeagueEntries(zone, summoner) {
 
 async function getMatchInfo(zone, summoner) {
 
-    let matches = await api.req(zone, 'lol.matchV4.getMatchlist', summoner.accountId, { season: [13] });
+    let matches = await api.req(zone, 'lol.matchV4.getMatchlist', summoner.accountId, {
+        season: [13]
+    });
     if (!matches) return -1;
 
     if (matches.totalGames > matches.endIndex) {
         let numRequests = (matches.endIndex - 100) / 100;
         let promises = [];
         for (let i = 1; i <= numRequests; i++) {
-            promises.push(api.req(zone, 'lol.matchV4.getMatchlist', summoner.accountId, { season: [13], beginIndex: 100 * i }));
+            promises.push(api.req(zone, 'lol.matchV4.getMatchlist', summoner.accountId, {
+                season: [13],
+                beginIndex: 100 * i
+            }));
         }
         Promise.all(promises);
     }
@@ -143,8 +158,11 @@ async function getChampionMastery(zone, summoner, topNum) {
     for (let master in mastery) {
 
         returnArray.push({
-            name: "Champion Mastery", value: `Champion Name: ${championKeys.get((mastery[master].championId)).name}` +
-                `\nChampion level: ${mastery[master].championLevel}\n`, level: mastery[master].championLevel, id: mastery[master].championId
+            name: "Champion Mastery",
+            value: `Champion Name: ${championKeys.get((mastery[master].championId)).name}` +
+                `\nChampion level: ${mastery[master].championLevel}\n`,
+            level: mastery[master].championLevel,
+            id: mastery[master].championId
         });
         counter++;
         if (topNum)
@@ -152,7 +170,9 @@ async function getChampionMastery(zone, summoner, topNum) {
                 break;
     }
 
-    returnArray.sort((a, b) => { return b.level - a.level })
+    returnArray.sort((a, b) => {
+        return b.level - a.level
+    })
 
     return returnArray;
 }
@@ -171,17 +191,24 @@ async function leagueStats(message, params, user) {
             zone = args[1].toLowerCase();
             if (regionsEZ.includes(zone)) {
                 zone = regionsEZ[regionsEZ.indexOf(zone)];
-            }
-            else
+            } else
                 return MAIN.generalMatcher(message, zone, user, regionsEZ,
-                    regionsEZ.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    regionsEZ.reduce((accum, current) => {
+                        accum.push({
+                            looped: true,
+                            region: current
+                        });
+                        return accum;
+                    }, []),
                     leagueStats, "Please indicate which region you wanted to search!");
         }
-    }
-    else
+    } else
         zone = params.region;
 
-    MAIN.sendToServer({ command: 'league_stats', params: [zone, args[0], message.guild.id, message.channel.id] });
+    MAIN.sendToServer({
+        command: 'league_stats',
+        params: [zone, args[0], message.guild.id, message.channel.id]
+    });
 
     return -1;
 }
@@ -203,17 +230,24 @@ const RLRanks = async function (message, params, user) {
             zone = args[1].toLowerCase();
             if (zones.includes(zone)) {
                 zone = zones[zones.indexOf(zone)];
-            }
-            else
+            } else
                 return MAIN.generalMatcher(message, zone, user, zones,
-                    zones.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    zones.reduce((accum, current) => {
+                        accum.push({
+                            looped: true,
+                            region: current
+                        });
+                        return accum;
+                    }, []),
                     RLRanks, "Please indicate which platform you wanted to search!");
         }
-    }
-    else
+    } else
         zone = params.region;
 
-    MAIN.sendToServer({ command: 'rocket_league_ranks', params: [zone, args[0], message.guild.id, message.channel.id] });
+    MAIN.sendToServer({
+        command: 'rocket_league_ranks',
+        params: [zone, args[0], message.guild.id, message.channel.id]
+    });
     return -1;
 }
 exports.RLRanks = RLRanks;
@@ -235,8 +269,8 @@ const RLTracker = async function (message, params, user) {
 
     if (args[0].includes('<#')) {
 
-        message.channel.send(`You have entered invalid arguments. Make sure to seperate the **player name** and the channel with a *comma*.`
-            + ` Use the **help rlTracker** command to get a better example!`);
+        message.channel.send(`You have entered invalid arguments. Make sure to seperate the **player name** and the channel with a *comma*.` +
+            ` Use the **help rlTracker** command to get a better example!`);
         return -1
     }
     // if (args[0].includes('<#'))
@@ -253,38 +287,53 @@ const RLTracker = async function (message, params, user) {
             zone = args[1].toLowerCase();
             if (zones.includes(zone)) {
                 zone = zones[zones.indexOf(zone)];
-            }
-            else
+            } else
                 return await MAIN.generalMatcher(message, zone, user, zones,
-                    zones.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    zones.reduce((accum, current) => {
+                        accum.push({
+                            looped: true,
+                            region: current
+                        });
+                        return accum;
+                    }, []),
                     RLTracker, "Please indicate which platform you wanted to user!");
         }
-    }
-    else
+    } else
         zone = params.region;
 
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
     if (!guild.RLTracker) guild.RLTracker = [];
 
     let ID = message.mentions.channels.first().id
 
     let status;
 
-    let parsed = await MAIN.sendToServer({ command: 'rocket_league_tracker', params: [zone, args[0], guild.RLTracker, ID] });
+    let parsed = await MAIN.sendToServer({
+        command: 'rocket_league_tracker',
+        params: [zone, args[0], guild.RLTracker, ID]
+    });
 
     if (parsed.status) {
         if (parsed.status == -1) {
             message.channel.send("I could not find that player+platform combination, try again?");
             result = -1;
-        }
-        else {
+        } else {
             message.channel.send("Such a ServerChannel - Player pair already exists!");
             result = -2;
         }
-    }
-    else {
-        Guild.findOneAndUpdate({ id: guild.id }, { $set: { RLTracker: parsed.RLTracker } }, function (err, doc, res) { if (err) console.log(err) });
+    } else {
+        Guild.findOneAndUpdate({
+            id: guild.id
+        }, {
+            $set: {
+                RLTracker: parsed.RLTracker
+            }
+        }, function (err, doc, res) {
+            if (err) console.log(err)
+        });
         message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
         status = 1;
     }
@@ -309,8 +358,8 @@ const UnlinkRLTracker = async function (message, params, user) {
 
     if (args[0].includes('<#')) {
 
-        message.channel.send(`You have entered invalid arguments. Make sure to seperate the **player name** and the channel with a *comma*.`
-            + ` Use the **help removeRLTracker** command to get a better example!`);
+        message.channel.send(`You have entered invalid arguments. Make sure to seperate the **player name** and the channel with a *comma*.` +
+            ` Use the **help removeRLTracker** command to get a better example!`);
         return -1
     }
 
@@ -322,17 +371,23 @@ const UnlinkRLTracker = async function (message, params, user) {
             zone = args[1].toLowerCase();
             if (zones.includes(zone)) {
                 zone = zones[zones.indexOf(zone)];
-            }
-            else
+            } else
                 return MAIN.generalMatcher(message, zone, user, zones,
-                    zones.reduce((accum, current) => { accum.push({ looped: true, region: current }); return accum; }, []),
+                    zones.reduce((accum, current) => {
+                        accum.push({
+                            looped: true,
+                            region: current
+                        });
+                        return accum;
+                    }, []),
                     UnlinkRLTracker, "Please indicate which platform you wanted to use!");
         }
-    }
-    else
+    } else
         zone = params.region;
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
     if (!guild.RLTracker) guild.RLTracker = [];
 
     let ID = message.mentions.channels.first().id
@@ -344,7 +399,13 @@ const UnlinkRLTracker = async function (message, params, user) {
             if ((link.player == args[0]) && (link.platform == zone)) {
                 message.channel.send(`Succesfully removed ${link.player} on ${link.platform} from ${message.mentions.channels.first()}!`);
                 guild.RLTracker.splice(guild.RLTracker.indexOf(link), 1);
-                Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { RLTracker: guild.RLTracker } }, () => { });
+                Guild.findOneAndUpdate({
+                    id: message.guild.id
+                }, {
+                    $set: {
+                        RLTracker: guild.RLTracker
+                    }
+                }, () => {});
                 return 1;
             }
         }
@@ -357,7 +418,9 @@ exports.UnlinkRLTracker = UnlinkRLTracker;
 
 const viewRLTrackers = async function (message, params, user) {
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.RLTracker || (guild.RLTracker.length == 0)) return message.channel.send("There are no trackers setup for this server!");
 
@@ -367,9 +430,15 @@ const viewRLTrackers = async function (message, params, user) {
     // }, []), -1, 1, 'md');
 
     MAIN.prettyEmbed(message, guild.RLTracker.reduce((accum, curr) => {
-        accum.push({ name: '** **', value: `<#${message.guild.channels.cache.get(curr.channelID).name} is linked to=${curr.player}_${curr.platform}` });
+        accum.push({
+            name: '** **',
+            value: `<#${message.guild.channels.cache.get(curr.channelID).name} is linked to=${curr.player}_${curr.platform}`
+        });
         return accum;
-    }, []), { description: "Here are the RLTrackers for this server:", modifier: 'md' });
+    }, []), {
+        description: "Here are the RLTrackers for this server:",
+        modifier: 'md'
+    });
 
     return 1;
 }
@@ -385,7 +454,10 @@ async function followTwitchChannel(message, params, user) {
         return -1;
     }
 
-    let parsed = await MAIN.sendToServer({ command: 'follow_twitch_channel', params: [args, user.twitchFollows, user.linkedTwitch] });
+    let parsed = await MAIN.sendToServer({
+        command: 'follow_twitch_channel',
+        params: [args, user.twitchFollows, user.linkedTwitch]
+    });
 
     if (parsed.status) {
         status = parsed.status;
@@ -400,9 +472,14 @@ async function followTwitchChannel(message, params, user) {
                 message.channel.send("You can't follow your own linked twitch!");
                 break;
         }
-    }
-    else if (parsed.result) {
-        User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.result } }, function (err, doc, res) { });
+    } else if (parsed.result) {
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                twitchFollows: parsed.result
+            }
+        }, function (err, doc, res) {});
         return message.channel.send(`Succesfully added ${parsed.targetChannelName} to your follow list!`);
     }
     return -1;
@@ -423,18 +500,32 @@ async function unfollowTwitchChannel(message, params, user) {
 
 
     if (!params.looped)
-        parsed = await MAIN.sendToServer({ command: 'unfollow_twitch_channel', params: [args, user.twitchFollows] });
+        parsed = await MAIN.sendToServer({
+            command: 'unfollow_twitch_channel',
+            params: [args, user.twitchFollows]
+        });
     else
-        parsed = await MAIN.sendToServer({ command: 'unfollow_twitch_channel', params: [params.channel, user.twitchFollows, true] });
+        parsed = await MAIN.sendToServer({
+            command: 'unfollow_twitch_channel',
+            params: [params.channel, user.twitchFollows, true]
+        });
 
 
     if (parsed.channelNames) {
 
         return MAIN.generalMatcher(message, args, user, parsed.channelNames, parsed.internalArray, unfollowTwitchChannel, "Select which channel you meant to remove:");
-    }//147711920
+    } //147711920
     else if (parsed.twitchFollows) {
 
-        User.findOneAndUpdate({ id: user.id }, { $set: { twitchFollows: parsed.twitchFollows } }, function (err, doc, res) { if (err) console.log(err) });
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                twitchFollows: parsed.twitchFollows
+            }
+        }, function (err, doc, res) {
+            if (err) console.log(err)
+        });
         message.channel.send(`Successfully removed ${parsed.name} from your follows!`);
     }
 
@@ -447,19 +538,31 @@ async function viewTwitchFollows(message, params, user) {
     if (!user.twitchFollows) return message.channel.send("You do not have twitch channels being followed!");
     if (user.twitchFollows.length == 0) return message.channel.send("You do not have twitch channels being followed!");
 
-    let parsed = await MAIN.sendToServer({ command: 'view_twitch_follows', params: [user.twitchFollows] });
-    return MAIN.prettyEmbed(message, parsed.finalArray,
-        { description: `You are following ${parsed.finalArray.length} channels!`, startTally: 1, modifier: 'md', maxLength: 150 });
+    let parsed = await MAIN.sendToServer({
+        command: 'view_twitch_follows',
+        params: [user.twitchFollows]
+    });
+    return MAIN.prettyEmbed(message, parsed.finalArray, {
+        description: `You are following ${parsed.finalArray.length} channels!`,
+        startTally: 1,
+        modifier: 'md',
+        maxLength: 150
+    });
 }
 exports.viewTwitchFollows = viewTwitchFollows;
 
 async function showChannelTwitchLinks(message, params, user) {
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.channelTwitch || (guild.channelTwitch.length == 0)) return message.channel.send("There are no pairs setup for this server!");
 
-    let parsed = await MAIN.sendToServer({ command: 'show_channel_twitch_links', params: [guild.channelTwitch] });
+    let parsed = await MAIN.sendToServer({
+        command: 'show_channel_twitch_links',
+        params: [guild.channelTwitch]
+    });
 
     let promiseArray = parsed.promiseArray;
     let textChannels = [];
@@ -471,15 +574,27 @@ async function showChannelTwitchLinks(message, params, user) {
     let finishedArray = [];
 
     for (let i = 0; i < promiseArray.length; i++) {
-        finishedArray.push({ texty: textChannels[i], streamy: promiseArray[i] });
+        finishedArray.push({
+            texty: textChannels[i],
+            streamy: promiseArray[i]
+        });
     }
 
-    finishedArray.sort((a, b) => { return b.streamy._data.view_count - a.streamy._data.view_count });
+    finishedArray.sort((a, b) => {
+        return b.streamy._data.view_count - a.streamy._data.view_count
+    });
 
     return MAIN.prettyEmbed(message, finishedArray.reduce((accum, current) => {
-        accum.push({ name: '', value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n` });
+        accum.push({
+            name: '',
+            value: `<#${current.texty.name} is linked to=${current.streamy._data.display_name}>\n`
+        });
         return accum;
-    }, []), { description: "Here are the ServerChannel-TwitchStreamer pairs:", startTally: 1, modifier: 'md' });
+    }, []), {
+        description: "Here are the ServerChannel-TwitchStreamer pairs:",
+        startTally: 1,
+        modifier: 'md'
+    });
 }
 exports.showChannelTwitchLinks = showChannelTwitchLinks;
 
@@ -488,7 +603,9 @@ async function removeChannelTwitchLink(message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only administrators can use this command!");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.channelTwitch || (guild.channelTwitch.length == 0)) return message.channel.send("There are no pairs setup for this server!");
 
@@ -498,7 +615,10 @@ async function removeChannelTwitchLink(message, params, user) {
 
     if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
 
-    let parsed = await MAIN.sendToServer({ command: 'remove_channel_twitch_link', params: [args[0]] });
+    let parsed = await MAIN.sendToServer({
+        command: 'remove_channel_twitch_link',
+        params: [args[0]]
+    });
 
     if (parsed.streamer) {
         parsed = parsed.streamer;
@@ -509,14 +629,19 @@ async function removeChannelTwitchLink(message, params, user) {
             if (message.mentions.channels.first().id == guild.channelTwitch[i][1]) {
                 if (parsed._data.id == guild.channelTwitch[i][0]) {
                     guild.channelTwitch.splice(i, 1);
-                    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelTwitch: guild.channelTwitch } }, function (err, doc, res) { });
+                    Guild.findOneAndUpdate({
+                        id: message.guild.id
+                    }, {
+                        $set: {
+                            channelTwitch: guild.channelTwitch
+                        }
+                    }, function (err, doc, res) {});
                     return message.channel.send(`Successfully unlinked ${parsed._data.display_name} and <#${message.mentions.channels.first().id}>`);
                 }
             }
         }
         message.channel.send("No such pair exists for this server, try again?");
-    }
-    else
+    } else
         return message.channel.send("No such pair exists for this server, try again?");
 
     return 1;
@@ -531,13 +656,28 @@ async function unlinkTwitch(message, params, user) {
         if (user.twitchFollows.length > 0)
             if (!params.looped)
                 return MAIN.generalMatcher(message, -23, user, ['Keep', 'Remove'],
-                    [{ looped: true, keep: true, followArr: user.twitchFollows },
-                    { looped: true, keep: false, followArr: [] }],
+                    [{
+                            looped: true,
+                            keep: true,
+                            followArr: user.twitchFollows
+                        },
+                        {
+                            looped: true,
+                            keep: false,
+                            followArr: []
+                        }
+                    ],
                     unlinkTwitch, "Do you want to keep your current follows?");
-    }
-    else {
+    } else {
 
-        User.findOneAndUpdate({ id: user.id }, { $set: { linkedTwitch: null, twitchFollows: params.followArr } }, function (err, doc, res) { });
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                linkedTwitch: null,
+                twitchFollows: params.followArr
+            }
+        }, function (err, doc, res) {});
         return message.channel.send("Succesfully unlinked your twitch!" + ` You now have ${params.followArr.length} channels still being followed!`);
     }
 }
@@ -550,35 +690,61 @@ async function linkTwitch(message, params, user) {
 
     if (!params.looped) {
 
-        let parsed = await MAIN.sendToServer({ command: 'link_twitch', params: [args.trim(), user.twitchLinks] });
+        let parsed = await MAIN.sendToServer({
+            command: 'link_twitch',
+            params: [args.trim(), user.twitchLinks]
+        });
 
         if (parsed.status) {
 
             message.channel.send("I could not find a channel with that name, try again?")
             return -1;
-        }
-        else {
+        } else {
 
-            return await linkTwitch(message, { looped: true, streamer: parsed.streamer, goodArray: parsed.goodArray }, user);
+            return await linkTwitch(message, {
+                looped: true,
+                streamer: parsed.streamer,
+                goodArray: parsed.goodArray
+            }, user);
         }
-    }
-    else {
+    } else {
 
         if (params.keep) {
-            User.findOneAndUpdate({ id: user.id }, { $set: { linkedTwitch: params.streamer._data.id, twitchFollows: params.followArr } }, function (err, doc, res) { });
+            User.findOneAndUpdate({
+                id: user.id
+            }, {
+                $set: {
+                    linkedTwitch: params.streamer._data.id,
+                    twitchFollows: params.followArr
+                }
+            }, function (err, doc, res) {});
             message.channel.send(`Succesfully linked ${params.streamer._data.display_name} to your account, you now have ${params.followArr.length} channels you are following!`);
             return 1;
-        }
-        else if (user.twitchFollows && (user.twitchFollows.length > 0)) {
+        } else if (user.twitchFollows && (user.twitchFollows.length > 0)) {
 
             if (user.twitchFollows.length > 0)
                 return await MAIN.generalMatcher(message, -23, user, ['Combine', 'Remove'],
-                    [{ streamer: params.streamer, looped: true, keep: 1, followArr: params.goodArray.concat(user.twitchFollows.filter(item => !params.goodArray.includes(item))) },
-                    { streamer: params.streamer, looped: true, keep: -1, followArr: params.goodArray }],
+                    [{
+                            streamer: params.streamer,
+                            looped: true,
+                            keep: 1,
+                            followArr: params.goodArray.concat(user.twitchFollows.filter(item => !params.goodArray.includes(item)))
+                        },
+                        {
+                            streamer: params.streamer,
+                            looped: true,
+                            keep: -1,
+                            followArr: params.goodArray
+                        }
+                    ],
                     linkTwitch, "You already have a linked twitch account or channels you have followed, would you like to combine the old follows, or remove them?");
-        }
-        else {
-            return await linkTwitch(message, { looped: true, followArr: params.goodArray, keep: -3, streamer: params.streamer }, user);
+        } else {
+            return await linkTwitch(message, {
+                looped: true,
+                followArr: params.goodArray,
+                keep: -3,
+                streamer: params.streamer
+            }, user);
         }
     }
 }
@@ -595,12 +761,17 @@ async function linkChannelWithTwitch(message, params, user) {
 
     if (args.length != 2) return message.channel.send("You did not specify a proper twitch streamer/text channel combo!");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
     if (!guild.channelTwitch) guild.channelTwitch = [];
 
     let ID = message.mentions.channels.first().id
 
-    let parsed = await MAIN.sendToServer({ command: 'link_channel_with_twitch', params: [args[0].trim(), guild.channelTwitch, ID] });
+    let parsed = await MAIN.sendToServer({
+        command: 'link_channel_with_twitch',
+        params: [args[0].trim(), guild.channelTwitch, ID]
+    });
     let result;
     let status;
 
@@ -608,14 +779,20 @@ async function linkChannelWithTwitch(message, params, user) {
         if (parsed.status == -1) {
             message.channel.send("I could not find a streamer with that name, try again?");
             result = -1;
-        }
-        else {
+        } else {
             message.channel.send("Such a ServerChannel - TwitchStreamer pair already exists!");
             result = -2;
         }
-    }
-    else {
-        Guild.findOneAndUpdate({ id: guild.id }, { $set: { channelTwitch: parsed.channelTwitch } }, function (err, doc, res) { if (err) console.log(err) });
+    } else {
+        Guild.findOneAndUpdate({
+            id: guild.id
+        }, {
+            $set: {
+                channelTwitch: parsed.channelTwitch
+            }
+        }, function (err, doc, res) {
+            if (err) console.log(err)
+        });
         message.channel.send(`Successfully paired ${args[0]} with <#${ID}>`);
         status = 1;
 
@@ -721,8 +898,7 @@ async function searchForUser(message, params, user) {
                 }
             }
         }
-    }
-    else {
+    } else {
         for (guild of MAIN.Client.guilds.cache.values()) {
             for (channel of guild.channels.cache.values()) {
                 if (channel.type == "voice") {
@@ -743,7 +919,9 @@ async function flipCoin(message, params, user) {
 
     if (!params.step) {
         let messa = await message.channel.send("Flipping coin...");
-        return setTimeout(flipCoin, 750, messa, { step: 1 }, user);
+        return setTimeout(flipCoin, 750, messa, {
+            step: 1
+        }, user);
     }
 
     switch (params.step) {
@@ -769,7 +947,9 @@ async function flipCoin(message, params, user) {
 
     params.step++;
     if (params.step != 6)
-        setTimeout(flipCoin, 750, message, { step: params.step }, user);
+        setTimeout(flipCoin, 750, message, {
+            step: params.step
+        }, user);
 }
 exports.flipCoin = flipCoin;
 
@@ -846,18 +1026,17 @@ function study(message, query) {
                         finalObject[index].items.push(itemString);
                         finalObject[index].refIndex.push(found.refIndex);
                         finalObject[index].originalString = slide;
-                    }
-                    else if (!finalObject[index].refIndex.includes(found.refIndex)) {
+                    } else if (!finalObject[index].refIndex.includes(found.refIndex)) {
 
                         let itemString = found.item.charAt(0).toLowerCase() + found.item.slice(1);
                         itemString = itemString.replace(/[\r\n,.(){}:;`~!@#$%^&*-_=+|]+/g, " ").trim();
                         finalObject[index].items.push(itemString);
                         finalObject[index].refIndex.push(found.refIndex);
                     }
-                }//result loop
-            }//searchWords loops
-        }//slide loop
-    }//ppt loop
+                } //result loop
+            } //searchWords loops
+        } //slide loop
+    } //ppt loop
 
     let currentSlideDeck = "";
 
@@ -878,7 +1057,9 @@ function study(message, query) {
 
     if (finalObject.length > 0) {
 
-        finalObject.sort(function (a, b) { return b.items.length - a.items.length });
+        finalObject.sort(function (a, b) {
+            return b.items.length - a.items.length
+        });
 
         for (let i = 0; i < searchNumbers; i++) {
 
@@ -910,8 +1091,7 @@ function study(message, query) {
             }
         }
         message.channel.send("```DONE!```");
-    }
-    else {
+    } else {
         message.channel.send("```Did not find any matches!```");
     }
 }
@@ -929,16 +1109,31 @@ exports.decider = decider;
 async function checkGuildTwitchStreams(guilds) {
     let guildArray = [];
     for (let guild of guilds) {
-        guildArray.push({ channelTwitch: guild.channelTwitch, twitchNotifications: guild.twitchNotifications, id: guild.id });
+        guildArray.push({
+            channelTwitch: guild.channelTwitch,
+            twitchNotifications: guild.twitchNotifications,
+            id: guild.id
+        });
     }
 
-    let parsed = await MAIN.sendToServer({ command: 'check_guild_twitch_streams', params: [guildArray] });
+    let parsed = await MAIN.sendToServer({
+        command: 'check_guild_twitch_streams',
+        params: [guildArray]
+    });
     parsed = parsed.completeArray;
 
     for (entry of parsed) {
 
         MAIN.Client.guilds.cache.get(entry.guildID).channels.cache.get(entry.channelID).send(entry.alertMessage);
-        Guild.findOneAndUpdate({ id: entry.guildID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+        Guild.findOneAndUpdate({
+            id: entry.guildID
+        }, {
+            $set: {
+                twitchNotifications: entry.twitchNotifications
+            }
+        }, function (err, doc, res) {
+            if (err) console.log(err)
+        });
     }
 
     return 1;
@@ -950,11 +1145,18 @@ async function checkUsersTwitchStreams(users) {
     let userArray = [];
     for (let user of users) {
         if (user.twitchFollows.length > 0)
-            userArray.push({ twitchFollows: user.twitchFollows, twitchNotifications: user.twitchNotifications, id: user.id });
+            userArray.push({
+                twitchFollows: user.twitchFollows,
+                twitchNotifications: user.twitchNotifications,
+                id: user.id
+            });
     }
 
 
-    let parsed = await MAIN.sendToServer({ command: 'check_user_twitch_streams', params: [userArray] });
+    let parsed = await MAIN.sendToServer({
+        command: 'check_user_twitch_streams',
+        params: [userArray]
+    });
     parsed = parsed.completeArray;
 
     for (entry of parsed) {
@@ -963,7 +1165,15 @@ async function checkUsersTwitchStreams(users) {
             let member = guild.members.cache.get(entry.userID);
             if (!member) continue;
             member.send(entry.alertMessage);
-            User.findOneAndUpdate({ id: entry.userID }, { $set: { twitchNotifications: entry.twitchNotifications } }, function (err, doc, res) { if (err) console.log(err) });
+            User.findOneAndUpdate({
+                id: entry.userID
+            }, {
+                $set: {
+                    twitchNotifications: entry.twitchNotifications
+                }
+            }, function (err, doc, res) {
+                if (err) console.log(err)
+            });
             return 1;
         }
     }
@@ -997,7 +1207,9 @@ const createFaction = async function (message, params, user) {
         return message.channel.send("You have to @mention a single role to link the faction to!");
 
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let existingPair = guild.factions.find(element =>
         ((element.role == message.mentions.roles.first()) || (element.name == args))
@@ -1018,7 +1230,15 @@ const createFaction = async function (message, params, user) {
         }
     });
 
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { if (err) console.log(err) });
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            factions: guild.factions
+        }
+    }, function (err, doc, res) {
+        if (err) console.log(err)
+    });
 
     message.channel.send(`The faction: **${args}** has been created and linked to${MAIN.mentionRole(message.mentions.roles.first().id)}!`);
 }
@@ -1052,7 +1272,9 @@ const factionPoints = async function (message, params, user) {
     if ((message.mentions.roles.size == 0) && (message.mentions.users.size == 0))
         return message.channel.send("You have to @mention either a single role or user to award/deduct points!");
 
-    let guild = (await MAIN.findGuild({ id: message.guild.id })).factions;
+    let guild = (await MAIN.findGuild({
+        id: message.guild.id
+    })).factions;
 
     let factionModify;
 
@@ -1065,12 +1287,16 @@ const factionPoints = async function (message, params, user) {
         guild[factionModify].points += args;
         guild[factionModify].contributions.general += args;
         message.channel.send(`**${guild[factionModify].name}** is now at ${guild[factionModify].points} points!`);
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild } }, function (err, doc, res) { });
-    }
-    else {
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                factions: guild
+            }
+        }, function (err, doc, res) {});
+    } else {
 
         let memberRoles = message.guild.members.cache.get(message.mentions.users.first().id).roles.cache.keyArray();
-
 
         factionModify = guild.findIndex(element => memberRoles.includes(element.role));
         if (factionModify == -1)
@@ -1085,16 +1311,32 @@ const factionPoints = async function (message, params, user) {
                 points: args
             };
             guild[factionModify].contributions.members.push(specificUser);
-        }
-        else {
+        } else {
             specificUser = guild[factionModify].contributions.members.find(element => element.userID == message.mentions.users.first().id);
-            specificUser.points += args
+
+            if (specificUser) //might need cleaning up at some point but w/e
+                specificUser.points += args;
+            else {
+
+                specificUser = {
+                    userID: message.mentions.users.first().id,
+                    points: args
+                }
+
+                guild[factionModify].contributions.members.push(specificUser);
+            }
         }
 
-        message.channel.send(`**${guild[factionModify].name}** is now at ${guild[factionModify].points} points!`
-            + `\n${message.guild.members.cache.get(message.mentions.users.first().id).displayName} has contributed ${specificUser.points} points!`);
+        message.channel.send(`**${guild[factionModify].name}** is now at ${guild[factionModify].points} points!` +
+            `\n${message.guild.members.cache.get(message.mentions.users.first().id).displayName} has contributed ${specificUser.points} points!`);
 
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild } }, function (err, doc, res) { });
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                factions: guild
+            }
+        }, function (err, doc, res) {});
     }
 
 }
@@ -1105,9 +1347,9 @@ const viewFaction = async function (message, params, user) {
     if (params.looped) {
         let faction = params.faction;
 
-        let finalText = `#Current standing: ${faction.points}\n`
-            + `\nGeneral Contributions: ${faction.contributions.general}\n`
-            + `\nMember Specific Contributions:\n`
+        let finalText = `#Current standing: ${faction.points}\n` +
+            `\nGeneral Contributions: ${faction.contributions.general}\n` +
+            `\nMember Specific Contributions:\n`
 
         let memberContribution = '';
 
@@ -1115,19 +1357,28 @@ const viewFaction = async function (message, params, user) {
 
             let member = faction.contributions.members[i];
 
-            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
-                + ` has contributed =${member.points} points!>\n`
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}` +
+                ` has contributed =${member.points} points!>\n`
         }
 
         finalText += memberContribution;
-        return MAIN.prettyEmbed(message, [{ name: faction.name, value: finalText }], { modifier: 'md' });
+        return MAIN.prettyEmbed(message, [{
+            name: faction.name,
+            value: finalText
+        }], {
+            modifier: 'md'
+        });
     }
 
     let args = message.content.split(" ").slice(1).join(" ").split(",")[0].trim();
     if (args.length == 0)
         args = null;
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    await message.guild.members.fetch();
 
     if (guild.factions.length == 0)
         return message.channel.send("There are no factions in this server! Mods can create one using the **createFaction** command!");
@@ -1141,10 +1392,10 @@ const viewFaction = async function (message, params, user) {
 
         for (let faction of guild.factions) {
 
-            let finalText = `#Current standing: ${faction.points}\n`
-                + `\nGeneral Contributions: ${faction.contributions.general}\n`
-                + `\nNew Member Points: ${faction.contributions.newMembers}`
-                + `\nMember Specific Contributions:\n`
+            let finalText = `#Current standing: ${faction.points}\n` +
+                `\nGeneral Contributions: ${faction.contributions.general}\n` +
+                `\nNew Member Points: ${faction.contributions.newMembers}` +
+                `\nMember Specific Contributions:\n`
 
             let memberContribution = '';
 
@@ -1156,26 +1407,32 @@ const viewFaction = async function (message, params, user) {
 
                 let member = faction.contributions.members[i];
 
-                memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
-                    + ` has contributed =${member.points} points!>\n`
+                console.log(member);
+
+                memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}` +
+                    ` has contributed =${member.points} points!>\n`
             }
 
             finalText += memberContribution;
-            finalEmbedArray.push({ name: faction.name, value: finalText });
+            finalEmbedArray.push({
+                name: faction.name,
+                value: finalText
+            });
         }
 
-        MAIN.prettyEmbed(message, finalEmbedArray, { modifier: 'md' });
-    }
-    else if (message.mentions.roles.size > 0) {
+        MAIN.prettyEmbed(message, finalEmbedArray, {
+            modifier: 'md'
+        });
+    } else if (message.mentions.roles.size > 0) {
 
         let faction = guild.factions.find(element => element.role == message.mentions.roles.first().id);
         if (!faction)
             return message.channel.send(`**${MAIN.mentionRole(message.mentions.roles.first().id)}** is not assigned to any existing faction!`);
 
-        let finalText = `#Current standing: ${faction.points}\n`
-            + `\nGeneral Contributions: ${faction.contributions.general}\n`
-            + `\nNew Member Points: ${faction.contributions.newMembers}`
-            + `\nMember Specific Contributions:\n`
+        let finalText = `#Current standing: ${faction.points}\n` +
+            `\nGeneral Contributions: ${faction.contributions.general}\n` +
+            `\nNew Member Points: ${faction.contributions.newMembers}` +
+            `\nMember Specific Contributions:\n`
 
         let memberContribution = '';
 
@@ -1183,15 +1440,19 @@ const viewFaction = async function (message, params, user) {
 
             let member = faction.contributions.members[i];
 
-            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
-                + ` has contributed =${member.points} points!>\n`
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}` +
+                ` has contributed =${member.points} points!>\n`
         }
 
         finalText += memberContribution;
-        MAIN.prettyEmbed(message, [{ name: faction.name, value: finalText }], { modifier: 'md' });
+        MAIN.prettyEmbed(message, [{
+            name: faction.name,
+            value: finalText
+        }], {
+            modifier: 'md'
+        });
 
-    }
-    else if (message.mentions.users.size > 0) {
+    } else if (message.mentions.users.size > 0) {
 
         let memberRoles = message.guild.members.cache.get(message.mentions.users.first().id).roles.cache.keyArray();
 
@@ -1199,10 +1460,10 @@ const viewFaction = async function (message, params, user) {
         if (!faction)
             return message.channel.send(`${MAIN.mention(message.mentions.users.first().id)} is not part of any faction!`);
 
-        let finalText = `#Current standing: ${faction.points}\n`
-            + `\nGeneral Contributions: ${faction.contributions.general}\n`
-            + `\nNew Member Points: ${faction.contributions.newMembers}`
-            + `\nMember Specific Contributions:\n`
+        let finalText = `#Current standing: ${faction.points}\n` +
+            `\nGeneral Contributions: ${faction.contributions.general}\n` +
+            `\nNew Member Points: ${faction.contributions.newMembers}` +
+            `\nMember Specific Contributions:\n`
 
         let memberContribution = '';
 
@@ -1210,14 +1471,18 @@ const viewFaction = async function (message, params, user) {
 
             let member = faction.contributions.members[i];
 
-            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
-                + ` has contributed =${member.points} points!>\n`
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}` +
+                ` has contributed =${member.points} points!>\n`
         }
 
         finalText += memberContribution;
-        MAIN.prettyEmbed(message, [{ name: faction.name, value: finalText }], { modifier: 'md' });
-    }
-    else if (args) {
+        MAIN.prettyEmbed(message, [{
+            name: faction.name,
+            value: finalText
+        }], {
+            modifier: 'md'
+        });
+    } else if (args) {
 
         let faction = guild.factions.find(element => element.name == args);
         if (!faction) {
@@ -1226,15 +1491,18 @@ const viewFaction = async function (message, params, user) {
                 acc.push(current.name);
                 return acc;
             }, []), guild.factions.reduce((acc, current, index) => {
-                acc.push({ faction: current, looped: true });
+                acc.push({
+                    faction: current,
+                    looped: true
+                });
                 return acc;
             }, []), viewFaction, `**${args}** is not an existing faction! Please choose which one you meant: `);
         }
 
-        let finalText = `#Current standing: ${faction.points}\n`
-            + `\nGeneral Contributions: ${faction.contributions.general}\n`
-            + `\nNew Member Points: ${faction.contributions.newMembers}`
-            + `\nMember Specific Contributions:\n`
+        let finalText = `#Current standing: ${faction.points}\n` +
+            `\nGeneral Contributions: ${faction.contributions.general}\n` +
+            `\nNew Member Points: ${faction.contributions.newMembers}` +
+            `\nMember Specific Contributions:\n`
 
         let memberContribution = '';
 
@@ -1242,12 +1510,17 @@ const viewFaction = async function (message, params, user) {
 
             let member = faction.contributions.members[i];
 
-            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
-                + ` has contributed =${member.points} points!>\n`
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}` +
+                ` has contributed =${member.points} points!>\n`
         }
 
         finalText += memberContribution;
-        MAIN.prettyEmbed(message, [{ name: faction.name, value: finalText }], { modifier: 'md' });
+        MAIN.prettyEmbed(message, [{
+            name: faction.name,
+            value: finalText
+        }], {
+            modifier: 'md'
+        });
     }
 }
 exports.viewFaction = viewFaction;
@@ -1259,12 +1532,20 @@ const deleteFaction = async function (message, params, user) {
     if (params.looped) {
 
         deleted = guild.factions.splice(params.factionIndex)[0];
-        Guild.findOneAndUpdate({ id: params.guildID }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+        Guild.findOneAndUpdate({
+            id: params.guildID
+        }, {
+            $set: {
+                factions: guild.factions
+            }
+        }, function (err, doc, res) {});
 
         return message.channel.send(`${deleted.name} has been deleted! ${MAIN.mentionRole(deleted.role)} can now be assigned a new faction!`);
     }
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
     if (guild.factions.length == 0)
         return message.channel.send("There are no faction in the server to delete!");
 
@@ -1279,8 +1560,7 @@ const deleteFaction = async function (message, params, user) {
         if (faction != -1)
             return message.channel.send(`**${MAIN.mentionRole(message.mentions.roles.first().id)}** is not assigned to any existing faction!`);
         deleted = guild.factions.splice(faction)[0];
-    }
-    else {
+    } else {
 
         let args = message.content.split(" ").slice(1).join(" ").split(",")[0].trim();
         if (args.length == 0)
@@ -1296,7 +1576,11 @@ const deleteFaction = async function (message, params, user) {
                 acc.push(current.name);
                 return acc;
             }, []), guild.factions.reduce((acc, current, index) => {
-                acc.push({ factionIndex: index, looped: true, guildID: message.guild.id });
+                acc.push({
+                    factionIndex: index,
+                    looped: true,
+                    guildID: message.guild.id
+                });
                 return acc;
             }, []), deleteFaction, `**${args}** is not an existing faction! Please choose which one you meant: `);
         }
@@ -1304,7 +1588,13 @@ const deleteFaction = async function (message, params, user) {
         deleted = guild.factions.splice(faction)[0];
     }
 
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            factions: guild.factions
+        }
+    }, function (err, doc, res) {});
 
     message.channel.send(`${deleted.name} has been deleted! ${MAIN.mentionRole(deleted.role)} can now be assigned a new faction!`);
 }
@@ -1316,7 +1606,9 @@ const resetFactions = async function (message, params, user) {
         if (!params.wipe)
             return message.channel.send("Faction reset aborted!");
         else {
-            let guild = await MAIN.findGuild({ id: params.guildID });
+            let guild = await MAIN.findGuild({
+                id: params.guildID
+            });
 
             for (let faction of guild.factions) {
 
@@ -1328,11 +1620,19 @@ const resetFactions = async function (message, params, user) {
                 //     member.points = 0;
                 // }
             }
-            Guild.findOneAndUpdate({ id: params.guildID }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+            Guild.findOneAndUpdate({
+                id: params.guildID
+            }, {
+                $set: {
+                    factions: guild.factions
+                }
+            }, function (err, doc, res) {});
             return params.channel.send("All factions have been reset!");
         }
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
     if (guild.factions.length == 0)
         return message.channel.send("There are no faction in the server to reset!");
 
@@ -1342,8 +1642,17 @@ const resetFactions = async function (message, params, user) {
         return message.channel.send("Only admins can delete factions");
 
     if (!params.looped)
-        return MAIN.generalMatcher(message, -23, user, ['yes', 'no'], [{ looped: true, wipe: true, guildID: message.guild.id, channel: message.channel },
-        { looped: true, wipe: false }],
+        return MAIN.generalMatcher(message, -23, user, ['yes', 'no'], [{
+                    looped: true,
+                    wipe: true,
+                    guildID: message.guild.id,
+                    channel: message.channel
+                },
+                {
+                    looped: true,
+                    wipe: false
+                }
+            ],
             resetFactions, "You are about to reset all faction and member contributions. Are you sure you wish to proceed?");
 }
 exports.resetFactions = resetFactions;
@@ -1358,10 +1667,18 @@ const factionNewMemberAlertChannel = async function (message, params, user) {
     if (message.mentions.channels.size != 1)
         message.channel.send("You can only have a single #channel mentioned!");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     guild.factionNewMemberAlert = message.mentions.channels.first().id;
-    Guild.findOneAndUpdate({ id: guild.id }, { $set: { factionNewMemberAlert: guild.factionNewMemberAlert } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            factionNewMemberAlert: guild.factionNewMemberAlert
+        }
+    }, function (err, doc, res) {});
 
     message.channel.send(`${MAIN.mentionChannel(guild.factionNewMemberAlert)} will now display new faction members!`);
 }
@@ -1374,7 +1691,9 @@ const createFactionRunningTally = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can set create/overwrite a live Faction Tally");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     await message.channel.send("Below will be the updated (once per minute) running tally of all factions!");
 
@@ -1382,10 +1701,10 @@ const createFactionRunningTally = async function (message, params, user) {
 
     for (let faction of guild.factions) {
 
-        let finalText = `#Current standing: ${faction.points}\n`
-            + `\nGeneral Contributions: ${faction.contributions.general}\n`
-            + `\nNew Member Points: ${faction.contributions.newMembers}\n`
-            + `\nMember Specific Contributions:\n`
+        let finalText = `#Current standing: ${faction.points}\n` +
+            `\nGeneral Contributions: ${faction.contributions.general}\n` +
+            `\nNew Member Points: ${faction.contributions.newMembers}\n` +
+            `\nMember Specific Contributions:\n`
 
         let memberContribution = '';
 
@@ -1397,49 +1716,68 @@ const createFactionRunningTally = async function (message, params, user) {
 
             let member = faction.contributions.members[i];
 
-            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}`
-                + ` has contributed =${member.points} points!>\n`
+            memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}` +
+                ` has contributed =${member.points} points!>\n`
         }
 
         finalText += memberContribution;
-        finalEmbedArray.push({ name: faction.name, value: finalText });
+        finalEmbedArray.push({
+            name: faction.name,
+            value: finalText
+        });
     }
 
-    let tally = await MAIN.prettyEmbed(message, finalEmbedArray, { modifier: 'md' });
+    let tally = await MAIN.prettyEmbed(message, finalEmbedArray, {
+        modifier: 'md'
+    });
 
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { factionLiveTally: { channelID: tally.channel.id, messageID: tally.id } } },
-        function (err, doc, res) { });
+    Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                factionLiveTally: {
+                    channelID: tally.channel.id,
+                    messageID: tally.id
+                }
+            }
+        },
+        function (err, doc, res) {});
 }
 exports.createFactionRunningTally = createFactionRunningTally;
 
 const privacyPolicy = async function (message, params, user) {
 
-    return message.channel.send("1) The data collected: "
-        + "Short Answer Bot collects the background data about how you use discord (number of messages sent, date of last message, "
-        + "time spent in a voice channel, time spent in an AFK channel) and data that you provide with consent."
-        + "This includes the personall games list, music playlist, whether you want to be pinged/DM'ed for game summons. "
-        + "Moreover any setting related information such as prefixes, and completed tutorials."
+    return message.channel.send("1) The data collected: " +
+        "Short Answer Bot collects the background data about how you use discord (number of messages sent, date of last message, " +
+        "time spent in a voice channel, time spent in an AFK channel) and data that you provide with consent." +
+        "This includes the personall games list, music playlist, whether you want to be pinged/DM'ed for game summons. " +
+        "Moreover any setting related information such as prefixes, and completed tutorials."
 
-        + " 2) Why is this data required:"
-        + "The data is required and used strictly to enable greater and more complex features on the bot. Some of the more"
-        + " unique features would be down right impossible without knowing: your games list, music playlists, twitch follows"
-        + " (again all of this information is only known if you choose to give it to the bot)."
+        +
+        " 2) Why is this data required:" +
+        "The data is required and used strictly to enable greater and more complex features on the bot. Some of the more" +
+        " unique features would be down right impossible without knowing: your games list, music playlists, twitch follows" +
+        " (again all of this information is only known if you choose to give it to the bot)."
 
-        + "  3) How do I use this data:"
-        + "  The data is used only when the relevant commands are requested by the users of the bot. I.E.: If someone is trying to "
-        + "  find a people to play a game, then the bot check whether the requested game is in your games list."
+        +
+        "  3) How do I use this data:" +
+        "  The data is used only when the relevant commands are requested by the users of the bot. I.E.: If someone is trying to " +
+        "  find a people to play a game, then the bot check whether the requested game is in your games list."
 
-        + "  4) Other than discord and users of the bot, who else sees this data. No one. I store this on a mongoDB database,"
-        + "  however it is encrypted. As such, beyond discord and the bot users, no third party has access to this information."
+        +
+        "  4) Other than discord and users of the bot, who else sees this data. No one. I store this on a mongoDB database," +
+        "  however it is encrypted. As such, beyond discord and the bot users, no third party has access to this information."
 
-        + "  5) "
-        + " The most reliable way to contact me is on discord (The Last Spark#7586), however, I can also be reached by email at"
-        + " denysashikhin@gmail.com."
+        +
+        "  5) " +
+        " The most reliable way to contact me is on discord (The Last Spark#7586), however, I can also be reached by email at" +
+        " denysashikhin@gmail.com."
 
-        + "  6) How can you remove the stored information:"
-        + " With all commands that ask for information there is an associated command to remove that information. However, if you "
-        + " want to ensure all, or some specific personal data is destroyed, contact me as mentioned in point 5) and I will "
-        + " be more than happy to do so.")
+        +
+        "  6) How can you remove the stored information:" +
+        " With all commands that ask for information there is an associated command to remove that information. However, if you " +
+        " want to ensure all, or some specific personal data is destroyed, contact me as mentioned in point 5) and I will " +
+        " be more than happy to do so.")
 }
 exports.privacyPolicy = privacyPolicy;
 

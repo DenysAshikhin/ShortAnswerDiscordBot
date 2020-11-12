@@ -30,7 +30,6 @@ const checkLink = async function (params) {
             quoteCheck.splice(quoteCheck.indexOf(-1), 1)
 
         messageContent = quoteCheck.join(' ').split(' ');
-
     }
 
 
@@ -38,7 +37,6 @@ const checkLink = async function (params) {
         messageContent = messageContent.split(' ');
     }
 
-    
     let links = [];
 
     for (let string of messageContent) {
@@ -79,3 +77,5 @@ const checkLink = async function (params) {
     return resy;
 }
 exports.checkLink = checkLink;
+
+

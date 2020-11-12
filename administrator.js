@@ -29,8 +29,7 @@ const channelImageThanker = async function (message, params, user) {
 
                 image = true;
                 break;
-            }
-            else if (isVideo(attachment.attachment)) {
+            } else if (isVideo(attachment.attachment)) {
                 video = true;
                 break;
             }
@@ -40,14 +39,18 @@ const channelImageThanker = async function (message, params, user) {
         for (let string of args)
             if (isImageUrl(string)) {
                 let result = await needle('get', string)
-                    .catch(err => { console.log("caught thanker error is image url") });
+                    .catch(err => {
+                        console.log("caught thanker error is image url")
+                    });
                 if (result) {
                     image = true;
                     break;
                 }
             }
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (image && video) {
         if (guild.thankerAutoRep) {
@@ -113,9 +116,16 @@ const channelLinkThanker = async function (message, params, user) {
     const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
 
 
-    let parsed = await MAIN.sendToServer({ command: 'linkCheck', params: [message.guild.id, message.channel.id, message.id, args] });
+    console.log("WTF?")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let parsed = await MAIN.sendToServer({
+        command: 'linkCheck',
+        params: [message.guild.id, message.channel.id, message.id, args]
+    });
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (parsed.reposts) {
 
@@ -127,8 +137,7 @@ const channelLinkThanker = async function (message, params, user) {
 
             changeRep(user, message.guild.id, parsed.newLinks, message);
         }
-    }
-    else {
+    } else {
 
         return 1;
     }
@@ -160,7 +169,9 @@ const setChannelImageThanker = async function (message, params, user) {
         return message.author.send("I don't have the right permissions to send messages in this channel!");
 
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (guild.channelImageThanker.includes(message.channel.id)) {
 
@@ -169,7 +180,13 @@ const setChannelImageThanker = async function (message, params, user) {
 
     guild.channelImageThanker.push(message.channel.id);
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImageThanker: guild.channelImageThanker } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelImageThanker: guild.channelImageThanker
+        }
+    }).exec();
     return message.channel.send("This channel will now be monitered for images");
 }
 exports.setChannelImageThanker = setChannelImageThanker;
@@ -181,7 +198,9 @@ const unSetChannelImageThanker = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can set a channel thanker for the server")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.channelImageThanker.includes(message.channel.id)) {
 
@@ -192,7 +211,13 @@ const unSetChannelImageThanker = async function (message, params, user) {
 
     guild.channelImageThanker.splice(guild.channelImageThanker.indexOf(message.channel.id));
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImageThanker: guild.channelImageThanker } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelImageThanker: guild.channelImageThanker
+        }
+    }).exec();
     return message.channel.send("This channel will no longer be monitered for images");
 }
 exports.unSetChannelImageThanker = unSetChannelImageThanker;
@@ -209,7 +234,9 @@ const setChannelLinkThanker = async function (message, params, user) {
         return message.author.send("I don't have the right permissions to send messages in this channel!");
 
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (guild.channelImageThanker.includes(message.channel.id)) {
 
@@ -218,7 +245,13 @@ const setChannelLinkThanker = async function (message, params, user) {
 
     guild.channelLinkThanker.push(message.channel.id);
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelLinkThanker: guild.channelLinkThanker } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelLinkThanker: guild.channelLinkThanker
+        }
+    }).exec();
     return message.channel.send("This channel will now be monitered for links");
 }
 exports.setChannelLinkThanker = setChannelLinkThanker;
@@ -230,7 +263,9 @@ const unSetChannelLinkThanker = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can set a channel thanker for the server")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.channelLinkThanker.includes(message.channel.id)) {
 
@@ -241,7 +276,13 @@ const unSetChannelLinkThanker = async function (message, params, user) {
 
     guild.channelLinkThanker.splice(guild.channelLinkThanker.indexOf(message.channel.id));
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelLinkThanker: guild.channelLinkThanker } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelLinkThanker: guild.channelLinkThanker
+        }
+    }).exec();
     return message.channel.send("This channel will no longer be monitered for links");
 }
 exports.unSetChannelLinkThanker = unSetChannelLinkThanker;
@@ -254,7 +295,9 @@ const channelThankerMessage = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can change the channel thanker for the server")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
 
     if ((!guild.channelImageThanker.includes(message.channel.id)) && (!guild.channelLinkThanker.includes(message.channel.id))) {
@@ -273,7 +316,13 @@ const channelThankerMessage = async function (message, params, user) {
 
     guild.channelThankerMessage = args;
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelThankerMessage: guild.channelThankerMessage } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelThankerMessage: guild.channelThankerMessage
+        }
+    }).exec();
     await message.channel.send("Updated channel message to:");
     return message.channel.send(channelThankerMessageConvert(message.author.id, `link and/or image/video`, guild));
 }
@@ -288,8 +337,8 @@ const channelThankerMessageConvert = function (userID, message, guild, amount) {
     if (guild.channelThankerMessage.length > 0)
         if (amount)
             return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${amount} rep!`)
-        else
-            return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${1} rep!`)
+    else
+        return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${1} rep!`)
 
     if (amount)
         return msg.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${amount} rep!`)
@@ -318,12 +367,12 @@ async function initialiseUsers(message, params) {
     if (message.channel.type == 'dm') return -1;
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("Only admins can forcefully load all members from a server into the database"
-            + " (only adds them if they are missing i.e. user joined while bot is down for updates).");
+        return message.channel.send("Only admins can forcefully load all members from a server into the database" +
+            " (only adds them if they are missing i.e. user joined while bot is down for updates).");
 
     if (!params.silent)
-        message.channel.send("Started checking if the members of this server are in my database...may take some time for larger servers."
-            + " I will let you know once I finish!");
+        message.channel.send("Started checking if the members of this server are in my database...may take some time for larger servers." +
+            " I will let you know once I finish!");
 
     let newUsers = 0;
     let existingUsers = 0;
@@ -334,10 +383,9 @@ async function initialiseUsers(message, params) {
 
         let member = MEMBER;
 
-        if (await (MAIN.checkExistance(member))) {//User exists with a matching guild in the DB
+        if (await (MAIN.checkExistance(member))) { //User exists with a matching guild in the DB
             existingUsers++;
-        }
-        else {
+        } else {
             newUsers++;
         }
     }
@@ -356,10 +404,10 @@ async function setDefaultServerPrefix(message, params, user) {
 
 
 
-    if ((message.mentions.channels.size != 0) || (message.mentions.crosspostedChannels.size != 0)
-        || (message.mentions.members.size != 0) || (message.mentions.users.size != 0)
-        || (message.mentions.roles.size != 0) || (message.mentions.everyone)
-        || (message.content.includes('@everyone')) || (message.content.includes('@here')))
+    if ((message.mentions.channels.size != 0) || (message.mentions.crosspostedChannels.size != 0) ||
+        (message.mentions.members.size != 0) || (message.mentions.users.size != 0) ||
+        (message.mentions.roles.size != 0) || (message.mentions.everyone) ||
+        (message.content.includes('@everyone')) || (message.content.includes('@here')))
         return message.channel.send("You cannot have a mention when setting a prefix!");
 
 
@@ -381,7 +429,17 @@ async function setDefaultServerPrefix(message, params, user) {
 
     if (params == "sa!") params = -1;
 
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { prefix: params } }, { new: true }, function (err, doc, res) { MAIN.cachedGuilds.set(doc.id, doc) });
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            prefix: params
+        }
+    }, {
+        new: true
+    }, function (err, doc, res) {
+        MAIN.cachedGuilds.set(doc.id, doc)
+    });
     return 1;
 }
 exports.setDefaultServerPrefix = setDefaultServerPrefix;
@@ -397,16 +455,20 @@ const autorole = async function (message, params, user) {
 
         switch (params.step) {
 
-            case 1://Comes from matcher
+            case 1: //Comes from matcher
 
-                await message.channel.send(`1) Please enter the title for the autorole message (Max. 250 characters):`
-                    + "\nThis is what the message currently will look like:");
-                await message.channel.send({ embed: { ...params.runningEmbed } });
+                await message.channel.send(`1) Please enter the title for the autorole message (Max. 250 characters):` +
+                    "\nThis is what the message currently will look like:");
+                await message.channel.send({
+                    embed: {
+                        ...params.runningEmbed
+                    }
+                });
                 params.numMessages += 2;
 
                 return MAIN.createRunningCommand(message, {
-                    command: autorole, commandParams:
-                    {
+                    command: autorole,
+                    commandParams: {
                         ...params,
                         step: 2
                     }
@@ -419,24 +481,30 @@ const autorole = async function (message, params, user) {
                     await message.channel.send("The title is limited to 250 characters." + `Yours was ${message.content.length}! Try again.`)
                     params.numMessages++;
                     return MAIN.createRunningCommand(message, {
-                        command: autorole, commandParams:
-                        {
+                        command: autorole,
+                        commandParams: {
                             ...params,
                             step: 2,
                         }
                     }, user);
-                }
-                else {
+                } else {
 
                     await message.channel.send("This is what the message will currently look like:");
-                    await message.channel.send({ embed: { ...params.runningEmbed, title: message.content } });
-                    params.numMessages += 3;//might cause issues
-                    return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [
-                        {
-                            ...params, step: 3, title: message.content
+                    await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed,
+                            title: message.content
+                        }
+                    });
+                    params.numMessages += 3; //might cause issues
+                    return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
+                            ...params,
+                            step: 3,
+                            title: message.content
                         },
                         {
-                            ...params, step: 1
+                            ...params,
+                            step: 1
                         }
                     ], autorole, `Do you wish to keep:  **${message.content}**   as the title or change it?`);
                 }
@@ -448,37 +516,39 @@ const autorole = async function (message, params, user) {
                     await message.channel.send("The title is limited to 250 characters." + `Yours was ${params.title.length}! Try again.`)
                     params.numMessages++;
                     return MAIN.createRunningCommand(message, {
-                        command: autorole, commandParams:
-                        {
+                        command: autorole,
+                        commandParams: {
                             ...params,
                             step: 1,
                         }
                     }, user);
-                }
-                else if (message.content.length <= 1000) {
+                } else if (message.content.length <= 1000) {
 
                     params.runningEmbed.title = params.title;
                     await message.channel.send("\nThis is what the message currently will look like:");
-                    await message.channel.send({ embed: { ...params.runningEmbed } });
+                    await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed
+                        }
+                    });
                     await message.channel.send("`2) Please enter the description for the autorole message (Max. 1000 characters):`");
                     params.numMessages += 3;
 
 
                     return MAIN.createRunningCommand(message, {
-                        command: autorole, commandParams:
-                        {
+                        command: autorole,
+                        commandParams: {
                             ...params,
                             step: 4
                         }
                     }, user);
-                }
-                else {
+                } else {
 
                     await message.channel.send("The description is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
                     params.numMessages++;
                     return MAIN.createRunningCommand(message, {
-                        command: autorole, commandParams:
-                        {
+                        command: autorole,
+                        commandParams: {
                             ...params,
                             step: 4,
                         }
@@ -493,292 +563,355 @@ const autorole = async function (message, params, user) {
                     await message.channel.send("The description is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
                     params.numMessages++;
                     return MAIN.createRunningCommand(message, {
-                        command: autorole, commandParams:
-                        {
+                        command: autorole,
+                        commandParams: {
                             ...params,
                             step: 3,
                         }
                     }, user);
-                }
-                else {
+                } else {
 
                     await message.channel.send("This is what the message will currently look like:");
-                    await message.channel.send({ embed: { ...params.runningEmbed, description: message.content } });
-                    params.numMessages += 3;//might cause issues
-                    return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [
-                        {
-                            ...params, step: 5, description: message.content, runningEmbed: { ...params.runningEmbed, description: message.content }
+                    await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed,
+                            description: message.content
+                        }
+                    });
+                    params.numMessages += 3; //might cause issues
+                    return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
+                            ...params,
+                            step: 5,
+                            description: message.content,
+                            runningEmbed: {
+                                ...params.runningEmbed,
+                                description: message.content
+                            }
                         },
                         {
-                            ...params, step: 3
+                            ...params,
+                            step: 3
                         }
                     ], autorole, `Do you wish to keep:  **${message.content}**   as the description or change it?`);
                 }
-            case 5:
+                case 5:
 
-                await message.channel.send("`3) Please enter an emoji and @role to pair seperated by **,** (must be a valid universal emoji or specific to this server!):` "
-                    + "```*emoji*, @role```"
-                    + "\nThis is what the message currently will look like:");
-                let tempy = await message.channel.send({ embed: { ...params.runningEmbed } });
-                params.numMessages += 2;
-
-                if (params.newEmoji) {
-                    params.emojis.push(params.newEmoji);
-                    params.roles.push(params.newEmoji.roleID);
-                    params.newEmoji = null;
-                }
-                reactEmoji(tempy, params.emojis);
-
-                return MAIN.createRunningCommand(message, {
-                    command: autorole, commandParams:
-                    {
-                        ...params,
-                        step: 6,
-                    }
-                }, user);
-
-                break;
-            case 6:
-
-                if (message.content.split(',').length != 2) {
-
-                    await message.channel.send("You made an error in writing the emoji-@role. Refer to the example below!"
-                        + "```*emoji*, @role```");
-                    params.numMessages++;
-                    return MAIN.createRunningCommand(message, {
-                        command: autorole, commandParams:
-                        {
-                            ...params,
-                            step: 6,
+                    await message.channel.send("`3) Please enter an emoji and @role to pair seperated by **,** (must be a valid universal emoji or specific to this server!):` " +
+                        "```*emoji*, @role```" +
+                        "\nThis is what the message currently will look like:");
+                    let tempy = await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed
                         }
-                    }, user);
-                }
-                else if (message.mentions.roles.size != 1) {
-
-                    await message.channel.send("You made an error in writing the emoji-@role. Make sure to @mention only 1 role! Refer to the example below!"
-                        + "```*emoji*, @role```");
-                    params.numMessages++;
-                    return MAIN.createRunningCommand(message, {
-                        command: autorole, commandParams:
-                        {
-                            ...params,
-                            step: 6,
-                        }
-                    }, user);
-                }
-                else {
-
-                    let args = message.content.split(',');
-                    let emoji = args[0].trim();
-                    let emojiID = null;
-                    let role = message.mentions.roles.first().id;
-
-                    if ((await giveRoleSelf(message, role)) != 1) {
-
-                        await message.channel.send("Please fix my permissions for this role or try a different one.");
-                        params.numMessages++;
-                        return MAIN.createRunningCommand(message, {
-                            command: autorole, commandParams:
-                            {
-                                ...params,
-                                step: 6,
-                            }
-                        }, user);
-                    }
-
-
-                    if (params.emojis.find(element => element.roleID == role)) {
-
-                        await message.channel.send(MAIN.mentionRole(role) +
-                            " is already linked to an emoji in this message! Try again");
-                        params.numMessages++;
-                        return MAIN.createRunningCommand(message, {
-                            command: autorole, commandParams:
-                            {
-                                ...params,
-                                step: 6,
-                            }
-                        }, user);
-                    }
-
-                    let foundEmoji = params.emojis.find(element => element.emoji == emoji);
-
-                    if (foundEmoji) {
-
-                        await message.channel.send(`That emoji is already used for this message! Try again!`);
-                        params.numMessages++;
-                        return MAIN.createRunningCommand(message, {
-                            command: autorole, commandParams:
-                            {
-                                ...params,
-                                step: 6,
-                            }
-                        }, user);
-                    }
-
-                    await message.channel.send("\nThis is what the message currently will look like:");
-                    let tempMess = await message.channel.send({ embed: { ...params.runningEmbed } });
+                    });
                     params.numMessages += 2;
-                    reactEmoji(tempMess, params.emojis);
 
-                    if (emoji.includes(':')) {
+                    if (params.newEmoji) {
+                        params.emojis.push(params.newEmoji);
+                        params.roles.push(params.newEmoji.roleID);
+                        params.newEmoji = null;
+                    }
+                    reactEmoji(tempy, params.emojis);
 
-                        let id = emoji.substring(emoji.indexOf(':', 3) + 1, emoji.indexOf('>'));
-                        console.log(id);
+                    return MAIN.createRunningCommand(message, {
+                        command: autorole,
+                        commandParams: {
+                            ...params,
+                            step: 6,
+                        }
+                    }, user);
 
-                        let guildEmoji = message.guild.emojis.cache.get(id);
-                        if (!guildEmoji) {
+                    break;
+                case 6:
 
-                            await message.channel.send("You entered an invalid emoji, make sure its universal or from this server! Refer to the example below!"
-                                + "```*emoji*, @role```");
+                    if (message.content.split(',').length != 2) {
+
+                        await message.channel.send("You made an error in writing the emoji-@role. Refer to the example below!" +
+                            "```*emoji*, @role```");
+                        params.numMessages++;
+                        return MAIN.createRunningCommand(message, {
+                            command: autorole,
+                            commandParams: {
+                                ...params,
+                                step: 6,
+                            }
+                        }, user);
+                    } else if (message.mentions.roles.size != 1) {
+
+                        await message.channel.send("You made an error in writing the emoji-@role. Make sure to @mention only 1 role! Refer to the example below!" +
+                            "```*emoji*, @role```");
+                        params.numMessages++;
+                        return MAIN.createRunningCommand(message, {
+                            command: autorole,
+                            commandParams: {
+                                ...params,
+                                step: 6,
+                            }
+                        }, user);
+                    } else {
+
+                        let args = message.content.split(',');
+                        let emoji = args[0].trim();
+                        let emojiID = null;
+                        let role = message.mentions.roles.first().id;
+
+                        if ((await giveRoleSelf(message, role)) != 1) {
+
+                            await message.channel.send("Please fix my permissions for this role or try a different one.");
                             params.numMessages++;
                             return MAIN.createRunningCommand(message, {
-                                command: autorole, commandParams:
-                                {
+                                command: autorole,
+                                commandParams: {
                                     ...params,
                                     step: 6,
                                 }
                             }, user);
                         }
 
-                        emojiID = id;
-                        await tempMess.react(guildEmoji);
-                    }
-                    else
-                        await tempMess.react(emoji);
 
-                    await message.channel.send("Don't worry about the order, they will be fixed in the next step!");
-                    params.numMessages += 2;//might cause issues
-                    return await MAIN.generalMatcher(message, -23, user, ['Add another pair', 'Change last pair', 'finish'], [
-                        {
-                            ...params, step: 5, newEmoji: { emoji: emoji, roleID: role, emojiID: emojiID }
-                        },
-                        {
-                            ...params, step: 5, newEmoji: null
-                        },
-                        {
-                            ...params, step: 7, newEmoji: { emoji: emoji, roleID: role, emojiID: emojiID }
+                        if (params.emojis.find(element => element.roleID == role)) {
+
+                            await message.channel.send(MAIN.mentionRole(role) +
+                                " is already linked to an emoji in this message! Try again");
+                            params.numMessages++;
+                            return MAIN.createRunningCommand(message, {
+                                command: autorole,
+                                commandParams: {
+                                    ...params,
+                                    step: 6,
+                                }
+                            }, user);
                         }
-                    ], autorole, `Do you wish to add another emoji-role pair, change the previous one or proceed to finalise the message?`);
-                }
 
-                break;
-            case 7:
+                        let foundEmoji = params.emojis.find(element => element.emoji == emoji);
 
-                if (params.newEmoji) {
-                    params.emojis.push(params.newEmoji);
-                    params.roles.push(params.newEmoji.roleID);
-                    params.newEmoji = null;
-                }
+                        if (foundEmoji) {
 
+                            await message.channel.send(`That emoji is already used for this message! Try again!`);
+                            params.numMessages++;
+                            return MAIN.createRunningCommand(message, {
+                                command: autorole,
+                                commandParams: {
+                                    ...params,
+                                    step: 6,
+                                }
+                            }, user);
+                        }
 
-                await message.channel.send("This is what the message currently will look like:");
-                let tempy1 = await message.channel.send({ embed: { ...params.runningEmbed } });
-                reactEmoji(tempy1, params.emojis);
-                params.numMessages += 3;//might cause issues
+                        await message.channel.send("\nThis is what the message currently will look like:");
+                        let tempMess = await message.channel.send({
+                            embed: {
+                                ...params.runningEmbed
+                            }
+                        });
+                        params.numMessages += 2;
+                        reactEmoji(tempMess, params.emojis);
 
-                return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permanent', 'Unlimited'], [
-                    {
-                        ...params, step: 8, unique: true, permenant: false, neither: false
-                    },
-                    {
-                        ...params, step: 8, unique: false, permenant: true, neither: false
-                    },
-                    {
-                        ...params, step: 8, unique: false, permenant: false, neither: true
-                    }
-                ], autorole, `What kind of mode should this message enforce?\n`
-                + "```" + `\n1) Unique: Limit each user to 1 reaction (they can change their reaction to gain/loose the role`
-                + `\n\n2) Permanent: Limit each user to a single reaction for the lifetime of this message. They cannot change their mind after reacting.`
-                + `\n\n3) Unlimited: Let everyone react to as many emojis as they want!` + "```");
+                        if (emoji.includes(':')) {
 
-                break;
-            case 8:
+                            let id = emoji.substring(emoji.indexOf(':', 3) + 1, emoji.indexOf('>'));
+                            console.log(id);
 
-                params.numMessages += 1;//might cause issues
-                return await MAIN.generalMatcher(message, -23, user, ['Static', 'Not Static'], [
-                    {
-                        ...params, step: 9, static: true
-                    },
-                    {
-                        ...params, step: 9, static: false
-                    }
-                ], autorole, `Would you like the message to be static? A static message will remove any other emojis to prevent mass reactions clogging up the message.`);
+                            let guildEmoji = message.guild.emojis.cache.get(id);
+                            if (!guildEmoji) {
 
-                break;
-            case 9:
+                                await message.channel.send("You entered an invalid emoji, make sure its universal or from this server! Refer to the example below!" +
+                                    "```*emoji*, @role```");
+                                params.numMessages++;
+                                return MAIN.createRunningCommand(message, {
+                                    command: autorole,
+                                    commandParams: {
+                                        ...params,
+                                        step: 6,
+                                    }
+                                }, user);
+                            }
 
-                await message.channel.send(`Below you will find the final result!`);
-                let finalMessage = await message.channel.send({ embed: params.runningEmbed });
-                params.messageID = finalMessage.id;
-                await reactEmoji(finalMessage, params.emojis);
-                autoRoleMap.set(finalMessage.id, params);
-                setEmojiCollecter(params, finalMessage);
-                params.numMessages += 2;
+                            emojiID = id;
+                            await tempMess.react(guildEmoji);
+                        } else
+                            await tempMess.react(emoji);
 
-                let guild = await MAIN.findGuild({ id: message.guild.id });
-
-                guild.autorole.push(params);
-
-
-                MAIN.cachedGuilds.set(guild.id, guild);
-
-                Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { });
-
-                params.numMessages += 1;
-
-                return await MAIN.generalMatcher(message, -23, user, ['Remove Messages', 'Keep Messages'], [
-                    {
-                        ...params, step: 10, remove: true
-                    },
-                    {
-                        ...params, step: 10, remove: false
-                    }
-                ], autorole, "Would you like me to delete the previous setup message? Depending on how many mistakes were made, some messages might be left over."
-                + " However, only the setup messages will be removed.");
-
-
-                break;
-            case 10:
-
-                if (params.remove) {
-
-                    console.log(`Removing ${params.numMessages} messages!`);
-
-                    // let messages = await message.channel.messages.fetch({ limit: params.numMessages - 1 })
-                    let messages = await message.channel.messages.fetch({ after: params.originalMessage })
-                    console.log(messages.size)
-                    messages.delete(params.messageID);
-                    console.log(messages.size);
-
-
-
-                    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
-                    if (!permission.has("MANAGE_MESSAGES")) {
-
-                        params.numMessages += 1;
-
-                        return await MAIN.generalMatcher(message, -23, user, ['Try Again', "Don't Try Again"], [
-                            {
-                                ...params, step: 10, remove: true
+                        await message.channel.send("Don't worry about the order, they will be fixed in the next step!");
+                        params.numMessages += 2; //might cause issues
+                        return await MAIN.generalMatcher(message, -23, user, ['Add another pair', 'Change last pair', 'finish'], [{
+                                ...params,
+                                step: 5,
+                                newEmoji: {
+                                    emoji: emoji,
+                                    roleID: role,
+                                    emojiID: emojiID
+                                }
                             },
                             {
-                                ...params, step: 10, remove: false
+                                ...params,
+                                step: 5,
+                                newEmoji: null
+                            },
+                            {
+                                ...params,
+                                step: 7,
+                                newEmoji: {
+                                    emoji: emoji,
+                                    roleID: role,
+                                    emojiID: emojiID
+                                }
                             }
-                        ], autorole, "I don't have the MANAGE_MESSAGES permission in this channel to delete messages. Would you like me to try again?");
+                        ], autorole, `Do you wish to add another emoji-role pair, change the previous one or proceed to finalise the message?`);
                     }
 
-                    message.channel.bulkDelete(messages).catch(err => {
-                        console.log("Error deleting bulk messages: " + err);
-                        message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                    break;
+                case 7:
+
+                    if (params.newEmoji) {
+                        params.emojis.push(params.newEmoji);
+                        params.roles.push(params.newEmoji.roleID);
+                        params.newEmoji = null;
+                    }
+
+
+                    await message.channel.send("This is what the message currently will look like:");
+                    let tempy1 = await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed
+                        }
+                    });
+                    reactEmoji(tempy1, params.emojis);
+                    params.numMessages += 3; //might cause issues
+
+                    return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permanent', 'Unlimited'], [{
+                                ...params,
+                                step: 8,
+                                unique: true,
+                                permenant: false,
+                                neither: false
+                            },
+                            {
+                                ...params,
+                                step: 8,
+                                unique: false,
+                                permenant: true,
+                                neither: false
+                            },
+                            {
+                                ...params,
+                                step: 8,
+                                unique: false,
+                                permenant: false,
+                                neither: true
+                            }
+                        ], autorole, `What kind of mode should this message enforce?\n` +
+                        "```" + `\n1) Unique: Limit each user to 1 reaction (they can change their reaction to gain/loose the role` +
+                        `\n\n2) Permanent: Limit each user to a single reaction for the lifetime of this message. They cannot change their mind after reacting.` +
+                        `\n\n3) Unlimited: Let everyone react to as many emojis as they want!` + "```");
+
+                    break;
+                case 8:
+
+                    params.numMessages += 1; //might cause issues
+                    return await MAIN.generalMatcher(message, -23, user, ['Static', 'Not Static'], [{
+                            ...params,
+                            step: 9,
+                            static: true
+                        },
+                        {
+                            ...params,
+                            step: 9,
+                            static: false
+                        }
+                    ], autorole, `Would you like the message to be static? A static message will remove any other emojis to prevent mass reactions clogging up the message.`);
+
+                    break;
+                case 9:
+
+                    await message.channel.send(`Below you will find the final result!`);
+                    let finalMessage = await message.channel.send({
+                        embed: params.runningEmbed
+                    });
+                    params.messageID = finalMessage.id;
+                    await reactEmoji(finalMessage, params.emojis);
+                    autoRoleMap.set(finalMessage.id, params);
+                    setEmojiCollecter(params, finalMessage);
+                    params.numMessages += 2;
+
+                    let guild = await MAIN.findGuild({
+                        id: message.guild.id
                     });
 
-                }
-                break;
+                    guild.autorole.push(params);
+
+
+                    MAIN.cachedGuilds.set(guild.id, guild);
+
+                    Guild.findOneAndUpdate({
+                        id: message.guild.id
+                    }, {
+                        $set: {
+                            autorole: guild.autorole
+                        }
+                    }, function (err, doc, res) {});
+
+                    params.numMessages += 1;
+
+                    return await MAIN.generalMatcher(message, -23, user, ['Remove Messages', 'Keep Messages'], [{
+                                ...params,
+                                step: 10,
+                                remove: true
+                            },
+                            {
+                                ...params,
+                                step: 10,
+                                remove: false
+                            }
+                        ], autorole, "Would you like me to delete the previous setup message? Depending on how many mistakes were made, some messages might be left over." +
+                        " However, only the setup messages will be removed.");
+
+
+                    break;
+                case 10:
+
+                    if (params.remove) {
+
+                        console.log(`Removing ${params.numMessages} messages!`);
+
+                        // let messages = await message.channel.messages.fetch({ limit: params.numMessages - 1 })
+                        let messages = await message.channel.messages.fetch({
+                            after: params.originalMessage
+                        })
+                        console.log(messages.size)
+                        messages.delete(params.messageID);
+                        console.log(messages.size);
+
+
+
+                        let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+                        if (!permission.has("MANAGE_MESSAGES")) {
+
+                            params.numMessages += 1;
+
+                            return await MAIN.generalMatcher(message, -23, user, ['Try Again', "Don't Try Again"], [{
+                                    ...params,
+                                    step: 10,
+                                    remove: true
+                                },
+                                {
+                                    ...params,
+                                    step: 10,
+                                    remove: false
+                                }
+                            ], autorole, "I don't have the MANAGE_MESSAGES permission in this channel to delete messages. Would you like me to try again?");
+                        }
+
+                        message.channel.bulkDelete(messages).catch(err => {
+                            console.log("Error deleting bulk messages: " + err);
+                            message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                        });
+
+                    }
+                    break;
         }
 
-    }
-    else {
+    } else {
 
         if (message.channel.type == 'dm') return message.channel.send("You can only create and autoRole Message from inside a server text channel");
 
@@ -787,14 +920,21 @@ const autorole = async function (message, params, user) {
 
         await message.channel.send("Welcome to the autorole message creator. This is what the message will currently look like:");
 
-        let embed1 = { ...MAIN.Embed, footer: '', title: '', timestamp: null };
-        await message.channel.send({ embed: embed1 });
+        let embed1 = {
+            ...MAIN.Embed,
+            footer: '',
+            title: '',
+            timestamp: null
+        };
+        await message.channel.send({
+            embed: embed1
+        });
         await message.channel.send("```\n You can enter **-1** at any point to stop the autorole creation process!```")
         await message.channel.send("Please be careful with all your future inputs.\n`Step 1) Please enter the title for the message (Max. 250 characters):`");
 
         return MAIN.createRunningCommand(message, {
-            command: autorole, commandParams:
-            {
+            command: autorole,
+            commandParams: {
                 step: 2,
                 runningEmbed: embed1,
                 guildID: message.guild.id,
@@ -828,11 +968,10 @@ const reactEmoji = async function (message, emojis) {
 
             let guildEmoji = message.guild.emojis.cache.get(id);
             await message.react(guildEmoji)
-                .catch(err => { });
-        }
-        else
+                .catch(err => {});
+        } else
             await message.react(emojiPair.emoji)
-                .catch(err => { });
+            .catch(err => {});
     }
 }
 
@@ -842,8 +981,7 @@ const giveRoleSelf = async function (message, roleID) {
     let guildMember = message.guild.members.cache.get(MAIN.Client.user.id);
     try {
         roleToAdd = message.guild.roles.cache.get(roleID);
-    }
-    catch (err) {
+    } catch (err) {
 
         return -1;
     }
@@ -867,8 +1005,7 @@ const giveRoleSelf = async function (message, roleID) {
                 return 1;
         }
         return -1;
-    }
-    else
+    } else
         return -1;
 }
 
@@ -883,7 +1020,10 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
     let collector = await message.createReactionCollector(function (reaction, user) {
         return (!user.bot)
-    }, { time: 60 * 60 * 1000, dispose: true });
+    }, {
+        time: 60 * 60 * 1000,
+        dispose: true
+    });
     collector.on('collect', async function (emoji, user) {
 
         let tempEmoji = emoji._emoji;
@@ -908,10 +1048,11 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
                 emoji.users.remove(user);
                 return MAIN.selfDestructMessage(emoji.message, 'You have already reacted to this message before! No takebacks!', 3, true);
-            }
-            else if (!userReacted && autorole.permenant) {
+            } else if (!userReacted && autorole.permenant) {
 
-                let guild = await MAIN.findGuild({ id: emoji.message.guild.id });
+                let guild = await MAIN.findGuild({
+                    id: emoji.message.guild.id
+                });
 
                 let index = guild.autorole.findIndex(element => element.messageID == emoji.message.id)
 
@@ -921,24 +1062,29 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
                 try {
                     roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
-                }
-                catch (err) {
+                } catch (err) {
 
                     return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
                 }
 
                 if (roleToAdd)
                     await guildMember.roles.add(roleToAdd)
-                        .catch(function (err) {
+                    .catch(function (err) {
 
-                            emoji.message.channel.send("I didn't have the required permission to give such a role!");
-                        });
+                        emoji.message.channel.send("I didn't have the required permission to give such a role!");
+                    });
                 else
                     return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
 
                 autoRoleMap.get(emoji.message.id).users.push(user.id);
 
-                Guild.findOneAndUpdate({ id: guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { })
+                Guild.findOneAndUpdate({
+                    id: guild.id
+                }, {
+                    $set: {
+                        autorole: guild.autorole
+                    }
+                }, function (err, doc, res) {})
                 return 1;
 
             }
@@ -959,8 +1105,8 @@ const setEmojiCollecter = async function (autoroleObj, message) {
                 if (foundUser) {
 
                     emoji.users.remove(user);
-                    return MAIN.selfDestructMessage(emoji.message, 'You have already reacted to this message, unreact with your previous one'
-                        + ` (by clicking on it again) and then try again.`, 3, true);
+                    return MAIN.selfDestructMessage(emoji.message, 'You have already reacted to this message, unreact with your previous one' +
+                        ` (by clicking on it again) and then try again.`, 3, true);
                 }
 
                 for (let roly of autorole.roles) {
@@ -968,8 +1114,8 @@ const setEmojiCollecter = async function (autoroleObj, message) {
                     if (guildMember.roles.cache.get(roly)) {
 
                         emoji.users.remove(user);
-                        return MAIN.selfDestructMessage(emoji.message, 'You already have one of the roles from the other reactions. You can'
-                            + "'t get another until you remove the existing one.", 3, true);
+                        return MAIN.selfDestructMessage(emoji.message, 'You already have one of the roles from the other reactions. You can' +
+                            "'t get another until you remove the existing one.", 3, true);
                     }
                 }
             }
@@ -978,29 +1124,25 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
             try {
                 roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
-            }
-            catch (err) {
+            } catch (err) {
 
                 return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
             }
 
             if (roleToAdd)
                 await guildMember.roles.add(roleToAdd)
-                    .catch(function (err) {
+                .catch(function (err) {
 
-                        emoji.message.channel.send("I didn't have the required permission to give such a role!");
-                    });
+                    emoji.message.channel.send("I didn't have the required permission to give such a role!");
+                });
             else
                 return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
 
-        }
-        else if (autorole.static) {
+        } else if (autorole.static) {
 
             return emoji.users.remove(user);
 
-        }
-        else {
-        }
+        } else {}
     });
 
     collector.on('remove', async function (emoji, user) {
@@ -1029,18 +1171,17 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
         try {
             roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
-        }
-        catch (err) {
+        } catch (err) {
 
             return emoji.message.send("A role that was used in the autorole message no longer exists, failed to remove the role.");
         }
 
         if (roleToAdd)
             await guildMember.roles.remove(roleToAdd)
-                .catch(function (err) {
+            .catch(function (err) {
 
-                    emoji.message.channel.send("I didn't have the required permission to remove such a role!");
-                });
+                emoji.message.channel.send("I didn't have the required permission to remove such a role!");
+            });
         else
             return emoji.message.send("A role that was used in the autorole message no longer exists, failed to remove the role.");
     });
@@ -1063,19 +1204,26 @@ const setEmojiCollectorAll = async function (autoroleObj) {
 
         try {
             message = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID).messages.fetch(AUTOROLE.messageID);
-        }
-        catch (err) {
+        } catch (err) {
 
             let channel = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID);
             if (channel)
                 channel.send("An autorole message that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
 
 
-            let guild = await MAIN.findGuild({ id: AUTOROLE.guildID });
+            let guild = await MAIN.findGuild({
+                id: AUTOROLE.guildID
+            });
 
             let index = guild.autorole.findIndex(element => element.messageID == AUTOROLE.messageID)
             guild.autorole.splice(index);
-            Guild.findOneAndUpdate({ id: guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { })
+            Guild.findOneAndUpdate({
+                id: guild.id
+            }, {
+                $set: {
+                    autorole: guild.autorole
+                }
+            }, function (err, doc, res) {})
             continue;
 
         }
@@ -1146,7 +1294,9 @@ const editAutoRoleTitle = async function (message, params, user) {
     autoMessage.title = title;
     autoMessage.runningEmbed.title = title;
 
-    actualAutoMessage.edit({ embed: autoMessage.runningEmbed });
+    actualAutoMessage.edit({
+        embed: autoMessage.runningEmbed
+    });
     updateAutoRoleObject(autoMessage, message.guild.id);
 }
 exports.editAutoRoleTitle = editAutoRoleTitle;
@@ -1190,7 +1340,9 @@ const editAutoRoleDescription = async function (message, params, user) {
     autoMessage.description = description;
     autoMessage.runningEmbed.description = description;
 
-    actualAutoMessage.edit({ embed: autoMessage.runningEmbed });
+    actualAutoMessage.edit({
+        embed: autoMessage.runningEmbed
+    });
     updateAutoRoleObject(autoMessage, message.guild.id);
 
 }
@@ -1198,13 +1350,21 @@ exports.editAutoRoleDescription = editAutoRoleDescription;
 
 const updateAutoRoleObject = async function (autoRoleObj, guildID) {
 
-    let guild = await MAIN.findGuild({ id: guildID });
+    let guild = await MAIN.findGuild({
+        id: guildID
+    });
 
     let index = guild.autorole.findIndex(element => element.messageID == autoRoleObj.messageID)
 
     guild.autorole[index] = autoRoleObj;
 
-    Guild.findOneAndUpdate({ id: guild.id }, { $set: { autorole: guild.autorole } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            autorole: guild.autorole
+        }
+    }, function (err, doc, res) {});
     return 1;
 }
 
@@ -1225,13 +1385,25 @@ const welcomeMessages = async function (message, params, user) {
     if (args == 'on') {
         message.channel.send("Welcome message have been enabled.");
         MAIN.cachedGuilds.get(message.guild.id).welcomeMessages = true;
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: true } }, function (err, doc, res) { });
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                welcomeMessages: true
+            }
+        }, function (err, doc, res) {});
         return 1;
     }
 
     message.channel.send("Welcome message have been disabled.");
     MAIN.cachedGuilds.get(message.guild.id).welcomeMessages = false;
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { welcomeMessages: false } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            welcomeMessages: false
+        }
+    }, function (err, doc, res) {});
     return 1;
 }
 exports.welcomeMessages = welcomeMessages;
@@ -1277,28 +1449,39 @@ const followYoutuber = async function (message, params, user) {
 
     let map = bot.youtubeIDs;
 
-    if (!map.get(youtuberID)) {//Never set a guild before
+    if (!map.get(youtuberID)) { //Never set a guild before
         let users = {};
         users[user.id] = true;
         map.set(youtuberID, {
             guilds: {},
             users: users
         })
-    }
-    else {
+    } else {
 
         let temp = map.get(youtuberID);
-        if (!temp.users[user.id]) {//Never set a youtube alert for this guild for this channel
+        if (!temp.users[user.id]) { //Never set a youtube alert for this guild for this channel
 
-            let users = { ...temp.users };
+            let users = {
+                ...temp.users
+            };
             users[user.id] = true
 
             temp.users = users;
             map.set(youtuberID, temp);
         }
     }
-    BOT.findOneAndUpdate({}, { $set: { youtubeIDs: map } }).exec();
-    User.findOneAndUpdate({ id: user.id }, { $set: { youtubeAlerts: user.youtubeAlerts } }).exec()
+    BOT.findOneAndUpdate({}, {
+        $set: {
+            youtubeIDs: map
+        }
+    }).exec();
+    User.findOneAndUpdate({
+        id: user.id
+    }, {
+        $set: {
+            youtubeAlerts: user.youtubeAlerts
+        }
+    }).exec()
     return message.channel.send(`You will now get DMs whenever **${youtuber.author}** posts a new video!`);
 }
 exports.followYoutuber = followYoutuber;
@@ -1315,10 +1498,16 @@ const viewYoutbeFollows = async function (message, params, user) {
     for (let yChannel of user.youtubeAlerts) {
 
         let youtuber = await ytch.getChannelInfo(yChannel[0]);
-        yArray.push({ name: '', value: `**${youtuber.author}**\n` })
+        yArray.push({
+            name: '',
+            value: `**${youtuber.author}**\n`
+        })
     }
 
-    return MAIN.prettyEmbed(message, yArray, { description: "Here are the Youtube channels you are following:", startTally: 1 });
+    return MAIN.prettyEmbed(message, yArray, {
+        description: "Here are the Youtube channels you are following:",
+        startTally: 1
+    });
 }
 exports.viewYoutbeFollows = viewYoutbeFollows;
 
@@ -1360,8 +1549,18 @@ const deleteYoutubeFollow = async function (message, params, user) {
     let actualYoutuber = botMap.get(youtuberID);
     delete actualYoutuber.users[user.id];
 
-    BOT.findOneAndUpdate({}, { $set: { youtubeIDs: bot.youtubeIDs } }).exec();
-    User.findOneAndUpdate({ id: user.id }, { $set: { youtubeAlerts: user.youtubeAlerts } }).exec();
+    BOT.findOneAndUpdate({}, {
+        $set: {
+            youtubeIDs: bot.youtubeIDs
+        }
+    }).exec();
+    User.findOneAndUpdate({
+        id: user.id
+    }, {
+        $set: {
+            youtubeAlerts: user.youtubeAlerts
+        }
+    }).exec();
     return message.channel.send(`Succesfuly unfollowed ${youtuber.author}!`);
 }
 exports.deleteYoutubeFollow = deleteYoutubeFollow;
@@ -1413,7 +1612,9 @@ const youtubeChannelPair = async function (message, params, user) {
 
 
 
-    let guild = await MAIN.findGuild({ id: guildID });
+    let guild = await MAIN.findGuild({
+        id: guildID
+    });
     if (!guild.youtubeAlerts) {
         let mappy = new Map();
         guild.youtubeAlerts = mappy;
@@ -1422,35 +1623,39 @@ const youtubeChannelPair = async function (message, params, user) {
     let guildMap = guild.youtubeAlerts;
 
     if (!guildMap.get(youtuberID)) {
-        guildMap.set(youtuberID, [[channelID, vids.items[0].videoId]]);
-    }
-    else {
+        guildMap.set(youtuberID, [
+            [channelID, vids.items[0].videoId]
+        ]);
+    } else {
 
         for (let pair of guildMap.get(youtuberID))
             if (pair[0] == channelID)
                 return message.channel.send("This pair already exists!");
 
         let arr = guldMap.get(youtuberID);
-        arr.push([[channelID, vids.items[0].videoId]])
+        arr.push([
+            [channelID, vids.items[0].videoId]
+        ])
     }
 
 
 
     //The massive amount of checks before ensure that I don't need to repeat this for the
-    if (!map.get(youtuberID)) {//Never set a guild before
+    if (!map.get(youtuberID)) { //Never set a guild before
         let guilds = {};
         guilds[guildID] = true;
         map.set(youtuberID, {
             guilds: guilds,
             users: {}
         })
-    }
-    else {
+    } else {
 
         let temp = map.get(youtuberID);
-        if (!temp.guilds[guildID]) {//Never set a youtube alert for this guild for this channel
+        if (!temp.guilds[guildID]) { //Never set a youtube alert for this guild for this channel
 
-            let guilds = { ...temp.guilds };
+            let guilds = {
+                ...temp.guilds
+            };
             guilds[guildID] = true
 
             temp.guilds = guilds;
@@ -1459,15 +1664,27 @@ const youtubeChannelPair = async function (message, params, user) {
     }
 
 
-    BOT.findOneAndUpdate({}, { $set: { youtubeIDs: map } }).exec();
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeAlerts: guild.youtubeAlerts } }).exec();
+    BOT.findOneAndUpdate({}, {
+        $set: {
+            youtubeIDs: map
+        }
+    }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            youtubeAlerts: guild.youtubeAlerts
+        }
+    }).exec();
     return message.channel.send(`${MAIN.mentionChannel(message.mentions.channels.first().id)} will now have post alerts whenever **${youtuber.author}** posts a new video!`);
 }
 exports.youtubeChannelPair = youtubeChannelPair;
 
 const viewYoutubeChannelPairs = async function (message, params, user) {
 
-    let guild = await Guild.findOne({ id: message.guild.id });
+    let guild = await Guild.findOne({
+        id: message.guild.id
+    });
 
     let yArray = [];
 
@@ -1479,15 +1696,21 @@ const viewYoutubeChannelPairs = async function (message, params, user) {
 
     for (let yChannel of guild.youtubeAlerts) {
 
-        let tChannels = yChannel[1];//Array containing the channelID, last vid
+        let tChannels = yChannel[1]; //Array containing the channelID, last vid
         let youtuber = await ytch.getChannelInfo(yChannel[0]);
 
         for (let tChannel of tChannels)
-            yArray.push({ name: '', value: `${MAIN.mentionChannel(tChannel[0])} is linked to **${youtuber.author}**\n` })
+            yArray.push({
+                name: '',
+                value: `${MAIN.mentionChannel(tChannel[0])} is linked to **${youtuber.author}**\n`
+            })
 
     }
 
-    return MAIN.prettyEmbed(message, yArray, { description: "Here are the ServerChannel-Youtuber pairs:", startTally: 1 });
+    return MAIN.prettyEmbed(message, yArray, {
+        description: "Here are the ServerChannel-Youtuber pairs:",
+        startTally: 1
+    });
 }
 exports.viewYoutubeChannelPairs = viewYoutubeChannelPairs;
 
@@ -1498,7 +1721,9 @@ const deleteYoutubeChannelPair = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can remove youtube alerts for the server");
 
-    let guild = await Guild.findOne({ id: message.guild.id });
+    let guild = await Guild.findOne({
+        id: message.guild.id
+    });
 
     if (!guild.youtubeAlerts)
         return message.channel.send("There are no youtube-channel pairs for this server!");
@@ -1535,14 +1760,14 @@ const deleteYoutubeChannelPair = async function (message, params, user) {
         x = 0;
 
         //yChannel[0] = actual youtuber (id)
-        let tChannels = yChannel[1];//Array containing the channelID, last vid
+        let tChannels = yChannel[1]; //Array containing the channelID, last vid
 
         for (let tChannel of tChannels) {
 
             if ((tChannel[0] == channelID) && (yChannel[0] == youtuberID)) {
 
-                tChannels.splice(x, 1);//Remove pair from guild
-                if (tChannels.length == 0) {//If it was last pair, remove it from map channel altogether
+                tChannels.splice(x, 1); //Remove pair from guild
+                if (tChannels.length == 0) { //If it was last pair, remove it from map channel altogether
                     guild.youtubeAlerts.delete(yChannel[0]);
 
 
@@ -1551,10 +1776,20 @@ const deleteYoutubeChannelPair = async function (message, params, user) {
                     let actualYoutuber = botMap.get(yChannel[0]);
                     delete actualYoutuber.guilds[guild.id];
 
-                    BOT.findOneAndUpdate({}, { $set: { youtubeIDs: bot.youtubeIDs } }).exec();
+                    BOT.findOneAndUpdate({}, {
+                        $set: {
+                            youtubeIDs: bot.youtubeIDs
+                        }
+                    }).exec();
                 }
 
-                Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeAlerts: guild.youtubeAlerts } }).exec();
+                Guild.findOneAndUpdate({
+                    id: message.guild.id
+                }, {
+                    $set: {
+                        youtubeAlerts: guild.youtubeAlerts
+                    }
+                }).exec();
                 return message.channel.send(`${MAIN.mentionChannel(tChannel[0])} is no longer linked to **${youtuber.author}**\n`)
             }
             x++;
@@ -1570,7 +1805,9 @@ const passwordLockRole = async function (message, params, user) {
 
     if (params.step) {
 
-        let guild = await MAIN.findGuild({ id: params.guildID });
+        let guild = await MAIN.findGuild({
+            id: params.guildID
+        });
         if (!guild.passwordLock)
             guild.passwordLock = new Map();
 
@@ -1585,18 +1822,30 @@ const passwordLockRole = async function (message, params, user) {
                     message.channel.send("That password is already used! Try another one.");
 
 
-                    return MAIN.createRunningCommand(message, { command: passwordLockRole, commandParams: params, DM: true }, user);
-                }
-                else if ((await giveRoleSelf(params.generalMessage, params.roleID)) != 1) {
+                    return MAIN.createRunningCommand(message, {
+                        command: passwordLockRole,
+                        commandParams: params,
+                        DM: true
+                    }, user);
+                } else if ((await giveRoleSelf(params.generalMessage, params.roleID)) != 1) {
 
                     await message.channel.send("I can't give or remove this role. Please fix my permissions or try a different role.");
-                    return MAIN.createRunningCommand(message, { command: passwordLockRole, commandParams: params, DM: true }, user);
-                }
-                else {
+                    return MAIN.createRunningCommand(message, {
+                        command: passwordLockRole,
+                        commandParams: params,
+                        DM: true
+                    }, user);
+                } else {
 
                     guild.passwordLock.set(pass, params.roleID);
                     MAIN.cachedGuilds.set(params.guildID, guild);
-                    Guild.findOneAndUpdate({ id: params.guildID }, { $set: { passwordLock: guild.passwordLock } }, function (err, doc, res) { });
+                    Guild.findOneAndUpdate({
+                        id: params.guildID
+                    }, {
+                        $set: {
+                            passwordLock: guild.passwordLock
+                        }
+                    }, function (err, doc, res) {});
                     message.channel.send(`To have a member be assigned your chosen role, have them Direct Message me the following password: sa!activatePasswordRole ${params.guildID}, ${pass}`);
                     return 0;
                 }
@@ -1626,13 +1875,20 @@ const passwordLockRole = async function (message, params, user) {
     if ((await giveRoleSelf(message, params.roleID)) != 1) {
 
         await message.channel.send("I can't give or remove this role. Please fix my permissions or try a different role.");
-        return MAIN.createRunningCommand(message, { command: passwordLockRole, commandParams: params }, user);
+        return MAIN.createRunningCommand(message, {
+            command: passwordLockRole,
+            commandParams: params
+        }, user);
     }
 
     let messy = await message.author.send("Please enter the password you would like to use:");
     params.dm = messy;
 
-    return MAIN.createRunningCommand(messy, { command: passwordLockRole, commandParams: params, DM: true }, user);
+    return MAIN.createRunningCommand(messy, {
+        command: passwordLockRole,
+        commandParams: params,
+        DM: true
+    }, user);
 }
 exports.passwordLockRole = passwordLockRole;
 
@@ -1646,7 +1902,9 @@ const activatePasswordRole = async function (message, params, user) {
     if (args.length != 2)
         return message.channel.send("Invalid password");
 
-    let guild = await MAIN.findGuild({ id: args[0] });
+    let guild = await MAIN.findGuild({
+        id: args[0]
+    });
     if (!guild)
         return message.channel.send("Invalid password");
 
@@ -1675,7 +1933,9 @@ const viewPasswordLockRole = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can view the password-roleID pairs for the server");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.passwordLock)
         return message.author.send("There are no password-roleID pairs for this server");
@@ -1687,7 +1947,9 @@ const viewPasswordLockRole = async function (message, params, user) {
     if (array.length == 0)
         messy.channel.send("There are no password-role pairs for that server!");
 
-    MAIN.prettyEmbed(messy, array, { startTally: 1 });
+    MAIN.prettyEmbed(messy, array, {
+        startTally: 1
+    });
 }
 exports.viewPasswordLockRole = viewPasswordLockRole;
 
@@ -1703,7 +1965,9 @@ const deletePasswordLockRole = async function (message, params, user) {
     if (!args)
         return message.channel.send("You have to provide a password to delete the pair for!");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.passwordLock)
         return message.author.send("There are no password-roleID pairs for this server");
@@ -1714,7 +1978,13 @@ const deletePasswordLockRole = async function (message, params, user) {
     guild.passwordLock.delete(args);
     console.log(guild.passwordLock);
 
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { passwordLock: guild.passwordLock } }, function (err, doc, res) { });
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            passwordLock: guild.passwordLock
+        }
+    }, function (err, doc, res) {});
     return message.channel.send(`Successfuly deleted the password-roleID!`);
 }
 exports.deletePasswordLockRole = deletePasswordLockRole;
@@ -1753,8 +2023,7 @@ const addRep = async function (message, params, user) {
 
     try {
         return message.channel.send(`Gave ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args, message))}`);
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err)
         console.log("blacklisted")
     }
@@ -1783,8 +2052,7 @@ const removeRep = async function (message, params, user) {
 
     try {
         return message.channel.send(`Took away ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args * -1, message))}`);
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err)
         console.log('second blacklisted')
     }
@@ -1793,7 +2061,9 @@ exports.removeRep = removeRep;
 
 const changeRep = async function (user, guildID, amount, message) {
 
-    let dbGuild = await MAIN.findGuild({ id: guildID });
+    let dbGuild = await MAIN.findGuild({
+        id: guildID
+    });
     // console.log(dbGuild)
     let actualGuild = await MAIN.Client.guilds.cache.get(guildID);
 
@@ -1820,7 +2090,13 @@ const changeRep = async function (user, guildID, amount, message) {
 
         checkRepThreshold(user.id, Number(amount), dbGuild, actualGuild);
 
-        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                reps: user.reps
+            }
+        }).exec();
         return user.reps.get(guildID);
     }
 
@@ -1832,7 +2108,13 @@ const changeRep = async function (user, guildID, amount, message) {
 
         checkRepThreshold(user.id, Number(amount), dbGuild, actualGuild);
 
-        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                reps: user.reps
+            }
+        }).exec();
         return user.reps.get(guildID);
     }
 
@@ -1842,7 +2124,13 @@ const changeRep = async function (user, guildID, amount, message) {
         user.reps.set(guildID, Number(rep) + Number(amount));
 
         checkRepThreshold(user.id, Number(rep) + Number(amount), dbGuild, actualGuild);
-        User.findOneAndUpdate({ id: user.id }, { $set: { reps: user.reps } }).exec();
+        User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                reps: user.reps
+            }
+        }).exec();
     }
     return user.reps.get(guildID);
 }
@@ -1858,7 +2146,9 @@ const blacklistRepRole = async function (message, params, user) {
     if (message.mentions.roles.size != 1)
         return message.channel.send("Only 1 @role must be mentioned.");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let roleID = message.mentions.roles.first().id;
 
@@ -1867,7 +2157,13 @@ const blacklistRepRole = async function (message, params, user) {
 
     guild.blacklistedRepRoles.push(roleID);
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: guild.id }, { $set: { blacklistedRepRoles: guild.blacklistedRepRoles } }).exec();
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            blacklistedRepRoles: guild.blacklistedRepRoles
+        }
+    }).exec();
     message.channel.send("Role has been blacklisted for receiving rep!");
 }
 exports.blacklistRepRole = blacklistRepRole;
@@ -1882,7 +2178,9 @@ const removeBlacklistedRepRole = async function (message, params, user) {
     if (message.mentions.roles.size != 1)
         return message.channel.send("Only 1 @role must be mentioned.");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let roleID = message.mentions.roles.first().id;
 
@@ -1894,7 +2192,13 @@ const removeBlacklistedRepRole = async function (message, params, user) {
 
     guild.blacklistedRepRoles.splice(guild.blacklistedRepRoles.indexOf(roleID));
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: guild.id }, { $set: { blacklistedRepRoles: guild.blacklistedRepRoles } }).exec();
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            blacklistedRepRoles: guild.blacklistedRepRoles
+        }
+    }).exec();
     message.channel.send("Role is no longer blacklisted for receiving rep!");
 }
 exports.removeBlacklistedRepRole = removeBlacklistedRepRole;
@@ -1910,7 +2214,9 @@ const blacklistGiveRepRole = async function (message, params, user) {
     if (message.mentions.roles.size != 1)
         return message.channel.send("Only 1 @role must be mentioned.");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let roleID = message.mentions.roles.first().id;
 
@@ -1919,7 +2225,13 @@ const blacklistGiveRepRole = async function (message, params, user) {
 
     guild.blacklistedGiveRepRoles.push(roleID);
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: guild.id }, { $set: { blacklistedGiveRepRoles: guild.blacklistedGiveRepRoles } }).exec();
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            blacklistedGiveRepRoles: guild.blacklistedGiveRepRoles
+        }
+    }).exec();
     message.channel.send("Role has been blacklisted for giving rep!");
 }
 exports.blacklistGiveRepRole = blacklistGiveRepRole;
@@ -1934,7 +2246,9 @@ const removeBlacklistedGiveRepRole = async function (message, params, user) {
     if (message.mentions.roles.size != 1)
         return message.channel.send("Only 1 @role must be mentioned.");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let roleID = message.mentions.roles.first().id;
 
@@ -1946,7 +2260,13 @@ const removeBlacklistedGiveRepRole = async function (message, params, user) {
 
     guild.blacklistedGiveRepRoles.splice(guild.blacklistedGiveRepRoles.indexOf(roleID));
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: guild.id }, { $set: { blacklistedGiveRepRoles: guild.blacklistedGiveRepRoles } }).exec();
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            blacklistedGiveRepRoles: guild.blacklistedGiveRepRoles
+        }
+    }).exec();
     message.channel.send("Role is no longer blacklisted for giving rep!");
 }
 exports.removeBlacklistedGiveRepRole = removeBlacklistedGiveRepRole;
@@ -1983,13 +2303,18 @@ const welcomeMessage = async function (message, params, user) {
     let guild = MAIN.cachedGuilds.get(message.guild.id);
     guild.welcomeMessage = args;
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: guild.id }, { $set: { welcomeMessage: guild.welcomeMessage } }).exec();
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            welcomeMessage: guild.welcomeMessage
+        }
+    }).exec();
     message.channel.send(`New users will receive the following message:\n${args}`);
 }
 exports.welcomeMessage = welcomeMessage;
 
 const topRep = async function (message, params, user) {
-
 
     let args = Number(message.content.split(" ").slice(1).join(" ").trim());
 
@@ -2000,7 +2325,10 @@ const topRep = async function (message, params, user) {
     let limit = args ? args : 10;
 
 
-    let parsed = await MAIN.sendToServer({ command: 'topRep', params: [message.guild.id, message.channel.id, limit] });
+    let parsed = await MAIN.sendToServer({
+        command: 'topRep',
+        params: [message.guild.id, message.channel.id, limit]
+    });
 
     // if (parsed.status) {
     //     if (parsed.status == -1) {
@@ -2021,6 +2349,23 @@ const topRep = async function (message, params, user) {
     // MAIN.prettyEmbed(message, finalString, { modifier: 'xl', title: `Below are the top ${limit} rep'ed users of ${originalLength} who have > 0 rep!` });
 }
 exports.topRep = topRep;
+
+
+
+const repToFaction = async function (message, params, user) {
+
+    if (isNaN(params[0])) {
+        return message.channel.send(`You have provided an invalid number for ratio for rep to faction contribution conversion!`);
+    }
+
+    let parsed = await MAIN.sendToServer({
+        command: 'repToFaction',
+        params: [message.guild.id, message.channel.id, params[0]]
+    });
+}
+exports.repToFaction = repToFaction;
+
+
 
 const identifyThanks = function (message) {
 
@@ -2080,18 +2425,28 @@ function setThankerAutoRep(message, params, user) {
     if (bool == "TRUE") {
 
         MAIN.cachedGuilds.get(message.guild.id).thankerAutoRep = true;
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { thankerAutoRep: true } }, function (err, doc, res) { });
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                thankerAutoRep: true
+            }
+        }, function (err, doc, res) {});
         message.channel.send("Rep will be automatically gained from channel thankers!");
         return 1;
-    }
-    else if (bool == "FALSE") {
+    } else if (bool == "FALSE") {
 
         MAIN.cachedGuilds.get(message.guild.id).thankerAutoRep = false;
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { thankerAutoRep: false } }, function (err, doc, res) { });
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                thankerAutoRep: false
+            }
+        }, function (err, doc, res) {});
         message.channel.send("Rep will not be automatically gained from channel thankers!");
         return 1;
-    }
-    else {
+    } else {
         message.channel.send("You must enter either true or false: **" + prefix + "setThankerAutoRep** *true/false*");
         return -1;
     }
@@ -2116,19 +2471,33 @@ async function setImageForwarding(message, params, user) {
 
     if (bool == "TRUE") {
 
-      
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { forwardImages: true } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res)});
+
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                forwardImages: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res)
+        });
         message.channel.send("Images will be automatically be forwarded to imageChannel!");
         return 1;
-    }
-    else if (bool == "FALSE") {
+    } else if (bool == "FALSE") {
 
-       // MAIN.cachedGuilds.get(message.guild.id).forwardImages = false;
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { forwardImages: false } }, function (err, doc, res) {MAIN.cachedGuilds.set(message.guild.id, res) });
+        // MAIN.cachedGuilds.get(message.guild.id).forwardImages = false;
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                forwardImages: false
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res)
+        });
         message.channel.send("Images will not be automatically be forwarded to imageChannel!");
         return 1;
-    }
-    else {
+    } else {
         message.channel.send("You must enter either true or false: **" + prefix + "setImageForwarding** *true/false*");
         return -1;
     }
@@ -2150,7 +2519,9 @@ const setImageChannel = async function (message, params, user) {
         return message.author.send("I don't have the right permissions to send messages in this channel!");
 
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (guild.channelImage.includes(message.channel.id)) {
 
@@ -2159,7 +2530,13 @@ const setImageChannel = async function (message, params, user) {
 
     guild.channelImage.push(message.channel.id);
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImage: guild.channelImage } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelImage: guild.channelImage
+        }
+    }).exec();
     return message.channel.send("This channel will now have images forwarded to it");
 }
 exports.setImageChannel = setImageChannel;
@@ -2171,7 +2548,9 @@ const unSetImageChannel = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can set a channel to have images forwarded to it")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.channelImage.includes(message.channel.id)) {
 
@@ -2182,7 +2561,13 @@ const unSetImageChannel = async function (message, params, user) {
 
     guild.channelImage.splice(guild.channelImage.indexOf(message.channel.id));
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImage: guild.channelImage } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelImage: guild.channelImage
+        }
+    }).exec();
     return message.channel.send("This channel will no longer have images forwarded to it");
 }
 exports.unSetImageChannel = unSetImageChannel;
@@ -2200,14 +2585,14 @@ const forwardImages = async function (message, guild, user) {
                     await guildy.channels.cache.get(imageChan).send(`Image from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
                 }
             }
-            else if (isVideo(attachment.attachment)) {
+    else if (isVideo(attachment.attachment)) {
 
-                let guildy = MAIN.Client.guilds.cache.get(guild.id);
-                for (let imageChan of guild.channelImage) {
+        let guildy = MAIN.Client.guilds.cache.get(guild.id);
+        for (let imageChan of guild.channelImage) {
 
-                    await guildy.channels.cache.get(imageChan).send(`Video from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
-                }
-            }
+            await guildy.channels.cache.get(imageChan).send(`Video from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
+        }
+    }
     const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
 
 
@@ -2215,7 +2600,9 @@ const forwardImages = async function (message, guild, user) {
         if (isImageUrl(string)) {
 
             let result = await needle('get', string)
-                .catch(err => { console.log("caught thanker error forward images") });
+                .catch(err => {
+                    console.log("caught thanker error forward images")
+                });
             if (result) {
                 let guildy = MAIN.Client.guilds.cache.get(guild.id);
                 for (let imageChan of guild.channelImage) {
@@ -2241,7 +2628,9 @@ const setImageSourceChannel = async function (message, params, user) {
         return message.author.send("I don't have the right permissions to send messages in this channel!");
 
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (guild.channelImageSource.includes(message.channel.id)) {
 
@@ -2250,7 +2639,13 @@ const setImageSourceChannel = async function (message, params, user) {
 
     guild.channelImageSource.push(message.channel.id);
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImageSource: guild.channelImageSource } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelImageSource: guild.channelImageSource
+        }
+    }).exec();
     return message.channel.send("This channel will now be scanned for images to forward");
 }
 exports.setImageSourceChannel = setImageSourceChannel;
@@ -2262,7 +2657,9 @@ const unSetImageSourceChannel = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can set unSet a channel to be scanned for images to forward")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.channelImageSource.includes(message.channel.id)) {
 
@@ -2273,7 +2670,13 @@ const unSetImageSourceChannel = async function (message, params, user) {
 
     guild.channelImageSource.splice(guild.channelImageSource.indexOf(message.channel.id));
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { channelImageSource: guild.channelImageSource } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            channelImageSource: guild.channelImageSource
+        }
+    }).exec();
     return message.channel.send("This channel will no longer be scanned for images to forward");
 }
 exports.unSetImageSourceChannel = unSetImageSourceChannel;
@@ -2304,20 +2707,37 @@ const setRepRolePair = async function (message, params, user) {
     if (!test)
         return message.channel.send("I don't have the permissions to work with that role!");
 
-    let editGuild = await MAIN.findGuild({ id: message.guild.id });
+    let editGuild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let prevPair = editGuild.repRolePairs.find(element => element.roleID == roleID);
 
     if (prevPair) {
 
         prevPair.rep = args;
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { repRolePairs: editGuild.repRolePairs } }).exec();
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                repRolePairs: editGuild.repRolePairs
+            }
+        }).exec();
         return message.channel.send(`Overwriting the previous ${prevPair.rep} rep limit for this role to ${args}`);
     }
 
-    editGuild.repRolePairs.push({ roleID: roleID, rep: args });
+    editGuild.repRolePairs.push({
+        roleID: roleID,
+        rep: args
+    });
     MAIN.cachedGuilds.set(message.guild.id, editGuild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { repRolePairs: editGuild.repRolePairs } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            repRolePairs: editGuild.repRolePairs
+        }
+    }).exec();
     return message.channel.send(`${MAIN.mentionRole(roleID)} will now be granted to members >= ${args} rep!`);
 }
 exports.setRepRolePair = setRepRolePair;
@@ -2334,7 +2754,9 @@ const removeRepRolePair = async function (message, params, user) {
 
 
     let roleID = message.mentions.roles.first().id;
-    let editGuild = await MAIN.findGuild({ id: message.guild.id });
+    let editGuild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let prevPair = editGuild.repRolePairs.find(element => element.roleID == roleID);
     if (!prevPair)
@@ -2343,7 +2765,13 @@ const removeRepRolePair = async function (message, params, user) {
 
     editGuild.repRolePairs.splice(editGuild.repRolePairs.indexOf(prevPair));
     MAIN.cachedGuilds.set(message.guild.id, editGuild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { repRolePairs: editGuild.repRolePairs } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            repRolePairs: editGuild.repRolePairs
+        }
+    }).exec();
     message.channel.send("The role has been removed from the rep autorole!");
 }
 exports.removeRepRolePair = removeRepRolePair;
@@ -2362,7 +2790,9 @@ const setCommandChannel = async function (message, params, user) {
     if (message.mentions.channels.size != 1)
         return message.channel.send("You have to #mention exactly 1 channel to add to the whitelist");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let channelID = message.mentions.channels.first().id;
 
@@ -2373,7 +2803,13 @@ const setCommandChannel = async function (message, params, user) {
 
     guild.commandChannelWhiteList.push(channelID);
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { commandChannelWhiteList: guild.commandChannelWhiteList } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            commandChannelWhiteList: guild.commandChannelWhiteList
+        }
+    }).exec();
     return message.channel.send(`${MAIN.mentionChannel(channelID)}` + " is now whitelisted for commands");
 }
 exports.setCommandChannel = setCommandChannel;
@@ -2385,7 +2821,9 @@ const unSetCommandChannel = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can remove a whitelisted bot command channel")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.commandChannelWhiteList.includes(message.channel.id)) {
 
@@ -2394,7 +2832,13 @@ const unSetCommandChannel = async function (message, params, user) {
 
     guild.commandChannelWhiteList.splice(guild.commandChannelWhiteList.indexOf(message.channel.id));
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { commandChannelWhiteList: guild.commandChannelWhiteList } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            commandChannelWhiteList: guild.commandChannelWhiteList
+        }
+    }).exec();
     return message.channel.send("This channel will no longer be whitelisted for bot commands!");
 }
 exports.unSetCommandChannel = unSetCommandChannel;
@@ -2417,7 +2861,9 @@ const setThankerLogChannel = async function (message, params, user) {
     if (message.mentions.channels.size != 1)
         return message.channel.send("You have to #mention exactly 1 channel to add to make the log channel");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let channelID = message.mentions.channels.first().id;
 
@@ -2428,7 +2874,13 @@ const setThankerLogChannel = async function (message, params, user) {
 
     guild.thankerMessageChannel.push(channelID);
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { thankerMessageChannel: guild.thankerMessageChannel } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            thankerMessageChannel: guild.thankerMessageChannel
+        }
+    }).exec();
     return message.channel.send(`${MAIN.mentionChannel(channelID)}` + " will now be used for thanks logs.");
 }
 exports.setThankerLogChannel = setThankerLogChannel;
@@ -2440,7 +2892,9 @@ const unSetThankerLogChannel = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can remove a thanker log channel")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     if (!guild.thankerMessageChannel.includes(message.channel.id)) {
 
@@ -2449,7 +2903,13 @@ const unSetThankerLogChannel = async function (message, params, user) {
 
     guild.thankerMessageChannel.splice(guild.thankerMessageChannel.indexOf(message.channel.id));
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { thankerMessageChannel: guild.thankerMessageChannel } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            thankerMessageChannel: guild.thankerMessageChannel
+        }
+    }).exec();
     return message.channel.send("This channel will no longer be not be used for thanks logs.");
 }
 exports.unSetThankerLogChannel = unSetThankerLogChannel;
@@ -2470,14 +2930,22 @@ const setMusicRole = async function (message, params, user) {
     if (message.mentions.roles.size != 1)
         return message.channel.send("You have to @role exactly 1 role to add to set as the minimum");
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     let roleID = message.mentions.roles.first().id;
 
     guild.musicRole = roleID;
 
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { musicRole: guild.musicRole } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            musicRole: guild.musicRole
+        }
+    }).exec();
     return message.channel.send("The role has been set as the minimum for music commands!");
 }
 exports.setMusicRole = setMusicRole;
@@ -2489,12 +2957,20 @@ const unSetMusicRole = async function (message, params, user) {
     if (!message.member.permissions.has("ADMINISTRATOR"))
         return message.channel.send("Only admins can remove the a minimal role for music functionality")
 
-    let guild = await MAIN.findGuild({ id: message.guild.id });
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
 
     guild.musicRole = '';
 
     MAIN.cachedGuilds.set(guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { musicRole: guild.musicRole } }).exec();
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            musicRole: guild.musicRole
+        }
+    }).exec();
     return message.channel.send("The minimum role for music has been removed!");
 }
 exports.unSetMusicRole = unSetMusicRole
@@ -2517,14 +2993,30 @@ const twitchHere = async function (message, params, user) {
 
     if (args == 'on') {
         message.channel.send("`@here` for twitch notifications have been enabled.");
-      //  MAIN.cachedGuilds.set(message.guild.id, guild);
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { twitchHERE: true } }, function (err, doc, res) {  MAIN.cachedGuilds.set(message.guild.id, res);});
+        //  MAIN.cachedGuilds.set(message.guild.id, guild);
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                twitchHERE: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
         return 1;
     }
 
     message.channel.send("`@here` for twitch notifications have been disabled.");
-   // MAIN.cachedGuilds.set(message.guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { twitchHERE: false } }, function (err, doc, res) {  MAIN.cachedGuilds.set(message.guild.id, res);});
+    // MAIN.cachedGuilds.set(message.guild.id, guild);
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            twitchHERE: false
+        }
+    }, function (err, doc, res) {
+        MAIN.cachedGuilds.set(message.guild.id, res);
+    });
     return 1;
 }
 exports.twitchHere = twitchHere;
@@ -2547,14 +3039,30 @@ const autoRepToggle = async function (message, params, user) {
 
     if (args == 'on') {
         message.channel.send("AutoRep has been enabled.");
-       
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { autoRep: true } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                autoRep: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
         return 1;
     }
 
     message.channel.send("AutoRep has been disabled.");
-  //  MAIN.cachedGuilds.set(message.guild.id, guild);
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { autoRep: false } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+    //  MAIN.cachedGuilds.set(message.guild.id, guild);
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            autoRep: false
+        }
+    }, function (err, doc, res) {
+        MAIN.cachedGuilds.set(message.guild.id, res);
+    });
     return 1;
 }
 exports.autoRepToggle = autoRepToggle;
@@ -2570,13 +3078,29 @@ const youtubeHere = async function (message, params, user) {
 
     if (args == 'on') {
         message.channel.send("`@here` for youtube notifications have been enabled.");
-     //   MAIN.cachedGuilds.set(gmessage.guild.id, guild);
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHERE: true } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+        //   MAIN.cachedGuilds.set(gmessage.guild.id, guild);
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                youtubeHERE: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
         return 1;
     }
-   // MAIN.cachedGuilds.set(message.guild.id, guild);
+    // MAIN.cachedGuilds.set(message.guild.id, guild);
     message.channel.send("`@here` for youtube notifications have been disabled.");
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { youtubeHERE: false } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            youtubeHERE: false
+        }
+    }, function (err, doc, res) {
+        MAIN.cachedGuilds.set(message.guild.id, res);
+    });
     return 1;
 }
 exports.youtubeHere = youtubeHere;
@@ -2593,12 +3117,28 @@ const gameRolePing = async function (message, params, user) {
     if (args == 'on') {
         message.channel.send("Users will now be DM'ed when their ROLE is pinged for a game.");
         //MAIN.cachedGuilds.set(gmessage.guild.id, guild);
-        Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameRolePing: true } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                gameRolePing: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
         return 1;
     }
-   // MAIN.cachedGuilds.set(message.guild.id, guild);
-   message.channel.send("Users will not be DM'ed when their ROLE is pinged for a game.");
-    Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameRolePing: false } }, function (err, doc, res) { MAIN.cachedGuilds.set(message.guild.id, res); });
+    // MAIN.cachedGuilds.set(message.guild.id, guild);
+    message.channel.send("Users will not be DM'ed when their ROLE is pinged for a game.");
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            gameRolePing: false
+        }
+    }, function (err, doc, res) {
+        MAIN.cachedGuilds.set(message.guild.id, res);
+    });
     return 1;
 }
 exports.gameRolePing = gameRolePing;

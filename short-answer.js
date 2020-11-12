@@ -1105,7 +1105,7 @@ function populateCommandMap() {
     commandMap.set(Commands[150].title.toUpperCase(), ADMINISTRATOR.unSetThankerLogChannel)
     commandMap.set(Commands[151].title.toUpperCase(), ADMINISTRATOR.autoRepToggle)
     commandMap.set(Commands[152].title.toUpperCase(), ADMINISTRATOR.gameRolePing)
-
+    commandMap.set(Commands[153].title.toUpperCase(), ADMINISTRATOR.repToFaction)
 
     exports.commandMap = commandMap;
 }

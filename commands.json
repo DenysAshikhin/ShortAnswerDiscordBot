@@ -1846,5 +1846,18 @@
            "admin"
         ],
         "category": "*Other*"
+    },
+    {
+        "title": "repToFaction",
+        "explanation": "Converts everyone's rep to their personal faction contribution (if they are part of a faction) and sets their rep to 0. The converted rate is set as the **number** after the command.",
+        "example": [
+            "1) repToFaction 0.25",
+            "2) repToFaction 0"
+        ],
+        "subsection": [
+           "games",
+           "admin"
+        ],
+        "category": "Faction"
     }
 ]
