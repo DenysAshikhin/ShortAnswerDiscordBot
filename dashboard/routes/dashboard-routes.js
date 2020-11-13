@@ -20,6 +20,7 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         something: "Null",
         subtitle: "Short Answer Bot Dashboard",
         url: MAIN.REDIRECT_URL,
+        key: res.cookies.get('key'),
         guild: res.locals.guild,
         dbGuild: res.locals.dbGuild,
         admin: res.locals.admin,

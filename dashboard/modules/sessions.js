@@ -23,6 +23,9 @@ const create = async function (key) {
 
 const update = async function (key) {
 
+    console.log('big keY: ')
+    console.log(key)
+
     return sessions.set(key, {
         authUser: await authClient.getUser(key),
         guilds: getManageableGuilds(await authClient.getGuilds(key))

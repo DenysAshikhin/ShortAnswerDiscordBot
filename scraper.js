@@ -15,6 +15,8 @@ const Guild = require('./Guild.js')
 const http = require("http");
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const needle = require('needle');
+exports.needle = needle;
 
 const path = require('path');
 
@@ -100,6 +102,7 @@ exports.Embed = Embed;
 var SECRET;
 
 var defaultPrefix = 'sa!';
+var botIP;
 
 if (process.argv.length == 3) {
 
@@ -111,11 +114,14 @@ if (process.argv.length == 3) {
     PORT = config.PORT;
     REDIRECT_URL = config.dashboardURLLive;
     SECRET = config.clienSecret;
+    botIP = config.botIP;
+
 } else {
     uri = config.uri;
     token = config.TesterToken;
     defaultPrefix = "##";
     HOST = '127.0.0.1';
+    botIP = HOST;
     PORT = config.PORT;
     REDIRECT_URL = config.dashboardURLTest;
     SECRET = config.TesterSecret;
@@ -366,6 +372,42 @@ function findFurthestDate(date1, date2) {
     return date2;
 }
 exports.findFurthestDate = findFurthestDate;
+
+
+const sendToBot = async function (data) {
+
+    let encrypted = encrypt(JSON.stringify({
+        ...data,
+        password: config.PASSWORD
+    }))
+
+
+    console.log(`sending to: ${botIP}:${config.botPORT}`);
+
+    let resp = await needle('get', `${botIP}:${config.botPORT}`, null, {
+        headers: {
+            'payload': encrypted.content,
+            'tag': encrypted.tag.toString('base64'),
+            'iv': encrypted.iv.toString('base64')
+        }
+    });
+
+
+    //let payload = JSON.parse(resp.raw.toString('utf8'));
+    //     let decryptedPayload = decrypt({
+    //         content: payload.payload,
+    //         tag: Buffer.from(payload.tag, 'base64'),
+    //         iv: Buffer.from(payload.iv, 'base64')
+    //     })
+
+    //     let finalPayload = JSON.parse(decryptedPayload);
+    //     if ((typeof finalPayload) == 'string')
+    //         finalPayload = JSON.parse(finalPayload);
+
+    //     return finalPayload;
+}
+exports.sendToBot = sendToBot;
+
 
 
 async function countTalk() {

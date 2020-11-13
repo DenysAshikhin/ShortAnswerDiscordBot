@@ -7,6 +7,7 @@ html(lang='en')
         
         script.
             var url = !{JSON.stringify(url)}
+            var key = !{JSON.stringify(key)}
             var guild = !{JSON.stringify(guild)}
             var dbGuild = !{JSON.stringify(dbGuild)}
             var dbUser = !{JSON.stringify(dbUser)}
@@ -35,6 +36,7 @@ html(lang='en')
 
             .tabs.navbar-nav
                 .category Modules
+                a#qof.cursor-pointer(href='#') #[i.fas.fa-gavel.pr-1.text-muted] Quality of Life
                 a#automod.cursor-pointer(href='#') #[i.fas.fa-gavel.pr-1.text-muted] Auto-mod
                 a#economy.cursor-pointer(href='#') #[i.fas.fa-coins.pr-1.text-muted] Economy
                 a#general.cursor-pointer(href='#') #[i.fas.fa-star.pr-1.text-muted] General
@@ -42,6 +44,7 @@ html(lang='en')
 
         include ../includes/navbar.pug
         
+        include modules/qof
         include modules/overview
         include modules/auto-mod
         include modules/economy

@@ -1,4 +1,4 @@
-$('#generalSubmitBtn').on('click', function () {
+$('#qofSubmitBtn').on('click', async function () {
 
     console.log('clicky');
 
@@ -6,12 +6,13 @@ $('#generalSubmitBtn').on('click', function () {
     let userPrefixVal = $('#userPrefix').val();
 
     // fetch('https://127.0.0.1/formUpdate', {
-    
+
     console.log(`${url}/formUpdate`)
 
-    fetch(`${url}/formUpdate`, {
+    let response = await fetch(`${url}/formUpdate`, {
         method: "POST",
         body: JSON.stringify({
+            'key': key,
             'userID': dbUser.id,
             'serverID': dbGuild.id,
             'serverPrefix': guildPrefixVal,
@@ -23,4 +24,6 @@ $('#generalSubmitBtn').on('click', function () {
         }
     });
 
+    console.log(response);
+    console.log(await response.json());
 });

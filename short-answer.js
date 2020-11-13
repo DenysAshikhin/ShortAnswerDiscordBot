@@ -10,6 +10,7 @@ var lastMessage;
 
 var spotifyClient;
 var spotifySecret;
+var botIP;
 var config = null;
 try {
 
@@ -30,16 +31,16 @@ try {
         token = config.token;
         IP = config.IP;
         PORT = config.PORT;
-    }
-    else {
+        botIP = config.botIP;
+    } else {
         uri = config.uri;
         token = config.TesterToken;
         IP = '127.0.0.1';
+        botIP = IP;
         PORT = config.PORT;
         defaultPrefix = "##";
     }
-}
-catch (err) {
+} catch (err) {
     console.log("config.json doesn't exist - probably running on heroku?");
 
     uri = process.env.uri;
@@ -52,6 +53,7 @@ catch (err) {
 
 exports.IP = IP;
 exports.PORT = PORT;
+exports.botIP = botIP;
 
 const Discord = require('discord.js');
 const User = require('./User.js');
@@ -76,6 +78,7 @@ const TUTORIAL = require('./tutorial.js');
 const BUGS = require('./bugs.js');
 const dbots = require('dbots');
 const ffmpeg = require('fluent-ffmpeg');
+const http = require("http");
 var uniqid = require('uniqid');
 exports.uniqid = uniqid;
 const Cache = require('caching-map');
@@ -93,9 +96,15 @@ const algorithm = 'aes-256-gcm',
     password = crypto.createHash('sha256').update(String(config.KEY)).digest('base64').substr(0, 32);
 
 var osu = require('node-os-utils');
-const { executionAsyncResource } = require('async_hooks');
-const { isError } = require('util');
-const { mainModule } = require('process');
+const {
+    executionAsyncResource
+} = require('async_hooks');
+const {
+    isError
+} = require('util');
+const {
+    mainModule
+} = require('process');
 const Bot = require('./Bot');
 var cpu = osu.cpu;
 var mem = osu.mem;
@@ -110,7 +119,10 @@ var checkCommandsSearchArray = Commands.reduce((accum, curr) => {
     accum.upperCase.push(curr.title.toUpperCase());
     accum.normal.push(curr.title);
     return accum;
-}, { upperCase: [], normal: [] });
+}, {
+    upperCase: [],
+    normal: []
+});
 exports.commandsText = checkCommandsSearchArray;
 
 var runningCommands = new Map();
@@ -175,7 +187,9 @@ async function gameSuggestControlEmoji() {
 const refreshSuggestQueue = async function (message) {
 
     message = await Client.guilds.cache.get(gameSuggest.guildID).channels.cache.get(gameSuggest.channelID).messages.fetch(gameSuggest.messageID);
-    gameSuggest.suggestQueue = (await findGuild({ id: gameSuggest.guildID })).gameSuggest;
+    gameSuggest.suggestQueue = (await findGuild({
+        id: gameSuggest.guildID
+    })).gameSuggest;
 
     if (gameSuggest.suggestQueue.length == 0)
         return message.edit("There are currently no new game suggestions.");
@@ -187,8 +201,8 @@ const refreshSuggestQueue = async function (message) {
 
     let limit = result.length > 5 ? 5 : result.length;
 
-    let displayMessage = `Total number of suggestions: ${gameSuggest.suggestQueue.length}\n`
-        + `${currentSuggest.displayName} has suggested **${currentSuggest.game}**. The top 5 closest matches are:`;
+    let displayMessage = `Total number of suggestions: ${gameSuggest.suggestQueue.length}\n` +
+        `${currentSuggest.displayName} has suggested **${currentSuggest.game}**. The top 5 closest matches are:`;
 
     for (let i = 0; i < limit; i++)
         displayMessage += `\n${i + 1}) ${result[i].item}`;
@@ -203,7 +217,9 @@ async function checkControlsEmoji(message) {
     gameSuggestCollecter = await message.createReactionCollector(function (reaction, user) {
         return (((reaction.emoji.name === '✅') || (reaction.emoji.name === '❎') ||
             (reaction.emoji.name === '❌') || (reaction.emoji.name === '🔄')) && (!user.bot))
-    }, { time: 60000 });
+    }, {
+        time: 60000
+    });
 
     gameSuggestCollecter.on('collect', async function (emoji, user) {
 
@@ -222,45 +238,77 @@ async function checkControlsEmoji(message) {
 
                 GAMES.games.push(gameSuggest.suggestQueue[0].game);
                 GAMES.games.sort();
-                Bot.findOneAndUpdate({}, { $set: { games: GAMES.games } }, function (err, doc, res) { if (err) console.log(err); if (res) console.log(res); if (doc) console.log(doc) })
+                Bot.findOneAndUpdate({}, {
+                    $set: {
+                        games: GAMES.games
+                    }
+                }, function (err, doc, res) {
+                    if (err) console.log(err);
+                    if (res) console.log(res);
+                    if (doc) console.log(doc)
+                })
 
-                let guild = await findGuild({ id: gameSuggest.guildID });
-                guild.gameSuggest.shift();
-                await Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
+                let guild = await findGuild({
+                    id: gameSuggest.guildID
                 });
+                guild.gameSuggest.shift();
+                await Guild.findOneAndUpdate({
+                    id: message.guild.id
+                }, {
+                    $set: {
+                        gameSuggest: guild.gameSuggest
+                    }
+                }, function (err, doc, res) {});
 
                 await fs.promises.writeFile('./gameslist.json', JSON.stringify(GAMES.games), 'UTF-8');
 
                 refreshSuggestQueue(emoji.message);
-            }
-            else if (emoji.emoji.toString() == '❎') {
+            } else if (emoji.emoji.toString() == '❎') {
 
 
                 Client.guilds.cache.get(gameSuggest.suggestQueue[0].guildID).members.cache.get(gameSuggest.suggestQueue[0].userID).user.send(
-                    `Your suggestion for **${gameSuggest.suggestQueue[0].game}** has been declined because there is already another game with a similar enough name!`
-                    + `\nTry the *search* command with **${gameSuggest.suggestQueue[0].game}** to view the closest matches!`
+                    `Your suggestion for **${gameSuggest.suggestQueue[0].game}** has been declined because there is already another game with a similar enough name!` +
+                    `\nTry the *search* command with **${gameSuggest.suggestQueue[0].game}** to view the closest matches!`
                 );
 
-                let guild = await findGuild({ id: gameSuggest.guildID });
-                guild.gameSuggest.shift();
-                await Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
+                let guild = await findGuild({
+                    id: gameSuggest.guildID
                 });
+                guild.gameSuggest.shift();
+                await Guild.findOneAndUpdate({
+                    id: message.guild.id
+                }, {
+                    $set: {
+                        gameSuggest: guild.gameSuggest
+                    }
+                }, function (err, doc, res) {});
 
                 refreshSuggestQueue(emoji.message);
-            }
-            else if (emoji.emoji.toString() == '❌') {
+            } else if (emoji.emoji.toString() == '❌') {
 
                 Client.guilds.cache.get(gameSuggest.suggestQueue[0].guildID).members.cache.get(gameSuggest.suggestQueue[0].userID).user.send(
                     `Your suggestion for **${gameSuggest.suggestQueue[0].game}** has been declined for being nonsensical! You are banned from further suggestions for 1 week!`
                 );
 
-                let guild = await findGuild({ id: gameSuggest.guildID });
+                let guild = await findGuild({
+                    id: gameSuggest.guildID
+                });
                 guild.gameSuggest.shift();
-                await Guild.findOneAndUpdate({ id: message.guild.id }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
-                });
+                await Guild.findOneAndUpdate({
+                    id: message.guild.id
+                }, {
+                    $set: {
+                        gameSuggest: guild.gameSuggest
+                    }
+                }, function (err, doc, res) {});
 
-                await User.findOneAndUpdate({ id: user.id }, { $set: { suggestionBanDate: getBanDate() } }, function (err, doc, res) {
-                });
+                await User.findOneAndUpdate({
+                    id: user.id
+                }, {
+                    $set: {
+                        suggestionBanDate: getBanDate()
+                    }
+                }, function (err, doc, res) {});
                 refreshSuggestQueue(emoji.message);
             }
         }
@@ -283,13 +331,28 @@ const modifiedSuggestionAccept = async function (game) {
     GAMES.games.push(game);
     GAMES.games.sort();
 
-    Bot.findOneAndUpdate({}, { $set: { games: GAMES.games } }, function (err, doc, res) { if (err) console.log(err); if (res) console.log(res); if (doc) console.log(doc) })
+    Bot.findOneAndUpdate({}, {
+        $set: {
+            games: GAMES.games
+        }
+    }, function (err, doc, res) {
+        if (err) console.log(err);
+        if (res) console.log(res);
+        if (doc) console.log(doc)
+    })
 
 
-    let guild = await findGuild({ id: gameSuggest.guildID });
-    guild.gameSuggest.shift();
-    await Guild.findOneAndUpdate({ id: gameSuggest.guildID }, { $set: { gameSuggest: guild.gameSuggest } }, function (err, doc, res) {
+    let guild = await findGuild({
+        id: gameSuggest.guildID
     });
+    guild.gameSuggest.shift();
+    await Guild.findOneAndUpdate({
+        id: gameSuggest.guildID
+    }, {
+        $set: {
+            gameSuggest: guild.gameSuggest
+        }
+    }, function (err, doc, res) {});
 
     await fs.promises.writeFile('./gameslist.json', JSON.stringify(GAMES.games), 'UTF-8');
 
@@ -390,7 +453,10 @@ var commandMap = new Map();
 var commandTracker = new Map();
 
 
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 mongoose.set('useFindAndModify', false);
 const connectDB = mongoose.connection;
 
@@ -408,20 +474,23 @@ exports.getUsers = getUsers;
 //{ games: { $gt: '' }, guilds: message.guild.id }
 const findUser = async function (member, force) {
     try {
-        let usery = await User.findOne({ id: member.id });
+        let usery = await User.findOne({
+            id: member.id
+        });
 
         if (!usery || force) {
 
             await checkExistance(member)
-            let tempUser = await User.findOne({ id: member.id });
+            let tempUser = await User.findOne({
+                id: member.id
+            });
             if (!tempUser) {
                 console.log(`Found null user: ${member}`)
                 console.log(`followed by: ${member.id}`)
             }
             cachedUsers.set(tempUser.id, tempUser);
             return tempUser;
-        }
-        else {
+        } else {
 
             let tempUser = await checkFix(usery);
             cachedUsers.set(tempUser.id, tempUser);
@@ -442,13 +511,13 @@ const findGuild = async function (params) {
         if (!guildy) {
 
             await createGuild(params);
-            return await Guild.findOne(params);
-        }
-        else {
+            guildy = await Guild.findOne(params);
+            cachedGuilds.set(guildy.id, guildy);
+            return guildy;
+        } else {
+            cachedGuilds.set(guildy.id, guildy);
             return guildy;
         }
-
-
     } catch (err) {
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
@@ -469,9 +538,10 @@ exports.getGuilds = getGuilds;
 
 const getUsersInGuild = async function (guildID) {
     try {
-        return await User.find({ guilds: guildID });
-    }
-    catch (err) {
+        return await User.find({
+            guilds: guildID
+        });
+    } catch (err) {
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
     }
 }
@@ -503,14 +573,26 @@ exports.decrypt = decrypt;
 
 const sendToServer = async function (data) {
 
-    let encrypted = encrypt(JSON.stringify({ ...data, password: config.PASSWORD }))
+    let encrypted = encrypt(JSON.stringify({
+        ...data,
+        password: config.PASSWORD
+    }))
 
-    let resp = await needle('get', `${IP}:${PORT}`, null,
-        { headers: { 'payload': encrypted.content, 'tag': encrypted.tag.toString('base64'), 'iv': encrypted.iv.toString('base64') } });
+    let resp = await needle('get', `${IP}:${PORT}`, null, {
+        headers: {
+            'payload': encrypted.content,
+            'tag': encrypted.tag.toString('base64'),
+            'iv': encrypted.iv.toString('base64')
+        }
+    });
 
 
     let payload = JSON.parse(resp.raw.toString('utf8'));
-    let decryptedPayload = decrypt({ content: payload.payload, tag: Buffer.from(payload.tag, 'base64'), iv: Buffer.from(payload.iv, 'base64') })
+    let decryptedPayload = decrypt({
+        content: payload.payload,
+        tag: Buffer.from(payload.tag, 'base64'),
+        iv: Buffer.from(payload.iv, 'base64')
+    })
 
     let finalPayload = JSON.parse(decryptedPayload);
     if ((typeof finalPayload) == 'string')
@@ -519,6 +601,83 @@ const sendToServer = async function (data) {
     return finalPayload;
 }
 exports.sendToServer = sendToServer;
+
+/**
+ * 
+ * @param {[userID, guildID]} params 
+ */
+const updateCache = function (params) {
+
+    if (params[0]) {
+
+        console.log('reseting cached User: ' + params[0]);
+        findUser({
+            id: params[0]
+        });
+    }
+
+    if (params[1]) {
+
+        console.log('reseting cached Guild: ' + params[1]);
+        findGuild({
+            id: params[0]
+        });
+    }
+}
+
+const requestListener = async function (req, res) {
+
+    let payload;
+
+    console.log('got cache hit')
+
+    if ((!req.headers.payload) || (!req.headers.tag) || (!req.headers.iv)) return res.end();
+
+
+    //Buffer.from(bufStr, 'utf8')
+
+    try {
+        payload = JSON.parse(decrypt({
+            content: req.headers.payload,
+            tag: Buffer.from(req.headers.tag, 'base64'),
+            iv: Buffer.from(req.headers.iv, 'base64')
+        }));
+    } catch (err) {
+        console.log(err);
+        console.log("error trying to decrypt");
+        return res.end();
+    }
+
+    if (payload.password != config.PASSWORD) {
+        console.log("Incorrect password")
+        return res.end();
+    }
+
+    //come back here
+    let commandMap = new Map();
+
+    commandMap.set('updateCache', updateCache);
+
+    if (commandMap.get(payload.command)) {
+
+        res.writeHead(200);
+        let functionRes = await commandMap.get(payload.command).apply(null, [payload.params]);
+        // let encrypted = encrypt(JSON.stringify(functionRes));
+
+        return res.end();
+    }
+    res.end();
+};
+
+const HTTPserver = http.createServer(requestListener);
+
+HTTPserver.listen(config.botPORT, botIP, () => {
+    console.log(`Server is running on http://${botIP}:${config.botPORT}`);
+});
+
+
+
+
 
 const inviteLink = function (message) {
     message.channel.send(`Here you go!\nhttps://discordapp.com/oauth2/authorize?&client_id=689315272531902606&permissions=8&scope=bot`);
@@ -578,14 +737,15 @@ connectDB.once('open', async function () {
         if (!user) {
 
             if (!message.member) {
-                user = await User.findOne({ id: message.author.id });
+                user = await User.findOne({
+                    id: message.author.id
+                });
 
                 console.log("Dm'ed by: " + message.author.username)
 
                 if (!user)
                     return message.channel.send(`I don't seem to have you in my database, try sending any message in a server I am in, then try DM'ing me again!`);
-            }
-            else
+            } else
                 user = await findUser(message.member);
 
             //cachedUsers.set(user.id, user);
@@ -594,8 +754,7 @@ connectDB.once('open', async function () {
 
         try {
             prefix = await getPrefix(message, user);
-        }
-        catch (err) {
+        } catch (err) {
 
             console.log(err);
             console.log(`error getting prefix: message = ${message.content} - guild = ${message.guild.name} = id = ${message.guild.id}`);
@@ -612,11 +771,13 @@ connectDB.once('open', async function () {
             guild = cachedGuilds.get(message.guild.id);
             if (!guild) {
 
-                guild = await findGuild({ id: message.guild.id });
+                guild = await findGuild({
+                    id: message.guild.id
+                });
                 cachedGuilds.set(message.guild.id, guild);
             }
 
-            if (!user.guilds.includes(message.guild.id)) {//Checking that the user exists in DB and they have a valid guild
+            if (!user.guilds.includes(message.guild.id)) { //Checking that the user exists in DB and they have a valid guild
                 await checkExistance(message.member);
                 user = await findUser(message.member);
             }
@@ -625,8 +786,7 @@ connectDB.once('open', async function () {
             if (guild.channelImageSource.includes(message.channel.id)) {
 
                 ADMINISTRATOR.forwardImages(message, guild, null);
-            }
-            else if ((guild.channelImage.length > 0) && guild.forwardImages) {
+            } else if ((guild.channelImage.length > 0) && guild.forwardImages) {
 
                 ADMINISTRATOR.forwardImages(message, guild, null);
             }
@@ -684,8 +844,7 @@ connectDB.once('open', async function () {
 
                                 try {
                                     let result = await ADMINISTRATOR.changeRep(newUser, message.guild.id, 1, message);
-                                }
-                                catch (err) {
+                                } catch (err) {
                                     console.log(err)
                                     console.log('error thanking')
                                     continue;
@@ -707,16 +866,14 @@ connectDB.once('open', async function () {
                                         channel.send(`Gave +1 rep to ${memberList}`);
                                 }
                             }
-                            else
-                                message.channel.send(`Gave +1 rep to ${memberList}`);
+                        else
+                            message.channel.send(`Gave +1 rep to ${memberList}`);
                     }
             }
-        }
-        else if (!user) {//Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
+        } else if (!user) { //Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
             message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in, using the help command and then sending the command again?");
             return;
-        }
-        else {
+        } else {
             if (user.defaultPrefix != "-1") prefix = user.defaultPrefix;
             else prefix = defaultPrefix;
         }
@@ -733,8 +890,7 @@ connectDB.once('open', async function () {
 
                 return;
                 // console.log("Running command took over");
-            }
-            else if (message.content.substr(0, prefix.length) == prefix) {
+            } else if (message.content.substr(0, prefix.length) == prefix) {
 
                 if (message.guild) {
 
@@ -748,12 +904,13 @@ connectDB.once('open', async function () {
                 }
 
                 if (!message.member) {
-                    user = await User.findOne({ id: message.author.id });
+                    user = await User.findOne({
+                        id: message.author.id
+                    });
 
                     if (!user)
                         return message.channel.send(`I don't seem to have you in my database, try sending any message in a server I am in, then try DM'ing me again!`);
-                }
-                else
+                } else
                     user = await findUser(message.member);
 
 
@@ -790,11 +947,9 @@ connectDB.once('open', async function () {
 
                 commandMatcher(message, command, params, user);
                 return;
-            }
-            else if (message.content.trim() == (defaultPrefix + "help")) {
+            } else if (message.content.trim() == (defaultPrefix + "help")) {
                 message.channel.send("You entered an invalid prefix - the proper one is: " + prefix);
-            }
-            else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
+            } else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
 
 
                 if (defaultPrefix != '##') {
@@ -802,31 +957,25 @@ connectDB.once('open', async function () {
                     if (user.prefix[index] != "-1") {
                         prefix = user.prefix[index];
                         // console.log('server prefix: ' + `${prefix}`)
-                    }
-                    else if (guild.prefix != "-1") {
+                    } else if (guild.prefix != "-1") {
                         prefix = guild.prefix;
                         //  console.log('server default prefix: ' + `${prefix}`)
-                    }
-                    else if (user.defaultPrefix != "-1") {
+                    } else if (user.defaultPrefix != "-1") {
                         prefix = user.defaultPrefix;
                         // console.log('default pre: ' + `${prefix}`)
-                    }
-                    else {
+                    } else {
                         prefix = defaultPrefix;
                         //    console.log('none: ' + `${prefix}`)
                     }
-                }
-                else
+                } else
                     prefix = '##';
 
-                message.channel.send("Your proper prefix is: " + prefix
-                    + "\n`" + `Type ${prefix}help` + "` for more help!");
-            }
-            else {//Command tracker stuff
+                message.channel.send("Your proper prefix is: " + prefix +
+                    "\n`" + `Type ${prefix}help` + "` for more help!");
+            } else { //Command tracker stuff
                 triggerCommandHandler(message, user, false);
             }
-        }
-        catch (err) {
+        } catch (err) {
 
             console.log(err)
             console.log(`prefix that broke: `, prefix)
@@ -838,8 +987,7 @@ connectDB.once('open', async function () {
 
         if (member.id == botID) {
             console.log("bot joined server!");
-        }
-        else {
+        } else {
             if (defaultPrefix == '##')
                 return 1
             checkExistance(member);
@@ -847,7 +995,9 @@ connectDB.once('open', async function () {
             let guild = cachedGuilds.get(member.guild.id);
             if (!guild) {
 
-                guild = await findGuild({ id: member.guild.id });
+                guild = await findGuild({
+                    id: member.guild.id
+                });
                 cachedUsers.set(member.guild.id, guild);
             }
 
@@ -877,14 +1027,22 @@ connectDB.once('open', async function () {
             if (!user) return -1;
             let index = user.guilds.indexOf(member.guild.id);
             user.kicked[index] = true;
-            User.findOneAndUpdate({ id: member.id }, { $set: { kicked: user.kicked } }, function (err, doc, res) { });
+            User.findOneAndUpdate({
+                id: member.id
+            }, {
+                $set: {
+                    kicked: user.kicked
+                }
+            }, function (err, doc, res) {});
         }
     });
 
     Client.on("guildCreate", async guild => {
         if (defaultPrefix == '##')
             return 1
-        let searchedGuild = await findGuild({ id: guild.id });
+        let searchedGuild = await findGuild({
+            id: guild.id
+        });
         if (!searchedGuild) await createGuild(guild);
 
         //ADMINISTRATOR.initialiseUsers(guild, { guild: guild, silent: true })
@@ -901,7 +1059,9 @@ connectDB.once('open', async function () {
         if (defaultPrefix == '##')
             return 1
 
-        let guild = await findGuild({ id: newMember.guild.id });
+        let guild = await findGuild({
+            id: newMember.guild.id
+        });
 
         let difference = arraysEqual(oldMember.roles.cache.keyArray(), newMember.roles.cache.keyArray());
 
@@ -918,10 +1078,16 @@ connectDB.once('open', async function () {
 
                 if (guild.factionNewMemberAlert)
                     (await newMember.guild.fetch()).channels.cache.get(guild.factionNewMemberAlert).send(
-                        `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!`
-                        + `\nWith ${faction.contributions.newMembers} points from new members.`);
+                        `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!` +
+                        `\nWith ${faction.contributions.newMembers} points from new members.`);
 
-                Guild.findOneAndUpdate({ id: newMember.guild.id }, { $set: { factions: guild.factions } }, function (err, doc, res) { });
+                Guild.findOneAndUpdate({
+                    id: newMember.guild.id
+                }, {
+                    $set: {
+                        factions: guild.factions
+                    }
+                }, function (err, doc, res) {});
             }
         }
     })
@@ -935,17 +1101,26 @@ connectDB.once('open', async function () {
  * @param {*} b new array
  */
 function arraysEqual(a, b) {
-    if (a === b) return { result: true };
-    if (a == null || b == null) return { result: false };
+    if (a === b) return {
+        result: true
+    };
+    if (a == null || b == null) return {
+        result: false
+    };
     // if (a.length !== b.length) return { result: false };
 
     a.sort();
     b.sort();
 
     for (var i = 0; i < a.length; ++i) {
-        if (a[i] !== b[i]) return { result: false, difference: b[i] };
+        if (a[i] !== b[i]) return {
+            result: false,
+            difference: b[i]
+        };
     }
-    return { result: true };
+    return {
+        result: true
+    };
 }
 exports.arraysEqual = arraysEqual;
 
@@ -1163,7 +1338,9 @@ const triggerRunningCommand = async function (message, user) {
 
     if (message.channel.type != 'dm') {
 
-        let guild = await findGuild({ id: message.guild.id });
+        let guild = await findGuild({
+            id: message.guild.id
+        });
 
         if (guild.commandChannelWhiteList.length > 0) {
 
@@ -1189,8 +1366,7 @@ const triggerRunningCommand = async function (message, user) {
             runningCommands.delete(message.author.id);
             return 1;
         }
-    }
-    else {
+    } else {
 
         currCommand = runningCommands.get(message.author.id);
 
@@ -1248,8 +1424,7 @@ async function commandMatcher(message, command, params, user) {
     if (check == -1) {
         //message.channel.send(`I didn't recognize that command, please try again?`);
         return -1;
-    }
-    else if ((check.result[0].score != 0)) {
+    } else if ((check.result[0].score != 0)) {
 
         if (!user.commandSuggestions) {
             return -1;
@@ -1258,20 +1433,25 @@ async function commandMatcher(message, command, params, user) {
         let fieldArray = new Array();
 
         for (let i = 0; i < check.result.length; i++) {
-            fieldArray.push({ value: check.result[i], name: "** **", inline: false })
+            fieldArray.push({
+                value: check.result[i],
+                name: "** **",
+                inline: false
+            })
         }
 
         prettyEmbed(message, check.prettyList, {
             description: `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
-            startTally: 1, modifier: 1, selector: true
+            startTally: 1,
+            modifier: 1,
+            selector: true
         });
 
         // prettyEmbed(message, `${command} is not a valid command, if you meant one of the following, simply type the **number** you wish to use:`,
         //     fieldArray, -1, 1, 1, null, null, true);
         specificCommandCreator(commandMatcher, [message, -1, params, user], check.result, user);
         return -11;
-    }
-    else {
+    } else {
 
         let match = user.commands.find(element => element[1] == check.result[0].item);
         match = match ? commandMap.get(match[0]) : commandMap.get(check.result[0].item);
@@ -1304,13 +1484,11 @@ async function handleCommandTracker(specificCommand, message, user, skipSearch, 
             tutorialResult = await TUTORIAL.tutorialStarter(specificCommand.defaults[0], specificCommand.command, specificCommand.defaults[1], user);
             if (tutorialResult != -22)
                 return tutorialResult;
-        }
-        else {
+        } else {
             message.channel.send("You entered an invalid option, please try again or enter *-1* to quit the suggestion prompt.");
             return 0;
         }
-    }
-    else {
+    } else {
 
         tutorialResult = await TUTORIAL.tutorialStarter(specificCommand.defaults[0], specificCommand.defaults[1], specificCommand.command, user);
         if (tutorialResult != -22)
@@ -1339,11 +1517,9 @@ async function checkCommands(params, user) {
 
     if (!isNaN(params)) {
         return -1;
-    }
-    else if (Array.isArray(params)) {
+    } else if (Array.isArray(params)) {
         params = params[0].trim();
-    }
-    else {
+    } else {
 
         params = params.trim();
     }
@@ -1364,13 +1540,15 @@ async function checkCommands(params, user) {
 
     if (user.commands) {
 
-        let reducedCommands = user.commands.reduce((accum, current) => { accum.push(current[1]); return accum }, []);
+        let reducedCommands = user.commands.reduce((accum, current) => {
+            accum.push(current[1]);
+            return accum
+        }, []);
         newOptions.keys.push("temp");
         checkCommandsSearchArray.temp = checkCommandsSearchArray.upperCase.concat(reducedCommands);
 
         fuse = new Fuse(checkCommandsSearchArray.upperCase.concat(reducedCommands), newOptions);
-    }
-    else
+    } else
         fuse = new Fuse(checkCommandsSearchArray.upperCase, newOptions);
 
     let result = fuse.search(params);
@@ -1418,7 +1596,7 @@ async function checkCommands(params, user) {
 // + ` to play a game with you, be notified when someone else wants to play a game, manage your games list and more type **${prefix}gameTutorial**`
 // + ` for a step-by-step walkthrough! However, if you would like to opt out of this and all future tutorials, type **${prefix}tutorials** *false*.`
 
-async function gameSuggestion(member) {//
+async function gameSuggestion(member) { //
 
 
 }
@@ -1443,8 +1621,8 @@ function findFurthestDate(date1, date2) {
         else
             return date2;
     else
-        if (numberDate2 == 0)
-            return date1;
+    if (numberDate2 == 0)
+        return date1;
 
     if (numberDate1 < numberDate2)
         return date1;
@@ -1465,7 +1643,9 @@ const getPrefix = async function (message, user) {
         guild = cachedGuilds.get(message.guild.id);
         if (!guild) {
 
-            guild = await findGuild({ id: message.guild.id });
+            guild = await findGuild({
+                id: message.guild.id
+            });
             cachedGuilds.set(message.guild.id, guild);
         }
 
@@ -1484,8 +1664,8 @@ const getPrefix = async function (message, user) {
                 index = user.guilds.indexOf(message.guild.id);
 
                 if (index == -1) {
-                    message.channel.send(`Something went wrong! Please try again. If the issue persists, please let the creator know through the`
-                        + ` support server using the ` + "`inviteSupportServer` command!");
+                    message.channel.send(`Something went wrong! Please try again. If the issue persists, please let the creator know through the` +
+                        ` support server using the ` + "`inviteSupportServer` command!");
                 }
             }
         }
@@ -1493,26 +1673,21 @@ const getPrefix = async function (message, user) {
         if (user.prefix[index] != "-1") {
             prefix = user.prefix[index];
             //  console.log('server prefix: ' + `${prefix}`)
-        }
-        else if (guild.prefix != "-1") {
+        } else if (guild.prefix != "-1") {
             prefix = guild.prefix;
             //  console.log('server default prefix: ' + `${prefix}`)
-        }
-        else if (user.defaultPrefix != "-1") {
+        } else if (user.defaultPrefix != "-1") {
             prefix = user.defaultPrefix;
             //  console.log('default pre: ' + `${prefix}`)
-        }
-        else {
+        } else {
             prefix = defaultPrefix;
             //    console.log('none: ' + `${prefix}`)
         }
-    }
-    else {
+    } else {
         if (user.defaultPrefix != "-1") {
             prefix = user.defaultPrefix;
             //  console.log('default pre: ' + `${prefix}`)
-        }
-        else {
+        } else {
             prefix = defaultPrefix;
             //    console.log('none: ' + `${prefix}`)
         }
@@ -1531,18 +1706,19 @@ async function updateMessage(message, user) {
     user.lastMessage[index] = getDate();
 
 
-    User.findOneAndUpdate({ id: user.id },
-        {
-            $set: {
-                messages: user.messages,
-                lastMessage: user.lastMessage,
-            }
-        }, function (err, doc, res) {
-            if (err) {
-                fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(user) + "_____________" + message.guild.id + "_________" + JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-            }
-            //   if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-        });
+    User.findOneAndUpdate({
+        id: user.id
+    }, {
+        $set: {
+            messages: user.messages,
+            lastMessage: user.lastMessage,
+        }
+    }, function (err, doc, res) {
+        if (err) {
+            fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(user) + "_____________" + message.guild.id + "_________" + JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        }
+        //   if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    });
 }
 
 function getDate() {
@@ -1603,8 +1779,8 @@ exports.mentionChannel = mentionChannel;
 
 function directMessage(message, memberID, game) {
 
-    message.guild.members.cache.get(memberID).user.send(message.member.displayName + " has summoned you for " + game + " in "
-        + message.guild.name + "!");
+    message.guild.members.cache.get(memberID).user.send(message.member.displayName + " has summoned you for " + game + " in " +
+        message.guild.name + "!");
 }
 exports.directMessage = directMessage;
 
@@ -1667,26 +1843,27 @@ async function addGuild(member, memberDB) {
     // memberDB.set("prefix", memberDB.prefix)
     // memberDB.save();
 
-    User.findOneAndUpdate({ id: member.id },
-        {
-            $set: {
-                guilds: memberDB.guilds,
-                messages: memberDB.messages,
-                lastMessage: memberDB.lastMessage,
-                timeTalked: memberDB.timeTalked,
-                lastTalked: memberDB.lastTalked,
-                timeAFK: memberDB.timeAFK,
-                dateJoined: memberDB.dateJoined,
-                summoner: memberDB.summoner,
-                kicked: memberDB.kicked,
-                prefix: memberDB.prefix,
-            }
-        }, function (err, doc, res) {
-            if (err) {
-                fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(`custom: ${member.displayName} : ${member.id}` + "\n-------------\n\n" + err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-            }
-            // if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-        });
+    User.findOneAndUpdate({
+        id: member.id
+    }, {
+        $set: {
+            guilds: memberDB.guilds,
+            messages: memberDB.messages,
+            lastMessage: memberDB.lastMessage,
+            timeTalked: memberDB.timeTalked,
+            lastTalked: memberDB.lastTalked,
+            timeAFK: memberDB.timeAFK,
+            dateJoined: memberDB.dateJoined,
+            summoner: memberDB.summoner,
+            kicked: memberDB.kicked,
+            prefix: memberDB.prefix,
+        }
+    }, function (err, doc, res) {
+        if (err) {
+            fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(`custom: ${member.displayName} : ${member.id}` + "\n-------------\n\n" + err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+        }
+        // if (res) fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+    });
 
 
 }
@@ -1710,7 +1887,9 @@ async function createGuild(guild) {
  */
 async function checkExistance(member) {
 
-    let tempUser = await User.findOne({ id: member.id });
+    let tempUser = await User.findOne({
+        id: member.id
+    });
     if (tempUser) {
 
         // console.log(tempUser);
@@ -1720,16 +1899,20 @@ async function checkExistance(member) {
 
             let index = tempUser.guilds.indexOf(member.guild.id);
             tempUser.kicked[index] = false;
-            User.findOneAndUpdate({ id: tempUser.id }, { $set: { kicked: tempUser.kicked } }, function (err, doc, res) { });
+            User.findOneAndUpdate({
+                id: tempUser.id
+            }, {
+                $set: {
+                    kicked: tempUser.kicked
+                }
+            }, function (err, doc, res) {});
             return true;
-        }
-        else {//The user exists, but not with a matching guild in the DB
+        } else { //The user exists, but not with a matching guild in the DB
 
             await addGuild(member, tempUser)
             return true;
         }
-    }
-    else {
+    } else {
         //   console.log("The user doesnt exist. " + member.displayName);
         await createUser(member);
         return false;
@@ -1741,7 +1924,8 @@ function hmsToSecondsOnly(str) {
 
     str = String(str).trim();
     var p = str.split(':'),
-        s = 0, m = 1;
+        s = 0,
+        m = 1;
     while (p.length > 0) {
         s += m * parseInt(p.pop(), 10);
         m *= 60;
@@ -1795,29 +1979,29 @@ async function setEmojiCollector(message) {
 
     let collector = await message.createReactionCollector(function (reaction, user) {
         return (((reaction.emoji.name === '1️⃣') || (reaction.emoji.name === '2️⃣') ||
-            (reaction.emoji.name === '3️⃣') || (reaction.emoji.name === '4️⃣') || (reaction.emoji.name === '5️⃣')
-            && (user.id != message.author.id)) && (!user.bot))
-    }, { time: 60000 });
+            (reaction.emoji.name === '3️⃣') || (reaction.emoji.name === '4️⃣') || (reaction.emoji.name === '5️⃣') &&
+            (user.id != message.author.id)) && (!user.bot))
+    }, {
+        time: 60000
+    });
     collector.on('collect', async function (emoji, user) {
 
         //  console.log("INSIDE OF NUMBA- ")
         let choice;
 
 
-        let usery = await findUser({ id: user.id });
+        let usery = await findUser({
+            id: user.id
+        });
         if (emoji.emoji.toString() == '1️⃣') {
             choice = 1;
-        }
-        else if (emoji.emoji.toString() == '2️⃣') {
+        } else if (emoji.emoji.toString() == '2️⃣') {
             choice = 2;
-        }
-        else if (emoji.emoji.toString() == '3️⃣') {
+        } else if (emoji.emoji.toString() == '3️⃣') {
             choice = 3;
-        }
-        else if (emoji.emoji.toString() == '4️⃣') {
+        } else if (emoji.emoji.toString() == '4️⃣') {
             choice = 4;
-        }
-        else if (emoji.emoji.toString() == '5️⃣') {
+        } else if (emoji.emoji.toString() == '5️⃣') {
             choice = 5;
         }
         let finy = await triggerCommandHandler(emoji.message, usery, false, choice);
@@ -1832,8 +2016,7 @@ async function setEmojiCollector(message) {
             }
 
 
-        }
-        else {
+        } else {
             emoji.users.remove(user);
         }
         //}
@@ -1844,8 +2027,7 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 
     if (Array.isArray(params)) {
         params = params[0].trim();
-    }
-    else if (isNaN(params)) {
+    } else if (isNaN(params)) {
         params = params.trim();
     }
 
@@ -1878,15 +2060,20 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
 
         for (let i = 0; i < maxResults; i++) {
 
-            parameterArray.push({ item: internalArray[result[i].refIndex] });
+            parameterArray.push({
+                item: internalArray[result[i].refIndex]
+            });
             promptArray.push(result[i]);
         }
-    }
-    else {
+    } else {
 
         for (let i = 0; i < internalArray.length; i++) {
-            parameterArray.push({ item: internalArray[i] });
-            promptArray.push({ item: searchArray[i] });
+            parameterArray.push({
+                item: internalArray[i]
+            });
+            promptArray.push({
+                item: searchArray[i]
+            });
         }
     }
 
@@ -1897,13 +2084,17 @@ async function generalMatcher(message, params, user, searchArray, internalArray,
         for (let i = 0; i < promptArray.length; i++)
             fieldArray.push(promptArray[i].item);
 
-        prettyEmbed(message, fieldArray, { description: flavourText, startTally: 1, modifier: 1, selector: true });
+        prettyEmbed(message, fieldArray, {
+            description: flavourText,
+            startTally: 1,
+            modifier: 1,
+            selector: true
+        });
         //prettyEmbed(message, flavourText, fieldArray, -1, 1, 1, null, null, true);
 
         specificCommandCreator(originalCommand, [message, -1, user], parameterArray, user);
         return 0;
-    }
-    else {
+    } else {
         message.channel.send(`You have entered an invalid suggestion number/input please try again.`);
         return -1
     }
@@ -1966,7 +2157,11 @@ async function prettyEmbed(message, array, extraParams) {
 
             runningString = "";
             groupNumber++;
-            field = { name: "", value: [], inline: true };
+            field = {
+                name: "",
+                value: [],
+                inline: true
+            };
         }
 
         if ((runningString.length < maxLength) || (field == null)) {
@@ -1985,21 +2180,18 @@ async function prettyEmbed(message, array, extraParams) {
                         for (newSplit of tempElement.split('\n')) {
                             if (newSplit.length > maxLength) {
                                 await message.channel.send(`${newSplit} is too long to be included in the embeds. If this occured from normal use, please notify the creator with the **suggest** command!`);
-                            }
-                            else
+                            } else
                                 tempRun += newSplit + "\n";
                             if (tempRun.length > maxLength) break;
                         }
 
                         tempElement = tempElement.substring(tempRun.length);
                         element = element.substring(0, tempRun.length);
-                    }
-                    else {
+                    } else {
                         console.log("UNSPLITABLE AF")
                         return message.channel.send("Found an unsplittable message body, odds of that happening naturally are next-to-none so stop testing me D:< However, if this is indeed from normal use, please notify the creator with the **suggest** command.");
                     }
-                }
-                else {
+                } else {
                     tempElement = -1;
                 }
 
@@ -2012,20 +2204,21 @@ async function prettyEmbed(message, array, extraParams) {
                     array.splice(array.indexOf(item) + 1, 0, tempItem)
                 }
                 BIGSPLIT = true;
-            }
-            {
+            } {
                 runningString += element;
 
-                field = field == null ? { name: "", value: [], inline: true } : field;
+                field = field == null ? {
+                    name: "",
+                    value: [],
+                    inline: true
+                } : field;
                 if (itemName != '') {
                     field.name = itemName;
                     previousName = itemName;
-                }
-                else if (part == -1) {
+                } else if (part == -1) {
                     field.name = '** **';
                     previousName = '';
-                }
-                else {
+                } else {
                     field.name = `${part} ${groupNumber}`;
                     previousName = `${part} ${groupNumber}`;
                 }
@@ -2045,7 +2238,11 @@ async function prettyEmbed(message, array, extraParams) {
 
                 runningString = "";
                 groupNumber++;
-                field = { name: "", value: [], inline: true };
+                field = {
+                    name: "",
+                    value: [],
+                    inline: true
+                };
             }
         }
         tally++;
@@ -2055,8 +2252,7 @@ async function prettyEmbed(message, array, extraParams) {
         field.name = field.name;
     else if (part == -1) {
         field.name = '** **';
-    }
-    else
+    } else
         field.name = `${part} ${groupNumber}`;
     if (field.value.length != 0)
         fieldArray.push(JSON.parse(JSON.stringify(field)));
@@ -2068,7 +2264,11 @@ exports.prettyEmbed = prettyEmbed;
 function createThreeQueue(array) {
 
     let threeQueue = {
-        queue: [[], [], []],
+        queue: [
+            [],
+            [],
+            []
+        ],
         index: 0
     };
 
@@ -2083,34 +2283,48 @@ function createThreeQueue(array) {
                 threeQueue.queue[0] = [array[0], array[1]];
                 threeQueue.queue[1] = [array[2], array[3]];
                 break;
-            }
-            else {
+            } else {
                 threeQueue.queue[0].push(array[j]);
 
                 if (!array[j + (rows)])
-                    threeQueue.queue[1].push({ name: "** **", value: "** **", inline: true });
+                    threeQueue.queue[1].push({
+                        name: "** **",
+                        value: "** **",
+                        inline: true
+                    });
                 else
                     threeQueue.queue[1].push(array[j + (rows)]);
 
                 if (!array[j + (2 * rows)])
-                    threeQueue.queue[2].push({ name: "** **", value: "** **", inline: true });
+                    threeQueue.queue[2].push({
+                        name: "** **",
+                        value: "** **",
+                        inline: true
+                    });
                 else
                     threeQueue.queue[2].push(array[j + (2 * rows)]);
             }
         }
-    }
-    else {
+    } else {
         for (let x = 0; x < array.length; x += 3) {
 
             threeQueue.queue[0].push(array[x]);
 
             if (!array[x + 1])
-                threeQueue.queue[1].push({ name: "** **", value: "** **", inline: true });
+                threeQueue.queue[1].push({
+                    name: "** **",
+                    value: "** **",
+                    inline: true
+                });
             else
                 threeQueue.queue[1].push(array[x + 1]);
 
             if (!array[x + 2])
-                threeQueue.queue[2].push({ name: "** **", value: "** **", inline: true });
+                threeQueue.queue[2].push({
+                    name: "** **",
+                    value: "** **",
+                    inline: true
+                });
             else
                 threeQueue.queue[2].push(array[x + 2]);
         }
@@ -2138,23 +2352,22 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
         if (!field) {
             if (threeQueue.index == 0) {
                 break;
-            }
-            else {
-                newEmbed.fields.push({ name: "** **", value: "** **", inline: true })
+            } else {
+                newEmbed.fields.push({
+                    name: "** **",
+                    value: "** **",
+                    inline: true
+                })
                 threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
                 continue;
             }
         }
 
-        if (!Array.isArray(field.value)) {
-        }
-        else if (modifier == -1) {
+        if (!Array.isArray(field.value)) {} else if (modifier == -1) {
             field.value = field.value.join('\n');
-        }
-        else if (modifier == 1) {
+        } else if (modifier == 1) {
             field.value = "```" + "\n" + field.value.join('\n') + "```";
-        }
-        else if (modifier) {
+        } else if (modifier) {
             field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
         }
         newEmbed.fields.push(field);
@@ -2163,19 +2376,23 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
 
 
     if (ARR.length > 0) {
-        message.channel.send({ embed: newEmbed });
+        message.channel.send({
+            embed: newEmbed
+        });
         return testy(ARR, description, message, modifier);
     }
 
     if (embedReturn) {
 
         return newEmbed;
-    }
-    else if (!selector) {
-        return await message.channel.send({ embed: newEmbed });
-    }
-    else {
-        let temp = await message.channel.send({ embed: newEmbed });
+    } else if (!selector) {
+        return await message.channel.send({
+            embed: newEmbed
+        });
+    } else {
+        let temp = await message.channel.send({
+            embed: newEmbed
+        });
         setControlEmoji(temp);
         return 20;
     }
@@ -2281,7 +2498,9 @@ const checkFix = async function (user) {
     }
 
     if (issue) {
-        await User.findOneAndUpdate({ id: user.id }, {
+        await User.findOneAndUpdate({
+            id: user.id
+        }, {
             $set: {
                 messages: user.messages,
                 lastMessage: user.lastMessage,
@@ -2293,6 +2512,7 @@ const checkFix = async function (user) {
         });
         return user;
     }
+
     return user;
 }
 
@@ -2411,8 +2631,7 @@ process.on('unhandledRejection', (err, promise) => {
     if (defaultPrefix != "##") {
         console.log("Caught unhandledRejectionWarning")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-    }
-    else
+    } else
         console.log(err)
 
 });
@@ -2422,8 +2641,7 @@ process.on('unhandledException', (err, p) => {
     if (defaultPrefix != "##") {
         console.log("Caught unhandledException")
         fs.promises.writeFile(`logs/${uniqid()}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-    }
-    else
+    } else
         console.log(err)
 
 });
