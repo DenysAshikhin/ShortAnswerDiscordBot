@@ -16,6 +16,10 @@ router.get('/dashboard', function (req, res) {
 
 router.get('/servers/:id', validateGuild, async function (req, res) {
 
+
+    res.locals.guildPrefix = res.locals.guildPrefix == '-1' ? 'sa!' : res.locals.guildPrefix;
+    res.locals.userPrefix = res.locals.userPrefix == '-1' ? 'sa!' : res.locals.userPrefix;
+
     res.render('dashboard/show', {
         something: "Null",
         subtitle: "Short Answer Bot Dashboard",

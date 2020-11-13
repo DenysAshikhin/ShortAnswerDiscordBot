@@ -97,7 +97,7 @@ router.post('/formUpdate', async function (req, res) {
         let params = [dbUser.id, guild.id];
 
         if ((req.body.userPrefix == '-1') || (req.body.userPrefix == 'sa!'))
-            dbUser.prefix[index] = 'sa!'
+            dbUser.prefix[index] = '-1';
         else
             dbUser.prefix[index] = req.body.userPrefix;
 
