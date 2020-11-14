@@ -7,11 +7,12 @@ section#qofModule.module.container.px-5
         .form-group.margin.my-5
             .row.justify-content-center
                 .col-4
-                    label Default Server Prefix
-                    input.form-control.qof#guildPrefix(type='text', name='prefix', class=serverPrefix,  value=guildPrefix, required)
-
-                    label Personal Server Prefix
-                    input.form-control.qof#userPrefix(type='text', name='prefix', class=userPrefix,  value=userPrefix, required)
+                    span
+                        label Default Server Prefix
+                        input.form-control.admin.qof#guildPrefix(type='text', name='prefix', class=serverPrefix,  value=guildPrefix, required)
+                    span
+                        label Personal Server Prefix
+                        input.form-control.qof#userPrefix(type='text', name='prefix', class=userPrefix,  value=userPrefix, required)
                 .col-4
                     label Whitelisted command channels
                     select.form-control.qof#whiteListedCommands(name=`WhitelistedChannelIds`, multiple)

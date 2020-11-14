@@ -93,13 +93,19 @@ const adminLock = function (arr) {
     if (!admin)
     
         for (let selector of arr) {
-            console.log($(selector))
+            console.log($(selector).parent())
             $(selector).attr('disabled', true);
+            $(selector).parent().attr('data-placement', 'top');
+            $(selector).parent().attr('data-toggle', 'tooltip');
+            $(selector).parent().attr('title', 'Only server administrators can modify modify these values.');
         }
 }
 
 adminLock(['#guildPrefix']);
 
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+})
 
 // for(tooltip of $('[data-toggle="tooltip"]')){
 //     console.log(tooltip)
