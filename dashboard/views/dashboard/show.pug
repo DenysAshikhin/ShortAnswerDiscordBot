@@ -10,6 +10,7 @@ html(lang='en')
             var url = !{JSON.stringify(url)}
             var key = !{JSON.stringify(key)}
             var guild = !{JSON.stringify(guild)}
+            var roles = !{JSON.stringify(roles)}
             var dbGuild = !{JSON.stringify(dbGuild)}
             var dbUser = !{JSON.stringify(dbUser)}
             var admin = !{JSON.stringify(admin)}
@@ -44,7 +45,7 @@ html(lang='en')
                 a#music.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Music
 
         include ../includes/navbar.pug
-        
+ 
         include modules/qof
         include modules/overview
         include modules/auto-mod

@@ -25,3 +25,15 @@ section#overviewModule.module.px-5
                         i.fas.fa-user-hashtag
                         strong.ml-1 Channels
                     p.mb-0 #{guild.channels.cache.size}
+    .row.align-items-center
+        .col-4
+            if dbGuild.factions
+                h4 Factions
+                #list-tab1.list-group(role='tablist')
+                    each faction in dbGuild.factions
+                        a.list-group-item.list-group-item-action(id=`${faction.role}List` data-toggle='list' href=`#info${faction.role}` role='tab' aria-controls='home') #{faction.name} - @#{roles.find(element => element.roleID == faction.role).name}
+        .col-8
+            if dbGuild.factions
+                #nav-tabContent1.tab-content
+                    each faction in dbGuild.factions
+                        p.tab-pane.fade.active(id=`info${faction.role}` role='tabpanel' aria-labelledby='list-home-list') Points: #{faction.points}

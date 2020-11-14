@@ -20,12 +20,21 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
     res.locals.guildPrefix = res.locals.guildPrefix == '-1' ? 'sa!' : res.locals.guildPrefix;
     res.locals.userPrefix = res.locals.userPrefix == '-1' ? 'sa!' : res.locals.userPrefix;
 
+
+    let roleArr = [];
+
+    for (let role of res.locals.guild.roles.cache.values())
+        roleArr.push({roleID: role.id, name: role.name});
+
+    console.log()
+
     res.render('dashboard/show', {
         something: "Null",
         subtitle: "Short Answer Bot Dashboard",
         url: MAIN.REDIRECT_URL,
         key: res.cookies.get('key'),
         guild: res.locals.guild,
+        roles: roleArr,
         dbGuild: res.locals.dbGuild,
         admin: res.locals.admin,
         guildPrefix: res.locals.guildPrefix,

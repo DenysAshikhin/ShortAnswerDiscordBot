@@ -107,7 +107,9 @@ $(function () {
     $('[data-toggle="tooltip"]').tooltip();
 })
 
-// for(tooltip of $('[data-toggle="tooltip"]')){
-//     console.log(tooltip)
-//     tooltip.tooltip({container: 'body'});
-// }
+
+
+console.log(roles)
+
+// $('.categoryItem').on('click', wtfaew);
+
