@@ -3,7 +3,8 @@
     padding: 10px;
 }
 
-.icon, .icon img {
+.icon,
+.icon img {
     font-size: x-large;
     height: 52px;
     width: 52px;
@@ -15,22 +16,32 @@
     padding-top: 7.5px;
 }
 
-.icon:hover, .icon img:hover {
+.icon:hover,
+.icon img:hover {
     border-radius: 15% !important;
 }
 
 .hamburger {
     cursor: pointer;
     font-size: xx-large;
-    bottom: 0;
-    position: absolute;
+    /* bottom: 0;
+    position: absolute; */
+    /* width: 72px; */
 }
+
+
+/* #hamburgerSurround {
+
+    width: 72px;
+} */
 
 #sidebar {
     padding: 10px;
+    max-height: 95vh;
 }
 
-#sidebar, #sidebarExtension {
+#sidebar,
+#sidebarExtension {
     height: 100vh;
     float: left;
 }
@@ -48,7 +59,8 @@
     width: 50%;
 }
 
-#sidebarExtension .large-icon, #sidebarExtension img {
+#sidebarExtension .large-icon,
+#sidebarExtension img {
     font-size: xx-large;
     width: 96px;
     height: 96px;
@@ -97,4 +109,3 @@
 .tabs .category:hover {
     color: black;
 }
-

@@ -1,6 +1,21 @@
 .jumbotron {
-    margin-top: 25vh;
+    margin-top: 0vh;
     background-color: white;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.tooltip {
+    position: absolute;
+}
+
+.user-avatar.round {
+
+    height: 32px;
+    width: 32px;
 }
 
 #navbarNavAltMarkup {

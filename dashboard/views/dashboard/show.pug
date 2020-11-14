@@ -1,9 +1,10 @@
 doctype
 html(lang='en')
     head
-        include ../includes/header.pug
-        //link(rel='stylesheet', href='/css/index.css')
+        link(rel='stylesheet', href='/css/index.css')
         link(rel='stylesheet', href='/css/sidebar.css')
+        include ../includes/header.pug
+
         
         script.
             var url = !{JSON.stringify(url)}
@@ -50,5 +51,3 @@ html(lang='en')
         include modules/economy
         include modules/general
         include modules/music
-        //- .jumbotron.text-center.bg-transparent
-        //-     h1.display-3 #{guild.name}

@@ -13,10 +13,10 @@ nav.navbar.navbar-expand-lg.navbar-light
           .dropdown-toggle(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
             img.user-avatar.round(src=user.avatarUrl(32)) 
             span.pl-2 #{user.username}
-          .dropdown-menu(aria-labelledby='dropdownMenuButton')
-            a.dropdown-item(href='/dashboard') Dashboard
+          .dropdown-menu.drop-down-menu-right(aria-labelledby='dropdownMenuButton')
+            a.dropdown-item(href='/dashboard') #[i.fas.fa-cogs.text-muted] Dashboard
             hr
-            a.dropdown-item(href='/logout') Logout
+            a.dropdown-item(href='/logout') #[i.fas.fa-user-slash.text-muted] Logout
       else
         a.nav-link(href='/login') 
           i.fas.fa-sign-in-alt
