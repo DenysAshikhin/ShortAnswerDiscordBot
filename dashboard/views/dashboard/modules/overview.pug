@@ -25,15 +25,72 @@ section#overviewModule.module.px-5
                         i.fas.fa-user-hashtag
                         strong.ml-1 Channels
                     p.mb-0 #{guild.channels.cache.size}
-    .row.align-items-center
-        .col-4
-            if dbGuild.factions
-                h4 Factions
-                #list-tab1.list-group(role='tablist')
-                    each faction in dbGuild.factions
-                        a.list-group-item.list-group-item-action(id=`${faction.role}List` data-toggle='list' href=`#info${faction.role}` role='tab' aria-controls='home') #{faction.name} - @#{roles.find(element => element.roleID == faction.role).name}
-        .col-8
-            if dbGuild.factions
-                #nav-tabContent1.tab-content
-                    each faction in dbGuild.factions
-                        p.tab-pane.fade.active(id=`info${faction.role}` role='tabpanel' aria-labelledby='list-home-list') Points: #{faction.points}
+    .row.d-flex
+        .col
+            #nav-tab-overview.nav.nav-tabs.fill-nav(role='tablist')
+                a#nav-profile-tab.nav-link(data-toggle='tab' role='tab' href='#nav-profile' aria-controls='nav-profile' aria-selected='false') Profile
+
+                if rep.length > 0
+                    a#nav-rep-tab.nav-link(data-toggle='tab' role='tab' href='#nav-rep' aria-controls='nav-contact' aria-selected='false') Rep
+                else
+                    a#nav-rep-tab.nav-link.disabled(data-toggle='tab' role='tab' href='#nav-rep' aria-controls='nav-contact' aria-selected='false') Rep
+
+                if dbGuild.factions.length > 0
+                    a#nav-factions-tab.nav-link(data-toggle='tab' href='#nav-factions' role='tab' aria-controls='nav-home' aria-selected='true') Factions
+                else
+                    a#nav-factions-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Factions
+
+    .row                    
+        .col
+            #nav-tabContent-overview.tab-content
+                #nav-profile.tab-pane.fade(role='tabpanel' aria-labelledby='nav-profile-tab') ...
+                #nav-rep.tab-pane.fade(role='tabpanel' aria-labelledby='nav-rep-tab')
+                    if rep.length > 0
+                        .row
+                            .col
+                                h4.text-center.m-3 Rep Amount
+                                hr
+                                table.table-striped.table-bordered.factionTable(id=`repTable`)
+                                    thead
+                                        tr
+                                            th(scope='col') Member
+                                            th(scope='col') Rep Amount
+                                    tbody
+                                        each member in rep
+                                            tr
+                                                td #{guild.members.cache.get(member.memberID).displayName}
+                                                // td 222
+                                                td #{member.rep}
+
+
+                #nav-factions.tab-pane.fade.m-3(role='tabpanel' aria-labelledby='nav-contact-tab')
+                    if dbGuild.factions.length > 0
+                        .row
+                            .col-4
+                                h4 Faction Title - @role
+                                #v-pills-tab.nav.flex-column.nav-pills(role='tablist' aria-orientation='vertical')
+                                    each faction in dbGuild.factions
+                                        a.nav-link.m-2.border.border-primary.rounded-pill(id=`factionPill${faction.role}` href=`#factionInfo${faction.role}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{faction.name} - @#{roles.find(element => element.roleID == faction.role).name}
+                            .col-8
+                                #v-pills-tabContent.tab-content
+                                    each faction in dbGuild.factions
+                                        .tab-pane.fade.show(id=`factionInfo${faction.role}` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                            h4.text-center.m-3 Total Points: #{faction.points}
+                                            hr
+                                            table.table-striped.table-bordered.factionTable(id=`factionTable${faction.role}`)
+                                                thead
+                                                    tr
+                                                        th(scope='col') From
+                                                        th(scope='col') Points
+                                                tbody
+                                                    tr
+                                                        td General
+                                                        td #{faction.contributions.general}
+                                                    tr
+                                                        td New Members
+                                                        td #{faction.contributions.newMembers}
+                                                    each contributor in faction.contributions.members
+                                                        tr
+                                                            td #{guild.members.cache.get(contributor.userID).displayName}
+                                                            // td 222
+                                                            td #{contributor.points}

@@ -91,7 +91,7 @@ $('#guildPrefix').on('input', function () {
 const adminLock = function (arr) {
 
     if (!admin)
-    
+
         for (let selector of arr) {
             console.log($(selector).parent())
             $(selector).attr('disabled', true);
@@ -109,7 +109,14 @@ $(function () {
 
 
 
-console.log(roles)
+$(window).on("load", function () {
+    
+    $('#repTable').DataTable();
+    
+    let tables = $('.factionTable');
 
-// $('.categoryItem').on('click', wtfaew);
+    for (let table of tables) {
 
+        $(`#${table.id}`).DataTable();
+    }
+})

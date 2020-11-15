@@ -38,6 +38,7 @@
 #sidebar {
     padding: 10px;
     max-height: 95vh;
+    overflow-y: auto;
 }
 
 #sidebar,

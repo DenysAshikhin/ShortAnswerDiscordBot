@@ -965,7 +965,7 @@
     },
     {
         "title": "rlTracker",
-        "explanation": "Sends a message with a Rocket Leauge elo rating update for a specific player/platofrm in a specified channel.",
+        "explanation": "Sends a message with a Rocket Leauge elo rating update for a specific player/platofrm in a specified channel after a valid ranked game has been played.",
         "example": [
             "1) rlTracker TheLastSpark, #command",
             "2) rlTracker TheLastSpark, steam, #notifications"
@@ -1243,7 +1243,7 @@
     },
     {
         "title": "autoRole",
-        "explanation": "Starts the setup for an autorole message! Complete with options such as:\n1) Unique: Only 1 reaction per user\n2) Static: Prevents other reactions\n3) Permanent: Limits a user to a single reaction for the message. They will not be able to change their mind.\nAnd if they remove the reaction, the role will be removed from them as well (unless permenent was enabled)",
+        "explanation": "Starts the setup for an autorole message! Complete with options such as:\n1) Unique: Only 1 reaction per user\n2) Static: Prevents other reactions\n3) Permanent: Limits a user to a single reaction for the message. They will not be able to change their mind.\nAnd if they remove the reaction, the role will be removed from them as well (unless permanent was enabled)",
         "example": [
             "1) autoRole"
         ],

@@ -1,28 +1,36 @@
 doctype
 html(lang='en')
     head
-        link(rel='stylesheet', href='/css/index.css')
-        link(rel='stylesheet', href='/css/sidebar.css')
         include ../includes/header.pug
 
+
+        link(rel='stylesheet', href='/css/index.css')
+        link(rel='stylesheet', href='/css/sidebar.css')
+        //cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css
+        link(rel='stylesheet' type='text/css' href='https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css')
+
+        script(type='text/javascript' charset='utf8' src='https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js', defer)
+        script(src='/js/guild.js', defer)
+        script(src='/js/submit.js', defer)
+        script(src='/js/sidebar.js', defer)
+        
         
         script.
             var url = !{JSON.stringify(url)}
             var key = !{JSON.stringify(key)}
             var guild = !{JSON.stringify(guild)}
             var roles = !{JSON.stringify(roles)}
+
+            var members = !{JSON.stringify(members)}
             var dbGuild = !{JSON.stringify(dbGuild)}
             var dbUser = !{JSON.stringify(dbUser)}
             var admin = !{JSON.stringify(admin)}
             var guildPrefix = !{JSON.stringify(guildPrefix)}
+
             var userPrefix = !{JSON.stringify(userPrefix)}
+            var rep = !{JSON.stringify(rep)}
 
-
-
-        script(src='/js/guild.js', defer)
-        script(src='/js/submit.js', defer)
-        script(src='/js/sidebar.js', defer)
-        
+            
 
     body
         include ../includes/sidebar.pug

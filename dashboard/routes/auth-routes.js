@@ -118,6 +118,14 @@ router.post('/formUpdate', async function (req, res) {
                         id: req.body.serverID
                     }, {
                         $set: {
+                            prefix: '-1'
+                        }
+                    }).exec();
+                else
+                    Guild.findOneAndUpdate({
+                        id: req.body.serverID
+                    }, {
+                        $set: {
                             prefix: req.body.serverPrefix
                         }
                     }).exec();
