@@ -67,10 +67,11 @@ section#overviewModule.module.px-5
                     if dbGuild.factions.length > 0
                         .row
                             .col-4
-                                h4 Faction Title - @role
+                                h4.m-3.text-center Faction Title - @role
+                                hr
                                 #v-pills-tab.nav.flex-column.nav-pills(role='tablist' aria-orientation='vertical')
                                     each faction in dbGuild.factions
-                                        a.nav-link.m-2.border.border-primary.rounded-pill(id=`factionPill${faction.role}` href=`#factionInfo${faction.role}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{faction.name} - @#{roles.find(element => element.roleID == faction.role).name}
+                                        a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`factionPill${faction.role}` href=`#factionInfo${faction.role}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{faction.name} - @#{roles.find(element => element.roleID == faction.role).name}
                             .col-8
                                 #v-pills-tabContent.tab-content
                                     each faction in dbGuild.factions
