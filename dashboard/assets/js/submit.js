@@ -125,6 +125,23 @@ $(window).on("load", function () {
         twitchTable.DataTable();
 
 
+
+    let imageThankerTable = $('#imageThankerTable');
+    if (imageThankerTable[0])
+        imageThankerTable.DataTable();
+
+    let linkThankerTable = $('#linkThankerTable');
+    if (linkThankerTable[0])
+        linkThankerTable.DataTable();
+
+    let blacklistRepTableTab = $('#blacklistedRepRolesTable');
+    if (blacklistRepTableTab[0])
+        blacklistRepTableTab.DataTable();
+
+    let blacklistRepGiveTableTab = $('#blacklistRepGiveTable');
+    if (blacklistRepGiveTableTab[0])
+        blacklistRepGiveTableTab.DataTable();
+
     let tables = $('.factionTable');
 
     for (let table of tables) {

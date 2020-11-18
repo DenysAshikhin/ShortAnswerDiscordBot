@@ -31,6 +31,9 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         guilds: res.locals.guild.id
     })];
 
+    //console.log(res.locals.dbGuild.blacklistedRepRoles.length)
+
+
     if (res.locals.dbGuild.youtubeAlerts.size > 0) {
 
         let youtubeArr = [];
@@ -99,9 +102,6 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
 
     if (twitchMap.size > 0)
         for (const twitchy of finishedPromises[2].value) {
-            console.log('wow')
-            console.log(twitchy.value._data.display_name)
-            console.log(twitchy.value._data.id)
             for (const channel of twitchMap.get(twitchy.value._data.id)) {
 
                 twitchPairs.push({

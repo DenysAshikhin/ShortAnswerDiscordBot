@@ -158,34 +158,44 @@ async function generalHelp(message, params, user) {
 
     if (!args) {
 
-        let description = "```md\n" + `You can see a list of commands under each category by typing <${(await MAIN.getPrefix(message, user))}helpCommand> I.E.:\n` +
-            `1) <${(await MAIN.getPrefix(message, user))}helpMusic>` + "```";
+
+        let description = `You can learn more about my commands on my [website](https://www.shortanswerbot.ca/commands "Short Answer Bot Commands")`;
+    
+            return MAIN.prettyEmbed(message,
+                [
+                    { name: "🔥**Invites**🔥", value: `[invite Me](https://discordapp.com/oauth2/authorize?&client_id=689315272531902606&permissions=8&scope=bot "Invite Link")` },
+                    { name: "🔥**Invites**🔥", value: "[Support Server](https://discord.gg/8tem3Gp)" }
+                ], {
+                description: description, startTally: 1, modifier: -1, title: `General Help`, maxLength: 1000
+            });
+   
 
 
-       // if (!user.completedTutorials.includes(100))
-           // description += "```fix\n" + `You have not completed the introductory tutorial which would teach you the basics of using the bot,`
-               // + ` you can do so by typing ${(await MAIN.getPrefix(message, user))}introTutorial` + "```";
 
-        return MAIN.prettyEmbed(message,
-            [
-                { name: "Popular", value: "Games", inline: true },
-                { name: "Popular", value: "Music", inline: true },
-                { name: "Popular", value: "Notifications", inline: true },
-                // { name: "Guide", value: "Help", inline: true },
-                { name: "Useful", value: "firstTime", inline: true },
-                { name: "Useful", value: "Tutorials", inline: true },
-                { name: "Fun", value: "Stats", inline: true },
-                { name: "Fun", value: "Miscellaneous", inline: true },
-                { name: "Others", value: "General", inline: true },
-                { name: "Others", value: "QualityOfLife", inline: true },
-                { name: "Hush-Hush", value: "Admins", inline: true },
-                { name: "Hush-Hush", value: "Bugs/Suggestions", inline: true },
-                { name: "🔥**Invite Commands**🔥", value: "inviteMe" },
-                { name: "🔥**Invite Commands**🔥", value: "inviteSupportServer" }
-            ], {
-            description: description, startTally: 1, modifier: 1, title: `General Help`
-        });
-    }
+
+    //     let description = "```md\n" + `You can see a list of commands under each category by typing <${(await MAIN.getPrefix(message, user))}helpCommand> I.E.:\n` +
+    //         `1) <${(await MAIN.getPrefix(message, user))}helpMusic>` + "```";
+
+    //     return MAIN.prettyEmbed(message,
+    //         [
+    //             { name: "Popular", value: "Games", inline: true },
+    //             { name: "Popular", value: "Music", inline: true },
+    //             { name: "Popular", value: "Notifications", inline: true },
+    //             // { name: "Guide", value: "Help", inline: true },
+    //             { name: "Useful", value: "firstTime", inline: true },
+    //             { name: "Useful", value: "Tutorials", inline: true },
+    //             { name: "Fun", value: "Stats", inline: true },
+    //             { name: "Fun", value: "Miscellaneous", inline: true },
+    //             { name: "Others", value: "General", inline: true },
+    //             { name: "Others", value: "QualityOfLife", inline: true },
+    //             { name: "Hush-Hush", value: "Admins", inline: true },
+    //             { name: "Hush-Hush", value: "Bugs/Suggestions", inline: true },
+    //             { name: "🔥**Invite Commands**🔥", value: "inviteMe" },
+    //             { name: "🔥**Invite Commands**🔥", value: "inviteSupportServer" }
+    //         ], {
+    //         description: description, startTally: 1, modifier: 1, title: `General Help`
+    //     });
+   }
 
     if (params.index != null) {
         return MAIN.sendHelpMessage(params.index, message, user);

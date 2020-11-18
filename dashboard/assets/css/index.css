@@ -18,6 +18,11 @@
     width: 32px;
 }
 
+.deco-white {
+    color:white !important;
+   /* text-decoration:none; */
+}
+
 #navbarNavAltMarkup {
     background-color: white;
 }

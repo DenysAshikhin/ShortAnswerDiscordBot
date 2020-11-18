@@ -46,6 +46,13 @@ section#overviewModule.module.px-5
                     span(data-placement='top' data-toggle='tooltip' title='No factions have been made for this server!')
                         a#nav-factions-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Factions
 
+                if dbGuild.channelImageThanker.length > 0 || dbGuild.channelLinkThanker.length > 0
+                    a#nav-thanker-tab.nav-link(data-toggle='tab' href='#nav-thanker' role='tab' aria-controls='nav-home' aria-selected='true') Channel Thanker
+                else
+                    span(data-placement='top' data-toggle='tooltip' title='No channel (image/video or link) thankers have been setup for this server!')
+                            a#nav-thanker-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Channel Thanker
+
+
     .row                    
         .col
             #nav-tabContent-overview.tab-content
@@ -66,55 +73,103 @@ section#overviewModule.module.px-5
                                     span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No Twitch alerts have been setup for this server!')
                                         a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`twitchAlertPill` href=`#twitchAlertsTable` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Twitch Alerts
 
-
-
                         .col
-                         #notificationPill.tab-content
-                            if youtubeAlerts.length > 0
-                                .tab-pane.fade.show.m-3(id=`youtubeAlertsTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
-                                    table.table-striped.table-bordered(id=`youtubeTable`)
-                                                thead
-                                                    tr
-                                                        th(scope='col') Youtube Channel
-                                                        th(scope='col') Alert Channel
-                                                tbody
-                                                    each youtube in youtubeAlerts
+                            #notificationPill.tab-content
+                                if youtubeAlerts.length > 0
+                                    .tab-pane.fade.show.m-3(id=`youtubeAlertsTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        table.table-striped.table-bordered(id=`youtubeTable`)
+                                                    thead
                                                         tr
-                                                            td #{youtube.youtuber}
-                                                            td ##{youtube.channel}
+                                                            th(scope='col') Youtube Channel
+                                                            th(scope='col') Alert Channel
+                                                    tbody
+                                                        each youtube in youtubeAlerts
+                                                            tr
+                                                                td #{youtube.youtuber}
+                                                                td ##{youtube.channel}
 
-                            if twitchAlerts.length > 0
-                                .tab-pane.fade.show.m-3(id=`twitchAlertsTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
-                                    table.table-striped.table-bordered(id=`twitchTable`)
-                                                thead
-                                                    tr
-                                                        th(scope='col') Twitch Channel
-                                                        th(scope='col') Alert Channel
-                                                tbody
-                                                    each twitcher in twitchAlerts
+                                if twitchAlerts.length > 0
+                                    .tab-pane.fade.show.m-3(id=`twitchAlertsTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        table.table-striped.table-bordered(id=`twitchTable`)
+                                                    thead
                                                         tr
-                                                            td #{twitcher.streamer}
-                                                            td ##{twitcher.channel}
+                                                            th(scope='col') Twitch Channel
+                                                            th(scope='col') Alert Channel
+                                                    tbody
+                                                        each twitcher in twitchAlerts
+                                                            tr
+                                                                td #{twitcher.streamer}
+                                                                td ##{twitcher.channel}
 
 
                 #nav-rep.tab-pane.fade(role='tabpanel' aria-labelledby='nav-rep-tab')
-                    if rep.length > 0
-                        .row
-                            .col
-                                h4.text-center.m-3 Rep Amount
-                                hr
-                                table.table-striped.table-bordered.factionTable(id=`repTable`)
-                                    thead
-                                        tr
-                                            th(scope='col') Member
-                                            th(scope='col') Rep Amount
-                                    tbody
-                                        each member in rep
-                                            tr
-                                                td #{guild.members.cache.get(member.memberID).displayName}
-                                                // td 222
-                                                td #{member.rep}
+                    
+                    .row
+                        .col-4
+                            #rep-pill-tab.nav.flex-column.nav-pills.m-3(role='tablist' aria-orientation='vertical')
+                                if rep.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`userRepPill` href=`#userRepTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Users Rep
+                                else
+                                    span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No users have earned/lost rep on this server!')
+                                        a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`userRepPill` href=`#userRepTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Users Rep
 
+                                if dbGuild.blacklistedRepRoles.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`blacklistRepPill` href=`#blacklistRepTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Blacklisted Rep Gain Roles
+                                else
+                                    span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No roles have been blacklisted from gaining rep on this server!')
+                                        a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`blacklistRepPill` href=`#blacklistRepTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Blacklisted Rep Gain Roles
+
+                                if dbGuild.blacklistedGiveRepRoles.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`blacklistRepGivePill` href=`#blacklistRepGiveTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Blacklisted Rep Give Roles
+                                else
+                                    span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No roles have been blacklisted from giving rep on this server!')
+                                        a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`blacklistRepGivePill` href=`#blacklistRepGiveTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Blacklisted Rep Give Roles
+
+
+
+                        .col
+                            #repPill.tab-content
+                                if rep.length > 0
+                                    .tab-pane.fade.show.m-3(id=`userRepTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        h4.text-center.m-3 Rep Amount
+                                        hr
+                                        table.table-striped.table-bordered.factionTable(id=`repTable`)
+                                            thead
+                                                tr
+                                                    th(scope='col') Member
+                                                    th(scope='col') Rep Amount
+                                            tbody
+                                                each member in rep
+                                                    tr
+                                                        td #{guild.members.cache.get(member.memberID).displayName}
+                                                        // td 222
+                                                        td #{member.rep}
+
+                                if dbGuild.blacklistedRepRoles.length > 0
+                                    .tab-pane.fade.show.m-3(id=`blacklistRepTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        h4.text-center.m-3 Blacklisted Rep Gain Roles
+                                        hr
+                                        table.table-striped.table-bordered.repTable(id=`blacklistedRepRolesTable`)
+                                                thead
+                                                    tr
+                                                        th(scope='col') Role
+                                                tbody
+                                                    each role in dbGuild.blacklistedRepRoles
+                                                        tr
+                                                            td @#{guild.roles.cache.get(role).name}
+
+                                if dbGuild.blacklistedGiveRepRoles.length > 0
+                                    .tab-pane.fade.show.m-3(id=`blacklistRepGiveTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        h4.text-center.m-3 Blacklisted Rep Give Roles
+                                        hr
+                                        table.table-striped.table-bordered.repTable(id=`blacklistedRepGiveRolesTable`)
+                                                thead
+                                                    tr
+                                                        th(scope='col') Role
+                                                tbody
+                                                    each role in dbGuild.blacklistedGiveRepRoles
+                                                        tr
+                                                            td @#{guild.roles.cache.get(role).name}
 
                 #nav-factions.tab-pane.fade.m-3(role='tabpanel' aria-labelledby='nav-contact-tab')
                     if dbGuild.factions.length > 0
@@ -127,6 +182,11 @@ section#overviewModule.module.px-5
                                         a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`factionPill${faction.role}` href=`#factionInfo${faction.role}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{faction.name} - @#{roles.find(element => element.roleID == faction.role).name}
                             .col
                                 #v-pills-tabContent.tab-content
+                                    if dbGuild.factionLiveTally
+                                        h5 A live embed overview of the factions is posted in ##{guild.channels.cache.get(dbGuild.factionLiveTally.channelID).name}
+                                    else
+                                        h5 No live embed overview of the factions is setup, please see *createFactionRunningTally* command    
+                                    hr
                                     each faction in dbGuild.factions
                                         .tab-pane.fade.show(id=`factionInfo${faction.role}` role='tabpanel' aria-labelledby='v-pills-home-tab')
                                             h4.text-center.m-3 Total Points: #{faction.points}
@@ -148,3 +208,51 @@ section#overviewModule.module.px-5
                                                             td #{guild.members.cache.get(contributor.userID).displayName}
                                                             // td 222
                                                             td #{contributor.points}
+
+                #nav-thanker.tab-pane.fade.m-3(role='tabpanel')
+                    .row
+                        .col-4
+                             #thanker-pill-tab.nav.flex-column.nav-pills.m-3(role='tablist' aria-orientation='vertical')
+                                if dbGuild.channelImageThanker.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`imageThankerPill` href=`#imageThankerTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Image/Video Thanker
+                                else
+                                    span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No channel image/video thankers have been setup for this server!')
+                                        a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`imageThankerPill` href=`#imageThankerTable` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Image/Video Thanker
+
+
+                                if dbGuild.channelLinkThanker.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`linkThankerPill` href=`#linkThankerTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Link Thanker
+                                else
+                                    span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No Twitch alerts have been setup for this server!')
+                                        a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`linkThankerPill` href=`#twitchAlertsTable` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Link Thanker
+
+                        .col
+                            #notificationPill.tab-content
+                                if !dbGuild.thankerAutoRep
+                                    h3 Warning, automatic rep gain from thanker is disabled! Enable it using the *setThankerAutoRep* command.
+                                    hr
+                                h5 Current thanker message: #{dbGuild.channelThankerMessage}
+                                p See the *channelThankerMessage* command to learn more
+                                hr
+                                if dbGuild.channelImageThanker.length > 0
+                                    .tab-pane.fade.show.m-3(id=`imageThankerTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        table.table-striped.table-bordered(id=`imageThankerTable`)
+                                                    thead
+                                                        tr
+                                                            th(scope='col') Thanker Channel
+                                                    tbody
+                                                        each channelID in dbGuild.channelImageThanker
+                                                            tr
+                                                                td ##{guild.channels.cache.get(channelID).name}
+                                if dbGuild.channelLinkThanker.length > 0
+                                    .tab-pane.fade.show.m-3(id=`linkThankerTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        h4 Channels that are scanned for (non-reposted) links to thank users for!
+                                        hr
+                                        table.table-striped.table-bordered(id=`linkThankerTable`)
+                                                    thead
+                                                        tr
+                                                            th(scope='col') Thanker Channel
+                                                    tbody
+                                                        each channelID in dbGuild.channelLinkThanker
+                                                            tr
+                                                                td ##{guild.channels.cache.get(channelID).name}

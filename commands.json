@@ -1376,7 +1376,7 @@
     },
     {
         "title": "setChannelImageThanker",
-        "explanation": "Thanks users for posting an image in the channel!",
+        "explanation": "Admin only command that marks this channel for image (thank) checking.",
         "example": [
             "1) setChannelImageThanker"
         ],
@@ -1695,7 +1695,7 @@
     },
     {
         "title": "blacklistGiveRepRole",
-        "explanation": "Add a role to the blacklist, preventing anyone with it from gaining rep!",
+        "explanation": "Add a role to the blacklist, preventing anyone with it from giving rep!",
         "example": [
             "1) blacklistRepRole @role"
         ],
