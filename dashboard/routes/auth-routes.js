@@ -1,7 +1,5 @@
 const express = require('express');
-const {
-    GridFSBucket
-} = require('mongodb');
+
 const router = express.Router();
 const CONFIG = require('../../config.json');
 const Guild = require('../../Guild');
@@ -20,7 +18,7 @@ router.get('/auth', async function (req, res) {
     try {
         const code = req.query.code;
 
-        console.log(code)
+        console.log('did /auth')
 
         const token = await authClient.getAccess(code);
 
@@ -78,10 +76,9 @@ router.post('/formUpdate', async function (req, res) {
         const code = req.body.key;
         const user = await authClient.getUser(code);
 
-        let dbUser = await User.findOne({
-            id: user.id
-        });
-
+        let dbUser = await MAIN.findUser({id: user.id, guild: {id: req.body.serverID}}, true);
+        console.log(dbUser)
+        
         let index = dbUser.guilds.indexOf(req.body.serverID);
 
         if (index == -1) {

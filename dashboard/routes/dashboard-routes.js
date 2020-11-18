@@ -29,13 +29,15 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
 
     for (let dbUser of dbUsers) {
 
-        let rep = dbUser.reps.get(res.locals.guild.id);
-        if (rep)
-            if (rep != '0')
-                repArr.push({
-                    memberID: dbUser.id,
-                    rep: rep
-                });
+        if (dbUser.reps) {
+            let rep = dbUser.reps.get(res.locals.guild.id);
+            if (rep)
+                if (rep != '0')
+                    repArr.push({
+                        memberID: dbUser.id,
+                        rep: rep
+                    });
+        }
     }
 
     let roleArr = [];

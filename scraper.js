@@ -33,6 +33,9 @@ const {
     Client,
     Intents
 } = require('discord.js');
+const {
+    create
+} = require('./User.js');
 
 const myIntents = new Intents();
 //myIntents.add('GUILDS');
@@ -278,7 +281,7 @@ async function addGuild(member, memberDB) {
     // memberDB.set("prefix", memberDB.prefix)
     // memberDB.save();
 
-    User.findOneAndUpdate({
+    await User.findOneAndUpdate({
         id: member.id
     }, {
         $set: {
@@ -315,11 +318,14 @@ async function checkExistance(member) {
     });
     if (tempUser) {
 
+        // console.log(tempUser);
+        // console.log('-----')
+        // console.log(member.displayName)
         if (tempUser.guilds.includes(member.guild.id)) {
 
             let index = tempUser.guilds.indexOf(member.guild.id);
             tempUser.kicked[index] = false;
-            User.findOneAndUpdate({
+            await User.findOneAndUpdate({
                 id: tempUser.id
             }, {
                 $set: {
@@ -330,10 +336,10 @@ async function checkExistance(member) {
         } else { //The user exists, but not with a matching guild in the DB
 
             await addGuild(member, tempUser)
-            return true;
+            return false;
         }
     } else {
-        console.log("The user doesnt exist. " + member.displayName);
+        //   console.log("The user doesnt exist. " + member.displayName);
         await createUser(member);
         return false;
     }
@@ -341,7 +347,10 @@ async function checkExistance(member) {
 exports.checkExistance = checkExistance;
 
 
-
+async function sleep(ms) {
+    await new Promise(resolve => setTimeout(resolve, ms));
+}
+exports.sleep = sleep;
 
 
 function findFurthestDate(date1, date2) {
@@ -1004,20 +1013,37 @@ const getUsers = async function (params) {
 }
 exports.getUsers = getUsers;
 
-const findUser = async function (member) {
+
+const findUser = async function (member, force) {
     try {
         let usery = await User.findOne({
             id: member.id
         });
 
-        if (!usery) {
+        if (!usery || force) {
 
-            await checkExistance(member)
-            return await User.findOne({
+            let existed = await checkExistance(member);
+            if (!existed) {
+                console.log("sleeping on a non-existant member")
+                await sleep(1000);
+            }
+            let tempUser = await User.findOne({
                 id: member.id
             });
+
+            if(!existed){
+                console.log(tempUser.guilds);
+            }
+
+            if (!tempUser) {
+                console.log(`Found null user: ${member}`)
+                console.log(`followed by: ${member.id}`)
+            }
+            return tempUser;
         } else {
-            return usery;
+
+            let tempUser = await checkFix(usery);
+            return tempUser;
         }
 
     } catch (err) {
@@ -1025,6 +1051,94 @@ const findUser = async function (member) {
     }
 }
 exports.findUser = findUser;
+
+
+const checkFix = async function (user) {
+
+    let issue = false;
+
+    for (let x = 0; x < user.guilds.length; x++) {
+
+        if (user.messages.length <= x) {
+            issue = true;
+
+            let diff = user.guilds.length - user.messages.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.messages.push(0)
+            }
+
+
+        }
+        if (user.lastMessage.length <= x) {
+            issue = true;
+
+
+            let diff = user.guilds.length - user.lastMessage.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.lastMessage.push('0-0-0')
+            }
+
+
+        }
+        if (user.timeTalked.length <= x) {
+            issue = true;
+
+            let diff = user.guilds.length - user.timeTalked.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.timeTalked.push(0)
+            }
+
+
+        }
+        if (user.lastTalked.length <= x) {
+            issue = true;
+            let diff = user.guilds.length - user.lastTalked.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.lastTalked.push('0-0-0')
+            }
+        }
+        if (user.timeAFK.length <= x) {
+            issue = true;
+            let diff = user.guilds.length - user.timeAFK.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.timeAFK.push(0)
+            }
+        }
+        if (user.dateJoined.length <= x) {
+            issue = true;
+            let diff = user.guilds.length - user.dateJoined.length;
+
+            for (let z = 0; z < diff; z++) {
+                user.dateJoined.push(getDate())
+            }
+        }
+    }
+
+    if (issue) {
+        await User.findOneAndUpdate({
+            id: user.id
+        }, {
+            $set: {
+                messages: user.messages,
+                lastMessage: user.lastMessage,
+                timeTalked: user.timeTalked,
+                lastTalked: user.lastTalked,
+                timeAFK: user.timeAFK,
+                dateJoined: user.dateJoined
+            }
+        });
+        return user;
+    }
+
+    return user;
+}
+
+
 
 const findGuild = async function (params) {
     try {
@@ -1202,10 +1316,32 @@ connectDB.once('open', async function () {
             guild: guild,
             silent: true
         })
+
+
+        let searchedGuild = await findGuild({
+            id: guild.id
+        });
+        if (!searchedGuild) await createGuild(guild);
+
+
     })
 });
 
 
+
+async function createGuild(guild) {
+
+    let newGuild = {
+        id: guild.id,
+        prefix: "-1",
+        name: guild.name
+    }
+
+    let guildModel = new Guild(newGuild);
+    await guildModel.save();
+    return guildModel;
+}
+exports.createGuild = createGuild;
 
 async function initialiseUsers(message, params) {
 

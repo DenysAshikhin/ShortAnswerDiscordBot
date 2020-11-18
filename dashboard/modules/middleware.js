@@ -12,8 +12,7 @@ module.exports.checkHTTP = function (req, res, next) {
 
     if (req.protocol === 'http') {
         res.redirect(301, `https://${req.headers.host}${req.url}`);
-    }
-    else
+    } else
         next();
 }
 
@@ -34,16 +33,13 @@ module.exports.updateUser = async function (req, res, next) {
         if (key) {
 
             res.locals.user = (await sessions.get(key)).authUser;
-        }
-        else
+        } else
             res.locals.user = null;
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err);
         console.log('error setting the user');
         res.locals.user = null;
-    }
-    finally {
+    } finally {
         next();
     }
 }
@@ -59,14 +55,40 @@ module.exports.validateGuild = async function (req, res, next) {
 
     if (res.locals.guild) {
 
-        let promiseArray = [MAIN.findUser({ id: res.locals.user.id }), Guild.findOne({ id: res.locals.guild.id })]
+        console.log("START")
+        let promiseArray = [MAIN.findUser({
+            id: res.locals.user.id,
+            guild: {
+                id: res.locals.guild.id
+            }
+        }, true), Guild.findOne({
+            id: res.locals.guild.id
+        })]
+
+
+
 
         let finishArray = await Promise.all(promiseArray);
 
         res.locals.dbUser = finishArray[0];
         res.locals.dbGuild = finishArray[1];
+
+        console.log('wow')
+        if (!res.locals.dbGuild) {
+
+            console.log('having to create a guildyyy');
+            await MAIN.createGuild({
+                id: res.locals.guild.id,
+                name: res.locals.guild.name
+            });
+            res.locals.dbGuild = await Guild.findOne({
+                id: res.locals.guild.id
+            });
+        }
+
+        console.log('delete this')
         console.log(`Setting user: ${res.locals.dbUser.displayName}`)
-        console.log(`Setting Guild: ${res.locals.dbGuild.name}`)
+        console.log(`Setting Guild: ${res.locals.dbGuild.id}`)
 
 
         if (res.locals.dbGuild.prefix == '-1')
@@ -79,8 +101,7 @@ module.exports.validateGuild = async function (req, res, next) {
         if (index == -1) {
             console.log("This bug is ridunculous")
             res.locals.userPrefix = 'sa!';
-        }
-        else
+        } else
             res.locals.userPrefix = res.locals.dbUser.prefix[index];
 
 
@@ -90,13 +111,11 @@ module.exports.validateGuild = async function (req, res, next) {
         if (res.locals.guild.members.cache.get(res.locals.dbUser.id).hasPermission("ADMINISTRATOR")) {
             console.log('IS ADMIN')
             res.locals.admin = true;
-        }
-        else
+        } else
             res.locals.admin = false;
 
         next();
-    }
-    else
+    } else
         res.render('errors/404');
 }
 
@@ -108,17 +127,14 @@ module.exports.updateGuilds = async function (req, res, next) {
         console.log('setting the GUILDS');
         if (key) {
             res.locals.guilds = (await sessions.get(key)).guilds;
-        }
-        else
+        } else
             res.locals.guilds = null;
-    }
-    catch (err) {
+    } catch (err) {
 
         console.log(err)
         console.log('error setting the GUILD');
         res.locals.guilds = null;
-    }
-    finally {
+    } finally {
         next();
     }
 }

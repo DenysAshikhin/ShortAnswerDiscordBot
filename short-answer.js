@@ -480,20 +480,27 @@ const findUser = async function (member, force) {
 
         if (!usery || force) {
 
-            await checkExistance(member)
+            let existed = await checkExistance(member);
+            if (!existed) {
+                console.log("sleeping on a non-existant member")
+                await sleep(1000);
+            }
             let tempUser = await User.findOne({
                 id: member.id
             });
+
+            if(!existed){
+                console.log(tempUser.guilds);
+            }
+
             if (!tempUser) {
                 console.log(`Found null user: ${member}`)
                 console.log(`followed by: ${member.id}`)
             }
-            cachedUsers.set(tempUser.id, tempUser);
             return tempUser;
         } else {
 
             let tempUser = await checkFix(usery);
-            cachedUsers.set(tempUser.id, tempUser);
             return tempUser;
         }
 
@@ -620,7 +627,7 @@ const updateCache = function (params) {
 
         console.log('reseting cached Guild: ' + params[1]);
         findGuild({
-            id: params[0]
+            id: params[1]
         });
     }
 }
@@ -1040,10 +1047,10 @@ connectDB.once('open', async function () {
     Client.on("guildCreate", async guild => {
         if (defaultPrefix == '##')
             return 1
-        let searchedGuild = await findGuild({
-            id: guild.id
-        });
-        if (!searchedGuild) await createGuild(guild);
+        // let searchedGuild = await findGuild({
+        //     id: guild.id
+        // });
+        // if (!searchedGuild) await createGuild(guild);
 
         //ADMINISTRATOR.initialiseUsers(guild, { guild: guild, silent: true })
     })
@@ -1899,7 +1906,7 @@ async function checkExistance(member) {
 
             let index = tempUser.guilds.indexOf(member.guild.id);
             tempUser.kicked[index] = false;
-            User.findOneAndUpdate({
+            await User.findOneAndUpdate({
                 id: tempUser.id
             }, {
                 $set: {
@@ -1910,7 +1917,7 @@ async function checkExistance(member) {
         } else { //The user exists, but not with a matching guild in the DB
 
             await addGuild(member, tempUser)
-            return true;
+            return false;
         }
     } else {
         //   console.log("The user doesnt exist. " + member.displayName);
