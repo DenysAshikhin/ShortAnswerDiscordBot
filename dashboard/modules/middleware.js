@@ -55,7 +55,6 @@ module.exports.validateGuild = async function (req, res, next) {
 
     if (res.locals.guild) {
 
-        console.log("START")
         let promiseArray = [MAIN.findUser({
             id: res.locals.user.id,
             guild: {
@@ -66,14 +65,12 @@ module.exports.validateGuild = async function (req, res, next) {
         })]
 
 
-
-
         let finishArray = await Promise.all(promiseArray);
 
         res.locals.dbUser = finishArray[0];
         res.locals.dbGuild = finishArray[1];
 
-        console.log('wow')
+
         if (!res.locals.dbGuild) {
 
             console.log('having to create a guildyyy');
@@ -86,7 +83,6 @@ module.exports.validateGuild = async function (req, res, next) {
             });
         }
 
-        console.log('delete this')
         console.log(`Setting user: ${res.locals.dbUser.displayName}`)
         console.log(`Setting Guild: ${res.locals.dbGuild.id}`)
 
@@ -101,12 +97,9 @@ module.exports.validateGuild = async function (req, res, next) {
         if (index == -1) {
             console.log("This bug is ridunculous")
             res.locals.userPrefix = 'sa!';
-        } else
+        } 
+        else
             res.locals.userPrefix = res.locals.dbUser.prefix[index];
-
-
-
-
 
         if (res.locals.guild.members.cache.get(res.locals.dbUser.id).hasPermission("ADMINISTRATOR")) {
             console.log('IS ADMIN')

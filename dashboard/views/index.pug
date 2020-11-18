@@ -9,9 +9,11 @@ html(lang='en')
         include includes/navbar.pug
 
         .jumbotron.text-center.bg-transparent
-            h1.display-3 Big Header Text
-            p.lead Text5 
+            h1.display-3 Short Answer Bot
+            p.lead Co-ordinate game squads, powerful autorole, twitch + youtube alerts, music (with Spotify) support and more
                 i.fas.fa-star
-            button.btn.btn-dark Text6
-        wow
+            if loggedIn
+                a.btn.btn-dark(href='/dashboard') Dashboard
+            else
+                a.btn.btn-link.btn-dark(href='/login') Login
         

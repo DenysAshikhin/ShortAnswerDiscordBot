@@ -115,9 +115,6 @@ const channelLinkThanker = async function (message, params, user) {
 
     const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
 
-
-    console.log("WTF?")
-
     let parsed = await MAIN.sendToServer({
         command: 'linkCheck',
         params: [message.guild.id, message.channel.id, message.id, args]

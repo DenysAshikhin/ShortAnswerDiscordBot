@@ -9,6 +9,8 @@ html(lang='en')
         
     body
         include ../includes/sidebar.pug
+        script.
+            var admin = !{JSON.stringify(admin)}
 
 
         #sidebarExtension.bg-light

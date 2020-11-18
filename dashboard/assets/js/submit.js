@@ -93,7 +93,6 @@ const adminLock = function (arr) {
     if (!admin)
 
         for (let selector of arr) {
-            console.log($(selector).parent())
             $(selector).attr('disabled', true);
             $(selector).parent().attr('data-placement', 'top');
             $(selector).parent().attr('data-toggle', 'tooltip');
@@ -110,9 +109,22 @@ $(function () {
 
 
 $(window).on("load", function () {
-    
-    $('#repTable').DataTable();
-    
+
+    let repTable = $('#repTable');
+    if (repTable[0])
+        repTable.DataTable();
+
+
+    let youtubeTable = $('#youtubeTable');
+    if (youtubeTable[0])
+        youtubeTable.DataTable();
+
+
+    let twitchTable = $('#twitchTable');
+    if (twitchTable[0])
+        twitchTable.DataTable();
+
+
     let tables = $('.factionTable');
 
     for (let table of tables) {

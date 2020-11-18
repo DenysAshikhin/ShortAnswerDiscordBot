@@ -434,7 +434,7 @@ async function countTalk() {
 
                 for (let MEMBER of channel.members) {
                     if ((channel.members.size < 2) && (channel.id != guild.afkChannelID)) {
-                        console.log('didnt count')
+                        //console.log('didnt count')
                         continue;
                     }
                     let member = MEMBER[1];

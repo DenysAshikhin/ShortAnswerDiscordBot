@@ -12,6 +12,7 @@ const rootRoutes = require('./routes/root-routes.js');
 const authRoutes = require('./routes/auth-routes.js');
 const dashboardRoutes = require('./routes/dashboard-routes.js');
 const Cookies = require('cookies');
+const favicon = require('serve-favicon')
 const middleware = require('./modules/middleware.js');
 
 var https = require('https');
@@ -48,6 +49,7 @@ const initialise = async function () {
     app.use(Cookies.express('a', 'b', 'c'));
     app.use(bodyParser);
     app.use(methodOverride('_method'));
+    app.use(favicon(path.join(__dirname, 'assets', 'images', 'favicon.ico')))
     app.locals.basedir = `${__dirname}/assets`;
 
 
@@ -56,7 +58,9 @@ const initialise = async function () {
         middleware.updateUser,
         rootRoutes,
         authRoutes,
-        middleware.validateUser, middleware.updateGuilds, dashboardRoutes);
+        middleware.validateUser, 
+        middleware.updateGuilds, 
+        dashboardRoutes);
 
     app.get('*', (req, res) => res.render('errors/404'));
 

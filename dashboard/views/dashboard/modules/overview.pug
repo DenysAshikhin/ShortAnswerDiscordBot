@@ -2,25 +2,25 @@ section#overviewModule.module.px-5
     .form-group.mt-5
         .row.text-center
             .col-lg-3.col-md-6
-                .border.rounded.m-3.p-3
+                .border.rounded.m-3.p-3.text-break
                     p.uppercase
                         i.fas.fa-user-ninja
                         strong.ml-1 Owner
                     p.mb-0 #{guild.owner.user.tag}
             .col-lg-3.col-md-6
-                .border.rounded.m-3.p-3
+                .border.rounded.m-3.p-3.text-break
                     p.uppercase
                         i.fas.fa-user-alt
                         strong.ml-1 Members
                     p.mb-0 #{guild.memberCount}
             .col-lg-3.col-md-6
-                .border.rounded.m-3.p-3
+                .border.rounded.m-3.p-3.text-break
                     p.uppercase
                         i.fas.fa-user-at
                         strong.ml-1 Roles
                     p.mb-0 #{guild.roles.cache.size}
             .col-lg-3.col-md-6
-                .border.rounded.m-3.p-3
+                .border.rounded.m-3.p-3.text-break
                     p.uppercase
                         i.fas.fa-user-hashtag
                         strong.ml-1 Channels
@@ -28,22 +28,75 @@ section#overviewModule.module.px-5
     .row.d-flex
         .col
             #nav-tab-overview.nav.nav-tabs.fill-nav(role='tablist')
-                a#nav-profile-tab.nav-link(data-toggle='tab' role='tab' href='#nav-profile' aria-controls='nav-profile' aria-selected='false') Profile
+                if dbGuild.channelTwitch.length > 0 || youtubeAlerts.length > 0 
+                    a#nav-notifications-tab.nav-link(data-toggle='tab' role='tab' href='#nav-notifications' aria-controls='nav-profile' aria-selected='false') Notifications
+                else 
+                    span(data-placement='top' data-toggle='tooltip' title='No notifications have been setup for this server!')
+                            a#nav-notifications-tab.disabled.nav-link(data-toggle='tab' role='tab' href='#nav-notifications' aria-controls='nav-profile' aria-selected='false') Notifications
 
                 if rep.length > 0
                     a#nav-rep-tab.nav-link(data-toggle='tab' role='tab' href='#nav-rep' aria-controls='nav-contact' aria-selected='false') Rep
-                else
-                    a#nav-rep-tab.nav-link.disabled(data-toggle='tab' role='tab' href='#nav-rep' aria-controls='nav-contact' aria-selected='false') Rep
+                else 
+                    span(data-placement='top' data-toggle='tooltip' title='No users have gotten any rep on this server!')
+                        a#nav-rep-tab.nav-link.disabled(data-toggle='tab' role='tab' href='#nav-rep' aria-controls='nav-contact' aria-selected='false') Rep
 
                 if dbGuild.factions.length > 0
                     a#nav-factions-tab.nav-link(data-toggle='tab' href='#nav-factions' role='tab' aria-controls='nav-home' aria-selected='true') Factions
                 else
-                    a#nav-factions-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Factions
+                    span(data-placement='top' data-toggle='tooltip' title='No factions have been made for this server!')
+                        a#nav-factions-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Factions
 
     .row                    
         .col
             #nav-tabContent-overview.tab-content
-                #nav-profile.tab-pane.fade(role='tabpanel' aria-labelledby='nav-profile-tab') ...
+                #nav-notifications.tab-pane.fade(role='tabpanel' aria-labelledby='nav-notifications-tab') 
+                    .row
+                        .col-4
+                            #notification-pill-tab.nav.flex-column.nav-pills.m-3(role='tablist' aria-orientation='vertical')
+                                if youtubeAlerts.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`youtubeAlertPill` href=`#youtubeAlertsTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Youtube Alerts
+                                else
+                                    span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No Youtube alerts have been setup for this server!')
+                                        a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`youtubeAlertPill` href=`#youtubeAlertsTable` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Youtube Alerts
+
+
+                                if twitchAlerts.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`twitchAlertPill` href=`#twitchAlertsTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Twitch Alerts
+                                else
+                                    span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No Twitch alerts have been setup for this server!')
+                                        a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`twitchAlertPill` href=`#twitchAlertsTable` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Twitch Alerts
+
+
+
+                        .col
+                         #notificationPill.tab-content
+                            if youtubeAlerts.length > 0
+                                .tab-pane.fade.show.m-3(id=`youtubeAlertsTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                    table.table-striped.table-bordered(id=`youtubeTable`)
+                                                thead
+                                                    tr
+                                                        th(scope='col') Youtube Channel
+                                                        th(scope='col') Alert Channel
+                                                tbody
+                                                    each youtube in youtubeAlerts
+                                                        tr
+                                                            td #{youtube.youtuber}
+                                                            td ##{youtube.channel}
+
+                            if twitchAlerts.length > 0
+                                .tab-pane.fade.show.m-3(id=`twitchAlertsTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                    table.table-striped.table-bordered(id=`twitchTable`)
+                                                thead
+                                                    tr
+                                                        th(scope='col') Twitch Channel
+                                                        th(scope='col') Alert Channel
+                                                tbody
+                                                    each twitcher in twitchAlerts
+                                                        tr
+                                                            td #{twitcher.streamer}
+                                                            td ##{twitcher.channel}
+
+
                 #nav-rep.tab-pane.fade(role='tabpanel' aria-labelledby='nav-rep-tab')
                     if rep.length > 0
                         .row
@@ -69,10 +122,10 @@ section#overviewModule.module.px-5
                             .col-4
                                 h4.m-3.text-center Faction Title - @role
                                 hr
-                                #v-pills-tab.nav.flex-column.nav-pills(role='tablist' aria-orientation='vertical')
+                                #faction-pills-tab.nav.flex-column.nav-pills(role='tablist' aria-orientation='vertical')
                                     each faction in dbGuild.factions
                                         a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`factionPill${faction.role}` href=`#factionInfo${faction.role}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{faction.name} - @#{roles.find(element => element.roleID == faction.role).name}
-                            .col-8
+                            .col
                                 #v-pills-tabContent.tab-content
                                     each faction in dbGuild.factions
                                         .tab-pane.fade.show(id=`factionInfo${faction.role}` role='tabpanel' aria-labelledby='v-pills-home-tab')

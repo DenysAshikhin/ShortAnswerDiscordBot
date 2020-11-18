@@ -46,6 +46,7 @@
     "pug": "^3.0.0",
     "puppeteer": "^4.0.0",
     "puppeteer-extra": "^3.1.15",
+    "serve-favicon": "^2.5.0",
     "teemojs": "^2.0.0-alpha.6",
     "twitch": "^4.2.7",
     "uniqid": "^5.2.0",

@@ -6,11 +6,16 @@ const {
 } = require('../modules/middleware.js');
 const GUILDS = require('../../Guild.js');
 const User = require('../../User.js');
+const ytch = require('yt-channel-info');
+const twitchLogic = require('../../serverLogic/twitchLogic.js');
+
+
 
 router.get('/dashboard', function (req, res) {
     res.render('dashboard/index', {
         something: "Null",
-        subtitle: "Short Answer Bot Dasboard"
+        subtitle: "Short Answer Bot Dasboard",
+        admin: false
     });
     //res.send('Hello World')
 });
@@ -21,9 +26,93 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
     res.locals.guildPrefix = res.locals.guildPrefix == '-1' ? 'sa!' : res.locals.guildPrefix;
     res.locals.userPrefix = res.locals.userPrefix == '-1' ? 'sa!' : res.locals.userPrefix;
 
-    let dbUsers = await User.find({
+
+    let promiseArr = [User.find({
         guilds: res.locals.guild.id
-    });
+    })];
+
+    if (res.locals.dbGuild.youtubeAlerts.size > 0) {
+
+        let youtubeArr = [];
+
+        for (const [key, value] of res.locals.dbGuild.youtubeAlerts)
+            youtubeArr.push(ytch.getChannelInfo(key));
+
+        promiseArr.push(Promise.allSettled(youtubeArr));
+    }
+    else
+        promiseArr.push(MAIN.sleep(1));
+
+    let twitchMap = new Map();
+
+    if (res.locals.dbGuild.channelTwitch.length > 0) {
+
+        let twitchArr = [];
+
+        for (const [twitchID, channelID] of res.locals.dbGuild.channelTwitch) {
+
+            // console.log(twitchID)
+            // console.log(channelID)
+
+            let twitchy = twitchMap.get(twitchID);
+
+            if (!twitchy)
+                twitchy = [channelID];
+            else
+                twitchy.push(channelID);
+            twitchMap.set(twitchID, [channelID]);
+
+            twitchArr.push(twitchLogic.getTwitchChannelByID(twitchID));
+            //console.log(temp._data.display_name);
+        }
+
+        promiseArr.push(Promise.allSettled(twitchArr));
+    }
+    else
+        promiseArr.push(MAIN.sleep(1));
+
+    //[dbUsers, Youtubes, Twitch]
+    let finishedPromises = await Promise.allSettled(promiseArr);
+
+    let dbUsers = finishedPromises[0].value;
+
+    let youtubePairs = [];
+
+    if (res.locals.dbGuild.youtubeAlerts.size > 0)
+        for (const youtube of finishedPromises[1].value) {
+
+            // console.log(youtube.value.author);
+            // console.log(res.locals.dbGuild.youtubeAlerts.get(youtube.value.authorId));
+
+            for (const channels of res.locals.dbGuild.youtubeAlerts.get(youtube.value.authorId)) {
+                //console.log(channels[0])
+                youtubePairs.push({
+                    youtuber: youtube.value.author,
+                    channel: MAIN.Client.channels.cache.get(
+                        channels[0]
+                    ).name
+                })
+            }
+        }
+
+    let twitchPairs = [];
+
+    if (twitchMap.size > 0)
+        for (const twitchy of finishedPromises[2].value) {
+            console.log('wow')
+            console.log(twitchy.value._data.display_name)
+            console.log(twitchy.value._data.id)
+            for (const channel of twitchMap.get(twitchy.value._data.id)) {
+
+                twitchPairs.push({
+                    streamer: twitchy.value._data.display_name,
+                    channel: MAIN.Client.channels.cache.get(
+                        channel
+                    ).name
+                })
+            }
+        }
+
 
     let repArr = [];
 
@@ -57,8 +146,6 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         memberMap.set(member.id, member.displayName)
     }
 
-    console.log(repArr)
-
     res.render('dashboard/show', {
         something: "Null",
         subtitle: "Short Answer Bot Dashboard",
@@ -73,7 +160,9 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         userPrefix: res.locals.userPrefix,
         dbUser: res.locals.dbUser,
         rep: repArr,
-        memberMap: memberMap
+        memberMap: memberMap,
+        youtubeAlerts: youtubePairs,
+        twitchAlerts: twitchPairs
     });
     //res.send('Hello World')
 });

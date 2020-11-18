@@ -482,7 +482,7 @@ const findUser = async function (member, force) {
 
             let existed = await checkExistance(member);
             if (!existed) {
-                console.log("sleeping on a non-existant member")
+               // console.log("sleeping on a non-existant member")
                 await sleep(1000);
             }
             let tempUser = await User.findOne({
@@ -490,7 +490,8 @@ const findUser = async function (member, force) {
             });
 
             if(!existed){
-                console.log(tempUser.guilds);
+                // console.log('userID: ', tempUser.id)
+                // console.log(tempUser.guilds);
             }
 
             if (!tempUser) {

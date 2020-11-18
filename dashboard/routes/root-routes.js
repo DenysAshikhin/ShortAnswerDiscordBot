@@ -7,9 +7,14 @@ var Commands = require('../../commands.json');
 
 
 router.get('/', function (req, res) {
+
+    let loggedIn = res.locals.user ? true : false;
+
+
     res.render('index', {
         something: "Null",
-        subtitle: "Short Answer Bot Homepage"
+        subtitle: "Short Answer Bot Homepage",
+        loggedIn: loggedIn
     });
     //res.send('Hello World')
 });

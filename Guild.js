@@ -102,7 +102,8 @@ const GuildSchema = new mongoose.Schema({
         default: '-1'
     },
     youtubeAlerts: {
-        type: Map
+        type: Map,
+        default: []
     },
     gameRolePing: {
         type: Boolean,

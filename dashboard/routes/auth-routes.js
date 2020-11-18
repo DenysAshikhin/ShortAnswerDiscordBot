@@ -77,7 +77,7 @@ router.post('/formUpdate', async function (req, res) {
         const user = await authClient.getUser(code);
 
         let dbUser = await MAIN.findUser({id: user.id, guild: {id: req.body.serverID}}, true);
-        console.log(dbUser)
+        console.log(dbUser.displayName)
         
         let index = dbUser.guilds.indexOf(req.body.serverID);
 

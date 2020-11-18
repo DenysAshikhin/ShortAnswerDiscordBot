@@ -404,3 +404,4 @@ async function getTwitchChannelByID(id) {
     const user = await twitchClient.helix.users.getUserById(id);
     return user;
 }
+exports.getTwitchChannelByID = getTwitchChannelByID;
