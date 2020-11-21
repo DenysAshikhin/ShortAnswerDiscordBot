@@ -51,6 +51,12 @@ section#overviewModule.module.px-5
                 else
                     span(data-placement='top' data-toggle='tooltip' title='No channel (image/video or link) thankers have been setup for this server!')
                             a#nav-thanker-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Channel Thanker
+                
+                if dbGuild.autorole.length > 0
+                    a#nav-autorole-tab.nav-link(data-toggle='tab' href='#nav-autorole' role='tab' aria-controls='nav-home' aria-selected='true') Autorole Messages
+                else
+                    span(data-placement='top' data-toggle='tooltip' title='No autorole messages have been setup for this server!')
+                            a#nav-autorole-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Autorole Messages
 
 
     .row                    
@@ -288,3 +294,27 @@ section#overviewModule.module.px-5
                                                             if guild.channels.cache.get(channelID)
                                                                 tr
                                                                     td ##{guild.channels.cache.get(channelID).name}
+
+                #nav-autorole.tab-pane.fade.m-3(role='tabpanel')
+                    if dbGuild.autorole.length > 0
+                        .row
+                            .col-4
+                                 #autorole-pills-tab.nav.flex-column.nav-pills(role='tablist' aria-orientation='vertical')
+                                    each autorole in dbGuild.autorole
+                                        a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`autorolePill${autorole.messageID}` href=`#autoroleInfo${autorole.messageID}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{autorole.runningEmbed.title}
+
+                            .col
+                                #autorole-pills-tabContent.tab-content
+                                    each autorole in dbGuild.autorole
+                                        .tab-pane.fade.show(id=`autoroleInfo${autorole.messageID}` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                            h4.text-center.m-3 The autorole below can be found in ##{guild.channels.cache.get(autorole.channelID).name}
+                                            hr
+                                            .card
+                                                .card-header
+                                                    h5 #{autorole.runningEmbed.title}
+                                                .card-body
+                                                    p.card-text #{autorole.runningEmbed.description}
+                                                .card-footer.text-muted 
+                                                    each emoji in autorole.emojis
+                                                        p.d-inline.mx-3 #{emoji.emoji}
+                                                        .d-inline.fas.fa-grip-lines-vertical
