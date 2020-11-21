@@ -7,14 +7,15 @@
         hr
         each guild in guilds
             a(href='/servers/' + guild.id)
-                .icon.shadow.round.my-2(data-toggle='tooltip', data-boundary='window', data-container= 'body', data-placement='right', title= guild.name)
+                .icon.shadow.round(data-toggle='tooltip', data-boundary='window', data-container= 'body', data-placement='right', title= guild.name)
                     if guild.icon
                         img.round(alt=guild.name, src=guild.iconURL({dynamic: true, size: 64}))
                     else
                         span.text-center.abbr #{guild.nameAcronym}
         a
             span.icon.my-2.align-middle
-                p.text-success.text-center.my-3(href='/invite' data-toggle='tooltip' data-boundary='window' data-container= 'body' data-placement='right' title='Add me to your server!')
-                    i.fas.fa-plus
+                p.text-success.text-center.my-3(style='transform: rotate(0);' data-toggle='tooltip' data-boundary='window' data-container= 'body' data-placement='right' title='Add me to your server!')
+                    i.fas.fa-plus.fa-2x
+                    a.stretched-link(href='/invite')
     .hamburger.px-1.bg-light.text-center
         i.fas.fa-bars#hamburgerSurround

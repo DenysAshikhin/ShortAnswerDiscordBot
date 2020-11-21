@@ -16,9 +16,7 @@ const topRep = async function (params) {
 
     let messy = await channel.send("Fetching all of the rep scores.... 0% complete!");
 
-    let users = await User.find({
-        guilds: guild.id
-    });
+    let users = await User.find({ "guilds": params[0], [`reps.${params[0]}`]: { $ne: null } }).lean();
 
     let members = await guild.members.fetch();
 
@@ -113,7 +111,7 @@ const repToFaction = async function (params) {
 
     let users = await User.find({
         guilds: guild.id
-    });
+    }).lean();
 
     let dbGuild = await Guild.findOne({
         id: params[0]
@@ -179,7 +177,7 @@ const repToFaction = async function (params) {
         $set: {
             factions: dbGuild.factions
         }
-    }, function (err, doc, res) {});
+    }, function (err, doc, res) { });
 
 
     await messy.edit("Converting all of the rep scores...." + ` ${100}% complete!\nEveryone's rep scores have been reset to 0 and their respective factions (if applicable)` +
@@ -199,7 +197,7 @@ const changeRep = async function (user, guildID, amount, message, resetPoints) {
         id: guildID
     });
     // console.log(dbGuild)
-    let actualGuild = await MAIN.Client.guilds.fetch(guildID);
+    let actualGuild = MAIN.Client.guilds.cache.get(guildID);
 
     let guildMember = actualGuild.members.cache.get(user.id);
 
@@ -212,11 +210,15 @@ const changeRep = async function (user, guildID, amount, message, resetPoints) {
                 throw ('Blacklisted boi')
                 return -1;
             }
-
         }
     }
 
+    let repExisted = true;
+
     if (!user.reps) {
+
+
+        repExisted = false;
 
         user.reps = new Map();
 
@@ -234,9 +236,19 @@ const changeRep = async function (user, guildID, amount, message, resetPoints) {
         return user.reps.get(guildID);
     }
 
-    let rep = user.reps.get(guildID);
+
+    let rep;
+
+    if(repExisted){
+        user.reps = new Map(Object.entries(user.reps));
+        rep = user.reps.get(guildID);
+    }
+    else{
+        rep = 0;
+    }
 
     if (!rep) {
+
 
         user.reps.set(guildID, Number(amount));
 
@@ -297,7 +309,7 @@ async function topStats(params) {
     channel.send("Collecting all the stats....");
     let allUsers = await MAIN.getUsers({
         guilds: guild.id
-    });
+    }).lean();
 
     let silentType;
     let silentTypeIndex;
@@ -386,25 +398,25 @@ async function topStats(params) {
     statsEmbed.thumbnail.url = guild.iconURL();
     let members = await guild.members.fetch();
     statsEmbed.fields = [{
-            name: '** **',
-            value: "```md\n" + `The Silent Type:\n#${members.get(silentType.id).displayName}\n` + `<${silentType.messages[silentTypeIndex]} messages sent.>` + "```"
-        },
-        {
-            name: '** **',
-            value: "```md\n" + `The Loud Mouth:\n#${members.get(loudMouth.id).displayName}\n` + `<${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.>` + "```"
-        },
-        {
-            name: '** **',
-            value: "```md\n" + `The Ghost:\n#${members.get(ghost.id).displayName}\n` + `<${ghost.timeAFK[ghostIndex]} minutes spent AFK.>` + "```"
-        },
-        {
-            name: '** **',
-            value: "```md\n" + `The MIA:\n#${members.get(MIA.id).displayName}\n` + `<${MAIN.findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex])} last seen date.>` + "```"
-        },
-        {
-            name: '** **',
-            value: "```md\n" + `The Summoner:\n#${members.get(summoner.id).displayName}\n` + `<${summoner.summoner[summonerIndex]} summoning rituals completed.>` + "```"
-        }
+        name: '** **',
+        value: "```md\n" + `The Silent Type:\n#${members.get(silentType.id).displayName}\n` + `<${silentType.messages[silentTypeIndex]} messages sent.>` + "```"
+    },
+    {
+        name: '** **',
+        value: "```md\n" + `The Loud Mouth:\n#${members.get(loudMouth.id).displayName}\n` + `<${loudMouth.timeTalked[loudMouthIndex]} minutes spent talking.>` + "```"
+    },
+    {
+        name: '** **',
+        value: "```md\n" + `The Ghost:\n#${members.get(ghost.id).displayName}\n` + `<${ghost.timeAFK[ghostIndex]} minutes spent AFK.>` + "```"
+    },
+    {
+        name: '** **',
+        value: "```md\n" + `The MIA:\n#${members.get(MIA.id).displayName}\n` + `<${MAIN.findFurthestDate(MIA.lastTalked[MIAIndex], MIA.lastMessage[MIAIndex])} last seen date.>` + "```"
+    },
+    {
+        name: '** **',
+        value: "```md\n" + `The Summoner:\n#${members.get(summoner.id).displayName}\n` + `<${summoner.summoner[summonerIndex]} summoning rituals completed.>` + "```"
+    }
     ];
 
     channel.send({

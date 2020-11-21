@@ -39,6 +39,8 @@ router.get('/auth-guild', async function (req, res) {
 
     try {
 
+        console.log('in /auth-guild')
+
         const key = res.cookies.get('key');
         await sessions.update(key);
     } catch (err) {

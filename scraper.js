@@ -1020,6 +1020,8 @@ const findUser = async function (member, force) {
             id: member.id
         });
 
+
+
         if (!usery || force) {
 
             let existed = await checkExistance(member);

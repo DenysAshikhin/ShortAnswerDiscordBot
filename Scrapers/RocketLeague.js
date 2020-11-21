@@ -3,7 +3,6 @@ const cheerio = require('cheerio');
 var MAIN = require('../scraper.js');
 const User = require('../User.js');
 const Guild = require('../Guild.js');
-const { PerformanceObserver, performance } = require('perf_hooks');
 const { init } = require('../User.js');
 
 /** 
@@ -31,14 +30,10 @@ async function rocketLeagueRanks(params) {
 
     let finalContent = [];
 
-    var t0 = performance.now()
-
     let initialIndex = $.indexOf('"stats":');
     let trialy = '{' + $.substring(initialIndex, $.indexOf(';', initialIndex) - 1) + '}';
 
     let anotherTrial = JSON.parse(trialy);
-
-    var t1 = performance.now()
 
     //  console.log("to finish parse: ", (t1 - t0))
 
@@ -47,7 +42,7 @@ async function rocketLeagueRanks(params) {
     let moreTest = anotherTrial['stats-v2'].standardProfiles[`rocket-league|${modifiedZone}|${params[1].toLowerCase()}`];
 
     try {
-        for (let i = 2; i < 10; i++)
+        for (let i = 2; i < 9; i++)
             if (moreTest.segments[i].stats.division.metadata.name != 'Unranked')
                 finalContent.push([
                     moreTest.segments[i].metadata.name,
@@ -91,37 +86,37 @@ async function rocketLeagueRanks(params) {
                     else
                         ranks.r2 = { rank: rank[1], division: -1, elo: -1 };
                     break;
+                // case 2:
+                //     if (rank.length == 4)
+                //         ranks.rs3 = { rank: rank[1], division: rank[2], elo: rank[3] };
+                //     else
+                //         ranks.rs3 = { rank: rank[1], division: -1, elo: -1 };
+                //     break;
                 case 2:
-                    if (rank.length == 4)
-                        ranks.rs3 = { rank: rank[1], division: rank[2], elo: rank[3] };
-                    else
-                        ranks.rs3 = { rank: rank[1], division: -1, elo: -1 };
-                    break;
-                case 3:
                     if (rank.length == 4)
                         ranks.r3 = { rank: rank[1], division: rank[2], elo: rank[3] };
                     else
                         ranks.r3 = { rank: rank[1], division: -1, elo: -1 };
                     break;
-                case 4:
+                case 3:
                     if (rank.length == 4)
                         ranks.hoops = { rank: rank[1], division: rank[2], elo: rank[3] };
                     else
                         ranks.hoops = { rank: rank[1], division: -1, elo: -1 };
                     break;
-                case 5:
+                case 4:
                     if (rank.length == 4)
                         ranks.rumble = { rank: rank[1], division: rank[2], elo: rank[3] };
                     else
                         ranks.rumble = { rank: rank[1], division: -1, elo: -1 };
                     break;
-                case 6:
+                case 5:
                     if (rank.length == 4)
                         ranks.dropshot = { rank: rank[1], division: rank[2], elo: rank[3] };
                     else
                         ranks.dropshot = { rank: rank[1], division: -1, elo: -1 };
                     break;
-                case 7:
+                case 6:
                     if (rank.length == 4)
                         ranks.snowday = { rank: rank[1], division: rank[2], elo: rank[3] };
                     else
@@ -257,27 +252,27 @@ const checkRLTrackers = async function (params) {
                             });
                         }
                     }
-                    if ((player.rs3.elo != temp.ranks.rs3.elo) && (player.rs3.elo != -1)) {
-                        playerElo = isNaN(player.rs3.elo) ? Number(player.rs3.elo.replace(',', '')) : Number(player.rs3.elo);
-                        tempElo = isNaN(temp.ranks.rs3.elo) ? Number(temp.ranks.rs3.elo.replace(',', '')) : Number(temp.ranks.rs3.elo);
+                    // if ((player.rs3.elo != temp.ranks.rs3.elo) && (player.rs3.elo != -1)) {
+                    //     playerElo = isNaN(player.rs3.elo) ? Number(player.rs3.elo.replace(',', '')) : Number(player.rs3.elo);
+                    //     tempElo = isNaN(temp.ranks.rs3.elo) ? Number(temp.ranks.rs3.elo.replace(',', '')) : Number(temp.ranks.rs3.elo);
 
-                        if ((temp.ranks.rs3.elo > player.rs3.elo)) {
-                            specificNotif.push({
-                                name: "Ranked Solo 3v3 Loss!" + ` Lost ${tempElo - playerElo} Elo`,
-                                value: `${MAIN.getEmoji(`RL${temp.ranks.rs3.rank}`)} ${temp.ranks.rs3.rank} : ${temp.ranks.rs3.division} (${temp.ranks.rs3.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.rs3.rank}`)} ${player.rs3.rank} : ${player.rs3.division} (${player.rs3.elo})`
-                                , difference: tempElo - playerElo
-                            });
-                        }
-                        else {
-                            specificNotif.push({
-                                name: "Ranked Solo 3v3 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
-                                value: `${MAIN.getEmoji(`RL${temp.ranks.rs3.rank}`)} ${temp.ranks.rs3.rank} : ${temp.ranks.rs3.division} (${temp.ranks.rs3.elo})`
-                                    + ` ➡️ ${MAIN.getEmoji(`RL${player.rs3.rank}`)} ${player.rs3.rank} : ${player.rs3.division} (${player.rs3.elo})`
-                                , difference: tempElo - playerElo
-                            });
-                        }
-                    }
+                    //     if ((temp.ranks.rs3.elo > player.rs3.elo)) {
+                    //         specificNotif.push({
+                    //             name: "Ranked Solo 3v3 Loss!" + ` Lost ${tempElo - playerElo} Elo`,
+                    //             value: `${MAIN.getEmoji(`RL${temp.ranks.rs3.rank}`)} ${temp.ranks.rs3.rank} : ${temp.ranks.rs3.division} (${temp.ranks.rs3.elo})`
+                    //                 + ` ➡️ ${MAIN.getEmoji(`RL${player.rs3.rank}`)} ${player.rs3.rank} : ${player.rs3.division} (${player.rs3.elo})`
+                    //             , difference: tempElo - playerElo
+                    //         });
+                    //     }
+                    //     else {
+                    //         specificNotif.push({
+                    //             name: "Ranked Solo 3v3 Victory!" + ` Gained ${(tempElo - playerElo) * -1} Elo`,
+                    //             value: `${MAIN.getEmoji(`RL${temp.ranks.rs3.rank}`)} ${temp.ranks.rs3.rank} : ${temp.ranks.rs3.division} (${temp.ranks.rs3.elo})`
+                    //                 + ` ➡️ ${MAIN.getEmoji(`RL${player.rs3.rank}`)} ${player.rs3.rank} : ${player.rs3.division} (${player.rs3.elo})`
+                    //             , difference: tempElo - playerElo
+                    //         });
+                    //     }
+                    // }
                     if ((player.hoops.elo != temp.ranks.hoops.elo) && (player.hoops.elo != -1)) {
                         playerElo = isNaN(player.hoops.elo) ? Number(player.hoops.elo.replace(',', '')) : Number(player.hoops.elo);
                         tempElo = isNaN(temp.ranks.hoops.elo) ? Number(temp.ranks.hoops.elo.replace(',', '')) : Number(temp.ranks.hoops.elo);

@@ -18,6 +18,9 @@ module.exports.checkHTTP = function (req, res, next) {
 
 module.exports.validateUser = async function (req, res, next) {
 
+
+    console.log('in validateUser')
+
     if (res.locals.user)
         next();
     else
@@ -28,8 +31,9 @@ module.exports.updateUser = async function (req, res, next) {
 
     try {
 
+        console.log('in updateUser');
         const key = res.cookies.get('key');
-        console.log('setting the user');
+        
         if (key) {
 
             res.locals.user = (await sessions.get(key)).authUser;
@@ -46,6 +50,9 @@ module.exports.updateUser = async function (req, res, next) {
 
 
 module.exports.validateGuild = async function (req, res, next) {
+
+
+    console.log('Validating guild')
 
     res.locals.guild = res.locals.guilds.find(function (guildy) {
 
@@ -83,6 +90,7 @@ module.exports.validateGuild = async function (req, res, next) {
             });
         }
 
+        
         console.log(`Setting user: ${res.locals.dbUser.displayName}`)
         console.log(`Setting Guild: ${res.locals.dbGuild.id}`)
 
@@ -102,7 +110,7 @@ module.exports.validateGuild = async function (req, res, next) {
             res.locals.userPrefix = res.locals.dbUser.prefix[index];
 
         if (res.locals.guild.members.cache.get(res.locals.dbUser.id).hasPermission("ADMINISTRATOR")) {
-            console.log('IS ADMIN')
+            // console.log('IS ADMIN')
             res.locals.admin = true;
         } else
             res.locals.admin = false;
@@ -117,7 +125,7 @@ module.exports.updateGuilds = async function (req, res, next) {
     try {
 
         const key = res.cookies.get('key');
-        console.log('setting the GUILDS');
+        console.log('inside updateGuilds');
         if (key) {
             res.locals.guilds = (await sessions.get(key)).guilds;
         } else

@@ -114,17 +114,13 @@ $(window).on("load", function () {
     if (repTable[0])
         repTable.DataTable();
 
-
     let youtubeTable = $('#youtubeTable');
     if (youtubeTable[0])
         youtubeTable.DataTable();
 
-
     let twitchTable = $('#twitchTable');
     if (twitchTable[0])
         twitchTable.DataTable();
-
-
 
     let imageThankerTable = $('#imageThankerTable');
     if (imageThankerTable[0])
@@ -141,6 +137,13 @@ $(window).on("load", function () {
     let blacklistRepGiveTableTab = $('#blacklistRepGiveTable');
     if (blacklistRepGiveTableTab[0])
         blacklistRepGiveTableTab.DataTable();
+
+    let repRolesPairTableTable = $('#repRolesPairTableTable');
+    if (repRolesPairTableTable[0])
+        repRolesPairTableTable.DataTable();
+
+
+
 
     let tables = $('.factionTable');
 

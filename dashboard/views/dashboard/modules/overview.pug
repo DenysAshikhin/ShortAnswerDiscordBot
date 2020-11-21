@@ -101,9 +101,7 @@ section#overviewModule.module.px-5
                                                                 td #{twitcher.streamer}
                                                                 td ##{twitcher.channel}
 
-
-                #nav-rep.tab-pane.fade(role='tabpanel' aria-labelledby='nav-rep-tab')
-                    
+                #nav-rep.tab-pane.fade(role='tabpanel' aria-labelledby='nav-rep-tab')    
                     .row
                         .col-4
                             #rep-pill-tab.nav.flex-column.nav-pills.m-3(role='tablist' aria-orientation='vertical')
@@ -125,6 +123,11 @@ section#overviewModule.module.px-5
                                     span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No roles have been blacklisted from giving rep on this server!')
                                         a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`blacklistRepGivePill` href=`#blacklistRepGiveTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Blacklisted Rep Give Roles
 
+                                if dbGuild.repRolePairs.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`repRolesPairPill` href=`#repRolesPairTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Rep Role Pairs
+                                else
+                                  span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No rep role pairs have been setup on this server!')
+                                    a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`repRolesPairPill` href=`#repRolesPairTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Rep Role Pairs
 
 
                         .col
@@ -140,10 +143,10 @@ section#overviewModule.module.px-5
                                                     th(scope='col') Rep Amount
                                             tbody
                                                 each member in rep
-                                                    tr
-                                                        td #{guild.members.cache.get(member.memberID).displayName}
-                                                        // td 222
-                                                        td #{member.rep}
+                                                    if guild.members.cache.get(member.memberID)
+                                                        tr
+                                                            td #{guild.members.cache.get(member.memberID).displayName}
+                                                            td #{member.rep}
 
                                 if dbGuild.blacklistedRepRoles.length > 0
                                     .tab-pane.fade.show.m-3(id=`blacklistRepTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
@@ -155,8 +158,9 @@ section#overviewModule.module.px-5
                                                         th(scope='col') Role
                                                 tbody
                                                     each role in dbGuild.blacklistedRepRoles
-                                                        tr
-                                                            td @#{guild.roles.cache.get(role).name}
+                                                        if guild.roles.cache.get(role)
+                                                            tr
+                                                                td @#{guild.roles.cache.get(role).name}
 
                                 if dbGuild.blacklistedGiveRepRoles.length > 0
                                     .tab-pane.fade.show.m-3(id=`blacklistRepGiveTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
@@ -168,8 +172,25 @@ section#overviewModule.module.px-5
                                                         th(scope='col') Role
                                                 tbody
                                                     each role in dbGuild.blacklistedGiveRepRoles
-                                                        tr
-                                                            td @#{guild.roles.cache.get(role).name}
+                                                        if guild.roles.cache.get(role)
+                                                            tr
+                                                                td @#{guild.roles.cache.get(role).name}
+
+                                if dbGuild.repRolePairs.length > 0
+                                    .tab-pane.fade.show.m-3(id=`repRolesPairTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        h4.text-center.m-3 Rep Thresholds to Gain Specific Roles
+                                        hr
+                                        table.table-striped.table-bordered.repTable(id=`repRolesPairTableTable`)
+                                                thead
+                                                    tr
+                                                        th(scope='col') Rep Threshold
+                                                        th(scope='col') Role
+                                                tbody
+                                                    each role in dbGuild.repRolePairs
+                                                        if guild.roles.cache.get(role.roleID)
+                                                            tr
+                                                                td #{role.rep}
+                                                                td @#{guild.roles.cache.get(role.roleID).name}
 
                 #nav-factions.tab-pane.fade.m-3(role='tabpanel' aria-labelledby='nav-contact-tab')
                     if dbGuild.factions.length > 0
@@ -183,10 +204,16 @@ section#overviewModule.module.px-5
                             .col
                                 #v-pills-tabContent.tab-content
                                     if dbGuild.factionLiveTally
-                                        h5 A live embed overview of the factions is posted in ##{guild.channels.cache.get(dbGuild.factionLiveTally.channelID).name}
+                                        h6 A live embed overview of the factions is posted in ##{guild.channels.cache.get(dbGuild.factionLiveTally.channelID).name}
                                     else
-                                        h5 No live embed overview of the factions is setup, please see *createFactionRunningTally* command    
+                                        h6 No live embed overview of the factions is setup, please see *createFactionRunningTally* command    
                                     hr
+                                    if dbGuild.factionNewMemberAlert
+                                        h6 When a new member joins a faction an alert will be posted in ##{guild.channels.cache.get(dbGuild.factionNewMemberAlert).name}
+                                    else
+                                        h6 No channel is set to receive an update when a new member joins a faction. Please see *factionNewMemberAlertChannel* command for more info
+                                    hr
+
                                     each faction in dbGuild.factions
                                         .tab-pane.fade.show(id=`factionInfo${faction.role}` role='tabpanel' aria-labelledby='v-pills-home-tab')
                                             h4.text-center.m-3 Total Points: #{faction.points}
@@ -204,10 +231,11 @@ section#overviewModule.module.px-5
                                                         td New Members
                                                         td #{faction.contributions.newMembers}
                                                     each contributor in faction.contributions.members
-                                                        tr
-                                                            td #{guild.members.cache.get(contributor.userID).displayName}
-                                                            // td 222
-                                                            td #{contributor.points}
+                                                        if guild.members.cache.get(contributor.userID)
+                                                            tr
+                                                                if guild.members.cache.get(contributor.userID)
+                                                                    td #{guild.members.cache.get(contributor.userID).displayName}
+                                                                    td #{contributor.points}
 
                 #nav-thanker.tab-pane.fade.m-3(role='tabpanel')
                     .row
@@ -236,17 +264,20 @@ section#overviewModule.module.px-5
                                 hr
                                 if dbGuild.channelImageThanker.length > 0
                                     .tab-pane.fade.show.m-3(id=`imageThankerTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                        h5 Channels that are scanned for images/videos to thank users for!
+                                        hr
                                         table.table-striped.table-bordered(id=`imageThankerTable`)
                                                     thead
                                                         tr
                                                             th(scope='col') Thanker Channel
                                                     tbody
                                                         each channelID in dbGuild.channelImageThanker
-                                                            tr
-                                                                td ##{guild.channels.cache.get(channelID).name}
+                                                            if guild.channels.cache.get(channelID)
+                                                                tr
+                                                                    td ##{guild.channels.cache.get(channelID).name}
                                 if dbGuild.channelLinkThanker.length > 0
                                     .tab-pane.fade.show.m-3(id=`linkThankerTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
-                                        h4 Channels that are scanned for (non-reposted) links to thank users for!
+                                        h5 Channels that are scanned for (non-reposted) links to thank users for!
                                         hr
                                         table.table-striped.table-bordered(id=`linkThankerTable`)
                                                     thead
@@ -254,5 +285,6 @@ section#overviewModule.module.px-5
                                                             th(scope='col') Thanker Channel
                                                     tbody
                                                         each channelID in dbGuild.channelLinkThanker
-                                                            tr
-                                                                td ##{guild.channels.cache.get(channelID).name}
+                                                            if guild.channels.cache.get(channelID)
+                                                                tr
+                                                                    td ##{guild.channels.cache.get(channelID).name}

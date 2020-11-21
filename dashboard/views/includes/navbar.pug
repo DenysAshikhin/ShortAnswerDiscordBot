@@ -4,9 +4,9 @@ nav.navbar.navbar-expand-lg.navbar-light
     span.navbar-toggler-icon
   #navbar.collapse.navbar-collapse
     .navbar-nav
-      a.nav-link(href='/commands')
-        i.fas.fa-code
-        span.pl-1 Commands
+      a.nav-link.bg-transparent.rounded.p-0(href='/commands' id='commandList')
+        i.fas.fa-code.font-weight-bold.text-dark
+        span.pl-1.font-weight-bold.text-dark Command List
     .navbar-nav.ml-auto
       if user
         .dropdown.mr-2

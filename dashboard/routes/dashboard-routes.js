@@ -12,6 +12,9 @@ const twitchLogic = require('../../serverLogic/twitchLogic.js');
 
 
 router.get('/dashboard', function (req, res) {
+
+    console.log('in /dashboard')
+
     res.render('dashboard/index', {
         something: "Null",
         subtitle: "Short Answer Bot Dasboard",
@@ -22,14 +25,13 @@ router.get('/dashboard', function (req, res) {
 
 router.get('/servers/:id', validateGuild, async function (req, res) {
 
+    console.log('in /servers/:' + req.params.id)
 
     res.locals.guildPrefix = res.locals.guildPrefix == '-1' ? 'sa!' : res.locals.guildPrefix;
     res.locals.userPrefix = res.locals.userPrefix == '-1' ? 'sa!' : res.locals.userPrefix;
 
 
-    let promiseArr = [User.find({
-        guilds: res.locals.guild.id
-    })];
+    let promiseArr = [User.find({ "guilds": res.locals.guild.id, [`reps.${res.locals.guild.id}`]: { $ne: null } }).lean()];
 
     //console.log(res.locals.dbGuild.blacklistedRepRoles.length)
 
@@ -47,6 +49,7 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         promiseArr.push(MAIN.sleep(1));
 
     let twitchMap = new Map();
+
 
     if (res.locals.dbGuild.channelTwitch.length > 0) {
 
@@ -74,8 +77,12 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
     else
         promiseArr.push(MAIN.sleep(1));
 
+
+
     //[dbUsers, Youtubes, Twitch]
     let finishedPromises = await Promise.allSettled(promiseArr);
+
+
 
     let dbUsers = finishedPromises[0].value;
 
@@ -119,7 +126,7 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
     for (let dbUser of dbUsers) {
 
         if (dbUser.reps) {
-            let rep = dbUser.reps.get(res.locals.guild.id);
+            let rep = dbUser.reps[res.locals.guild.id];
             if (rep)
                 if (rep != '0')
                     repArr.push({
@@ -146,6 +153,7 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         memberMap.set(member.id, member.displayName)
     }
 
+
     res.render('dashboard/show', {
         something: "Null",
         subtitle: "Short Answer Bot Dashboard",
@@ -164,6 +172,7 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         youtubeAlerts: youtubePairs,
         twitchAlerts: twitchPairs
     });
+
     //res.send('Hello World')
 });
 

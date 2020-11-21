@@ -432,7 +432,7 @@ const viewRLTrackers = async function (message, params, user) {
     MAIN.prettyEmbed(message, guild.RLTracker.reduce((accum, curr) => {
         accum.push({
             name: '** **',
-            value: `<#${message.guild.channels.cache.get(curr.channelID).name} is linked to=${curr.player}_${curr.platform}`
+            value: `<#${message.guild.channels.cache.get(curr.channelID).name} is linked to=${curr.player}_${curr.platform}>`
         });
         return accum;
     }, []), {

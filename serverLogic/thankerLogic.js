@@ -72,7 +72,7 @@ const checkLink = async function (params) {
 
 
     let resy = { newLinks: links.length, reposts: repo };
-    console.log(resy);
+    //console.log(resy);
 
     return resy;
 }

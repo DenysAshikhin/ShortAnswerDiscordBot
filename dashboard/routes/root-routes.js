@@ -10,7 +10,7 @@ router.get('/', function (req, res) {
 
     let loggedIn = res.locals.user ? true : false;
 
-
+    console.log('in /')
     res.render('index', {
         something: "Null",
         subtitle: "Short Answer Bot Homepage",
@@ -59,6 +59,7 @@ for (let i = 0; i < Commands.length; i++) {
 }
 
 router.get('/commands', function (req, res) {
+
     res.render('commands', {
         subtitle: 'Commands',
         categories: [{
