@@ -7,20 +7,27 @@ section#qofModule.module.container.px-5
         .form-group.margin.my-5
             .row.justify-content-center
                 .col-4
+                    //- span
+                    //-     label Default Server Prefix
+                    //-     input.form-control.admin.qof#guildPrefix(type='text', name='prefix', class=serverPrefix,  value=guildPrefix, maxLength='5', required)
                     span
-                        label Default Server Prefix
-                        input.form-control.admin.qof#guildPrefix(type='text', name='prefix', class=serverPrefix,  value=guildPrefix, required)
-                    span
-                        label Personal Server Prefix
-                        input.form-control.qof#userPrefix(type='text', name='prefix', class=userPrefix,  value=userPrefix, required)
-                .col-4
-                    label Whitelisted command channels
-                    select.form-control.qof#whiteListedCommands(name=`WhitelistedChannelIds`, multiple)
-                        each channel of Array.from(guild.channels.cache.filter(c => c.type == 'text').values())
-                            option ##{channel.name}
+                        label Personal Default Prefix
+                        input.form-control.qof#defaultPrefix(type='text', name='prefix', class=userPrefix,  value=defaultPrefix, maxLength='5', required)
+            .row.justify-content-center
+                a.m-3( href=`${url}/commands?command=commandSuggestions`) Command Suggestions
+                .custom-control.custom-switch.m-3
+                    input#customSwitch1.custom-control-input(type='checkbox')
+                    label.custom-control-label.user-select-none(for='customSwitch1') Enable
+
+                            
+                //- .col-4
+                //-     label Whitelisted command channels
+                //-     select.form-control.qof#whiteListedCommands(name=`WhitelistedChannelIds`, multiple)
+                //-         each channel of Array.from(guild.channels.cache.filter(c => c.type == 'text').values())
+                //-             option ##{channel.name}
             .row.justify-content-center
                 .col-4.my-4.text-center(style='position: relative')
-                    #qofSubmitBtn.button.btn.btn-success #[i.fas.fa-rocket] Submit
+                    #qofUserSubmitBtn.button.btn.btn-success #[i.fas.fa-rocket] Submit
 
                     .row.my-2
                         .toast.validToast.fade.hide(id='validToast' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')

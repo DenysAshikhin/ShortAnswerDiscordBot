@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const MAIN = require('../../scraper.js');
 
 var Commands = require('../../commands.json');
 
@@ -36,22 +36,22 @@ for (let i = 0; i < Commands.length; i++) {
         if (!subArr)
             subCategoryMap.set(subSection, [subCategory]);
         else
-        if (!subArr.includes(subCategory)) {
-            subArr.push(subCategory);
-            subArr.sort(function (a, b) {
+            if (!subArr.includes(subCategory)) {
+                subArr.push(subCategory);
+                subArr.sort(function (a, b) {
 
-                if (a == 'Other')
+                    if (a == 'Other')
+                        if (b == 'Other')
+                            return 0;
+                        else
+                            return 1;
                     if (b == 'Other')
-                        return 0;
-                    else
-                        return 1;
-                if (b == 'Other')
-                    return -1;
+                        return -1;
 
-                else
-                    return a.localeCompare(b);
-            });
-        }
+                    else
+                        return a.localeCompare(b);
+                });
+            }
     }
 
 
@@ -60,60 +60,65 @@ for (let i = 0; i < Commands.length; i++) {
 
 router.get('/commands', function (req, res) {
 
+    if (!req.query.command)
+        req.query.command = null;
+
     res.render('commands', {
         subtitle: 'Commands',
         categories: [{
-                name: 'Games',
-                icon: 'fas fa-users',
-                subSectionCategories: subCategoryMap.get('games'),
-                exactCategory: 'games'
-            },
-            {
-                name: 'Music',
-                icon: 'fas fa-music',
-                subSectionCategories: subCategoryMap.get('music'),
-                exactCategory: 'music'
-            },
-            {
-                name: 'Notifications',
-                icon: 'fas fa-bell',
-                subSectionCategories: subCategoryMap.get('notifications'),
-                exactCategory: 'notifications'
-            },
-            {
-                name: 'Stats',
-                icon: 'fas fa-info-circle',
-                subSectionCategories: subCategoryMap.get('stats'),
-                exactCategory: 'stats'
-            },
-            {
-                name: 'General',
-                icon: 'fas fa-music',
-                subSectionCategories: subCategoryMap.get('general'),
-                exactCategory: 'general'
-            },
-            {
-                name: 'Quality of Life',
-                icon: 'fas fa-music',
-                subSectionCategories: subCategoryMap.get('qof'),
-                exactCategory: 'qof'
-            },
-            {
-                name: 'Admin',
-                icon: 'fas fa-music',
-                subSectionCategories: subCategoryMap.get('admin'),
-                exactCategory: 'admin'
-            },
-            {
-                name: 'Bugs/Suggestions',
-                icon: 'fas fa-music',
-                subSectionCategories: subCategoryMap.get('bugs'),
-                exactCategory: 'bugs'
-            },
+            name: 'Games',
+            icon: 'fas fa-users',
+            subSectionCategories: subCategoryMap.get('games'),
+            exactCategory: 'games'
+        },
+        {
+            name: 'Music',
+            icon: 'fas fa-music',
+            subSectionCategories: subCategoryMap.get('music'),
+            exactCategory: 'music'
+        },
+        {
+            name: 'Notifications',
+            icon: 'fas fa-bell',
+            subSectionCategories: subCategoryMap.get('notifications'),
+            exactCategory: 'notifications'
+        },
+        {
+            name: 'Stats',
+            icon: 'fas fa-info-circle',
+            subSectionCategories: subCategoryMap.get('stats'),
+            exactCategory: 'stats'
+        },
+        {
+            name: 'General',
+            icon: 'fas fa-music',
+            subSectionCategories: subCategoryMap.get('general'),
+            exactCategory: 'general'
+        },
+        {
+            name: 'Quality of Life',
+            icon: 'fas fa-hand-holding-heart',
+            subSectionCategories: subCategoryMap.get('qof'),
+            exactCategory: 'qof'
+        },
+        {
+            name: 'Admin',
+            icon: 'fas fa-music',
+            subSectionCategories: subCategoryMap.get('admin'),
+            exactCategory: 'admin'
+        },
+        {
+            name: 'Bugs/Suggestions',
+            icon: 'fas fa-music',
+            subSectionCategories: subCategoryMap.get('bugs'),
+            exactCategory: 'bugs'
+        },
         ],
         //commands: checkCommandsSearchArray.normal
         completeCommands: Commands,
-        subSectionCategories: subCategoryMap
+        subSectionCategories: subCategoryMap,
+        query: req.query.command,
+        url: MAIN.REDIRECT_URL
         //searchCommands: checkCommandsSearchArray.upperCase
     })
 });

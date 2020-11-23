@@ -1,9 +1,7 @@
 $('.tabs a, #sidebarExtension header').on('click', function () {
 
     $('.tabs a').removeClass('active');
-
     setModule($(this).attr('id'));
-
 });
 
 const setModule = function (name) {

@@ -10,9 +10,9 @@ $('#qofSubmitBtn').on('click', async function () {
 
     // fetch('https://127.0.0.1/formUpdate', {
 
-    console.log(`${url}/formUpdate`)
+    console.log(`${url}/formUpdate/serverQualityOfLife`)
 
-    loadingStart($(this), `${url}/formUpdate`, {
+    loadingStart($(this), `${url}/formUpdate/serverQualityOfLife`, {
         'key': key,
         'userID': dbUser.id,
         'serverID': dbGuild.id,
@@ -20,6 +20,29 @@ $('#qofSubmitBtn').on('click', async function () {
         'userPrefix': userPrefixVal
     })
 });
+
+$('#qofUserSubmitBtn').on('click', async function () {
+
+    if ($(this).hasClass('disabled'))
+        return 1;
+
+    console.log('clicky');
+
+    let defaultPrefixVal = $('#defaultPrefix').val();
+    let suggestions = $('#customSwitch1').prop("checked")
+    // fetch('https://127.0.0.1/formUpdate', {
+
+    loadingStart($(this), `${url}/formUpdate/userQualityOfLife`, {
+        'key': key,
+        'userID': dbUser.id,
+        'serverID': dbGuild.id,
+        'defaultPrefix': defaultPrefixVal,
+        'commandSuggestions': suggestions
+    })
+});
+
+
+
 
 const loadingStart = async function (button, url, body) {
 
@@ -54,6 +77,25 @@ const loadingStart = async function (button, url, body) {
         $('#failedToast').toast('show')
     }
 }
+
+
+
+$('#defaultPrefix').on('input', function () {
+
+    if ($(this)[0].checkValidity()) {
+
+        $(this).removeClass('border border-danger')
+    } else {
+        $(this).addClass('border border-danger');
+    }
+
+    console.log(!$('#qofModule form')[0].checkValidity())
+
+    if (!$('#qofModule form')[0].checkValidity())
+        $('#qofUserSubmitBtn').addClass('disabled');
+    else
+        $('#qofUserSubmitBtn').removeClass('disabled');
+});
 
 $('#userPrefix').on('input', function () {
 
@@ -107,7 +149,6 @@ $(function () {
 })
 
 
-
 $(window).on("load", function () {
 
     let repTable = $('#repTable');
@@ -142,7 +183,9 @@ $(window).on("load", function () {
     if (repRolesPairTableTable[0])
         repRolesPairTableTable.DataTable();
 
-
+    let rocketLeagueTable = $('#rocketLeagueTable');
+    if (rocketLeagueTable[0])
+        rocketLeagueTable.DataTable();
 
 
     let tables = $('.factionTable');

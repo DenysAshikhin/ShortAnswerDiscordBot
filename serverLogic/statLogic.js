@@ -239,11 +239,11 @@ const changeRep = async function (user, guildID, amount, message, resetPoints) {
 
     let rep;
 
-    if(repExisted){
+    if (repExisted) {
         user.reps = new Map(Object.entries(user.reps));
         rep = user.reps.get(guildID);
     }
-    else{
+    else {
         rep = 0;
     }
 
@@ -307,7 +307,7 @@ async function topStats(params) {
     let channel = guild.channels.cache.get(params[1]);
 
     channel.send("Collecting all the stats....");
-    let allUsers = await MAIN.getUsers({
+    let allUsers = await Users.find({
         guilds: guild.id
     }).lean();
 
@@ -424,7 +424,8 @@ async function topStats(params) {
     });
 
     return {
-        status: 1
+        status: 1,
+        result: statsEmbed
     };
 }
 exports.topStats = topStats;

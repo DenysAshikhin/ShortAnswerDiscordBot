@@ -4,21 +4,33 @@ const MAIN = require('../../scraper.js');
 const {
     validateGuild
 } = require('../modules/middleware.js');
-const GUILDS = require('../../Guild.js');
+const Guild = require('../../Guild.js');
 const User = require('../../User.js');
 const ytch = require('yt-channel-info');
 const twitchLogic = require('../../serverLogic/twitchLogic.js');
 
 
 
-router.get('/dashboard', function (req, res) {
+router.get('/dashboard', async function (req, res) {
 
-    console.log('in /dashboard')
+    console.log('in /dashboard');
+
+
+    let finishedArr = await Promise.all([MAIN.findUser({ id: res.locals.user.id }), Guild.findOne({ id: res.locals.user.id })]);
+
+    res.locals.dbUser = finishedArr[0];
+    res.locals.dbGuild = finishedArr[1];
+    let defaultPrefix = res.locals.dbUser.defaultPrefix == '-1' ? 'sa!' : res.locals.dbUser.defaultPrefix;
 
     res.render('dashboard/index', {
         something: "Null",
         subtitle: "Short Answer Bot Dasboard",
-        admin: false
+        admin: false,
+        dbUser: res.locals.dbUser,
+        dbGuild: res.locals.dbGuild,
+        defaultPrefix: defaultPrefix,
+        url: MAIN.REDIRECT_URL,
+        key: res.cookies.get('key')
     });
     //res.send('Hello World')
 });
@@ -31,7 +43,21 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
     res.locals.userPrefix = res.locals.userPrefix == '-1' ? 'sa!' : res.locals.userPrefix;
 
 
-    let promiseArr = [User.find({ "guilds": res.locals.guild.id, [`reps.${res.locals.guild.id}`]: { $ne: null } }).lean()];
+    /*
+    {"guilds": "97354142502092800", $or: [{ "games": { $exists: true, $gt: "" } }, {"reps.97354142502092800": { $ne: null }}]}
+    */
+
+
+    let promiseArr = [User.find({
+        "guilds": res.locals.guild.id,
+        $or:
+            [
+                { [`reps.${res.locals.guild.id}`]: { $ne: null } },
+                { games: { $gt: "" } },
+                { playlists: { $ne: [] } }
+            ]
+
+    }).lean()];
 
     //console.log(res.locals.dbGuild.blacklistedRepRoles.length)
 
@@ -123,17 +149,61 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
 
     let repArr = [];
 
+    let topGamer;
+    let topRep;
+    let topDJ;
+    let longestPlaylist;
+
     for (let dbUser of dbUsers) {
+
+        if (!res.locals.guild.members.cache.get(dbUser.id))
+            continue;
 
         if (dbUser.reps) {
             let rep = dbUser.reps[res.locals.guild.id];
-            if (rep)
-                if (rep != '0')
+            if (rep) {
+
+                if (!topRep)
+                    topRep = { user: dbUser, rep: rep };
+                else
+                    topRep = topRep.rep > rep ? topRep : { user: dbUser, rep: rep };
+
+
+                if (rep != '0') {
+
                     repArr.push({
                         memberID: dbUser.id,
                         rep: rep
                     });
+                }
+            }
         }
+
+        if (dbUser.games)
+            if (dbUser.games.length > 0)
+                if (!topGamer)
+                    topGamer = dbUser;
+                else
+                    topGamer = topGamer.games.length > dbUser.games.length ? topGamer : dbUser;
+
+
+        if (dbUser.playlists)
+            if (dbUser.playlists.length > 0) {
+                if (!topDJ)
+                    topDJ = dbUser;
+                else
+                    topDJ = topDJ.playlists.length > dbUser.playlists.length ? topDJ : dbUser;
+
+                for (let i = 0; i < dbUser.playlists.length; i++) {
+
+                    if (!longestPlaylist)
+                        longestPlaylist = { user: dbUser, index: i };
+                    else
+                        longestPlaylist = longestPlaylist.user.playlists[longestPlaylist.index].songs.length > dbUser.playlists[i].songs.length ? longestPlaylist : { user: dbUser, index: i };
+                }
+            }
+
+
     }
 
     let roleArr = [];
@@ -153,7 +223,6 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         memberMap.set(member.id, member.displayName)
     }
 
-
     res.render('dashboard/show', {
         something: "Null",
         subtitle: "Short Answer Bot Dashboard",
@@ -170,7 +239,11 @@ router.get('/servers/:id', validateGuild, async function (req, res) {
         rep: repArr,
         memberMap: memberMap,
         youtubeAlerts: youtubePairs,
-        twitchAlerts: twitchPairs
+        twitchAlerts: twitchPairs,
+        topGamer: topGamer,
+        topDJ: topDJ,
+        longestPlaylist: longestPlaylist,
+        topRep: topRep
     });
 
     //res.send('Hello World')

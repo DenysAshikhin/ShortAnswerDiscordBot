@@ -159,11 +159,12 @@
     },
     {
         "title": "ping",
-        "explanation": "Pings and DM's every member from the called server who have [game] in their games list. Also starts a squad for the game, default size of 5, can be modified by passing a number after the game title with a ','.",
+        "explanation": "Pings and DM's every member from the called server who have [game] in their games list. Also starts a squad for the game, default size of 5, can be modified by passing a number after the game title with a ','. Can also ping anyone with a specific role of the setting is enabled for the server. See toggleGameRolePing command.",
         "example": [
             "1) ping Valorant",
             "2) ping 0",
-            "3) ping Valorant, 4"
+            "3) ping Valorant, 4",
+            "4) ping Valorant, 10 @role"
         ],
         "subsection": [
            "games"

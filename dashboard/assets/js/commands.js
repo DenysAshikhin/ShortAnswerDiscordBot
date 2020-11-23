@@ -4,17 +4,9 @@ var lastActiveSubCategory = 'Faction';
 var lastActiveCategoryElement;
 var lastActiveSubCategoryElement;
 
-$('#searchBox').on('input', function (e) {
+const updateResults = function (collapseID) {
 
-    // console.log('called 1')
-
-    if (e.target.value.length == 0) {
-        setCategory(lastActiveCategory, lastActiveSubCategory);
-        if (lastActiveCategoryElement.hasClass('collapsed'))
-            lastActiveCategoryElement.click();
-        lastActiveSubCategoryElement.click();
-        return 1;
-    }
+    let box = $('#searchBox .form-control');
 
     $(`#noResults`).hide();
     $('.commandCard').hide();
@@ -38,7 +30,7 @@ $('#searchBox').on('input', function (e) {
 
     let fuse = new Fuse(searchCommands, options)
 
-    let result = fuse.search(e.target.value);
+    let result = fuse.search(box.val());
 
     if (result.length != 0)
 
@@ -51,6 +43,30 @@ $('#searchBox').on('input', function (e) {
         }
     else
         $(`#noResults`).show();
+
+
+        if(collapseID) {
+
+            $('.collapse').removeClass('show');
+            $(`#${collapseID}Collapse`).addClass('show');
+        }
+
+}
+
+$('#searchBox').on('input', function (e) {
+
+    // console.log('called 1')
+
+    if (e.target.value.length == 0) {
+        setCategory(lastActiveCategory, lastActiveSubCategory);
+        if (lastActiveCategoryElement.hasClass('collapsed'))
+            lastActiveCategoryElement.click();
+        lastActiveSubCategoryElement.click();
+        return 1;
+    }
+
+
+    updateResults();
 });
 
 
@@ -88,7 +104,7 @@ const setSubsection = function () {
 }
 //setSubsection('games', 'Faction');
 
-$('.categoryItem').on('click', setSubsection);
+
 
 
 const setCategory1 = function (params) {
@@ -103,6 +119,21 @@ const setCategory1 = function (params) {
     lastActiveSubCategoryElement = subCategoryList;
     subCategoryList.click();
 }
-$('.categoryButton').on('click', setCategory1);
 
+
+$('.categoryButton').on('click', setCategory1);
+$('.categoryItem').on('click', setSubsection);
 $(`#gamesCategoryButton`).click();
+
+
+
+$(window).on("load", function () {
+
+    let box = $('#searchBox .form-control');
+    if (query) {
+        box.val(query);
+        updateResults(query);
+    }
+    //else
+        //$('.categoryButton').on('click', setCategory1);
+});

@@ -1,0 +1,41 @@
+section#qofModule.module.container.px-5
+
+    .jumbotron.bg-transparent.pb-0
+        h1.display-4.text-center Quality of Life 
+
+    form
+        .form-group.margin.my-5
+            .row.justify-content-center
+                .col-4
+                    span
+                        label Default Server Prefix
+                        input.form-control.admin.qof#guildPrefix(type='text', name='prefix', class=serverPrefix,  value=guildPrefix, maxLength='5', required)
+                    span
+                        label Personal Server Prefix
+                        input.form-control.qof#userPrefix(type='text', name='prefix', class=userPrefix,  value=userPrefix, maxLength='5', required)
+                .col-4
+                    label Whitelisted command channels
+                    select.form-control.qof#whiteListedCommands(name=`WhitelistedChannelIds`, multiple)
+                        each channel of Array.from(guild.channels.cache.filter(c => c.type == 'text').values())
+                            option ##{channel.name}
+            .row.justify-content-center
+                .col-4.my-4.text-center(style='position: relative')
+                    #qofSubmitBtn.button.btn.btn-success #[i.fas.fa-rocket] Submit
+
+                    .row.my-2
+                        .toast.validToast.fade.hide(id='validToast' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
+                            .toast-header
+                                strong.mr-auto Short Answer Bot
+                                button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                    span(aria-hidden='true') &times;
+                            .toast-body
+                                | Settings Saved Successfully
+
+                        .toast.failedToast.fade.hide(id='failedToast' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
+                            .toast-header
+                                strong.mr-auto Short Answer Bot
+                                button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                    span(aria-hidden='true') &times;
+                            .toast-body
+                                | Something went wrong. If the issue persists please let the owner know through
+                                | the discord support server: https://discord.gg/nMj6UKH

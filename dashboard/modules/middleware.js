@@ -23,8 +23,12 @@ module.exports.validateUser = async function (req, res, next) {
 
     if (res.locals.user)
         next();
-    else
+    else {
+
+        console.log('failed to validate user')
         res.render('errors/401');
+    }
+
 }
 
 module.exports.updateUser = async function (req, res, next) {
@@ -33,12 +37,15 @@ module.exports.updateUser = async function (req, res, next) {
 
         console.log('in updateUser');
         const key = res.cookies.get('key');
-        
+
         if (key) {
 
             res.locals.user = (await sessions.get(key)).authUser;
-        } else
+            console.log('updateUser succesfuly')
+        } else {
             res.locals.user = null;
+            console.log('no key in cache')
+        }
     } catch (err) {
         console.log(err);
         console.log('error setting the user');
@@ -50,7 +57,6 @@ module.exports.updateUser = async function (req, res, next) {
 
 
 module.exports.validateGuild = async function (req, res, next) {
-
 
     console.log('Validating guild')
 
@@ -90,7 +96,7 @@ module.exports.validateGuild = async function (req, res, next) {
             });
         }
 
-        
+
         console.log(`Setting user: ${res.locals.dbUser.displayName}`)
         console.log(`Setting Guild: ${res.locals.dbGuild.id}`)
 
@@ -105,7 +111,7 @@ module.exports.validateGuild = async function (req, res, next) {
         if (index == -1) {
             console.log("This bug is ridunculous")
             res.locals.userPrefix = 'sa!';
-        } 
+        }
         else
             res.locals.userPrefix = res.locals.dbUser.prefix[index];
 
@@ -118,6 +124,26 @@ module.exports.validateGuild = async function (req, res, next) {
         next();
     } else
         res.render('errors/404');
+}
+
+
+module.exports.validateKey = async function(req,res,next){
+    
+    console.log('in validateKey middleware');
+
+    try {
+        const code = req.body.key;
+        const user = await authClient.getUser(code);
+        res.locals.validatedUser = user;
+
+        next();
+    } catch (err) {
+
+        console.log(err)
+        console.log('error parsing the provided key');
+        res.status(400).end();
+    }
+
 }
 
 module.exports.updateGuilds = async function (req, res, next) {

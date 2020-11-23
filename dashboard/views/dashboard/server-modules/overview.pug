@@ -25,6 +25,45 @@ section#overviewModule.module.px-5
                         i.fas.fa-user-hashtag
                         strong.ml-1 Channels
                     p.mb-0 #{guild.channels.cache.size}
+            .col-lg-3.col-md-6
+                .border.rounded.m-3.p-3.text-break
+                    p.uppercase
+                        i.fas.fa-user-hashtag
+                        strong.ml-1 Most Repped
+                    if topRep
+                        p.mb-0 #{guild.members.cache.get(topRep.user.id).displayName} with #{topRep.rep} rep!
+                    else
+                        p.mb-0 No one has gotten rep yet!
+            .col-lg-3.col-md-6
+                .border.rounded.m-3.p-3.text-break
+                    p.uppercase
+                        i.fas.fa-user-hashtag
+                        strong.ml-1 Top Gamer
+                    if topGamer
+                         p.mb-0 #{guild.members.cache.get(topGamer.id).displayName} with #{topGamer.games.length} signedUp games!
+                    else
+                        p.mb-0 No one has signed up for games yet!
+
+            .col-lg-3.col-md-6
+                .border.rounded.m-3.p-3.text-break
+                    p.uppercase
+                        i.fas.fa-user-hashtag
+                        strong.ml-1 Top DJ
+                    if topDJ
+                        p.mb-0 #{guild.members.cache.get(topDJ.id).displayName} with #{topDJ.playlists.length} saved playlists!
+                    else
+                        p.mb-0 No one has made personal music playlists!
+                    
+            .col-lg-3.col-md-6
+                .border.rounded.m-3.p-3.text-break
+                    p.uppercase
+                        i.fas.fa-user-hashtag
+                        strong.ml-1 Longest Playlist
+                    if longestPlaylist
+                        p.mb-0 #{longestPlaylist.user.playlists[longestPlaylist.index].title} with #{longestPlaylist.user.playlists[longestPlaylist.index].songs.length} songs
+                    else
+                        p.mb-0 No one has made personal music playlists!
+                    
     .row.d-flex
         .col
             #nav-tab-overview.nav.nav-tabs.fill-nav(role='tablist')
@@ -57,6 +96,12 @@ section#overviewModule.module.px-5
                 else
                     span(data-placement='top' data-toggle='tooltip' title='No autorole messages have been setup for this server!')
                             a#nav-autorole-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Autorole Messages
+                
+                if dbGuild.RLTracker.length > 0
+                    a#nav-trackers-tab.nav-link(data-toggle='tab' href='#nav-trackers' role='tab' aria-controls='nav-home' aria-selected='true') Game Trackers
+                else
+                    span(data-placement='top' data-toggle='tooltip' title='No game trackers have been setup for this server!')
+                            a#nav-trackers-tab.nav-link.disabled(data-toggle='tab' role='tab' aria-controls='nav-home' aria-selected='true') Game Trackers
 
 
     .row                    
@@ -262,12 +307,13 @@ section#overviewModule.module.px-5
 
                         .col
                             #notificationPill.tab-content
-                                if !dbGuild.thankerAutoRep
-                                    h3 Warning, automatic rep gain from thanker is disabled! Enable it using the *setThankerAutoRep* command.
-                                    hr
-                                h5 Current thanker message: #{dbGuild.channelThankerMessage}
-                                p See the *channelThankerMessage* command to learn more
-                                hr
+                                .row.d-flex.justify-content-center
+                                    if !dbGuild.thankerAutoRep
+                                        h3 Warning, automatic rep gain from thanker is disabled! Enable it using the *setThankerAutoRep* command.
+                                        hr
+                                    h5.text-center Current thanker message: #{dbGuild.channelThankerMessage}
+                                    h6.text-center See the *channelThankerMessage* command to learn more
+                                    
                                 if dbGuild.channelImageThanker.length > 0
                                     .tab-pane.fade.show.m-3(id=`imageThankerTableTab` role='tabpanel' aria-labelledby='v-pills-home-tab')
                                         h5 Channels that are scanned for images/videos to thank users for!
@@ -313,8 +359,34 @@ section#overviewModule.module.px-5
                                                 .card-header
                                                     h5 #{autorole.runningEmbed.title}
                                                 .card-body
-                                                    p.card-text #{autorole.runningEmbed.description}
+                                                    pre.card-text #{autorole.runningEmbed.description}
                                                 .card-footer.text-muted 
                                                     each emoji in autorole.emojis
                                                         p.d-inline.mx-3 #{emoji.emoji}
                                                         .d-inline.fas.fa-grip-lines-vertical
+
+                #nav-trackers.tab-pane.fade(role='tabpanel')
+                    .row
+                        .col-4
+                            #trackers-pill-tab.nav.flex-column.nav-pills.m-3(role='tablist' aria-orientation='vertical')
+                                if dbGuild.RLTracker.length > 0
+                                    a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id='rocketLeagueTrackerPill', href='#rocketLeagueTrackerTableTab' data-toggle='pill' role='tab') Rocket League
+                                else
+                                  span(data-placement='right' data-boundary='window' data-container= 'body' data-toggle='tooltip' title='No Rocket League Trackers have been setup for this server!')
+                                        a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`rocketLeagueTrackerPill` href=`#rocketLeagueTrackerTableTab` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') Rocket League
+
+                        .col
+                            #trackersPill.tab-content
+                                if dbGuild.RLTracker.length > 0
+                                     table.table-striped.table-bordered(id=`rocketLeagueTable`)
+                                        thead
+                                            tr
+                                                th(scope='col') Text Channel
+                                                th(scope='col') Username
+                                                th(scope='col') Platform
+                                        tbody
+                                            each rl in dbGuild.RLTracker
+                                                tr
+                                                    td ##{guild.channels.cache.get(rl.channelID).name}
+                                                    td #{rl.player}
+                                                    td #{rl.platform}

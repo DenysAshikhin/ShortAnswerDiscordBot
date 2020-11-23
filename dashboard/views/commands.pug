@@ -4,6 +4,9 @@ html(lang='en')
         include includes/header.pug
         script.
             var searchCommands = !{JSON.stringify(completeCommands)}
+            var query = !{JSON.stringify(query)}
+            var url = !{JSON.stringify(url)}
+
         script(src='/js/commands.js', defer)
         script(src='https://cdn.jsdelivr.net/npm/fuse.js@6.4.3', defer)
         //- script(defer).

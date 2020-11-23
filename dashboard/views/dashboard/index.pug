@@ -2,28 +2,48 @@ doctype
 html(lang='en')
     head
         include ../includes/header.pug
+      
         link(rel='stylesheet', href='/css/index.css')
         link(rel='stylesheet', href='/css/sidebar.css')
-        script(src='/js/sidebar.js', defer)
+        //cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css
+        link(rel='stylesheet' type='text/css' href='https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css')
+
+        script(type='text/javascript' charset='utf8' src='https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js', defer)
+        script(src='/js/guild.js', defer)
         script(src='/js/submit.js', defer)
-        
+        script(src='/js/sidebar.js', defer)
+
     body
         include ../includes/sidebar.pug
         script.
             var admin = !{JSON.stringify(admin)}
+            var url = !{JSON.stringify(url)}
+            var key = !{JSON.stringify(key)}
+            var dbGuild = !{JSON.stringify(dbGuild)}
+            var dbUser = !{JSON.stringify(dbUser)}
 
 
         #sidebarExtension.bg-light
-            header.text-center.pt-4 
+            header.text-center.pt-4#overview
                 .large-icon.bg-white.round
                     img.round(src=user.avatarUrl(128), alt=user.username)
                 h4.pt-2 #{user.username}
                     span.text-muted #{'#' + user.discriminator.toString().padStart(4, '0')}
 
+            .tabs.navbar-nav
+                .category Modules
+                a#qof.cursor-pointer(href='#') #[i.fas.fa-hand-holding-heart.text-muted] Quality of Life
+                a#general.cursor-pointer(href='#') #[i.fas.fa-star.pr-1.text-muted] General
+                a#music.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Music
+                a#games.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Games
 
-        include ../includes/navbar.pug
+        include ../includes/navbar.pug        
         
-        .jumbotron.text-center.bg-transparent
-            h1.display-3 Dashboard
-            hr
-            p.lead Manage your server configs
+ 
+        include user-modules/qof
+        include user-modules/overview
+        //- include user-modules/auto-mod
+        //- include user-modules/economy
+        //- include user-modules/general
+        //- include user-modules/music
+

@@ -715,7 +715,8 @@ connectDB.once('open', async function () {
                 dbots: 'PxWDhVYUsJEGv0rASxtFLX8v9UPBVRPcCpkhtjt0dqQzKwVT78lDM0fGGxa4PG9ILQ4Ni7fg7BtVjO9ClNiugKMGkTQuKJQNexT1TyGXLwdtBk2LMvuP8QeK3djdeFBm1KDM41DgJwVS7y1plK6h9xTF1Fg',
                 dbotlist: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0IjoxLCJpZCI6IjY4OTMxNTI3MjUzMTkwMjYwNiIsImlhdCI6MTYwMTkxOTQxMX0.VkVQJBlO655iA9U4S2TfodvkKp9U7lQMI8YLmVcm6rI',
                 bfd: '082c1c097b211985a68bcc6eca877896245505a36117274d575b23e9ac91955b430369207ee7da3b08a2879c8a6a494991316cf665f14bf8e2c9e17550f0c4c7',
-                bod: '96c8eb193567962e13566729d8651854'
+                bod: '96c8eb193567962e13566729d8651854',
+                topgg: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4OTMxNTI3MjUzMTkwMjYwNiIsImJvdCI6dHJ1ZSwiaWF0IjoxNjA1OTI3NTgzfQ.sG21fgKT1koxVSQB6QX7lHCjcuhRcH2kXRqf5ZGe6OU'
 
             },
             clientLibrary: 'discord.js'
