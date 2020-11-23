@@ -105,8 +105,6 @@ const setSubsection = function () {
 //setSubsection('games', 'Faction');
 
 
-
-
 const setCategory1 = function (params) {
 
     //console.log('called 3')

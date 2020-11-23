@@ -16,7 +16,10 @@ section#qofModule.module.container.px-5
             .row.justify-content-center
                 a.m-3( href=`${url}/commands?command=commandSuggestions`) Command Suggestions
                 .custom-control.custom-switch.m-3
-                    input#customSwitch1.custom-control-input(type='checkbox')
+                    if dbUser.commandSuggestions
+                        input#customSwitch1.custom-control-input(type='checkbox' checked="true")
+                    else
+                        input#customSwitch1.custom-control-input(type='checkbox')
                     label.custom-control-label.user-select-none(for='customSwitch1') Enable
 
                             
@@ -30,7 +33,7 @@ section#qofModule.module.container.px-5
                     #qofUserSubmitBtn.button.btn.btn-success #[i.fas.fa-rocket] Submit
 
                     .row.my-2
-                        .toast.validToast.fade.hide(id='validToast' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
+                        .toast.validToast.fade.hide(id='validToast' class='qofUserSubmitBtn' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
                             .toast-header
                                 strong.mr-auto Short Answer Bot
                                 button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
@@ -38,7 +41,7 @@ section#qofModule.module.container.px-5
                             .toast-body
                                 | Settings Saved Successfully
 
-                        .toast.failedToast.fade.hide(id='failedToast' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
+                        .toast.failedToast.fade.hide(id='failedToast' class='qofUserSubmitBtn' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
                             .toast-header
                                 strong.mr-auto Short Answer Bot
                                 button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')

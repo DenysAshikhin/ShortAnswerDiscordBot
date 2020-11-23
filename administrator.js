@@ -2414,7 +2414,7 @@ function setThankerAutoRep(message, params, user) {
         return message.channel.send("Only admins can disable/enable automatic rep from image/link thanks.");
 
     if (!message.content.split(" ")[1]) {
-        message.channel.send("You must enter either true or false: **" + prefix + "setThankerAutoRep** *true/false*");
+        message.channel.send("You must enter either true or false!");
         return -1;
     }
     let bool = message.content.split(" ")[1].toUpperCase().trim();

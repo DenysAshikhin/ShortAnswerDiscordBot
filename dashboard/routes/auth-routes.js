@@ -69,6 +69,49 @@ router.get('/invite', function (req, res) {
 });
 
 
+router.post('/formUpdate/userGames', validateKey, async function (req, res) {
+
+    console.log('in /formUpdate/userGames');
+
+    //console.log(req.body.commandSuggestions);
+
+    res.locals.dbUser = await MAIN.findUser({ id: res.locals.validatedUser.id });
+
+    if (req.body.excludePing === false)
+        res.locals.dbUser.excludePing = false;
+    else
+        res.locals.dbUser.excludePing = true;
+
+    if (req.body.excludeDM === false)
+        res.locals.dbUser.excludeDM = false;
+    else
+        res.locals.dbUser.excludeDM = true;
+
+    if (req.body.removeGames)
+        for (let game of req.body.removeGames)
+            if (res.locals.dbUser.games.includes(game))
+                res.locals.dbUser.games.splice(res.locals.dbUser.games.indexOf(game), 1);
+
+
+    User.findOneAndUpdate({ id: res.locals.dbUser.id }, {
+        $set: {
+            excludePing: res.locals.dbUser.excludePing,
+            excludeDM: res.locals.dbUser.excludeDM,
+            games: res.locals.dbUser.games
+        }
+    }).exec();
+
+    res.status(200).json({
+        maybe: user
+    }).end();
+
+    // MAIN.sendToBot({
+    //     command: 'updateCache',
+    //     params: [res.locals.dbUser.id]
+    // });
+
+    return 1;
+});
 
 router.post('/formUpdate/userQualityOfLife', validateKey, async function (req, res) {
 
@@ -87,10 +130,10 @@ router.post('/formUpdate/userQualityOfLife', validateKey, async function (req, r
         else if (req.body.defaultPrefix.length < 6)
             res.locals.dbUser.defaultPrefix = req.body.defaultPrefix;
 
-        if (req.body.commandSuggestions === false)
-            res.locals.dbUser.commandSuggestions = false;
-        else
-            res.locals.dbUser.commandSuggestions = true;
+    if (req.body.commandSuggestions === false)
+        res.locals.dbUser.commandSuggestions = false;
+    else
+        res.locals.dbUser.commandSuggestions = true;
 
     User.findOneAndUpdate({ id: res.locals.dbUser.id }, {
         $set: {

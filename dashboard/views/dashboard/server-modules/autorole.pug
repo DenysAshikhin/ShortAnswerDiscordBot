@@ -1,0 +1,29 @@
+section#autoroleModule.module.container.px-5
+    .jumbotron.bg-transparent.pb-0
+        h1.display-4.text-center Autorole Messages
+    .form-group.margin.mt-5
+        .row
+            .col
+                 #autoroleConfig.tab-pane.fade.show.active.m-3(role='tabpanel')
+                    if dbGuild.autorole.length > 0
+                        .row
+                            .col-4
+                                 #autorole-pills-Config.nav.flex-column.nav-pills(role='tablist' aria-orientation='vertical')
+                                    each autorole in dbGuild.autorole
+                                        a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`autoroleConfigPill${autorole.messageID}` href=`#autoroleConfigInfo${autorole.messageID}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{autorole.runningEmbed.title}
+
+                            .col
+                                #autorole-pills-tabConfig.tab-content
+                                    each autorole in dbGuild.autorole
+                                        .tab-pane.fade.show(id=`autoroleConfigInfo${autorole.messageID}` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                            h4.text-center.m-3 The autorole below can be found in ##{guild.channels.cache.get(autorole.channelID).name}
+                                            hr
+                                            .card
+                                                .card-header
+                                                    h5 #{autorole.runningEmbed.title}
+                                                .card-body
+                                                    pre.card-text #{autorole.runningEmbed.description}
+                                                .card-footer.text-muted 
+                                                    ul.list-group.list-group-horizontal(id=`autorole${autorole.messageID}`)
+                                                        each emoji in autorole.emojis
+                                                            li.list-group-item.d-inline.mx-3 #{emoji.emoji}

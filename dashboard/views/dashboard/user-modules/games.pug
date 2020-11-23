@@ -1,0 +1,60 @@
+section#gamesModule.module.container.px-5
+
+    .jumbotron.bg-transparent.pb-0
+        h1.display-4.text-center Game Settings
+
+    form
+        .form-group.margin.my-5               
+            .row.justify-content-center
+                a.m-3( href=`${url}/commands?command=excludePing`) Game Pings
+                .custom-control.custom-switch.m-3
+                    if !dbUser.excludePing
+                        input#pingSwitch.custom-control-input(type='checkbox' checked="true")
+                    else
+                        input#pingSwitch.custom-control-input(type='checkbox')
+                    label.custom-control-label.user-select-none(for='pingSwitch') Enabled
+            
+            .row.justify-content-center
+                a.m-3( href=`${url}/commands?command=excludeDM`) Direct Message Game Alerts
+                .custom-control.custom-switch.m-3
+                    if !dbUser.excludeDM
+                        input#dmSwitch.custom-control-input(type='checkbox' checked="true")
+                    else
+                        input#dmSwitch.custom-control-input(type='checkbox')
+                    label.custom-control-label.user-select-none(for='dmSwitch') Enabled
+          
+            .row.justify-content-center.mt-3
+                a(href=`${url}/commands?command=signUp`) Signed Up 
+                label.ml-2 Games (Click to remove a game)
+            .row.justify-content-center    
+                select.form-control.userGamesList.w-50.overflow-auto(name=`Games List`, multiple)
+                    each game of dbUser.games
+                        option.gameOption(id=`gameTitle${game}`) #{game}
+
+            .row.justify-content-center
+                label.mt-3 Games to Remove from Games List   
+            .row.justify-content-center
+                select.form-control.userRemoveGamesList.w-50.overflow-auto(name=`Games List`, multiple)
+
+
+            .row.justify-content-center
+                .col-4.my-4.text-center(style='position: relative')
+                    #gamesUserSubmitBtn.button.btn.btn-success #[i.fas.fa-rocket] Submit
+
+                    .row.my-2
+                        .toast.validToast.fade.hide(id='validToast' class='gamesUserSubmitBtn' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
+                            .toast-header
+                                strong.mr-auto Short Answer Bot
+                                button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                    span(aria-hidden='true') &times;
+                            .toast-body
+                                | Settings Saved Successfully
+
+                        .toast.failedToast.fade.hide(id='failedToast' class='gamesUserSubmitBtn' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
+                            .toast-header
+                                strong.mr-auto Short Answer Bot
+                                button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                    span(aria-hidden='true') &times;
+                            .toast-body
+                                | Something went wrong. If the issue persists please let the owner know through
+                                | the discord support server: https://discord.gg/nMj6UKH

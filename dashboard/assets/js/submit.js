@@ -41,6 +41,32 @@ $('#qofUserSubmitBtn').on('click', async function () {
     })
 });
 
+$('#gamesUserSubmitBtn').on('click', async function () {
+
+    if ($(this).hasClass('disabled'))
+        return 1;
+
+    console.log('clicky');
+
+    let ping = !$('#pingSwitch').prop("checked");
+    let dm = !$('#dmSwitch').prop("checked");
+    let removeGames = [];
+
+    $(".userRemoveGamesList option").each(function () {
+        removeGames.push($(this).val());
+        $(this).remove();
+    });
+    // fetch('https://127.0.0.1/formUpdate', {
+
+    loadingStart($(this), `${url}/formUpdate/userGames`, {
+        'key': key,
+        'userID': dbUser.id,
+        'serverID': dbGuild.id,
+        'excludePing': ping,
+        'excludeDM': dm,
+        'removeGames': removeGames
+    })
+});
 
 
 
@@ -70,15 +96,27 @@ const loadingStart = async function (button, url, body) {
 
     console.log(response);
     console.log(await response.json());
+    console.log(button.attr('id'));
+
 
     if (response.status == 200) {
-        $('#validToast').toast('show')
+        $(`.${button.attr('id')}.validToast`).toast('show')
     } else {
-        $('#failedToast').toast('show')
+        $(`.${button.attr('id')}.failedToast`).toast('show')
     }
 }
 
+$(".userGamesList").mouseup(function () {
 
+    !$('.userGamesList option:selected').remove().appendTo('.userRemoveGamesList');
+    $("option:selected").prop("selected", false)
+});
+
+$(".userRemoveGamesList").mouseup(function () {
+
+    !$('.userRemoveGamesList option:selected').remove().appendTo('.userGamesList');
+    $("option:selected").prop("selected", false)
+});
 
 $('#defaultPrefix').on('input', function () {
 
@@ -193,5 +231,18 @@ $(window).on("load", function () {
     for (let table of tables) {
 
         $(`#${table.id}`).DataTable();
+    }
+
+
+
+    let orderedLists = $('ul');
+
+    for (let list of orderedLists) {
+
+        Sortable.create(list, {
+            animation: 150,
+            draggable: '.list-group-item',
+            handle: '.list-group-item'
+        });
     }
 })

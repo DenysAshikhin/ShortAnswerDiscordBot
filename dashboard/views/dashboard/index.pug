@@ -33,15 +33,16 @@ html(lang='en')
             .tabs.navbar-nav
                 .category Modules
                 a#qof.cursor-pointer(href='#') #[i.fas.fa-hand-holding-heart.text-muted] Quality of Life
-                a#general.cursor-pointer(href='#') #[i.fas.fa-star.pr-1.text-muted] General
-                a#music.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Music
-                a#games.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Games
+                //- a#general.cursor-pointer(href='#') #[i.fas.fa-star.pr-1.text-muted] General
+                //- a#music.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Music
+                a#games.cursor-pointer(href='#') #[i.fas.fa-gamepad.pr-1.text-muted] Games
 
         include ../includes/navbar.pug        
         
  
         include user-modules/qof
         include user-modules/overview
+        include user-modules/games
         //- include user-modules/auto-mod
         //- include user-modules/economy
         //- include user-modules/general
