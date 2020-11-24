@@ -9,6 +9,7 @@ html(lang='en')
         link(rel='stylesheet' type='text/css' href='https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css')
 
         script(type='text/javascript' charset='utf8' src='https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js', defer)
+        script(src='https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js', defer)
         script(src='/js/guild.js', defer)
         script(src='/js/submit.js', defer)
         script(src='/js/sidebar.js', defer)
@@ -34,7 +35,7 @@ html(lang='en')
                 .category Modules
                 a#qof.cursor-pointer(href='#') #[i.fas.fa-hand-holding-heart.text-muted] Quality of Life
                 //- a#general.cursor-pointer(href='#') #[i.fas.fa-star.pr-1.text-muted] General
-                //- a#music.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Music
+                a#music.cursor-pointer(href='#') #[i.fas.fa-music.pr-1.text-muted] Music
                 a#games.cursor-pointer(href='#') #[i.fas.fa-gamepad.pr-1.text-muted] Games
 
         include ../includes/navbar.pug        
@@ -46,5 +47,5 @@ html(lang='en')
         //- include user-modules/auto-mod
         //- include user-modules/economy
         //- include user-modules/general
-        //- include user-modules/music
+        include user-modules/music
 

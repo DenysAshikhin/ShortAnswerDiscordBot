@@ -35,7 +35,6 @@ $('#qofUserSubmitBtn').on('click', async function () {
     loadingStart($(this), `${url}/formUpdate/userQualityOfLife`, {
         'key': key,
         'userID': dbUser.id,
-        'serverID': dbGuild.id,
         'defaultPrefix': defaultPrefixVal,
         'commandSuggestions': suggestions
     })
@@ -61,7 +60,6 @@ $('#gamesUserSubmitBtn').on('click', async function () {
     loadingStart($(this), `${url}/formUpdate/userGames`, {
         'key': key,
         'userID': dbUser.id,
-        'serverID': dbGuild.id,
         'excludePing': ping,
         'excludeDM': dm,
         'removeGames': removeGames
