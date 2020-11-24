@@ -63,12 +63,58 @@ $('#gamesUserSubmitBtn').on('click', async function () {
         'excludePing': ping,
         'excludeDM': dm,
         'removeGames': removeGames
-    })
+    });
+
 });
 
+$('.playlistUpdateSubmitBtn').on('click', function () {
+
+    if ($(this).hasClass('disabled'))
+        return 1;
 
 
-const loadingStart = async function (button, url, body) {
+    let list = $(this).parent().parent().parent().find('ul');
+
+    let playlistTitle = list.attr('playlistTitle');
+
+    list = list.children();
+
+    let newSongList = [];
+    let removeSongList = [];
+
+    list.each(function () {
+
+        if (!$(this).hasClass('bg-danger'))
+            newSongList.push($(this).attr('songTitle'));
+        else {
+            removeSongList.push($(this).attr('songTitle'));
+            $(this).remove();
+        }
+        // else
+        //     
+    })
+
+
+    console.log(playlistTitle);
+    // console.log(list)
+
+    loadingStart($(this), `${url}/formUpdate/playlistUpdate`, {
+        'key': key,
+        'userID': dbUser.id,
+        'playlistTitle': playlistTitle,
+        'newSongList': newSongList,
+        'removeSongList': removeSongList
+    }, {
+        text: `Update ${playlistTitle} Playlist    `,
+        icon: '<i class="fas fa-music" ></i>'
+    });
+
+});
+
+const loadingStart = async function (button, url, body, miscellaneous) {
+
+    let buttonText = miscellaneous.text ? miscellaneous.text : '  Submit   ';
+    let buttonIcon = miscellaneous.icon ? miscellaneous.icon : '<i class="fas fa-rocket" ></i>';
 
     // const loadingCircle= '<span id=spinner class="spinner-border text-dark" role="status" aria-hidden="true">  Loading</span>';
     button.text('');
@@ -88,8 +134,8 @@ const loadingStart = async function (button, url, body) {
 
     button.removeClass('spinner-border')
     //button.find('#spinner').remove();
-    button.text('  Submit');
-    button.prepend('<i class="fas fa-rocket" ></i>');
+    button.text(buttonText);
+    button.append(buttonIcon);
 
 
     console.log(response);
@@ -165,6 +211,14 @@ $('#guildPrefix').on('input', function () {
     else
         $('#qofSubmitBtn').removeClass('disabled');
 });
+
+$('.songCloseBtn').mouseup(function () {
+
+    let container = $(this).parent().parent();
+    container.toggleClass('bg-danger');
+    container.toggleClass('deco-white');
+});
+
 
 const adminLock = function (arr) {
 

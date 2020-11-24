@@ -69,6 +69,77 @@ router.get('/invite', function (req, res) {
 });
 
 
+router.post('/formUpdate/playlistUpdate', validateKey, async function (req, res) {
+
+    console.log('/formUpdate/playlistUpdate');
+
+    res.locals.dbUser = await MAIN.findUser({ id: res.locals.validatedUser.id });
+
+    if (req.body.playlistTitle) {
+
+        let playlist = res.locals.dbUser.playlists.find(element => element.title === req.body.playlistTitle);
+
+        if (playlist) {
+
+            if (req.body.removeSongList)
+                if (req.body.removeSongList.length > 0) {
+
+                    for (let songToRemove of req.body.removeSongList) {
+
+                        for(let i = 0; i < playlist.songs.length; i++) {
+
+                            if (playlist.songs[i].title == songToRemove) {
+                                playlist.songs.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
+            for (let i = 0; i < req.body.newSongList.length; i++) {
+
+                let songTitle = req.body.newSongList[i];
+
+                if (playlist.songs[i].title === songTitle) {
+
+                }
+                else {
+
+                    let index;
+                    let songItem;
+
+                    for (let j = 0; j < playlist.songs.length; j++) {
+                        if (playlist.songs[j].title === songTitle) {
+                            index = j;
+                            songItem = playlist.songs[j];
+                            break;
+                        }
+                    }
+
+                    playlist.songs[index] = playlist.songs[i];
+                    playlist.songs[i] = songItem;
+                }
+            }
+
+            User.findOneAndUpdate({ id: res.locals.dbUser.id }, { $set: { playlists: res.locals.dbUser.playlists } }).exec();
+
+            res.status(200).json({
+                result: playlist
+            }).end();
+        }
+        else
+            res.status(400).json({
+                message: 'Error code: Could not find a personal playlist with the title: ' + req.body.playlistTitle
+            }).end();
+    }
+    else
+        res.status(400).json({
+            message: 'Error code: Could not find a personal playlist with the title: ' + req.body.playlistTitle
+        }).end();
+});
+
+
 router.post('/formUpdate/userGames', validateKey, async function (req, res) {
 
     console.log('in /formUpdate/userGames');

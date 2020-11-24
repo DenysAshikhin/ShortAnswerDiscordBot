@@ -1,28 +1,8 @@
 section#musicModule.module.container.px-5
     .jumbotron.bg-transparent.py-2.mb-3(style='position: relative')
         .row.d-flex.justify-content-center
-            h1.display-4.text-center Music
-
-            span.d-flex.mx-3
-                #gamesUserSubmitBtn.button.btn.btn-success.my-auto #[i.fas.fa-rocket] Submit
-
-                .row.my-2
-                    .toast.validToast.fade.hide(id='validToast' class='musicUserSubmitBtn' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
-                        .toast-header
-                            strong.mr-auto Short Answer Bot
-                            button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
-                                span(aria-hidden='true') &times;
-                        .toast-body
-                            | Settings Saved Successfully
-
-                    .toast.failedToast.fade.hide(id='failedToast' class='gamesUserSubmitBtn' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
-                        .toast-header
-                            strong.mr-auto Short Answer Bot
-                            button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
-                                span(aria-hidden='true') &times;
-                        .toast-body
-                            | Something went wrong. If the issue persists please let the owner know through
-                            | the discord support server: https://discord.gg/nMj6UKH
+            h1.display-4.text-center Music - Personal Playlists
+               
     .form-group.margin.mt-4
         .row
             .col-4
@@ -43,23 +23,38 @@ section#musicModule.module.container.px-5
                     #playlist-pills-tabConfig.tab-content
                         each playlist in dbUser.playlists
                             if playlist.songs.length > 0
-                                .tab-pane.fade.show(id=`playlistInfo${playlist.title}` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                                .tab-pane.fade.show(id=`playlistInfo${playlist.title}` playlistTitle=`${playlist.title}` role='tabpanel' aria-labelledby='v-pills-home-tab')
                                     .card
-                                        .card-header
-                                            h5.text-center #{playlist.title}
-                                        .card-body
-                                            ul.list-group.overflow-auto.playlistList(id=`playlistList${playlist.title}`, style='max-height: 65vh;')
+                                        .card-header.border-bottom-0
+                                            .row.d-flex
+                                                .playlistUpdateSubmitBtn.button.btn.btn-success.my-auto.m-auto Update #{playlist.title} Playlist #[i.fas.fa-music]
+                                            
+                                                .toast.validToast.fade.hide(id='validToast' class='musicUserSubmitBtn' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
+                                                    .toast-header
+                                                        strong.mr-auto Short Answer Bot
+                                                        button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                                            span(aria-hidden='true') &times;
+                                                    .toast-body
+                                                        | Settings Saved Successfully
+
+                                                .toast.failedToast.fade.hide(id='failedToast' class='gamesUserSubmitBtn' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
+                                                    .toast-header
+                                                        strong.mr-auto Short Answer Bot
+                                                        button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                                            span(aria-hidden='true') &times;
+                                                    .toast-body
+                                                        | Something went wrong. If the issue persists please let the owner know through
+                                                        | the discord support server: https://discord.gg/nMj6UKH
+                                        .card-body.px-0.pb-0.mx-0.pt-0
+                                            ul.list-group.overflow-auto.playlistList(id=`playlistList${playlist.title}`, playlistTitle=`${playlist.title}` style='max-height: 65vh;')
                                                 each song in playlist.songs
-                                                    li.list-group-item.d-inline.mx-3.songItem(id=`exactSong${song.title.split(' ').join('-')
-                                                    .split('(').join('%')
-                                                    .split(')').join('%')
-                                                    }`) 
+                                                    li.list-group-item.d-inline.songItem.border-left-0.border-right-0.border-bottom-0.border-top(songTitle=`${song.title}`) 
                                                         .row
-                                                            .span #{song.title}
+                                                            .span.w-90 #{song.title}
                                                         
-                                                            button.songCloseBtn.close.mx-3(type='button' aria-label='Close')
+                                                            button.songCloseBtn.close.ml-auto.my-auto(type='button' aria-label='Close')
                                                                 span(aria-hidden='true') &times;
-                                            .card-footer.text-muted
+                                            .card-footer.text-muted.py-2
                                                 p.text-center.mb-0 Drag The Songs to Rearrange!
 
                                                 

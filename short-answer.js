@@ -2538,6 +2538,13 @@ const performFix = async function (user) {
 async function updateAll() {
 
 
+    // for(let guild of Client.guilds.cache().values()){
+//Drawin Academy ID: 773089116240740382
+    //     if (guild.name == 'Drawing Academy'){       
+    //         console.log(guild.id)
+    //     }
+    // }
+
     //console.log("someday")
 
     //     let users = await getUsers();
