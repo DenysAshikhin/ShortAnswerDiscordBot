@@ -22,6 +22,11 @@
     /* text-decoration:none; */
 }
 
+.deco-black {
+    color: black !important;
+    /* text-decoration:none; */
+}
+
 .songItem:hover {
     background-color: #0275d8;
     /* opacity: 0.5; */

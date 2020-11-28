@@ -111,10 +111,34 @@ $('.playlistUpdateSubmitBtn').on('click', function () {
 
 });
 
+
+$('.addSongBtn').on('click', function () {
+
+    if ($(this).hasClass('disabled'))
+        return 1;
+
+    let inputField = $(this).parent().parent().find('input');
+    let songURL = inputField.val();
+    let playlistTitle = $(this).attr('playlistTitle');
+
+    // console.log(playlistTitle);
+    // console.log(inputField.val());
+
+    loadingStart($(this), `${url}/formUpdate/addSong`, {
+        'key': key,
+        'userID': dbUser.id,
+        'playlistTitle': playlistTitle,
+        'songURL': songURL
+    }, {
+        text: `Add Song`,
+        icon: ''
+    });
+});
+
 const loadingStart = async function (button, url, body, miscellaneous) {
 
-    let buttonText = miscellaneous.text ? miscellaneous.text : '  Submit   ';
-    let buttonIcon = miscellaneous.icon ? miscellaneous.icon : '<i class="fas fa-rocket" ></i>';
+    let buttonText = miscellaneous ? miscellaneous.text : '  Submit   ';
+    let buttonIcon = miscellaneous ? miscellaneous.icon : '<i class="fas fa-rocket" ></i>';
 
     // const loadingCircle= '<span id=spinner class="spinner-border text-dark" role="status" aria-hidden="true">  Loading</span>';
     button.text('');
@@ -144,9 +168,11 @@ const loadingStart = async function (button, url, body, miscellaneous) {
 
 
     if (response.status == 200) {
-        $(`.${button.attr('id')}.validToast`).toast('show')
+        //$(`.${button.attr('id')}.validToast`).toast('show')
+        button.find('.validToast').toast('show')
     } else {
-        $(`.${button.attr('id')}.failedToast`).toast('show')
+        //$(`.${button.attr('id')}.failedToast`).toast('show')
+        button.find('.failedToast').toast('show')
     }
 }
 

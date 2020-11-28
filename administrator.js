@@ -334,8 +334,8 @@ const channelThankerMessageConvert = function (userID, message, guild, amount) {
     if (guild.channelThankerMessage.length > 0)
         if (amount)
             return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${amount} rep!`)
-    else
-        return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${1} rep!`)
+        else
+            return guild.channelThankerMessage.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${1} rep!`)
 
     if (amount)
         return msg.replace('<>', MAIN.mention(userID)).replace('[]', message).replace('()', `+${amount} rep!`)
@@ -495,14 +495,14 @@ const autorole = async function (message, params, user) {
                     });
                     params.numMessages += 3; //might cause issues
                     return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
-                            ...params,
-                            step: 3,
-                            title: message.content
-                        },
-                        {
-                            ...params,
-                            step: 1
-                        }
+                        ...params,
+                        step: 3,
+                        title: message.content
+                    },
+                    {
+                        ...params,
+                        step: 1
+                    }
                     ], autorole, `Do you wish to keep:  **${message.content}**   as the title or change it?`);
                 }
                 break;
@@ -577,39 +577,55 @@ const autorole = async function (message, params, user) {
                     });
                     params.numMessages += 3; //might cause issues
                     return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
-                            ...params,
-                            step: 5,
-                            description: message.content,
-                            runningEmbed: {
-                                ...params.runningEmbed,
-                                description: message.content
-                            }
-                        },
-                        {
-                            ...params,
-                            step: 3
+                        ...params,
+                        step: 5,
+                        description: message.content,
+                        runningEmbed: {
+                            ...params.runningEmbed,
+                            description: message.content
                         }
+                    },
+                    {
+                        ...params,
+                        step: 3
+                    }
                     ], autorole, `Do you wish to keep:  **${message.content}**   as the description or change it?`);
                 }
-                case 5:
+            case 5:
 
-                    await message.channel.send("`3) Please enter an emoji and @role to pair seperated by **,** (must be a valid universal emoji or specific to this server!):` " +
-                        "```*emoji*, @role```" +
-                        "\nThis is what the message currently will look like:");
-                    let tempy = await message.channel.send({
-                        embed: {
-                            ...params.runningEmbed
-                        }
-                    });
-                    params.numMessages += 2;
-
-                    if (params.newEmoji) {
-                        params.emojis.push(params.newEmoji);
-                        params.roles.push(params.newEmoji.roleID);
-                        params.newEmoji = null;
+                await message.channel.send("`3) Please enter an emoji and @role to pair seperated by **,** (must be a valid universal emoji or specific to this server!):` " +
+                    "```*emoji*, @role```" +
+                    "\nThis is what the message currently will look like:");
+                let tempy = await message.channel.send({
+                    embed: {
+                        ...params.runningEmbed
                     }
-                    reactEmoji(tempy, params.emojis);
+                });
+                params.numMessages += 2;
 
+                if (params.newEmoji) {
+                    params.emojis.push(params.newEmoji);
+                    params.roles.push(params.newEmoji.roleID);
+                    params.newEmoji = null;
+                }
+                reactEmoji(tempy, params.emojis);
+
+                return MAIN.createRunningCommand(message, {
+                    command: autorole,
+                    commandParams: {
+                        ...params,
+                        step: 6,
+                    }
+                }, user);
+
+                break;
+            case 6:
+
+                if (message.content.split(',').length != 2) {
+
+                    await message.channel.send("You made an error in writing the emoji-@role. Refer to the example below!" +
+                        "```*emoji*, @role```");
+                    params.numMessages++;
                     return MAIN.createRunningCommand(message, {
                         command: autorole,
                         commandParams: {
@@ -617,14 +633,28 @@ const autorole = async function (message, params, user) {
                             step: 6,
                         }
                     }, user);
+                } else if (message.mentions.roles.size != 1) {
 
-                    break;
-                case 6:
+                    await message.channel.send("You made an error in writing the emoji-@role. Make sure to @mention only 1 role! Refer to the example below!" +
+                        "```*emoji*, @role```");
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: autorole,
+                        commandParams: {
+                            ...params,
+                            step: 6,
+                        }
+                    }, user);
+                } else {
 
-                    if (message.content.split(',').length != 2) {
+                    let args = message.content.split(',');
+                    let emoji = args[0].trim();
+                    let emojiID = null;
+                    let role = message.mentions.roles.first().id;
 
-                        await message.channel.send("You made an error in writing the emoji-@role. Refer to the example below!" +
-                            "```*emoji*, @role```");
+                    if ((await giveRoleSelf(message, role)) != 1) {
+
+                        await message.channel.send("Please fix my permissions for this role or try a different one.");
                         params.numMessages++;
                         return MAIN.createRunningCommand(message, {
                             command: autorole,
@@ -633,10 +663,13 @@ const autorole = async function (message, params, user) {
                                 step: 6,
                             }
                         }, user);
-                    } else if (message.mentions.roles.size != 1) {
+                    }
 
-                        await message.channel.send("You made an error in writing the emoji-@role. Make sure to @mention only 1 role! Refer to the example below!" +
-                            "```*emoji*, @role```");
+
+                    if (params.emojis.find(element => element.roleID == role)) {
+
+                        await message.channel.send(MAIN.mentionRole(role) +
+                            " is already linked to an emoji in this message! Try again");
                         params.numMessages++;
                         return MAIN.createRunningCommand(message, {
                             command: autorole,
@@ -645,267 +678,234 @@ const autorole = async function (message, params, user) {
                                 step: 6,
                             }
                         }, user);
-                    } else {
-
-                        let args = message.content.split(',');
-                        let emoji = args[0].trim();
-                        let emojiID = null;
-                        let role = message.mentions.roles.first().id;
-
-                        if ((await giveRoleSelf(message, role)) != 1) {
-
-                            await message.channel.send("Please fix my permissions for this role or try a different one.");
-                            params.numMessages++;
-                            return MAIN.createRunningCommand(message, {
-                                command: autorole,
-                                commandParams: {
-                                    ...params,
-                                    step: 6,
-                                }
-                            }, user);
-                        }
-
-
-                        if (params.emojis.find(element => element.roleID == role)) {
-
-                            await message.channel.send(MAIN.mentionRole(role) +
-                                " is already linked to an emoji in this message! Try again");
-                            params.numMessages++;
-                            return MAIN.createRunningCommand(message, {
-                                command: autorole,
-                                commandParams: {
-                                    ...params,
-                                    step: 6,
-                                }
-                            }, user);
-                        }
-
-                        let foundEmoji = params.emojis.find(element => element.emoji == emoji);
-
-                        if (foundEmoji) {
-
-                            await message.channel.send(`That emoji is already used for this message! Try again!`);
-                            params.numMessages++;
-                            return MAIN.createRunningCommand(message, {
-                                command: autorole,
-                                commandParams: {
-                                    ...params,
-                                    step: 6,
-                                }
-                            }, user);
-                        }
-
-                        await message.channel.send("\nThis is what the message currently will look like:");
-                        let tempMess = await message.channel.send({
-                            embed: {
-                                ...params.runningEmbed
-                            }
-                        });
-                        params.numMessages += 2;
-                        reactEmoji(tempMess, params.emojis);
-
-                        if (emoji.includes(':')) {
-
-                            let id = emoji.substring(emoji.indexOf(':', 3) + 1, emoji.indexOf('>'));
-                            console.log(id);
-
-                            let guildEmoji = message.guild.emojis.cache.get(id);
-                            if (!guildEmoji) {
-
-                                await message.channel.send("You entered an invalid emoji, make sure its universal or from this server! Refer to the example below!" +
-                                    "```*emoji*, @role```");
-                                params.numMessages++;
-                                return MAIN.createRunningCommand(message, {
-                                    command: autorole,
-                                    commandParams: {
-                                        ...params,
-                                        step: 6,
-                                    }
-                                }, user);
-                            }
-
-                            emojiID = id;
-                            await tempMess.react(guildEmoji);
-                        } else
-                            await tempMess.react(emoji);
-
-                        await message.channel.send("Don't worry about the order, they will be fixed in the next step!");
-                        params.numMessages += 2; //might cause issues
-                        return await MAIN.generalMatcher(message, -23, user, ['Add another pair', 'Change last pair', 'finish'], [{
-                                ...params,
-                                step: 5,
-                                newEmoji: {
-                                    emoji: emoji,
-                                    roleID: role,
-                                    emojiID: emojiID
-                                }
-                            },
-                            {
-                                ...params,
-                                step: 5,
-                                newEmoji: null
-                            },
-                            {
-                                ...params,
-                                step: 7,
-                                newEmoji: {
-                                    emoji: emoji,
-                                    roleID: role,
-                                    emojiID: emojiID
-                                }
-                            }
-                        ], autorole, `Do you wish to add another emoji-role pair, change the previous one or proceed to finalise the message?`);
                     }
 
-                    break;
-                case 7:
+                    let foundEmoji = params.emojis.find(element => element.emoji == emoji);
 
-                    if (params.newEmoji) {
-                        params.emojis.push(params.newEmoji);
-                        params.roles.push(params.newEmoji.roleID);
-                        params.newEmoji = null;
+                    if (foundEmoji) {
+
+                        await message.channel.send(`That emoji is already used for this message! Try again!`);
+                        params.numMessages++;
+                        return MAIN.createRunningCommand(message, {
+                            command: autorole,
+                            commandParams: {
+                                ...params,
+                                step: 6,
+                            }
+                        }, user);
                     }
 
-
-                    await message.channel.send("This is what the message currently will look like:");
-                    let tempy1 = await message.channel.send({
+                    await message.channel.send("\nThis is what the message currently will look like:");
+                    let tempMess = await message.channel.send({
                         embed: {
                             ...params.runningEmbed
                         }
                     });
-                    reactEmoji(tempy1, params.emojis);
-                    params.numMessages += 3; //might cause issues
+                    params.numMessages += 2;
+                    reactEmoji(tempMess, params.emojis);
 
-                    return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permanent', 'Unlimited'], [{
-                                ...params,
-                                step: 8,
-                                unique: true,
-                                permenant: false,
-                                neither: false
-                            },
-                            {
-                                ...params,
-                                step: 8,
-                                unique: false,
-                                permenant: true,
-                                neither: false
-                            },
-                            {
-                                ...params,
-                                step: 8,
-                                unique: false,
-                                permenant: false,
-                                neither: true
-                            }
-                        ], autorole, `What kind of mode should this message enforce?\n` +
-                        "```" + `\n1) Unique: Limit each user to 1 reaction (they can change their reaction to gain/loose the role` +
-                        `\n\n2) Permanent: Limit each user to a single reaction for the lifetime of this message. They cannot change their mind after reacting.` +
-                        `\n\n3) Unlimited: Let everyone react to as many emojis as they want!` + "```");
+                    if (emoji.includes(':')) {
 
-                    break;
-                case 8:
+                        let id = emoji.substring(emoji.indexOf(':', 3) + 1, emoji.indexOf('>'));
+                        console.log(id);
 
-                    params.numMessages += 1; //might cause issues
-                    return await MAIN.generalMatcher(message, -23, user, ['Static', 'Not Static'], [{
+                        let guildEmoji = message.guild.emojis.cache.get(id);
+                        if (!guildEmoji) {
+
+                            await message.channel.send("You entered an invalid emoji, make sure its universal or from this server! Refer to the example below!" +
+                                "```*emoji*, @role```");
+                            params.numMessages++;
+                            return MAIN.createRunningCommand(message, {
+                                command: autorole,
+                                commandParams: {
+                                    ...params,
+                                    step: 6,
+                                }
+                            }, user);
+                        }
+
+                        emojiID = id;
+                        await tempMess.react(guildEmoji);
+                    } else
+                        await tempMess.react(emoji);
+
+                    await message.channel.send("Don't worry about the order, they will be fixed in the next step!");
+                    params.numMessages += 2; //might cause issues
+                    return await MAIN.generalMatcher(message, -23, user, ['Add another pair', 'Change last pair', 'finish'], [{
+                        ...params,
+                        step: 5,
+                        newEmoji: {
+                            emoji: emoji,
+                            roleID: role,
+                            emojiID: emojiID
+                        }
+                    },
+                    {
+                        ...params,
+                        step: 5,
+                        newEmoji: null
+                    },
+                    {
+                        ...params,
+                        step: 7,
+                        newEmoji: {
+                            emoji: emoji,
+                            roleID: role,
+                            emojiID: emojiID
+                        }
+                    }
+                    ], autorole, `Do you wish to add another emoji-role pair, change the previous one or proceed to finalise the message?`);
+                }
+
+                break;
+            case 7:
+
+                if (params.newEmoji) {
+                    params.emojis.push(params.newEmoji);
+                    params.roles.push(params.newEmoji.roleID);
+                    params.newEmoji = null;
+                }
+
+
+                await message.channel.send("This is what the message currently will look like:");
+                let tempy1 = await message.channel.send({
+                    embed: {
+                        ...params.runningEmbed
+                    }
+                });
+                reactEmoji(tempy1, params.emojis);
+                params.numMessages += 3; //might cause issues
+
+                return await MAIN.generalMatcher(message, -23, user, ['Unique', 'Permanent', 'Unlimited'], [{
+                    ...params,
+                    step: 8,
+                    unique: true,
+                    permenant: false,
+                    neither: false
+                },
+                {
+                    ...params,
+                    step: 8,
+                    unique: false,
+                    permenant: true,
+                    neither: false
+                },
+                {
+                    ...params,
+                    step: 8,
+                    unique: false,
+                    permenant: false,
+                    neither: true
+                }
+                ], autorole, `What kind of mode should this message enforce?\n` +
+                "```" + `\n1) Unique: Limit each user to 1 reaction (they can change their reaction to gain/loose the role` +
+                `\n\n2) Permanent: Limit each user to a single reaction for the lifetime of this message. They cannot change their mind after reacting.` +
+                `\n\n3) Unlimited: Let everyone react to as many emojis as they want!` + "```");
+
+                break;
+            case 8:
+
+                params.numMessages += 1; //might cause issues
+                return await MAIN.generalMatcher(message, -23, user, ['Static', 'Not Static'], [{
+                    ...params,
+                    step: 9,
+                    static: true
+                },
+                {
+                    ...params,
+                    step: 9,
+                    static: false
+                }
+                ], autorole, `Would you like the message to be static? A static message will remove any other emojis to prevent mass reactions clogging up the message.`);
+
+                break;
+            case 9:
+
+                await message.channel.send(`Below you will find the final result!`);
+                let finalMessage = await message.channel.send({
+                    embed: params.runningEmbed
+                });
+                params.messageID = finalMessage.id;
+                await reactEmoji(finalMessage, params.emojis);
+                autoRoleMap.set(finalMessage.id, params);
+                setEmojiCollecter(params, finalMessage);
+                params.numMessages += 2;
+
+                let guild = await MAIN.findGuild({
+                    id: message.guild.id
+                });
+
+                guild.autorole.push(params);
+
+
+                MAIN.cachedGuilds.set(guild.id, guild);
+
+                Guild.findOneAndUpdate({
+                    id: message.guild.id
+                }, {
+                    $set: {
+                        autorole: guild.autorole
+                    }
+                }, function (err, doc, res) { });
+
+                params.numMessages += 1;
+
+                return await MAIN.generalMatcher(message, -23, user, ['Remove Messages', 'Keep Messages'], [{
+                    ...params,
+                    step: 10,
+                    remove: true
+                },
+                {
+                    ...params,
+                    step: 10,
+                    remove: false
+                }
+                ], autorole, "Would you like me to delete the previous setup message? Depending on how many mistakes were made, some messages might be left over." +
+                " However, only the setup messages will be removed.");
+
+
+                break;
+            case 10:
+
+                if (params.remove) {
+
+                    console.log(`Removing ${params.numMessages} messages!`);
+
+                    // let messages = await message.channel.messages.fetch({ limit: params.numMessages - 1 })
+                    let messages = await message.channel.messages.fetch({
+                        after: params.originalMessage
+                    })
+                    console.log(messages.size)
+                    messages.delete(params.messageID);
+                    console.log(messages.size);
+
+
+
+                    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+                    if (!permission.has("MANAGE_MESSAGES")) {
+
+                        params.numMessages += 1;
+
+                        return await MAIN.generalMatcher(message, -23, user, ['Try Again', "Don't Try Again"], [{
                             ...params,
-                            step: 9,
-                            static: true
+                            step: 10,
+                            remove: true
                         },
                         {
                             ...params,
-                            step: 9,
-                            static: false
+                            step: 10,
+                            remove: false
                         }
-                    ], autorole, `Would you like the message to be static? A static message will remove any other emojis to prevent mass reactions clogging up the message.`);
-
-                    break;
-                case 9:
-
-                    await message.channel.send(`Below you will find the final result!`);
-                    let finalMessage = await message.channel.send({
-                        embed: params.runningEmbed
-                    });
-                    params.messageID = finalMessage.id;
-                    await reactEmoji(finalMessage, params.emojis);
-                    autoRoleMap.set(finalMessage.id, params);
-                    setEmojiCollecter(params, finalMessage);
-                    params.numMessages += 2;
-
-                    let guild = await MAIN.findGuild({
-                        id: message.guild.id
-                    });
-
-                    guild.autorole.push(params);
-
-
-                    MAIN.cachedGuilds.set(guild.id, guild);
-
-                    Guild.findOneAndUpdate({
-                        id: message.guild.id
-                    }, {
-                        $set: {
-                            autorole: guild.autorole
-                        }
-                    }, function (err, doc, res) {});
-
-                    params.numMessages += 1;
-
-                    return await MAIN.generalMatcher(message, -23, user, ['Remove Messages', 'Keep Messages'], [{
-                                ...params,
-                                step: 10,
-                                remove: true
-                            },
-                            {
-                                ...params,
-                                step: 10,
-                                remove: false
-                            }
-                        ], autorole, "Would you like me to delete the previous setup message? Depending on how many mistakes were made, some messages might be left over." +
-                        " However, only the setup messages will be removed.");
-
-
-                    break;
-                case 10:
-
-                    if (params.remove) {
-
-                        console.log(`Removing ${params.numMessages} messages!`);
-
-                        // let messages = await message.channel.messages.fetch({ limit: params.numMessages - 1 })
-                        let messages = await message.channel.messages.fetch({
-                            after: params.originalMessage
-                        })
-                        console.log(messages.size)
-                        messages.delete(params.messageID);
-                        console.log(messages.size);
-
-
-
-                        let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
-                        if (!permission.has("MANAGE_MESSAGES")) {
-
-                            params.numMessages += 1;
-
-                            return await MAIN.generalMatcher(message, -23, user, ['Try Again', "Don't Try Again"], [{
-                                    ...params,
-                                    step: 10,
-                                    remove: true
-                                },
-                                {
-                                    ...params,
-                                    step: 10,
-                                    remove: false
-                                }
-                            ], autorole, "I don't have the MANAGE_MESSAGES permission in this channel to delete messages. Would you like me to try again?");
-                        }
-
-                        message.channel.bulkDelete(messages).catch(err => {
-                            console.log("Error deleting bulk messages: " + err);
-                            message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
-                        });
-
+                        ], autorole, "I don't have the MANAGE_MESSAGES permission in this channel to delete messages. Would you like me to try again?");
                     }
-                    break;
+
+                    message.channel.bulkDelete(messages).catch(err => {
+                        console.log("Error deleting bulk messages: " + err);
+                        message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                    });
+
+                }
+                break;
         }
 
     } else {
@@ -965,10 +965,10 @@ const reactEmoji = async function (message, emojis) {
 
             let guildEmoji = message.guild.emojis.cache.get(id);
             await message.react(guildEmoji)
-                .catch(err => {});
+                .catch(err => { });
         } else
             await message.react(emojiPair.emoji)
-            .catch(err => {});
+                .catch(err => { });
     }
 }
 
@@ -1066,10 +1066,10 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
                 if (roleToAdd)
                     await guildMember.roles.add(roleToAdd)
-                    .catch(function (err) {
+                        .catch(function (err) {
 
-                        emoji.message.channel.send("I didn't have the required permission to give such a role!");
-                    });
+                            emoji.message.channel.send("I didn't have the required permission to give such a role!");
+                        });
                 else
                     return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
 
@@ -1081,7 +1081,7 @@ const setEmojiCollecter = async function (autoroleObj, message) {
                     $set: {
                         autorole: guild.autorole
                     }
-                }, function (err, doc, res) {})
+                }, function (err, doc, res) { })
                 return 1;
 
             }
@@ -1128,10 +1128,10 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
             if (roleToAdd)
                 await guildMember.roles.add(roleToAdd)
-                .catch(function (err) {
+                    .catch(function (err) {
 
-                    emoji.message.channel.send("I didn't have the required permission to give such a role!");
-                });
+                        emoji.message.channel.send("I didn't have the required permission to give such a role!");
+                    });
             else
                 return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
 
@@ -1139,7 +1139,7 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
             return emoji.users.remove(user);
 
-        } else {}
+        } else { }
     });
 
     collector.on('remove', async function (emoji, user) {
@@ -1175,10 +1175,10 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
         if (roleToAdd)
             await guildMember.roles.remove(roleToAdd)
-            .catch(function (err) {
+                .catch(function (err) {
 
-                emoji.message.channel.send("I didn't have the required permission to remove such a role!");
-            });
+                    emoji.message.channel.send("I didn't have the required permission to remove such a role!");
+                });
         else
             return emoji.message.send("A role that was used in the autorole message no longer exists, failed to remove the role.");
     });
@@ -1220,7 +1220,7 @@ const setEmojiCollectorAll = async function (autoroleObj) {
                 $set: {
                     autorole: guild.autorole
                 }
-            }, function (err, doc, res) {})
+            }, function (err, doc, res) { })
             continue;
 
         }
@@ -1361,7 +1361,7 @@ const updateAutoRoleObject = async function (autoRoleObj, guildID) {
         $set: {
             autorole: guild.autorole
         }
-    }, function (err, doc, res) {});
+    }, function (err, doc, res) { });
     return 1;
 }
 
@@ -1388,7 +1388,7 @@ const welcomeMessages = async function (message, params, user) {
             $set: {
                 welcomeMessages: true
             }
-        }, function (err, doc, res) {});
+        }, function (err, doc, res) { });
         return 1;
     }
 
@@ -1400,7 +1400,7 @@ const welcomeMessages = async function (message, params, user) {
         $set: {
             welcomeMessages: false
         }
-    }, function (err, doc, res) {});
+    }, function (err, doc, res) { });
     return 1;
 }
 exports.welcomeMessages = welcomeMessages;
@@ -1842,7 +1842,7 @@ const passwordLockRole = async function (message, params, user) {
                         $set: {
                             passwordLock: guild.passwordLock
                         }
-                    }, function (err, doc, res) {});
+                    }, function (err, doc, res) { });
                     message.channel.send(`To have a member be assigned your chosen role, have them Direct Message me the following password: sa!activatePasswordRole ${params.guildID}, ${pass}`);
                     return 0;
                 }
@@ -1939,7 +1939,7 @@ const viewPasswordLockRole = async function (message, params, user) {
 
     let messy = await message.author.send("Here are all the password-roleID pairs");
 
-    array = Array.from(guild.passwordLock, ([name, value]) => (`${name} - ${value}`));
+    array = Array.from(guild.passwordLock, ([name, value]) => (`${name} - **@${message.guild.roles.cache.get(value).name}**`));
 
     if (array.length == 0)
         messy.channel.send("There are no password-role pairs for that server!");
@@ -1981,7 +1981,7 @@ const deletePasswordLockRole = async function (message, params, user) {
         $set: {
             passwordLock: guild.passwordLock
         }
-    }, function (err, doc, res) {});
+    }, function (err, doc, res) { });
     return message.channel.send(`Successfuly deleted the password-roleID!`);
 }
 exports.deletePasswordLockRole = deletePasswordLockRole;
@@ -2428,7 +2428,7 @@ function setThankerAutoRep(message, params, user) {
             $set: {
                 thankerAutoRep: true
             }
-        }, function (err, doc, res) {});
+        }, function (err, doc, res) { });
         message.channel.send("Rep will be automatically gained from channel thankers!");
         return 1;
     } else if (bool == "FALSE") {
@@ -2440,7 +2440,7 @@ function setThankerAutoRep(message, params, user) {
             $set: {
                 thankerAutoRep: false
             }
-        }, function (err, doc, res) {});
+        }, function (err, doc, res) { });
         message.channel.send("Rep will not be automatically gained from channel thankers!");
         return 1;
     } else {
@@ -2582,14 +2582,14 @@ const forwardImages = async function (message, guild, user) {
                     await guildy.channels.cache.get(imageChan).send(`Image from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
                 }
             }
-    else if (isVideo(attachment.attachment)) {
+            else if (isVideo(attachment.attachment)) {
 
-        let guildy = MAIN.Client.guilds.cache.get(guild.id);
-        for (let imageChan of guild.channelImage) {
+                let guildy = MAIN.Client.guilds.cache.get(guild.id);
+                for (let imageChan of guild.channelImage) {
 
-            await guildy.channels.cache.get(imageChan).send(`Video from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
-        }
-    }
+                    await guildy.channels.cache.get(imageChan).send(`Video from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
+                }
+            }
     const args = message.content.trim().replace(/[\n\r]/g, " ").split(' ');
 
 

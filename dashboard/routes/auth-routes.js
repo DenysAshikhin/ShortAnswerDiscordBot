@@ -8,6 +8,8 @@ const User = require('../../User');
 const authClient = require('../modules/auth-client.js');
 const sessions = require('../modules/sessions.js');
 const { validateKey } = require('../modules/middleware.js');
+const music = require('../../music.js');
+let ytdl = require("ytdl-core");
 
 router.get('/login', function (req, res) {
 
@@ -69,6 +71,89 @@ router.get('/invite', function (req, res) {
 });
 
 
+router.post('/formUpdate/addSong', validateKey, async function (req, res) {
+
+    console.log('/formUpdate/addSong');
+
+
+    res.locals.dbUser = await MAIN.findUser({ id: res.locals.validatedUser.id });
+
+    if (req.body.playlistTitle) {
+
+        let playlist = res.locals.dbUser.playlists.find(element => element.title === req.body.playlistTitle);
+
+        if (playlist) {
+
+            if (ytdl.validateURL(req.body.songURL)) {
+                songInfo = await ytdl.getInfo(req.body.songURL, {
+                    requestOptions: {
+                        headers: {
+                            cookie: MAIN.config.youtubeCookie
+                        },
+                    },
+                    quality: 'highestaudio'
+                });
+
+                //console.log(songInfo)
+                if (songInfo.videoDetails.lengthSeconds) {
+
+                    if (!songInfo.player_response.microformat.playerMicroformatRenderer.availableCountries.includes('US')) {
+                        res.status(400).json({
+                            message: 'Error code: Song is region blocked!'
+                        }).end();
+                        return;
+                    }
+
+                    let startTime = req.body.songURL.lastIndexOf('?t=');
+                    let offset = 0;
+
+                    if (startTime != -1) {
+
+                        let tester = req.body.songURL.substring(startTime + 3);
+                        offset = (tester.length > 0 && !isNaN(tester)) ? Number(tester) : 0;
+                    }
+
+                    let song = {
+                        title: songInfo.videoDetails.title,
+                        url: songInfo.videoDetails.video_url,
+                        duration: songInfo.videoDetails.lengthSeconds,
+                        start: null,
+                        offset: offset,
+                        id: songInfo.videoDetails.videoId,
+                        paused: null,
+                        timePaused: 0,
+                        progress: 0
+                    };
+
+                    playlist.songs.push(song);
+                    User.findOneAndUpdate({ id: res.locals.dbUser.id }, { $set: { playlists: res.locals.dbUser.playlists } }).exec();
+
+                    res.status(200).json({
+                        result: playlist,
+                        message: 'Success!'
+                    }).end();
+                }
+            }
+            else{
+                res.status(400).json({
+                    message: 'Error: Not a valid url: ' + req.body.songURL
+                }).end();
+            }
+        }
+        else {
+            res.status(400).json({
+                message: 'Error code: Could not find a personal playlist with the title: ' + req.body.playlistTitle
+            }).end();
+        }
+    }
+    else {
+        res.status(400).json({
+            message: 'Error code: Could not find a personal playlist with the title: ' + req.body.playlistTitle
+        }).end();
+    }
+});
+
+
 router.post('/formUpdate/playlistUpdate', validateKey, async function (req, res) {
 
     console.log('/formUpdate/playlistUpdate');
@@ -86,7 +171,7 @@ router.post('/formUpdate/playlistUpdate', validateKey, async function (req, res)
 
                     for (let songToRemove of req.body.removeSongList) {
 
-                        for(let i = 0; i < playlist.songs.length; i++) {
+                        for (let i = 0; i < playlist.songs.length; i++) {
 
                             if (playlist.songs[i].title == songToRemove) {
                                 playlist.songs.splice(i, 1);
@@ -138,7 +223,6 @@ router.post('/formUpdate/playlistUpdate', validateKey, async function (req, res)
             message: 'Error code: Could not find a personal playlist with the title: ' + req.body.playlistTitle
         }).end();
 });
-
 
 router.post('/formUpdate/userGames', validateKey, async function (req, res) {
 

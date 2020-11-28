@@ -258,7 +258,7 @@ async function checkControlsEmoji(message) {
                     $set: {
                         gameSuggest: guild.gameSuggest
                     }
-                }, function (err, doc, res) {});
+                }, function (err, doc, res) { });
 
                 await fs.promises.writeFile('./gameslist.json', JSON.stringify(GAMES.games), 'UTF-8');
 
@@ -281,7 +281,7 @@ async function checkControlsEmoji(message) {
                     $set: {
                         gameSuggest: guild.gameSuggest
                     }
-                }, function (err, doc, res) {});
+                }, function (err, doc, res) { });
 
                 refreshSuggestQueue(emoji.message);
             } else if (emoji.emoji.toString() == '❌') {
@@ -300,7 +300,7 @@ async function checkControlsEmoji(message) {
                     $set: {
                         gameSuggest: guild.gameSuggest
                     }
-                }, function (err, doc, res) {});
+                }, function (err, doc, res) { });
 
                 await User.findOneAndUpdate({
                     id: user.id
@@ -308,7 +308,7 @@ async function checkControlsEmoji(message) {
                     $set: {
                         suggestionBanDate: getBanDate()
                     }
-                }, function (err, doc, res) {});
+                }, function (err, doc, res) { });
                 refreshSuggestQueue(emoji.message);
             }
         }
@@ -352,7 +352,7 @@ const modifiedSuggestionAccept = async function (game) {
         $set: {
             gameSuggest: guild.gameSuggest
         }
-    }, function (err, doc, res) {});
+    }, function (err, doc, res) { });
 
     await fs.promises.writeFile('./gameslist.json', JSON.stringify(GAMES.games), 'UTF-8');
 
@@ -482,14 +482,14 @@ const findUser = async function (member, force) {
 
             let existed = await checkExistance(member);
             if (!existed) {
-               // console.log("sleeping on a non-existant member")
+                // console.log("sleeping on a non-existant member")
                 await sleep(1000);
             }
             let tempUser = await User.findOne({
                 id: member.id
             });
 
-            if(!existed){
+            if (!existed) {
                 // console.log('userID: ', tempUser.id)
                 // console.log(tempUser.guilds);
             }
@@ -498,10 +498,12 @@ const findUser = async function (member, force) {
                 console.log(`Found null user: ${member}`)
                 console.log(`followed by: ${member.id}`)
             }
+            cachedUsers.set(tempUser.id, tempUser);
             return tempUser;
         } else {
 
             let tempUser = await checkFix(usery);
+            cachedUsers.set(tempUser.id, tempUser);
             return tempUser;
         }
 
@@ -683,6 +685,9 @@ HTTPserver.listen(config.botPORT, botIP, () => {
     console.log(`Server is running on http://${botIP}:${config.botPORT}`);
 });
 
+// HTTPserver.listen('35333', botIP, () => {
+//     console.log(`Server is running on http://${botIP}:${35333}`);
+// });
 
 
 
@@ -795,7 +800,8 @@ connectDB.once('open', async function () {
             if (guild.channelImageSource.includes(message.channel.id)) {
 
                 ADMINISTRATOR.forwardImages(message, guild, null);
-            } else if ((guild.channelImage.length > 0) && guild.forwardImages) {
+            }
+            else if ((guild.channelImage.length > 0) && guild.forwardImages) {
 
                 ADMINISTRATOR.forwardImages(message, guild, null);
             }
@@ -875,14 +881,16 @@ connectDB.once('open', async function () {
                                         channel.send(`Gave +1 rep to ${memberList}`);
                                 }
                             }
-                        else
-                            message.channel.send(`Gave +1 rep to ${memberList}`);
+                            else
+                                message.channel.send(`Gave +1 rep to ${memberList}`);
                     }
             }
-        } else if (!user) { //Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
+        }
+        else if (!user) { //Only happens if a user that is not in the DB DM's the bot...not sure how but hey, you never know?
             message.channel.send("You don't seem to be in my DataBase, perhaps try joining a server I am in, using the help command and then sending the command again?");
             return;
-        } else {
+        }
+        else {
             if (user.defaultPrefix != "-1") prefix = user.defaultPrefix;
             else prefix = defaultPrefix;
         }
@@ -899,7 +907,8 @@ connectDB.once('open', async function () {
 
                 return;
                 // console.log("Running command took over");
-            } else if (message.content.substr(0, prefix.length) == prefix) {
+            }
+            else if (message.content.substr(0, prefix.length) == prefix) {
 
                 if (message.guild) {
 
@@ -913,20 +922,20 @@ connectDB.once('open', async function () {
                 }
 
                 if (!message.member) {
-                    user = await User.findOne({
+                    user = await findUser({
                         id: message.author.id
                     });
 
                     if (!user)
                         return message.channel.send(`I don't seem to have you in my database, try sending any message in a server I am in, then try DM'ing me again!`);
-                } else
+                }
+                else
                     user = await findUser(message.member);
 
-
-                cachedUsers.set(user.id, user);
                 exports.cachedUsers = cachedUsers;
                 console.log(`Number of cached users: ${cachedUsers.size}`);
-                console.log(`guild:::: ${message.guild.name},,, user::::${message.author.username}`)
+                if (message.guild)
+                    console.log(`guild:::: ${message.guild.name},,, user::::${message.author.username}`)
                 if (message.channel.type != 'dm') {
                     let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
                     if (!permission.has("SEND_MESSAGES"))
@@ -945,9 +954,6 @@ connectDB.once('open', async function () {
 
 
                 let command = message.content.split(' ')[0].substr(prefix.length).toUpperCase();
-                //  console.log('SECOND ATTEMPT DONE')
-
-                // exports.prefix = prefix;
 
                 let params = message.content.substr(message.content.indexOf(' ') + 1).split(',');
 
@@ -961,23 +967,7 @@ connectDB.once('open', async function () {
             } else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
 
 
-                if (defaultPrefix != '##') {
-                    let index = user.guilds.indexOf(message.guild.id);
-                    if (user.prefix[index] != "-1") {
-                        prefix = user.prefix[index];
-                        // console.log('server prefix: ' + `${prefix}`)
-                    } else if (guild.prefix != "-1") {
-                        prefix = guild.prefix;
-                        //  console.log('server default prefix: ' + `${prefix}`)
-                    } else if (user.defaultPrefix != "-1") {
-                        prefix = user.defaultPrefix;
-                        // console.log('default pre: ' + `${prefix}`)
-                    } else {
-                        prefix = defaultPrefix;
-                        //    console.log('none: ' + `${prefix}`)
-                    }
-                } else
-                    prefix = '##';
+                prefix = '##';
 
                 message.channel.send("Your proper prefix is: " + prefix +
                     "\n`" + `Type ${prefix}help` + "` for more help!");
@@ -1042,7 +1032,7 @@ connectDB.once('open', async function () {
                 $set: {
                     kicked: user.kicked
                 }
-            }, function (err, doc, res) {});
+            }, function (err, doc, res) { });
         }
     });
 
@@ -1096,7 +1086,7 @@ connectDB.once('open', async function () {
                     $set: {
                         factions: guild.factions
                     }
-                }, function (err, doc, res) {});
+                }, function (err, doc, res) { });
             }
         }
     })
@@ -1630,8 +1620,8 @@ function findFurthestDate(date1, date2) {
         else
             return date2;
     else
-    if (numberDate2 == 0)
-        return date1;
+        if (numberDate2 == 0)
+            return date1;
 
     if (numberDate1 < numberDate2)
         return date1;
@@ -1916,7 +1906,7 @@ async function checkExistance(member) {
                 $set: {
                     kicked: tempUser.kicked
                 }
-            }, function (err, doc, res) {});
+            }, function (err, doc, res) { });
             return true;
         } else { //The user exists, but not with a matching guild in the DB
 
@@ -2374,7 +2364,7 @@ async function testy(ARR, description, message, modifier, URL, title, selector, 
             }
         }
 
-        if (!Array.isArray(field.value)) {} else if (modifier == -1) {
+        if (!Array.isArray(field.value)) { } else if (modifier == -1) {
             field.value = field.value.join('\n');
         } else if (modifier == 1) {
             field.value = "```" + "\n" + field.value.join('\n') + "```";
@@ -2539,7 +2529,7 @@ async function updateAll() {
 
 
     // for(let guild of Client.guilds.cache().values()){
-//Drawin Academy ID: 773089116240740382
+    //Drawin Academy ID: 773089116240740382
     //     if (guild.name == 'Drawing Academy'){       
     //         console.log(guild.id)
     //     }
