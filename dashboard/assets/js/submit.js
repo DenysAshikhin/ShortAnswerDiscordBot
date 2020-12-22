@@ -112,7 +112,7 @@ $('.playlistUpdateSubmitBtn').on('click', function () {
 });
 
 
-$('.addSongBtn').on('click', function () {
+$('.addSongBtn').on('click', async function () {
 
     if ($(this).hasClass('disabled'))
         return 1;
@@ -124,21 +124,42 @@ $('.addSongBtn').on('click', function () {
     // console.log(playlistTitle);
     // console.log(inputField.val());
 
-    loadingStart($(this), `${url}/formUpdate/addSong`, {
+    let finish = await loadingStart($(this), `${url}/formUpdate/addSong`, {
         'key': key,
         'userID': dbUser.id,
         'playlistTitle': playlistTitle,
         'songURL': songURL
     }, {
         text: `Add Song`,
-        icon: ''
+        icon: '',
+        validToast: `validToastAddSong${playlistTitle.split(' ').join('-')}`,
+        failedToast: `failedToastAddSong${playlistTitle.split(' ').join('-')}`
     });
+
+    if (finish.status == 200) {
+
+        let playlist = $(`#playlistList${playlistTitle.split(' ').join('-')}`);
+        console.log(finish);
+
+        let songTitle = await finish.json().songTitle
+
+        let newListItem = `<li class="list-group-item d-inline songItem border-left-0 border-right-0 border-bottom-0 border-top" songTitle="${songTitle}"> 
+        <div class="row">
+          <div class="span w-90">${songTitle}</div>
+          <button class="songCloseBtn close ml-auto my-auto" type="button" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+      </li>`
+
+      playlist.append(newListItem);
+    }
+
 });
 
 const loadingStart = async function (button, url, body, miscellaneous) {
 
     let buttonText = miscellaneous ? miscellaneous.text : '  Submit   ';
     let buttonIcon = miscellaneous ? miscellaneous.icon : '<i class="fas fa-rocket" ></i>';
+
 
     // const loadingCircle= '<span id=spinner class="spinner-border text-dark" role="status" aria-hidden="true">  Loading</span>';
     button.text('');
@@ -164,16 +185,26 @@ const loadingStart = async function (button, url, body, miscellaneous) {
 
     console.log(response);
     console.log(await response.json());
-    console.log(button.attr('id'));
+    //console.log(button.attr('id'));
 
 
-    if (response.status == 200) {
-        //$(`.${button.attr('id')}.validToast`).toast('show')
-        button.siblings().children('.validToast').toast('show')
-    } else {
-        //$(`.${button.attr('id')}.failedToast`).toast('show')
-        button.siblings.siblings().children('.failedToast').toast('show')
+    if (miscellaneous) {
+        if (miscellaneous.validToast) {
+
+            if (response.status == 200) {
+                $(`#${miscellaneous.validToast}`).toast('show');
+            } else {
+                $(`#${miscellaneous.failedToast}`).toast('show');
+            }
+        }
     }
+    else if (response.status == 200) {
+        button.siblings().children('.validToast').toast('show');
+    } else {
+        button.siblings().children('.failedToast').toast('show');
+    }
+
+    return response;
 }
 
 $(".userGamesList").mouseup(function () {

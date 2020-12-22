@@ -85,14 +85,7 @@ router.post('/formUpdate/addSong', validateKey, async function (req, res) {
         if (playlist) {
 
             if (ytdl.validateURL(req.body.songURL)) {
-                songInfo = await ytdl.getInfo(req.body.songURL, {
-                    requestOptions: {
-                        headers: {
-                            cookie: MAIN.config.youtubeCookie
-                        },
-                    },
-                    quality: 'highestaudio'
-                });
+                songInfo = await ytdl.getInfo(req.body.songURL);
 
                 //console.log(songInfo)
                 if (songInfo.videoDetails.lengthSeconds) {
@@ -130,11 +123,12 @@ router.post('/formUpdate/addSong', validateKey, async function (req, res) {
 
                     res.status(200).json({
                         result: playlist,
-                        message: 'Success!'
+                        message: 'Success!',
+                        songTitle: song.title
                     }).end();
                 }
             }
-            else{
+            else {
                 res.status(400).json({
                     message: 'Error: Not a valid url: ' + req.body.songURL
                 }).end();

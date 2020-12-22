@@ -9,7 +9,7 @@ section#musicModule.module.container.px-5
                     #userMusic-pills-Config.nav.flex-column.nav-pills(role='tablist' aria-orientation='vertical')
                         if dbUser.playlists.length > 0
                             each playlist in dbUser.playlists
-                                a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`playlistPill${playlist.title}` href=`#playlistInfo${playlist.title}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{playlist.title}
+                                a.nav-link.m-2.text-center.border.border-primary.rounded-pill(id=`playlistPill${playlist.title.split(' ').join('-')}` href=`#playlistInfo${playlist.title.split(' ').join('-')}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{playlist.title}
                                 //- else
                                 //-     span(data-placement='top' data-toggle='tooltip' title='There are no songs in this playlist!')
                                 //-         a.nav-link.m-2.text-center.border.border-secondary.rounded-pill.disabled(id=`playlistPill${playlist.title}` href=`#playlistInfo${playlist.title}` data-toggle='pill' role='tab' aria-controls='v-pills-home' aria-selected='true') #{playlist.title}
@@ -24,7 +24,7 @@ section#musicModule.module.container.px-5
                 if dbUser.playlists.length > 0
                     #playlist-pills-tabConfig.tab-content
                         each playlist in dbUser.playlists
-                            .tab-pane.fade.show(id=`playlistInfo${playlist.title}` playlistTitle=`${playlist.title}` role='tabpanel' aria-labelledby='v-pills-home-tab')
+                            .tab-pane.fade.show(id=`playlistInfo${playlist.title.split(' ').join('-')}` playlistTitle=`${playlist.title}` role='tabpanel' aria-labelledby='v-pills-home-tab')
                                 .card
                                     .card-header.border-bottom-0
                                         .row.d-flex
@@ -48,7 +48,7 @@ section#musicModule.module.container.px-5
                                                         | Something went wrong. If the issue persists please let the owner know through
                                                         | the discord support server: https://discord.gg/nMj6UKH
                                     .card-body.px-0.pb-0.mx-0.pt-0
-                                        ul.list-group.overflow-auto.playlistList(id=`playlistList${playlist.title}`, playlistTitle=`${playlist.title}` style='max-height: 65vh;')
+                                        ul.list-group.overflow-auto.playlistList(id=`playlistList${playlist.title.split(' ').join('-')}`, playlistTitle=`${playlist.title}` style='max-height: 65vh;')
                                             each song in playlist.songs
                                                 li.list-group-item.d-inline.songItem.border-left-0.border-right-0.border-bottom-0.border-top(songTitle=`${song.title}`) 
                                                     .row
@@ -64,5 +64,20 @@ section#musicModule.module.container.px-5
                                                         span#inputGroup-sizing-sm.input-group-text Link
                                                     input.my-auto.mr-1.form-control(type='text' aria-label='Sizing example input' aria-describedby='inputGroup-sizing-sm')
                                                     .addSongBtn.button.btn-sm.btn-success(playlistTitle = `${playlist.title}`) Add Song
+                                                .row
+                                                    .toast.validToast.fade.hide(id=`validToastAddSong${playlist.title.split(' ').join('-')}` class='musicUserSubmitBtn' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
+                                                        .toast-header
+                                                            strong.mr-auto Short Answer Bot
+                                                            button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                                                span(aria-hidden='true') &times;
+                                                        .toast-body
+                                                            | Settings Saved Successfully
 
-                                                
+                                                    .toast.failedToast.fade.hide(id=`failedToastAddSong${playlist.title.split(' ').join('-')}` class='gamesUserSubmitBtn' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
+                                                        .toast-header
+                                                            strong.mr-auto Short Answer Bot
+                                                            button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                                                span(aria-hidden='true') &times;
+                                                        .toast-body
+                                                            | Something went wrong. If the issue persists please let the owner know through
+                                                            | the discord support server: https://discord.gg/nMj6UKH

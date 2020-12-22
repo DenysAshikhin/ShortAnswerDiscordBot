@@ -1386,10 +1386,10 @@ connectDB.once('open', async function () {
 
         console.log("Ready!");
         exports.Client = client;
-        checkRL();
+        //checkRL();
         // createBackUp();
-        checkTwitch();
-        youtubeLogic.alertYoutube();
+        //checkTwitch();
+        //youtubeLogic.alertYoutube();
 
 
         let promiseArray = [];

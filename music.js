@@ -901,8 +901,9 @@ async function play(message, params, user) {
             if (serverQueue.connectionchannel)
                 if (!serverQueue.connection.channel.members.get(user.id))
                     return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
-
+//hmmmm
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
+
     if (!args) return message.channel.send("You have to provide a link or title of song to play!");
 
     const voiceChannel = message.member.voice.channel;
@@ -1073,7 +1074,7 @@ async function play(message, params, user) {
             if (searchResult.items[i])
                 if (searchResult.items[i].type == 'video') {
                     titleArray.push(searchResult.items[i].title);
-                    urlArray.push({ url: searchResult.items[i].link, custom: true });
+                    urlArray.push({ url: searchResult.items[i].url, custom: true });
                 }
 
             if (titleArray.length == 5)
