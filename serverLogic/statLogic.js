@@ -18,6 +18,9 @@ const topRep = async function (params) {
 
     let users = await User.find({ "guilds": params[0], [`reps.${params[0]}`]: { $ne: null } }).lean();
 
+    if (users.length == 0 )
+        messy.edit("No on in this server has a non-zero rep amount!");
+
     let members = await guild.members.fetch();
 
     let count = 0;

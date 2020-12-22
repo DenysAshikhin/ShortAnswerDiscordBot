@@ -109,7 +109,7 @@ var botIP;
 
 if (process.argv.length == 3) {
 
-    uri = config.uri;
+    //#   uri = config.uri;
     token = config.token;
     HOST = config.IP;
 
@@ -120,7 +120,7 @@ if (process.argv.length == 3) {
     botIP = config.botIP;
 
 } else {
-    uri = config.uri;
+    //   # uri = config.uri;
     token = config.TesterToken;
     defaultPrefix = "##";
     HOST = '127.0.0.1';
@@ -130,6 +130,21 @@ if (process.argv.length == 3) {
     SECRET = config.TesterSecret;
 
 }
+
+var ip = require("ip");
+
+if (ip.address() == config.IP) {
+    uri = config.uriLocal;
+}
+else
+    uri = config.uri;
+console.log(uri);
+console.log(ip.address());
+console.log(config.IP)
+
+
+
+exports.botIP = botIP;
 exports.HOST = HOST;
 exports.SECRET = SECRET;
 exports.REDIRECT_URL = REDIRECT_URL;
@@ -331,7 +346,7 @@ async function checkExistance(member) {
                 $set: {
                     kicked: tempUser.kicked
                 }
-            }, function (err, doc, res) {});
+            }, function (err, doc, res) { });
             return true;
         } else { //The user exists, but not with a matching guild in the DB
 
@@ -373,8 +388,8 @@ function findFurthestDate(date1, date2) {
         else
             return date2;
     else
-    if (numberDate2 == 0)
-        return date1;
+        if (numberDate2 == 0)
+            return date1;
 
     if (numberDate1 < numberDate2)
         return date1;
@@ -524,7 +539,6 @@ const updateFactionTally = async function (guilds) {
     for (let GUILD of guilds) {
         let guild = GUILD;
 
-
         if (!guild.factionLiveTally)
             continue;
         if (!guild.factionLiveTally.channelID)
@@ -557,6 +571,9 @@ const updateFactionTally = async function (guilds) {
 
 
 
+        // let message = client.guilds.cache.get('728358459791245345').channels.cache.get('760233657482084353');
+        // message = await message.send('temp');
+
         let factions = guild.factions;
 
         let finalEmbedArray = [];
@@ -566,7 +583,14 @@ const updateFactionTally = async function (guilds) {
             let finalText = `#Current standing: ${faction.points}\n` +
                 `\nGeneral Contributions: ${faction.contributions.general}\n` +
                 `\nNew Member Points: ${faction.contributions.newMembers}` +
-                `\nMember Specific Contributions:\n`
+                `\nMember Specific Contributions:\n`;
+
+            finalEmbedArray.push({
+                name: faction.name + ' Overview',
+                value: finalText,
+                inline: false
+            });
+            finalText = '';
 
             let memberContribution = '';
 
@@ -574,32 +598,44 @@ const updateFactionTally = async function (guilds) {
 
             let limit = faction.contributions.members.length > 5 ? 5 : faction.contributions.members.length;
 
-            for (let i = 0; i < limit; i++) {
+            if (faction.contributions.members.length != 0)
+                for (let i = 0; i < limit; i++) {
 
-                let member = faction.contributions.members[i];
+                    let member = faction.contributions.members[i];
 
-                let actualyMember = await client.guilds.cache.get(guild.id).members.fetch(member.userID);
+                    let actualyMember = await client.guilds.cache.get(guild.id).members.fetch(member.userID);
 
 
-                memberContribution += `${i + 1})<${actualyMember.displayName.replace(/\s/g, '_')}` +
-                    ` has contributed =${member.points} points!>\n`
-            }
+                    memberContribution += `${i + 1})<${actualyMember.displayName.replace(/\s/g, '_')}` +
+                        ` has contributed =${member.points} points!>\n`
+                    // memberContribution += `${i + 1})<Member#${i + 1}` +
+                    //     ` has contributed =${member.points} points!>\n`
+                }
+            else
+                finalText = "No members have contributed to this faction!";
 
             finalText += memberContribution;
             finalEmbedArray.push({
-                name: faction.name,
-                value: finalText
+                name: faction.name + ' Member Contributions',
+                value: finalText,
+                inline: true
             });
         }
 
+        let link = 'https://www.shortanswerbot.ca/servers/' + guild.id;
+
         let returnedEmbed = await prettyEmbed(null, finalEmbedArray, {
             modifier: 'md',
-            embed: true
+            embed: true,
+            order: false,
+            description: `Only the top 5 member contributions are shown per faction. To see a complete list visit ${link} (make sure you log in first!) and click **Factions**`
         });
         message.edit({
             embed: returnedEmbed
         });
+
     }
+
 }
 
 const getEmoji = function (EMOJI) {
@@ -642,6 +678,7 @@ async function prettyEmbed(message, array, extraParams) {
     let maxLength = extraParams.maxLength ? extraParams.maxLength : 100;
     let cutOff = extraParams.cutOff;
     let embedReturn = extraParams.embed ? extraParams.embed : false;
+    let order = extraParams.order == false ? extraParams.order : true;
 
     let runningString = "";
     let previousName = "";
@@ -650,6 +687,7 @@ async function prettyEmbed(message, array, extraParams) {
     let fieldArray = [];
 
     let tester = 1;
+    let inline;
     for (item of array) {
 
         let BIGSPLIT = false;
@@ -667,6 +705,7 @@ async function prettyEmbed(message, array, extraParams) {
         element = Array.isArray(element) ? element.join("\n") : element;
         let itemName = item.name ? item.name : "";
 
+
         if ((previousName != itemName) && (field != null)) {
             if (item.name) {
                 previousName = '';
@@ -681,6 +720,7 @@ async function prettyEmbed(message, array, extraParams) {
 
             if (field.value.length != 0) {
 
+                field.inline = inline;
                 fieldArray.push(JSON.parse(JSON.stringify(field)));
             }
 
@@ -689,9 +729,16 @@ async function prettyEmbed(message, array, extraParams) {
             field = {
                 name: "",
                 value: [],
-                inline: true
+                inline: inline
             };
         }
+
+        inline = item.inline == false ? false : true;
+
+        // if (item.inline == false)
+        //     inline = item.inline;
+        // if (item.inline == true)
+        //     inline = item.inline;
 
         if ((runningString.length < maxLength) || (field == null)) {
 
@@ -738,7 +785,7 @@ async function prettyEmbed(message, array, extraParams) {
                 field = field == null ? {
                     name: "",
                     value: [],
-                    inline: true
+                    inline: inline
                 } : field;
                 if (itemName != '') {
                     field.name = itemName;
@@ -762,7 +809,7 @@ async function prettyEmbed(message, array, extraParams) {
                     field.name = item.name;
                     previousName = item.name;
                 }
-
+                field.inline = inline;
                 fieldArray.push(JSON.parse(JSON.stringify(field)));
 
                 runningString = "";
@@ -770,7 +817,7 @@ async function prettyEmbed(message, array, extraParams) {
                 field = {
                     name: "",
                     value: [],
-                    inline: true
+                    inline: inline
                 };
             }
         }
@@ -783,13 +830,15 @@ async function prettyEmbed(message, array, extraParams) {
         field.name = '** **';
     } else
         field.name = `${part} ${groupNumber}`;
-    if (field.value.length != 0)
+    if (field.value.length != 0) {
+        field.inline = inline;
         fieldArray.push(JSON.parse(JSON.stringify(field)));
-    return await testy(fieldArray, description, message, modifier, URL, title, selector, cutOff, embedReturn);
+    }
+    return await testy(fieldArray, description, message, modifier, URL, title, selector, cutOff, embedReturn, order);
 }
 exports.prettyEmbed = prettyEmbed;
 
-function createThreeQueue(array, cutOff) {
+function createThreeQueue(array, cutOff, order) {
 
     let threeQueue = {
         queue: [
@@ -800,10 +849,16 @@ function createThreeQueue(array, cutOff) {
         index: 0
     };
 
+
     const CUT = cutOff ? cutOff : 4;
+
+
 
     let rows = Math.floor(array.length / 3);
     if ((array.length % 3) > 0) rows++;
+
+    if (order)
+        rows = 999;
 
     if (rows < CUT) {
         for (let j = 0; j < rows; j++) {
@@ -862,50 +917,64 @@ function createThreeQueue(array, cutOff) {
     return threeQueue;
 }
 
-async function testy(ARR, description, message, modifier, URL, title, selector, cutOff, embedReturn) {
+async function testy(ARR, description, message, modifier, URL, title, selector, cutOff, embedReturn, order) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.timestamp = new Date();
     newEmbed.description = description;
     newEmbed.title = title ? title : newEmbed.title;
     newEmbed.thumbnail.url = URL;
+    let sort = order == false ? false : true;
 
     let amount = ARR.length > 24 ? 24 : ARR.length;
 
-    let threeQueue = createThreeQueue(ARR.splice(0, amount), cutOff)
 
-    threeQueue.index = 0;
 
-    for (let i = 0; i < 25; i++) {
+    if (sort) {
+        let threeQueue = createThreeQueue(ARR.splice(0, amount), cutOff, order)
+        threeQueue.index = 0;
+        for (let i = 0; i < 25; i++) {
 
-        let field = threeQueue.queue[threeQueue.index].shift();
-        if (!field) {
-            if (threeQueue.index == 0) {
-                break;
-            } else {
-                newEmbed.fields.push({
-                    name: "** **",
-                    value: "** **",
-                    inline: true
-                })
-                threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
-                continue;
+            let field = threeQueue.queue[threeQueue.index].shift();
+            if (!field) {
+                if (threeQueue.index == 0) {
+                    break;
+                } else {
+                    newEmbed.fields.push({
+                        name: "** **",
+                        value: "** **",
+                        inline: true
+                    })
+                    threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
+                    continue;
+                }
             }
-        }
 
-        if (!Array.isArray(field.value)) {} else if (modifier == -1) {
-            field.value = field.value.join('\n');
-        } else if (modifier == 1) {
-            field.value = "```" + "\n" + field.value.join('\n') + "```";
-        } else if (modifier) {
-            field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
+            if (!Array.isArray(field.value)) { } else if (modifier == -1) {
+                field.value = field.value.join('\n');
+            } else if (modifier == 1) {
+                field.value = "```" + "\n" + field.value.join('\n') + "```";
+            } else if (modifier) {
+                field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
+            }
+            newEmbed.fields.push(field);
+            threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
         }
-        newEmbed.fields.push(field);
-        threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
     }
+    else
+        for (let i = 0; i < ARR.length; i++) {
+            let field = ARR[i];
+            if (!Array.isArray(field.value)) { } else if (modifier == -1) {
+                field.value = field.value.join('\n');
+            } else if (modifier == 1) {
+                field.value = "```" + "\n" + field.value.join('\n') + "```";
+            } else if (modifier) {
+                field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
+            }
+            newEmbed.fields.push(field);
+        }
 
-
-    if (ARR.length > 0) {
+    if ((ARR.length > 0) && sort) {
         client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID).send({
             embed: newEmbed
         });
@@ -1033,7 +1102,7 @@ const findUser = async function (member, force) {
                 id: member.id
             });
 
-            if(!existed){
+            if (!existed) {
                 console.log(tempUser.guilds);
             }
 

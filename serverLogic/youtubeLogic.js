@@ -152,6 +152,11 @@ const alertYoutube = async function (params) {
                     users.set(member.id, dbUser);
                 }
 
+                if(!dbUser.youtubeAlerts){
+                    console.log(`${dbUser.id} somehow slept through in youtube!`);
+                    continue;
+                }
+
                 if (userArray[i].vidID != dbUser.youtubeAlerts.get(userArray[i].youtuberID)) {//check the the user hasnt already been notified of this song
 
                     member.user.send(userArray[i].message);

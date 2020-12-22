@@ -23,4 +23,4 @@ const BotSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Bots', BotSchema);
+module.exports = mongoose.model('Bots', BotSchema, 'Bots');

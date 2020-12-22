@@ -27,13 +27,13 @@ try {
 
     if (process.argv.length == 3) {
 
-        uri = config.uri;
+        //  uri = config.uri;
         token = config.token;
         IP = config.IP;
         PORT = config.PORT;
         botIP = config.botIP;
     } else {
-        uri = config.uri;
+        // uri = config.uri;
         token = config.TesterToken;
         IP = '127.0.0.1';
         botIP = IP;
@@ -54,6 +54,19 @@ try {
 exports.IP = IP;
 exports.PORT = PORT;
 exports.botIP = botIP;
+
+
+var ip = require("ip");
+
+if (ip.address() == config.IP) {
+    uri = config.uriLocal;
+}
+else
+    uri = config.uri;
+console.log(uri);
+console.log(ip.address());
+console.log(config.IP)
+
 
 const Discord = require('discord.js');
 const User = require('./User.js');
@@ -967,7 +980,7 @@ connectDB.once('open', async function () {
             } else if ((message.content.trim().length == 22) && (message.mentions.users.size == 1) && (message.mentions.users.get(Client.user.id))) {
 
 
-                prefix = '##';
+                //prefix = '##';
 
                 message.channel.send("Your proper prefix is: " + prefix +
                     "\n`" + `Type ${prefix}help` + "` for more help!");
@@ -1062,31 +1075,35 @@ connectDB.once('open', async function () {
             id: newMember.guild.id
         });
 
-        let difference = arraysEqual(oldMember.roles.cache.keyArray(), newMember.roles.cache.keyArray());
 
-        if (!difference.difference)
-            return;
+        if (guild.factionNewMemberPoints) {
 
-        if (guild.factions.length > 0) {
+            let difference = arraysEqual(oldMember.roles.cache.keyArray(), newMember.roles.cache.keyArray());
 
-            let faction = guild.factions.find(element => element.role == difference.difference);
+            if (!difference.difference)
+                return;
 
-            if (faction) {
-                faction.points += 50;
-                faction.contributions.newMembers += 50;
+            if (guild.factions.length > 0) {
 
-                if (guild.factionNewMemberAlert)
-                    (await newMember.guild.fetch()).channels.cache.get(guild.factionNewMemberAlert).send(
-                        `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!` +
-                        `\nWith ${faction.contributions.newMembers} points from new members.`);
+                let faction = guild.factions.find(element => element.role == difference.difference);
 
-                Guild.findOneAndUpdate({
-                    id: newMember.guild.id
-                }, {
-                    $set: {
-                        factions: guild.factions
-                    }
-                }, function (err, doc, res) { });
+                if (faction) {
+                    faction.points += 50;
+                    faction.contributions.newMembers += 50;
+
+                    if (guild.factionNewMemberAlert)
+                        (await newMember.guild.fetch()).channels.cache.get(guild.factionNewMemberAlert).send(
+                            `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!` +
+                            `\nWith ${faction.contributions.newMembers} points from new members.`);
+
+                    Guild.findOneAndUpdate({
+                        id: newMember.guild.id
+                    }, {
+                        $set: {
+                            factions: guild.factions
+                        }
+                    }, function (err, doc, res) { });
+                }
             }
         }
     })
@@ -1280,6 +1297,7 @@ function populateCommandMap() {
     commandMap.set(Commands[151].title.toUpperCase(), ADMINISTRATOR.autoRepToggle)
     commandMap.set(Commands[152].title.toUpperCase(), ADMINISTRATOR.gameRolePing)
     commandMap.set(Commands[153].title.toUpperCase(), ADMINISTRATOR.repToFaction)
+    commandMap.set(Commands[154].title.toUpperCase(), ADMINISTRATOR.factionNewMemberPoints)
 
     exports.commandMap = commandMap;
 }

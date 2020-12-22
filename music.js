@@ -886,6 +886,8 @@ params = {
 */
 async function play(message, params, user) {
 
+    //return message.channel.send('Music functionality is temporarily disabled while a potential memory leak is being investigated. Please try again in a few days!');
+
     if (message.channel.type == 'dm') return message.reply("You must be in a server voice channel and send the command from a server!");
 
     if (!(await checkMusicPerm(user, message.guild, message)))

@@ -70,6 +70,9 @@ const updateGamesList = async function () {
 
     let botty = await Bot.findOne();
 
+
+    //console.log(botty)
+
     games = botty.games;
 
 

@@ -1203,24 +1203,35 @@ const setEmojiCollectorAll = async function (autoroleObj) {
             message = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID).messages.fetch(AUTOROLE.messageID);
         } catch (err) {
 
+            console.log(err)
+            console.log('autorole needs to be deleted?');
+
             let channel = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID);
-            if (channel)
+            if (!channel) {
+                channel.send("An autorole message channel! that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
+                continue;
+            }
+            if (!message) {
                 channel.send("An autorole message that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
+                continue;
+            }
 
 
-            let guild = await MAIN.findGuild({
-                id: AUTOROLE.guildID
-            });
+            fs.promises.writeFile(`${23124}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+            fs.promises.writeFile(`${2222}.json`, JSON.stringify("guildID: " + guild.id + "\n\n" + "MessageID: " + AUTOROLE.messageID), 'UTF-8');
+            // let guild = await MAIN.findGuild({
+            //     id: AUTOROLE.guildID
+            // });
 
-            let index = guild.autorole.findIndex(element => element.messageID == AUTOROLE.messageID)
-            guild.autorole.splice(index);
-            Guild.findOneAndUpdate({
-                id: guild.id
-            }, {
-                $set: {
-                    autorole: guild.autorole
-                }
-            }, function (err, doc, res) { })
+            // let index = guild.autorole.findIndex(element => element.messageID == AUTOROLE.messageID)
+            // guild.autorole.splice(index);
+            // Guild.findOneAndUpdate({
+            //     id: guild.id
+            // }, {
+            //     $set: {
+            //         autorole: guild.autorole
+            //     }
+            // }, function (err, doc, res) { })
             continue;
 
         }
@@ -2579,6 +2590,7 @@ const forwardImages = async function (message, guild, user) {
 
                 for (let imageChan of guild.channelImage) {
 
+                    await MAIN.sleep(2000);
                     await guildy.channels.cache.get(imageChan).send(`Image from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
                 }
             }
@@ -2587,6 +2599,7 @@ const forwardImages = async function (message, guild, user) {
                 let guildy = MAIN.Client.guilds.cache.get(guild.id);
                 for (let imageChan of guild.channelImage) {
 
+                    await MAIN.sleep(2000);
                     await guildy.channels.cache.get(imageChan).send(`Video from ${MAIN.mention(message.author.id)}:\n${attachment.attachment}`);
                 }
             }
@@ -2603,7 +2616,7 @@ const forwardImages = async function (message, guild, user) {
             if (result) {
                 let guildy = MAIN.Client.guilds.cache.get(guild.id);
                 for (let imageChan of guild.channelImage) {
-
+                    await MAIN.sleep(2000);
                     await guildy.channels.cache.get(imageChan).send(`Image from ${MAIN.mention(message.author.id)}:\n${string}`);
                 }
             }
@@ -3101,6 +3114,44 @@ const youtubeHere = async function (message, params, user) {
     return 1;
 }
 exports.youtubeHere = youtubeHere;
+
+const factionNewMemberPoints = async function (message, params, user) {
+
+    const args = message.content.split(" ").slice(1).join(" ").toLowerCase();
+
+    if ((args != 'off') && (args != 'on')) {
+
+        return message.channel.send("You have to specify either 'on' or 'off");
+    }
+
+    if (args == 'on') {
+        message.channel.send("Faction points for new members will be awarded!");
+        //   MAIN.cachedGuilds.set(gmessage.guild.id, guild);
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                factionNewMemberPoints: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
+        return 1;
+    }
+    // MAIN.cachedGuilds.set(message.guild.id, guild);
+    message.channel.send("Faction points for new members will not be awarded!");
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            factionNewMemberPoints: false
+        }
+    }, function (err, doc, res) {
+        MAIN.cachedGuilds.set(message.guild.id, res);
+    });
+    return 1;
+}
+exports.factionNewMemberPoints = factionNewMemberPoints;
 
 const gameRolePing = async function (message, params, user) {
 

@@ -1360,7 +1360,8 @@
             "1) viewPasswordLockRole"
         ],
         "subsection": [
-           "miscellaneous"
+           "miscellaneous",
+           "admin"
         ],
         "category": "Password Role"
     },
@@ -1371,7 +1372,8 @@
             "1) deletePasswordLockRole password123"
         ],
         "subsection": [
-           "miscellaneous"
+           "miscellaneous",
+           "admin"
         ],
         "category": "Password Role"
     },
@@ -1858,6 +1860,19 @@
         "subsection": [
            "games",
            "admin"
+        ],
+        "category": "Faction"
+    },
+    {
+        "title": "factionNewMemberPoints",
+        "explanation": "Enables or disables points being awarded to factions for having members join them!",
+        "example": [
+            "1) factionNewMemberPoints on",
+            "2) factionNewMemberPoints off"
+        ],
+        "subsection": [
+           "admin",
+           "Faction"
         ],
         "category": "Faction"
     }

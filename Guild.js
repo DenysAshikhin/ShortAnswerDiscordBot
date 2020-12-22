@@ -73,6 +73,10 @@ const GuildSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    factionNewMemberPoints: {
+        type: Boolean,
+        default: true
+    },
     repRolePairs: {
         type: [],
         default: []
@@ -111,4 +115,4 @@ const GuildSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Guild', GuildSchema);
+module.exports = mongoose.model('Guild', GuildSchema, 'Guild');
