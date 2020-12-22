@@ -169,10 +169,10 @@ const loadingStart = async function (button, url, body, miscellaneous) {
 
     if (response.status == 200) {
         //$(`.${button.attr('id')}.validToast`).toast('show')
-        button.find('.validToast').toast('show')
+        button.siblings().children('.validToast').toast('show')
     } else {
         //$(`.${button.attr('id')}.failedToast`).toast('show')
-        button.find('.failedToast').toast('show')
+        button.siblings.siblings().children('.failedToast').toast('show')
     }
 }
 

@@ -30,22 +30,23 @@ section#musicModule.module.container.px-5
                                         .row.d-flex
                                             .playlistUpdateSubmitBtn.button.btn.btn-success.my-auto.m-auto Update #{playlist.title} Playlist #[i.fas.fa-music]
                                         
-                                            .toast.validToast.fade.hide(id='validToast' class='musicUserSubmitBtn' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
-                                                .toast-header
-                                                    strong.mr-auto Short Answer Bot
-                                                    button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
-                                                        span(aria-hidden='true') &times;
-                                                .toast-body
-                                                    | Settings Saved Successfully
+                                            .row.my-2
+                                                .toast.validToast.fade.hide(id='validToast' class='musicUserSubmitBtn' data-delay='3000'  role='alert' aria-live='assertive' aria-atomic='true')
+                                                    .toast-header
+                                                        strong.mr-auto Short Answer Bot
+                                                        button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                                            span(aria-hidden='true') &times;
+                                                    .toast-body
+                                                        | Settings Saved Successfully
 
-                                            .toast.failedToast.fade.hide(id='failedToast' class='gamesUserSubmitBtn' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
-                                                .toast-header
-                                                    strong.mr-auto Short Answer Bot
-                                                    button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
-                                                        span(aria-hidden='true') &times;
-                                                .toast-body
-                                                    | Something went wrong. If the issue persists please let the owner know through
-                                                    | the discord support server: https://discord.gg/nMj6UKH
+                                                .toast.failedToast.fade.hide(id='failedToast' class='gamesUserSubmitBtn' data-delay='10000' role='alert' aria-live='assertive' aria-atomic='true')
+                                                    .toast-header
+                                                        strong.mr-auto Short Answer Bot
+                                                        button.ml-2.mb-1.close(type='button' data-dismiss='toast' aria-label='Close')
+                                                            span(aria-hidden='true') &times;
+                                                    .toast-body
+                                                        | Something went wrong. If the issue persists please let the owner know through
+                                                        | the discord support server: https://discord.gg/nMj6UKH
                                     .card-body.px-0.pb-0.mx-0.pt-0
                                         ul.list-group.overflow-auto.playlistList(id=`playlistList${playlist.title}`, playlistTitle=`${playlist.title}` style='max-height: 65vh;')
                                             each song in playlist.songs

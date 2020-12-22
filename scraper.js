@@ -151,11 +151,35 @@ exports.REDIRECT_URL = REDIRECT_URL;
 
 
 
+spotifyClient = config.spotifyClient;
+exports.spotifyClient = spotifyClient;
+spotifySecret = config.spotifySecret;
+exports.spotifySecret = spotifySecret
+var Spotify = require('enhanced-spotify-api');
+exports.Spotify = Spotify;
 
 
-// const Cryptr = require('cryptr');
-// const cryptr = new Cryptr(config.KEY);
-// exports.cryptr = cryptr;
+
+async function authoriseSpotify() {
+
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    let basy = Buffer.from(spotifyClient + ':' + spotifySecret).toString('base64');
+
+    let options = {
+        headers: { 'Authorization': 'Basic ' + basy }
+    };
+
+    needle.post('https://accounts.spotify.com/api/token', 'grant_type=client_credentials', options, function (err, resp) {
+        if (err) console.log(err);
+        if (resp) {
+            Spotify.setAccessToken(resp.body.access_token);
+            exports.Spotify = Spotify;
+        }
+    })
+}
+authoriseSpotify();
+
 
 
 var algorithm = 'aes-256-gcm',
@@ -1475,13 +1499,26 @@ async function minuteCount() {
 
     if (process.argv.length == 3) {
         countTalk();
-        checkTwitch();
-        youtubeLogic.alertYoutube();
+
         // console.log(county++)
     }
 }
 setInterval(minuteCount, 60 * 1000);
 
+async function alertTwitch(){
+    if (process.argv.length == 3) {
+        checkTwitch();
+    }
+}
+setInterval(alertTwitch, 60 * 1000);
+
+async function alertyoutube() {
+
+    if (process.argv.length == 3) {
+        youtubeLogic.alertYoutube();
+    }
+}
+setInterval(alertyoutube, 10 * 60 * 1000);
 
 const checkRL = async function () {
 
