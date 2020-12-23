@@ -40,29 +40,65 @@ $('#qofUserSubmitBtn').on('click', async function () {
     })
 });
 
+$('#createPlaylist').on('click', async function () {
+
+    let prompt = window.prompt("Enter the name for the new playlist!", "Playlist Title");
+
+    if (prompt == null || prompt == "") {
+        // txt = "User cancelled the prompt.";
+    } else {
+        let playlistTitle = prompt;
+        let response = await loadingStart($(this), `${url}/formUpdate/createPlaylist`, {
+            'key': key,
+            'userID': dbUser.id,
+            'playlistTitle': playlistTitle
+        }, {
+            text: 'Create New Playlist',
+            validToast: `validToastCreatePlaylist`,
+            failedToast: `failedToastCreatePlaylist`
+        });
+
+        if (response.status == 200) {
+
+            console.log('trying to refresh')
+            window.location.reload();
+            return 1;
+        }
+    }
+})
+
 $('#gamesUserSubmitBtn').on('click', async function () {
 
-    if ($(this).hasClass('disabled'))
-        return 1;
 
-    console.log('clicky');
+    let list = $(this).parent().parent().parent().parent().find('ul');
+
+    list = list.children();
 
     let ping = !$('#pingSwitch').prop("checked");
     let dm = !$('#dmSwitch').prop("checked");
-    let removeGames = [];
+    let newGamesList = [];
+    let removeGamesList = [];
 
-    $(".userRemoveGamesList option").each(function () {
-        removeGames.push($(this).val());
-        $(this).remove();
+    list.each(function () {
+
+        if (!$(this).hasClass('bg-danger'))
+            newGamesList.push($(this).attr('gameTitle'));
+        else {
+            removeGamesList.push($(this).attr('gameTitle'));
+            $(this).remove();
+        }
     });
-    // fetch('https://127.0.0.1/formUpdate', {
 
     loadingStart($(this), `${url}/formUpdate/userGames`, {
         'key': key,
         'userID': dbUser.id,
+        'newGamesList': newGamesList,
+        'removeGamesList': removeGamesList,
         'excludePing': ping,
         'excludeDM': dm,
-        'removeGames': removeGames
+    }, {
+        text: `Submit`,
+        icon: '<i class="fas fa-music" ></i>'
     });
 
 });
@@ -82,6 +118,7 @@ $('.playlistUpdateSubmitBtn').on('click', function () {
     let newSongList = [];
     let removeSongList = [];
 
+
     list.each(function () {
 
         if (!$(this).hasClass('bg-danger'))
@@ -90,13 +127,8 @@ $('.playlistUpdateSubmitBtn').on('click', function () {
             removeSongList.push($(this).attr('songTitle'));
             $(this).remove();
         }
-        // else
-        //     
     })
 
-
-    console.log(playlistTitle);
-    // console.log(list)
 
     loadingStart($(this), `${url}/formUpdate/playlistUpdate`, {
         'key': key,
@@ -150,7 +182,7 @@ $('.addSongBtn').on('click', async function () {
         </div>
       </li>`
 
-      playlist.append(newListItem);
+        playlist.append(newListItem);
     }
 
 });
@@ -207,17 +239,17 @@ const loadingStart = async function (button, url, body, miscellaneous) {
     return response;
 }
 
-$(".userGamesList").mouseup(function () {
+// $(".userGamesList").mouseup(function () {
 
-    !$('.userGamesList option:selected').remove().appendTo('.userRemoveGamesList');
-    $("option:selected").prop("selected", false)
-});
+//     !$('.userGamesList option:selected').remove().appendTo('.userRemoveGamesList');
+//     $("option:selected").prop("selected", false)
+// });
 
-$(".userRemoveGamesList").mouseup(function () {
+// $(".userRemoveGamesList").mouseup(function () {
 
-    !$('.userRemoveGamesList option:selected').remove().appendTo('.userGamesList');
-    $("option:selected").prop("selected", false)
-});
+//     !$('.userRemoveGamesList option:selected').remove().appendTo('.userGamesList');
+//     $("option:selected").prop("selected", false)
+// });
 
 $('#defaultPrefix').on('input', function () {
 
@@ -269,12 +301,13 @@ $('#guildPrefix').on('input', function () {
         $('#qofSubmitBtn').removeClass('disabled');
 });
 
-$('.songCloseBtn').mouseup(function () {
+$('.closeBtn').mouseup(function () {
 
     let container = $(this).parent().parent();
     container.toggleClass('bg-danger');
     container.toggleClass('deco-white');
 });
+
 
 
 const adminLock = function (arr) {

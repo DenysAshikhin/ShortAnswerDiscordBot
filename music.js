@@ -901,7 +901,7 @@ async function play(message, params, user) {
             if (serverQueue.connectionchannel)
                 if (!serverQueue.connection.channel.members.get(user.id))
                     return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
-//hmmmm
+
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
 
     if (!args) return message.channel.send("You have to provide a link or title of song to play!");
@@ -1958,7 +1958,7 @@ function createPlaylist(message, params, user) {
 
     if (user.playlists.some((value) => { return value.title == newName })) return message.channel.send(`You already have a playlist called ${newName}`);
 
-    if (newName.length > 200) return message.channel.send(`${newName} is too loong!`);
+    if (newName.length > 200) return message.channel.send(`${newName} is too long!`);
     user.playlists.push({ title: newName, songs: [] })
     User.findOneAndUpdate({ id: user.id }, { $set: { playlists: user.playlists } }, function (err, doc, res) { });
 

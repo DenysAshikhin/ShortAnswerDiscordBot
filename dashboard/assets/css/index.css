@@ -33,6 +33,12 @@
     color: white;
 }
 
+.gameItem:hover {
+    background-color: #0275d8;
+    /* opacity: 0.5; */
+    color: white;
+}
+
 #navbarNavAltMarkup {
     background-color: white;
 }

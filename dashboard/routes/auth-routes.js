@@ -71,6 +71,45 @@ router.get('/invite', function (req, res) {
 });
 
 
+router.post('/formUpdate/createPlaylist', validateKey, async function(req, res){
+
+    console.log('in /formUpdate/createPlaylist')
+    res.locals.dbUser = await MAIN.findUser({ id: res.locals.validatedUser.id });
+    if (req.body.playlistTitle){
+
+        let playlist = res.locals.dbUser.playlists.find(element => element.title === req.body.playlistTitle);
+
+        if (playlist){
+            res.status(400).json({
+                message: 'Error message: You already have a playlist with this title!'
+            }).end();
+        }
+        else{
+
+            if((req.body.playlistTitle.length == 0) || (req.body.playlistTitle.length > 200)){
+                res.status(400).json({
+                    message: 'Error message: Invalid playlist title!'
+                }).end();
+            }
+            else{
+
+                res.locals.dbUser.playlists.push({title: req.body.playlistTitle, songs: []});
+                User.findOneAndUpdate({ id: res.locals.dbUser.id }, {$set: {playlists: res.locals.dbUser.playlists}}).exec();
+                res.status(200).json({
+                    message: 'Successfully created new playlist!',
+                    playlistTitle: req.body.playlistTitle
+                })
+            }
+
+        }
+    }
+    else {
+        res.status(400).json({
+            message: 'Error message: Missing playlist title!'
+        }).end();
+    }
+})
+
 router.post('/formUpdate/addSong', validateKey, async function (req, res) {
 
     console.log('/formUpdate/addSong');
@@ -236,8 +275,8 @@ router.post('/formUpdate/userGames', validateKey, async function (req, res) {
     else
         res.locals.dbUser.excludeDM = true;
 
-    if (req.body.removeGames)
-        for (let game of req.body.removeGames)
+    if (req.body.removeGamesList)
+        for (let game of req.body.removeGamesList)
             if (res.locals.dbUser.games.includes(game))
                 res.locals.dbUser.games.splice(res.locals.dbUser.games.indexOf(game), 1);
 
@@ -251,7 +290,8 @@ router.post('/formUpdate/userGames', validateKey, async function (req, res) {
     }).exec();
 
     res.status(200).json({
-        maybe: user
+        newGamesList: res.locals.dbUser.games,
+        message: "Succesfully updates personal game settings!"
     }).end();
 
     // MAIN.sendToBot({
