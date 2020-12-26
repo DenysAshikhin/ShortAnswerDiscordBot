@@ -141,6 +141,7 @@ else
 console.log(uri);
 console.log(ip.address());
 console.log(config.IP)
+console.log('ip test over')
 
 
 
@@ -423,6 +424,8 @@ exports.findFurthestDate = findFurthestDate;
 
 
 const sendToBot = async function (data) {
+
+    console.log("triggered send to bot");
 
     let encrypted = encrypt(JSON.stringify({
         ...data,
@@ -1253,32 +1256,7 @@ const getGuilds = async function () {
 }
 exports.getGuilds = getGuilds;
 
-// const server = net.createServer(async (socket) => {
 
-//     socket.on('data', async (data) => {
-//         let dataParsed = JSON.parse(data.toString());
-//         queue(commandMap.get(dataParsed.command), dataParsed.params, socket, true);
-//         if (dataParsed.kill)
-//             socket.destroy();
-
-//         // let result = await commandMap.get(dataParsed.command).apply(null, [dataParsed.params, socket]);
-//         //     socket.write(JSON.stringify({ status: result }));
-
-//     })
-//     socket.on('error', (err) => {
-//         // Handle errors here.
-//         // console.log(err);
-//         // console.log("Caught socket error");
-//     });
-//     socket.on('close', (had_error) => {
-//         // console.log("socket closed");
-//         // console.log(had_error)
-//         socket.destroy();
-//         // console.log("destroyed the closed socket?");
-//     })
-// });
-
-// server.on('error', (err) => { console.log("Caught server error") })
 
 // Grab an arbitrary unused PORT.
 //'45.63.17.228'
@@ -1505,7 +1483,7 @@ async function minuteCount() {
 }
 setInterval(minuteCount, 60 * 1000);
 
-async function alertTwitch(){
+async function alertTwitch() {
     if (process.argv.length == 3) {
         checkTwitch();
     }
@@ -1561,3 +1539,30 @@ process.on('unhandledException', (err, p) => {
     } else
         console.log(err);
 });
+
+process.on('unhandledError', (err) => {
+    console.log(err);
+})
+
+
+
+
+
+// const fuckThisShit = async function(){
+
+//     var Dependo = require('dependo');
+
+//     // Fire up an dependo instance
+//     var dependo = new Dependo('./scraper.js', {
+//       format: 'es6',
+//       exclude: '^node_modules',
+//       title: "FUCK THIS"
+//     });
+
+//     let res = dependo.generateHtml();
+
+//     fs.promises.writeFile(`./htmll3l.html`, res, 'UTF-8');
+//     console.log("WROPTE")
+// }
+// fuckThisShit();
+

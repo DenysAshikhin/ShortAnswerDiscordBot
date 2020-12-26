@@ -15,7 +15,6 @@ router.get('/dashboard', async function (req, res) {
 
     console.log('in /dashboard');
 
-
     let finishedArr = await Promise.all([MAIN.findUser({ id: res.locals.user.id }), Guild.findOne({ id: res.locals.user.id })]);
 
     res.locals.dbUser = finishedArr[0];

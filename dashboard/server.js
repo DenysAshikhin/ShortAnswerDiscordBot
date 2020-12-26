@@ -15,6 +15,7 @@ const Cookies = require('cookies');
 const favicon = require('serve-favicon')
 const middleware = require('./modules/middleware.js');
 
+
 var https = require('https');
 var http = require('http');
 var fs = require('fs');
@@ -28,14 +29,6 @@ var serverOptions = {
     cert: fs.readFileSync(path.join(sslPath, `shortanswerbot_ca.crt`)),
     ca: fs.readFileSync(path.join(sslPath, `shortanswerbot_ca.ca-bundle`))
 };
-
-
-var serverOptionsTemp = {
-    key: fs.readFileSync(path.join(path.join(__dirname, '..', 'temp', 'security'), 'cert.key')),
-    cert: fs.readFileSync(path.join(path.join(__dirname, '..', 'temp', 'security'), `cert.pem`))
-    // ca: fs.readFileSync(path.join(path.join(__dirname, '..', 'temp'), `shortanswerbot_ca.ca-bundle`))
-};
-
 
 var httpServer;
 var httpsServer

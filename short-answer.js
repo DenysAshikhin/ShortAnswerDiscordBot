@@ -1,6 +1,6 @@
 var PORT;
 var IP;
-
+console.log("SHORT ANSWER IMPORTED")
 
 var defaultPrefix = "sa!";
 
@@ -694,6 +694,8 @@ const requestListener = async function (req, res) {
 
 const HTTPserver = http.createServer(requestListener);
 
+
+console.log(`This should be 5555~~~~${config.botPORT}`)
 HTTPserver.listen(config.botPORT, botIP, () => {
     console.log(`Server is running on http://${botIP}:${config.botPORT}`);
 });

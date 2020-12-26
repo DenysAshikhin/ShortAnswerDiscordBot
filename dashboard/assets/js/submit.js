@@ -173,7 +173,7 @@ $('.addSongBtn').on('click', async function () {
         let playlist = $(`#playlistList${playlistTitle.split(' ').join('-')}`);
         console.log(finish);
 
-        let songTitle = await finish.json().songTitle
+        let songTitle = finish.songTitle
 
         let newListItem = `<li class="list-group-item d-inline songItem border-left-0 border-right-0 border-bottom-0 border-top" songTitle="${songTitle}"> 
         <div class="row">
@@ -216,7 +216,11 @@ const loadingStart = async function (button, url, body, miscellaneous) {
 
 
     console.log(response);
-    console.log(await response.json());
+    let statusCode = response.status;
+    response = await response.json();
+    response.status = statusCode;
+    console.log(`following: `);
+    console.log(response);
     //console.log(button.attr('id'));
 
 
