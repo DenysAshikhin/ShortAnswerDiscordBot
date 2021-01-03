@@ -1,5 +1,5 @@
 // This variable affects the `.h-*` and `.w-*` classes.
-
+@import "../bootstrap_source/scss/bootstrap";
 $sizes: map-merge(
   (
     25: 25%,
@@ -13,6 +13,9 @@ $sizes: map-merge(
   $sizes
 );
 
+.pr-6,
+.px-6 {
+  padding-right: 4.5rem !important;
+  padding-left: 4.5rem !important;
+}
 
-
-@import "../bootstrap_source/scss/bootstrap";

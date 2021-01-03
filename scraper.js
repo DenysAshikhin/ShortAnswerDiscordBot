@@ -1372,10 +1372,14 @@ connectDB.once('open', async function () {
 
         let promiseArray = [];
 
-        for (let guildy of client.guilds.cache.values())
-            promiseArray.push(guildy.members.fetch());
+        for (let guildy of client.guilds.cache.values()) {
 
-        await Promise.all(promiseArray);
+            guildy.members.fetch().catch(err => console.log(`died on: ${guildy.id} --- ${guildy.name}`));
+            
+        }
+        // promiseArray.push(guildy.members.fetch());
+
+        // await Promise.all(promiseArray);
 
 
         const DASHBOARD = require('./dashboard/server.js');

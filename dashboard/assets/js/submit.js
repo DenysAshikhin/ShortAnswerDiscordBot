@@ -137,9 +137,36 @@ $('.playlistUpdateSubmitBtn').on('click', function () {
         'newSongList': newSongList,
         'removeSongList': removeSongList
     }, {
-        text: `Update ${playlistTitle} Playlist    `,
+        text: `Update Playlist    `,
         icon: '<i class="fas fa-music" ></i>'
     });
+
+});
+
+$('.playlistDeleteSubmitBtn').on('click', async function () {
+
+    let list = $(this).parent().parent().parent().find('ul');
+
+    let playlistTitle = list.attr('playlistTitle');
+
+    if (window.confirm("Are you sure you wish to delete this playlist?")) {
+        let response = await loadingStart($(this), `${url}/formUpdate/playlistDelete`, {
+            'key': key,
+            'userID': dbUser.id,
+            'playlistTitle': playlistTitle
+        }, {
+            text: `Delete Playlist    `,
+            icon: '<i class="fas fa-music" ></i>'
+        });
+
+
+        if (response.status == 200) {
+            await new Promise(r => setTimeout(r, 2000));
+            console.log('trying to refresh')
+            window.location.reload();
+            return 1;
+        }
+    }
 
 });
 
@@ -225,7 +252,9 @@ const loadingStart = async function (button, url, body, miscellaneous) {
 
 
     if (miscellaneous) {
+        console.log('inside miscel')
         if (miscellaneous.validToast) {
+            console.log('inside of validToast')
 
             if (response.status == 200) {
                 $(`#${miscellaneous.validToast}`).toast('show');
@@ -233,8 +262,15 @@ const loadingStart = async function (button, url, body, miscellaneous) {
                 $(`#${miscellaneous.failedToast}`).toast('show');
             }
         }
+        else if (response.status == 200) {
+            console.log(`In else if`)
+            button.siblings().children('.validToast').toast('show');
+        } else {
+            button.siblings().children('.failedToast').toast('show');
+        }
     }
     else if (response.status == 200) {
+        console.log(`In else if`)
         button.siblings().children('.validToast').toast('show');
     } else {
         button.siblings().children('.failedToast').toast('show');
@@ -242,18 +278,6 @@ const loadingStart = async function (button, url, body, miscellaneous) {
 
     return response;
 }
-
-// $(".userGamesList").mouseup(function () {
-
-//     !$('.userGamesList option:selected').remove().appendTo('.userRemoveGamesList');
-//     $("option:selected").prop("selected", false)
-// });
-
-// $(".userRemoveGamesList").mouseup(function () {
-
-//     !$('.userRemoveGamesList option:selected').remove().appendTo('.userGamesList');
-//     $("option:selected").prop("selected", false)
-// });
 
 $('#defaultPrefix').on('input', function () {
 

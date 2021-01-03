@@ -285,6 +285,47 @@ router.post('/formUpdate/playlistUpdate', validateKey, async function (req, res)
         }).end();
 });
 
+router.post('/formUpdate/playlistDelete', validateKey, async function (req, res) {
+
+    console.log('in deletePlaylist');
+    res.locals.dbUser = await MAIN.findUser({ id: res.locals.validatedUser.id });
+
+    if (req.body.playlistTitle) {
+
+        let playlist = res.locals.dbUser.playlists.find(element => element.title === req.body.playlistTitle);
+
+        let index = -1;
+
+        for (let i = 0; i < res.locals.dbUser.playlists.length; i++) {
+
+            if (res.locals.dbUser.playlists[i].title === req.body.playlistTitle) {
+                index = i;
+                break
+            }
+        }
+
+        if (index != -1) {
+
+            res.locals.dbUser.playlists.splice(index, 1);
+            console.log(index);
+
+            User.findOneAndUpdate({ id: res.locals.dbUser.id }, { $set: { playlists: res.locals.dbUser.playlists } }).exec();
+
+            res.status(200).json({
+                message: "Succesfuly deleted playlist."
+            }).end();
+        }
+        else
+            res.status(400).json({
+                message: 'Error code: Could not find a personal playlist with the title: ' + req.body.playlistTitle
+            }).end();
+    }
+    else
+        res.status(400).json({
+            message: 'Error code: Could not find a personal playlist with the title: ' + req.body.playlistTitle
+        }).end();
+});
+
 router.post('/formUpdate/userGames', validateKey, async function (req, res) {
 
     console.log('in /formUpdate/userGames');
@@ -360,7 +401,7 @@ router.post('/formUpdate/userQualityOfLife', validateKey, async function (req, r
     }).exec();
 
     res.status(200).json({
-        maybe: user
+        message: "Successfully updated settings."
     }).end();
 
     MAIN.sendToBot({
@@ -544,7 +585,7 @@ async function spotifyPlaylist(message, params, user) {
     console.log("over)", playlistTracks.items.length)
     let orderPlaylist = [playlistTracks.items[0]];
 
-    
+
 
     // for (let trackID of playlistTracks.order) {
     //     orderPlaylist.push(playlistTracks.items[trackID])

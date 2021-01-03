@@ -35,6 +35,7 @@ var httpsServer
 
 const initialise = async function () {
 
+    console.log("try to inistiliase")
 
     app.set('views', __dirname + '/views');
     app.set('view engine', 'pug')

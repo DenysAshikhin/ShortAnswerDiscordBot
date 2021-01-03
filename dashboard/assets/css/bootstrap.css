@@ -8623,14 +8623,6 @@ button.bg-dark:focus {
   width: auto !important;
 }
 
-.w-85 {
-  width: 85% !important;
-}
-
-.w-90 {
-  width: 90% !important;
-}
-
 .h-25 {
   height: 25% !important;
 }
@@ -8649,14 +8641,6 @@ button.bg-dark:focus {
 
 .h-auto {
   height: auto !important;
-}
-
-.h-85 {
-  height: 85% !important;
-}
-
-.h-90 {
-  height: 90% !important;
 }
 
 .mw-100 {
@@ -10816,5 +10800,11 @@ a.text-dark:hover, a.text-dark:focus {
     color: inherit;
     border-color: #dee2e6;
   }
+}
+
+.pr-6,
+.px-6 {
+  padding-right: 4.5rem !important;
+  padding-left: 4.5rem !important;
 }
 /*# sourceMappingURL=bootstrap.css.map */
