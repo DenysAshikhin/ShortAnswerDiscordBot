@@ -122,6 +122,9 @@ async function timeZone(message, params, user) {
 }
 exports.timeZone = timeZone;
 
+/**
+ * flags: none = all, 1 = self, 2 = any message without attachments
+ */
 async function Delete(message, params) {
 
     if (message.channel.type == 'dm') return -1;
@@ -136,15 +139,14 @@ async function Delete(message, params) {
 
     let args = message.content.split(" ").slice(1).join(" ").split(',');
     let amount = args[0];
-
-    let self = false;
+    let flag;
     if (args[1])
-        if (args[1].toLowerCase().trim() == 'false')
-            self = false;
-        else if (args[1].toLowerCase().trim() == 'true')
-            self = true;
+        if (args[1].toLowerCase().trim() == '1')
+            flag = 1;
+        else if (args[1].toLowerCase().trim() == '2')
+            flag = 2;
         else
-            return message.channel.send("If providing the `self` argument, it must be either `true` or `false` seperated from the number with a `,` (comma)!");
+            return message.channel.send("If providing an optional delete modifier, it must be either `1` or `2` seperated from the number with a `,` (comma)!");
 
     if (params[0].length <= 0) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
     else if (isNaN(params[0])) message.channel.send("You have entered an invalid number, valid range is 0<x<100");
@@ -155,12 +157,25 @@ async function Delete(message, params) {
         amount = Number(params[0]) + 1;
         let messages = await message.channel.messages.fetch({ limit: amount });
 
-        if (self) {
+        if (flag == 1) {
 
             for (let messy of messages.values()) {
-           
-                if (messy.author.id != MAIN.Client.user.id)
+
+                if (messy.author.id != MAIN.Client.user.id) {
                     messages.delete(messy.id)
+                }
+            }
+            message.channel.bulkDelete(messages).catch(err => {
+                console.log("Error deleting bulk messages: " + err);
+                message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+            });
+        }
+        else if (flag == 2) {
+
+            for (let messy of messages.values()) {
+                if (messy.attachments.size != 0) {
+                    messages.delete(messy.id)
+                }
             }
             message.channel.bulkDelete(messages).catch(err => {
                 console.log("Error deleting bulk messages: " + err);

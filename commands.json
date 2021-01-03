@@ -184,10 +184,10 @@
     },
     {
         "title": "delete",
-        "explanation": "Deletes [number] of the last messages. You and the bot must have the *Manage_Messages* permission in the channel you wish to run the command. Can optionally provide a true/false after the number to indicate for the bot to delete only its own messages",
+        "explanation": "Deletes [number] of the last messages. You and the bot must have the *Manage_Messages* permission in the channel you wish to run the command. Can optionally provide a 1 or 2 flag after a comma for the following:\n1: Deletes only its own messages\n2: Deletes any message without attachments",
         "example": [
             "1) delete 4",
-            "2) delete 10, true"
+            "2) delete 10, 1"
         ],
         "subsection": [
            "general"
