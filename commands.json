@@ -1875,5 +1875,17 @@
            "Faction"
         ],
         "category": "Faction"
+    },
+    {
+        "title": "resetFactionPoints",
+        "explanation": "Resets the points for all factions to 0, including any contributions.",
+        "example": [
+            "1) resetFactionPoints"
+        ],
+        "subsection": [
+           "admin",
+           "Faction"
+        ],
+        "category": "Faction"
     }
 ]

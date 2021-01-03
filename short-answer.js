@@ -1300,6 +1300,7 @@ function populateCommandMap() {
     commandMap.set(Commands[152].title.toUpperCase(), ADMINISTRATOR.gameRolePing)
     commandMap.set(Commands[153].title.toUpperCase(), ADMINISTRATOR.repToFaction)
     commandMap.set(Commands[154].title.toUpperCase(), ADMINISTRATOR.factionNewMemberPoints)
+    commandMap.set(Commands[155].title.toUpperCase(), ADMINISTRATOR.resetFactionPoints)
 
     exports.commandMap = commandMap;
 }
@@ -2124,7 +2125,7 @@ exports.generalMatcher = generalMatcher;
 
 /**
  * 
- * @param {part, startTally, modifier, URL, title, description, selector, maxLength, embed} extraParams 
+ * @param {part, startTally, modifier, URL, title, description, selector, maxLength, embedReturn} extraParams 
  */
 async function prettyEmbed(message, array, extraParams) {
 

@@ -2374,6 +2374,36 @@ const repToFaction = async function (message, params, user) {
 exports.repToFaction = repToFaction;
 
 
+const resetFactionPoints = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can reset the faction points");
+
+    let guild = await Guild.findOne({ id: message.guild.id }).exec();
+
+    for (let faction of guild.factions) {
+
+        faction.points = 0;
+        faction.contributions.general = 0;
+        faction.contributions.newMembers = 0;
+
+        for (let member of faction.contributions.members) {
+
+            if ((!member.legacyPoints) || (member.legacyPoints === NaN))
+                member.legacyPoints = 0;
+
+            member.legacyPoints += member.points;
+            member.points = 0;
+        }
+    }
+
+    Guild.findOneAndUpdate({ id: guild.id }, { $set: { factions: guild.factions } }).exec();
+    message.channel.send("Succesfully reset faction points");
+}
+exports.resetFactionPoints = resetFactionPoints;
+
 
 const identifyThanks = function (message) {
 

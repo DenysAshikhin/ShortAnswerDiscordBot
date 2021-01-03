@@ -405,7 +405,7 @@ const UnlinkRLTracker = async function (message, params, user) {
                     $set: {
                         RLTracker: guild.RLTracker
                     }
-                }, () => {});
+                }, () => { });
                 return 1;
             }
         }
@@ -479,7 +479,7 @@ async function followTwitchChannel(message, params, user) {
             $set: {
                 twitchFollows: parsed.result
             }
-        }, function (err, doc, res) {});
+        }, function (err, doc, res) { });
         return message.channel.send(`Succesfully added ${parsed.targetChannelName} to your follow list!`);
     }
     return -1;
@@ -635,7 +635,7 @@ async function removeChannelTwitchLink(message, params, user) {
                         $set: {
                             channelTwitch: guild.channelTwitch
                         }
-                    }, function (err, doc, res) {});
+                    }, function (err, doc, res) { });
                     return message.channel.send(`Successfully unlinked ${parsed._data.display_name} and <#${message.mentions.channels.first().id}>`);
                 }
             }
@@ -657,15 +657,15 @@ async function unlinkTwitch(message, params, user) {
             if (!params.looped)
                 return MAIN.generalMatcher(message, -23, user, ['Keep', 'Remove'],
                     [{
-                            looped: true,
-                            keep: true,
-                            followArr: user.twitchFollows
-                        },
-                        {
-                            looped: true,
-                            keep: false,
-                            followArr: []
-                        }
+                        looped: true,
+                        keep: true,
+                        followArr: user.twitchFollows
+                    },
+                    {
+                        looped: true,
+                        keep: false,
+                        followArr: []
+                    }
                     ],
                     unlinkTwitch, "Do you want to keep your current follows?");
     } else {
@@ -677,7 +677,7 @@ async function unlinkTwitch(message, params, user) {
                 linkedTwitch: null,
                 twitchFollows: params.followArr
             }
-        }, function (err, doc, res) {});
+        }, function (err, doc, res) { });
         return message.channel.send("Succesfully unlinked your twitch!" + ` You now have ${params.followArr.length} channels still being followed!`);
     }
 }
@@ -717,7 +717,7 @@ async function linkTwitch(message, params, user) {
                     linkedTwitch: params.streamer._data.id,
                     twitchFollows: params.followArr
                 }
-            }, function (err, doc, res) {});
+            }, function (err, doc, res) { });
             message.channel.send(`Succesfully linked ${params.streamer._data.display_name} to your account, you now have ${params.followArr.length} channels you are following!`);
             return 1;
         } else if (user.twitchFollows && (user.twitchFollows.length > 0)) {
@@ -725,17 +725,17 @@ async function linkTwitch(message, params, user) {
             if (user.twitchFollows.length > 0)
                 return await MAIN.generalMatcher(message, -23, user, ['Combine', 'Remove'],
                     [{
-                            streamer: params.streamer,
-                            looped: true,
-                            keep: 1,
-                            followArr: params.goodArray.concat(user.twitchFollows.filter(item => !params.goodArray.includes(item)))
-                        },
-                        {
-                            streamer: params.streamer,
-                            looped: true,
-                            keep: -1,
-                            followArr: params.goodArray
-                        }
+                        streamer: params.streamer,
+                        looped: true,
+                        keep: 1,
+                        followArr: params.goodArray.concat(user.twitchFollows.filter(item => !params.goodArray.includes(item)))
+                    },
+                    {
+                        streamer: params.streamer,
+                        looped: true,
+                        keep: -1,
+                        followArr: params.goodArray
+                    }
                     ],
                     linkTwitch, "You already have a linked twitch account or channels you have followed, would you like to combine the old follows, or remove them?");
         } else {
@@ -1293,7 +1293,7 @@ const factionPoints = async function (message, params, user) {
             $set: {
                 factions: guild
             }
-        }, function (err, doc, res) {});
+        }, function (err, doc, res) { });
     } else {
 
         let memberRoles = message.guild.members.cache.get(message.mentions.users.first().id).roles.cache.keyArray();
@@ -1336,7 +1336,7 @@ const factionPoints = async function (message, params, user) {
             $set: {
                 factions: guild
             }
-        }, function (err, doc, res) {});
+        }, function (err, doc, res) { });
     }
 
 }
@@ -1394,12 +1394,14 @@ const viewFaction = async function (message, params, user) {
 
             let finalText = `#Current standing: ${faction.points}\n` +
                 `\nGeneral Contributions: ${faction.contributions.general}\n` +
-                `\nNew Member Points: ${faction.contributions.newMembers}` +
-                `\nMember Specific Contributions:\n`
+                `\nNew Member Points: ${faction.contributions.newMembers}\n` +
+                `\nMember Specific Contributions:\n\n`
 
             let memberContribution = '';
 
-            faction.contributions.members.sort((a, b) => b.points - a.points)
+            faction.contributions.members = faction.contributions.members.filter((value) => { return value.points != 0; });
+
+            faction.contributions.members.sort((a, b) => b.points - a.points);
 
             let limit = faction.contributions.members.length > 5 ? 5 : faction.contributions.members.length;
 
@@ -1407,13 +1409,13 @@ const viewFaction = async function (message, params, user) {
 
                 let member = faction.contributions.members[i];
 
-                console.log(member);
-
                 memberContribution += `${i + 1})<${message.guild.members.cache.get(member.userID).displayName.replace(/\s/g, '_')}` +
                     ` has contributed =${member.points} points!>\n`
             }
 
-            finalText += memberContribution;
+            if (faction.contributions.members != 0)
+                finalText += memberContribution;
+
             finalEmbedArray.push({
                 name: faction.name,
                 value: finalText
@@ -1421,7 +1423,9 @@ const viewFaction = async function (message, params, user) {
         }
 
         MAIN.prettyEmbed(message, finalEmbedArray, {
-            modifier: 'md'
+            modifier: 'md',
+            maxLength: 150
+
         });
     } else if (message.mentions.roles.size > 0) {
 
@@ -1431,10 +1435,13 @@ const viewFaction = async function (message, params, user) {
 
         let finalText = `#Current standing: ${faction.points}\n` +
             `\nGeneral Contributions: ${faction.contributions.general}\n` +
-            `\nNew Member Points: ${faction.contributions.newMembers}` +
-            `\nMember Specific Contributions:\n`
+            `\nNew Member Points: ${faction.contributions.newMembers}\n` +
+            `\nMember Specific Contributions:\n\n`
 
         let memberContribution = '';
+        faction.contributions.members = faction.contributions.members.filter((value) => { return value.points != 0; });
+        faction.contributions.members.sort((a, b) => b.points - a.points);
+
 
         for (let i = 0; i < faction.contributions.members.length; i++) {
 
@@ -1444,7 +1451,9 @@ const viewFaction = async function (message, params, user) {
                 ` has contributed =${member.points} points!>\n`
         }
 
-        finalText += memberContribution;
+        if (faction.contributions.members != 0)
+            finalText += memberContribution;
+
         MAIN.prettyEmbed(message, [{
             name: faction.name,
             value: finalText
@@ -1462,10 +1471,12 @@ const viewFaction = async function (message, params, user) {
 
         let finalText = `#Current standing: ${faction.points}\n` +
             `\nGeneral Contributions: ${faction.contributions.general}\n` +
-            `\nNew Member Points: ${faction.contributions.newMembers}` +
-            `\nMember Specific Contributions:\n`
+            `\nNew Member Points: ${faction.contributions.newMembers}\n` +
+            `\nMember Specific Contributions:\n\n`
 
         let memberContribution = '';
+        faction.contributions.members = faction.contributions.members.filter((value) => { return value.points != 0; });
+        faction.contributions.members.sort((a, b) => b.points - a.points);
 
         for (let i = 0; i < faction.contributions.members.length; i++) {
 
@@ -1475,7 +1486,9 @@ const viewFaction = async function (message, params, user) {
                 ` has contributed =${member.points} points!>\n`
         }
 
-        finalText += memberContribution;
+        if (faction.contributions.members != 0)
+            finalText += memberContribution;
+
         MAIN.prettyEmbed(message, [{
             name: faction.name,
             value: finalText
@@ -1501,10 +1514,12 @@ const viewFaction = async function (message, params, user) {
 
         let finalText = `#Current standing: ${faction.points}\n` +
             `\nGeneral Contributions: ${faction.contributions.general}\n` +
-            `\nNew Member Points: ${faction.contributions.newMembers}` +
-            `\nMember Specific Contributions:\n`
+            `\nNew Member Points: ${faction.contributions.newMembers}\n` +
+            `\nMember Specific Contributions:\n\n`
 
         let memberContribution = '';
+        faction.contributions.members = faction.contributions.members.filter((value) => { return value.points != 0; });
+        faction.contributions.members.sort((a, b) => b.points - a.points);
 
         for (let i = 0; i < faction.contributions.members.length; i++) {
 
@@ -1514,7 +1529,9 @@ const viewFaction = async function (message, params, user) {
                 ` has contributed =${member.points} points!>\n`
         }
 
-        finalText += memberContribution;
+        if (faction.contributions.members != 0)
+            finalText += memberContribution;
+
         MAIN.prettyEmbed(message, [{
             name: faction.name,
             value: finalText
@@ -1538,7 +1555,7 @@ const deleteFaction = async function (message, params, user) {
             $set: {
                 factions: guild.factions
             }
-        }, function (err, doc, res) {});
+        }, function (err, doc, res) { });
 
         return message.channel.send(`${deleted.name} has been deleted! ${MAIN.mentionRole(deleted.role)} can now be assigned a new faction!`);
     }
@@ -1594,7 +1611,7 @@ const deleteFaction = async function (message, params, user) {
         $set: {
             factions: guild.factions
         }
-    }, function (err, doc, res) {});
+    }, function (err, doc, res) { });
 
     message.channel.send(`${deleted.name} has been deleted! ${MAIN.mentionRole(deleted.role)} can now be assigned a new faction!`);
 }
@@ -1626,7 +1643,7 @@ const resetFactions = async function (message, params, user) {
                 $set: {
                     factions: guild.factions
                 }
-            }, function (err, doc, res) {});
+            }, function (err, doc, res) { });
             return params.channel.send("All factions have been reset!");
         }
 
@@ -1643,16 +1660,16 @@ const resetFactions = async function (message, params, user) {
 
     if (!params.looped)
         return MAIN.generalMatcher(message, -23, user, ['yes', 'no'], [{
-                    looped: true,
-                    wipe: true,
-                    guildID: message.guild.id,
-                    channel: message.channel
-                },
-                {
-                    looped: true,
-                    wipe: false
-                }
-            ],
+            looped: true,
+            wipe: true,
+            guildID: message.guild.id,
+            channel: message.channel
+        },
+        {
+            looped: true,
+            wipe: false
+        }
+        ],
             resetFactions, "You are about to reset all faction and member contributions. Are you sure you wish to proceed?");
 }
 exports.resetFactions = resetFactions;
@@ -1678,7 +1695,7 @@ const factionNewMemberAlertChannel = async function (message, params, user) {
         $set: {
             factionNewMemberAlert: guild.factionNewMemberAlert
         }
-    }, function (err, doc, res) {});
+    }, function (err, doc, res) { });
 
     message.channel.send(`${MAIN.mentionChannel(guild.factionNewMemberAlert)} will now display new faction members!`);
 }
@@ -1732,16 +1749,16 @@ const createFactionRunningTally = async function (message, params, user) {
     });
 
     Guild.findOneAndUpdate({
-            id: message.guild.id
-        }, {
-            $set: {
-                factionLiveTally: {
-                    channelID: tally.channel.id,
-                    messageID: tally.id
-                }
+        id: message.guild.id
+    }, {
+        $set: {
+            factionLiveTally: {
+                channelID: tally.channel.id,
+                messageID: tally.id
             }
-        },
-        function (err, doc, res) {});
+        }
+    },
+        function (err, doc, res) { });
 }
 exports.createFactionRunningTally = createFactionRunningTally;
 
