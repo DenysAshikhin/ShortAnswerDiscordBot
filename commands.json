@@ -1887,5 +1887,29 @@
            "Faction"
         ],
         "category": "Faction"
+    },
+    {
+        "title": "addAutoRoleRole",
+        "explanation": "Adds a new role to an existing autoRole message. You need to provide the id of the autorole message. This can be found by right clicking on the existing autorole message and clicking 'copy ID'. To see this option enable developer options in discord settings.",
+        "example": [
+            "1) addAutoRoleRole messageIDHere, :emoji:, @role"
+        ],
+        "subsection": [
+           "admin",
+           "Faction"
+        ],
+        "category": "autoRole"
+    },
+    {
+        "title": "removeAutoRoleRole",
+        "explanation": "Removes a reaction/role pair from an existing autoRole message. You need to provide the id of the autorole message. This can be found by right clicking on the existing autorole message and clicking 'copy ID'. To see this option enable developer options in discord settings.",
+        "example": [
+            "1) addAutoRoleRole messageIDHere, :emoji:"
+        ],
+        "subsection": [
+           "admin",
+           "Faction"
+        ],
+        "category": "autoRole"
     }
 ]

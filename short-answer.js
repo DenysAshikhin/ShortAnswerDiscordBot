@@ -948,9 +948,8 @@ connectDB.once('open', async function () {
                     user = await findUser(message.member);
 
                 exports.cachedUsers = cachedUsers;
-                console.log(`Number of cached users: ${cachedUsers.size}`);
                 if (message.guild)
-                    console.log(`guild:::: ${message.guild.name},,, user::::${message.author.username}`)
+                    console.log(`guild:~${message.guild.name}~ user:~${message.author.username}~ message:~${message.content}`);
                 if (message.channel.type != 'dm') {
                     let permission = message.channel.permissionsFor(message.guild.members.cache.get(botID));
                     if (!permission.has("SEND_MESSAGES"))
@@ -1078,25 +1077,36 @@ connectDB.once('open', async function () {
         });
 
 
-        if (guild.factionNewMemberPoints) {
+        if (guild.factionNewMemberPoints != false) {
 
             let difference = arraysEqual(oldMember.roles.cache.keyArray(), newMember.roles.cache.keyArray());
 
-            if (!difference.difference)
+            if (!difference.difference) {
+                //console.log("not difference");
                 return;
+            }
 
             if (guild.factions.length > 0) {
 
                 let faction = guild.factions.find(element => element.role == difference.difference);
 
                 if (faction) {
+                    console.log("Found the faction to update new member points");
                     faction.points += 50;
                     faction.contributions.newMembers += 50;
 
-                    if (guild.factionNewMemberAlert)
-                        (await newMember.guild.fetch()).channels.cache.get(guild.factionNewMemberAlert).send(
-                            `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!` +
-                            `\nWith ${faction.contributions.newMembers} points from new members.`);
+                    if (guild.factionNewMemberAlert != false) {
+                        try {
+                            (await newMember.guild.fetch()).channels.cache.get(guild.factionNewMemberAlert).send(
+                                `${mention(newMember.id)} has just joined **${faction.name}**! **${faction.name}** is now at a total ${faction.points} points!` +
+                                `\nWith ${faction.contributions.newMembers} points from new members.`);
+
+                        }
+                        catch (err) {
+                            console.log(err);
+                            console.log("Error posting update of new member points!")
+                        }
+                    }
 
                     Guild.findOneAndUpdate({
                         id: newMember.guild.id
@@ -1106,7 +1116,11 @@ connectDB.once('open', async function () {
                         }
                     }, function (err, doc, res) { });
                 }
+                else
+                    console.log("did not find the faction to update new member points");
             }
+           // else
+              //  console.log('no factions??')
         }
     })
 });
@@ -1301,6 +1315,8 @@ function populateCommandMap() {
     commandMap.set(Commands[153].title.toUpperCase(), ADMINISTRATOR.repToFaction)
     commandMap.set(Commands[154].title.toUpperCase(), ADMINISTRATOR.factionNewMemberPoints)
     commandMap.set(Commands[155].title.toUpperCase(), ADMINISTRATOR.resetFactionPoints)
+    commandMap.set(Commands[156].title.toUpperCase(), ADMINISTRATOR.addAutoRoleRole)
+    commandMap.set(Commands[157].title.toUpperCase(), ADMINISTRATOR.deleteAutoRoleRole)
 
     exports.commandMap = commandMap;
 }

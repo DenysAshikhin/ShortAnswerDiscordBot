@@ -493,7 +493,7 @@ async function countTalk() {
 
                                     let timeAFK = usy.timeAFK;
                                     timeAFK[index] += 1;
-                                    console.log('logged afk for: ', member.displayName)
+                                    // console.log('logged afk for: ', member.displayName)
 
                                     User.findOneAndUpdate({
                                         id: member.id
@@ -630,7 +630,15 @@ const updateFactionTally = async function (guilds) {
 
                     let member = faction.contributions.members[i];
 
-                    let actualyMember = await client.guilds.cache.get(guild.id).members.fetch(member.userID);
+                    let actualyMember;
+
+                    try {
+                        actualyMember = await client.guilds.cache.get(guild.id).members.fetch(member.userID);
+                    }
+                    catch (err) {
+                        continue;
+                    }
+
 
 
                     memberContribution += `${i + 1})<${actualyMember.displayName.replace(/\s/g, '_')}` +
@@ -1375,7 +1383,7 @@ connectDB.once('open', async function () {
         for (let guildy of client.guilds.cache.values()) {
 
             guildy.members.fetch().catch(err => console.log(`died on: ${guildy.id} --- ${guildy.name}`));
-            
+
         }
         // promiseArray.push(guildy.members.fetch());
 

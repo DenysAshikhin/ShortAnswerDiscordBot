@@ -441,6 +441,424 @@ async function setDefaultServerPrefix(message, params, user) {
 }
 exports.setDefaultServerPrefix = setDefaultServerPrefix;
 
+const reactEmoji = async function (message, emojis) {
+
+    for (let emojiPair of emojis) {
+
+        //  console.log(emojiPair)
+
+        if (emojiPair.emoji.includes(':')) {
+
+            let id = emojiPair.emoji.substring(emojiPair.emoji.indexOf(':', 3) + 1, emojiPair.emoji.indexOf('>'));
+            //   console.log(id);
+
+            let guildEmoji = message.guild.emojis.cache.get(id);
+            await message.react(guildEmoji)
+                .catch(err => { });
+        } else
+            await message.react(emojiPair.emoji)
+                .catch(err => { });
+    }
+}
+
+const giveRoleSelf = async function (message, roleID) {
+
+    let roleToAdd;
+    let guildMember = message.guild.members.cache.get(MAIN.Client.user.id);
+    try {
+        roleToAdd = message.guild.roles.cache.get(roleID);
+    } catch (err) {
+
+        return -1;
+    }
+
+    if (roleToAdd) {
+        let member1 = await guildMember.roles.add(roleToAdd)
+            .catch(function (err) {
+
+                message.channel.send("I don't have the required permission to give such a role!");
+                return -1;
+            });
+
+        let member2 = await guildMember.roles.remove(roleToAdd)
+            .catch(function (err) {
+                message.channel.send("I don't have the required permission to revoke such a role!");
+                return -1;
+            });
+
+        if (member2) {
+            if (member2.id)
+                return 1;
+        }
+        return -1;
+    } else
+        return -1;
+}
+
+const populateAutoRoleMap = function (autoRoleObj) {
+
+    for (let pair of autoRoleObj)
+        autoRoleMap.set(pair.messageID, pair);
+
+}
+
+const setEmojiCollecter = async function (autoroleObj, message) {
+
+    let collector = await message.createReactionCollector(function (reaction, user) {
+        return (!user.bot)
+    }, {
+        time: 60 * 60 * 1000,
+        dispose: true
+    });
+    collector.on('collect', async function (emoji, user) {
+
+        let tempEmoji = emoji._emoji;
+        let autorole = autoRoleMap.get(emoji.message.id);
+
+        let matchedPair = autorole.emojis.find(function (element) {
+
+            //Universal Emoji
+            if (!tempEmoji.id)
+                return element.emoji == tempEmoji.name;
+
+            else //Guild specific emoji
+                return element.emojiID == tempEmoji.id
+
+        });
+
+        let userReacted = autorole.users.find(element => element == user.id);
+        let guildMember = emoji.message.guild.members.cache.get(user.id);
+
+        if (matchedPair) {
+            if (userReacted && autorole.permenant) {
+
+                emoji.users.remove(user);
+                return MAIN.selfDestructMessage(emoji.message, 'You have already reacted to this message before! No takebacks!', 3, true);
+            } else if (!userReacted && autorole.permenant) {
+
+                let guild = await MAIN.findGuild({
+                    id: emoji.message.guild.id
+                });
+
+                let index = guild.autorole.findIndex(element => element.messageID == emoji.message.id)
+
+                guild.autorole[index].users.push(user.id);
+
+                let roleToAdd;
+
+                try {
+                    roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
+                } catch (err) {
+
+                    return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
+                }
+
+                if (roleToAdd)
+                    await guildMember.roles.add(roleToAdd)
+                        .catch(function (err) {
+
+                            emoji.message.channel.send("I didn't have the required permission to give such a role!");
+                        });
+                else
+                    return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
+
+                autoRoleMap.get(emoji.message.id).users.push(user.id);
+
+                Guild.findOneAndUpdate({
+                    id: guild.id
+                }, {
+                    $set: {
+                        autorole: guild.autorole
+                    }
+                }, function (err, doc, res) { })
+                return 1;
+
+            }
+
+            if (autorole.unique) {
+
+                let foundUser;
+
+                for (let reaction of message.reactions.cache.values()) {
+
+                    if (reaction.emoji != tempEmoji)
+                        if (reaction.users.cache.get(user.id)) {
+                            foundUser = true;
+                            break;
+                        }
+                }
+
+                if (foundUser) {
+
+                    emoji.users.remove(user);
+                    return MAIN.selfDestructMessage(emoji.message, 'You have already reacted to this message, unreact with your previous one' +
+                        ` (by clicking on it again) and then try again.`, 3, true);
+                }
+
+                for (let roly of autorole.roles) {
+
+                    if (guildMember.roles.cache.get(roly)) {
+
+                        emoji.users.remove(user);
+                        return MAIN.selfDestructMessage(emoji.message, 'You already have one of the roles from the other reactions. You can' +
+                            "'t get another until you remove the existing one.", 3, true);
+                    }
+                }
+            }
+
+            let roleToAdd;
+
+            try {
+                roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
+            } catch (err) {
+
+                return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
+            }
+
+            if (roleToAdd)
+                await guildMember.roles.add(roleToAdd)
+                    .catch(function (err) {
+
+                        emoji.message.channel.send("I didn't have the required permission to give such a role!");
+                    });
+            else
+                return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
+
+        } else if (autorole.static) {
+
+            return emoji.users.remove(user);
+
+        } else { }
+    });
+
+    collector.on('remove', async function (emoji, user) {
+
+        let tempEmoji = emoji._emoji;
+        let autorole = autoRoleMap.get(emoji.message.id);
+
+        if (autorole.permenant)
+            return -1;
+
+        let matchedPair = autorole.emojis.find(function (element) {
+
+            //Universal Emoji
+            if (!tempEmoji.id)
+                return element.emoji == tempEmoji.name;
+
+            else //Guild specific emoji
+                return element.emojiID == tempEmoji.id
+
+        });
+
+        let userReacted = autorole.users.find(element => element == user.id);
+        let guildMember = emoji.message.guild.members.cache.get(user.id);
+
+        let roleToAdd;
+
+        try {
+            roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
+        } catch (err) {
+
+            console.log(err)
+            return emoji.message.send("A role that was used in the autorole message no longer exists, failed to remove the role.");
+        }
+
+        if (roleToAdd)
+            await guildMember.roles.remove(roleToAdd)
+                .catch(function (err) {
+
+                    emoji.message.channel.send("I didn't have the required permission to remove such a role!");
+                });
+        else
+            return emoji.message.send("A role that was used in the autorole message no longer exists, failed to remove the role.");
+    });
+
+    autoRoleCollectors.push(collector);
+    autoroleObj.collector = collector;
+}
+
+const setEmojiCollectorAll = async function (autoroleObj) {
+
+
+    for (let AUTOROLE of autoroleObj) {
+
+        let message;
+
+
+        //let guldss = await MAIN.Client.guilds.fetch();
+
+        if (!MAIN.Client.guilds.cache.get(AUTOROLE.guildID))
+            continue;
+
+        try {
+            message = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID).messages.fetch(AUTOROLE.messageID);
+        } catch (err) {
+
+            console.log(err)
+            console.log('autorole needs to be deleted?');
+
+            let guild1 = await MAIN.Client.guilds.fetch(AUTOROLE.guildID);
+
+            if (!guild1) {
+
+                console.log(`Guild: ${AUTOROLE.guild} || Autorole: ${AUTOROLE.messageID} || Issue: guild missing`);
+                continue;
+            }
+
+            let channel = await guild.channels.cache.get(AUTOROLE.channelID);
+            if (!channel) {
+                //channel.send("An autorole message channel! that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
+                console.log(`Guild: ${AUTOROLE.guild} || Autorole: ${AUTOROLE.messageID} || Issue: channel missing`);
+                continue;
+            }
+            if (!message) {
+                //channel.send("An autorole message that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
+                console.log(`Guild: ${AUTOROLE.guild} || Autorole: ${AUTOROLE.messageID} || Issue: message missing`);
+                continue;
+            }
+
+
+            fs.promises.writeFile(`${23124}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+            fs.promises.writeFile(`${2222}.json`, JSON.stringify("guildID: " + guild.id + "\n\n" + "MessageID: " + AUTOROLE.messageID), 'UTF-8');
+            // let guild = await MAIN.findGuild({
+            //     id: AUTOROLE.guildID
+            // });
+
+            // let index = guild.autorole.findIndex(element => element.messageID == AUTOROLE.messageID)
+            // guild.autorole.splice(index);
+            // Guild.findOneAndUpdate({
+            //     id: guild.id
+            // }, {
+            //     $set: {
+            //         autorole: guild.autorole
+            //     }
+            // }, function (err, doc, res) { })
+            continue;
+
+        }
+
+
+        if (message.author.id != MAIN.Client.user.id) {
+
+            autoRoleMap.delete(message.id);
+            continue;
+        }
+
+        setEmojiCollecter(AUTOROLE, message);
+
+    }
+}
+
+const initialiseAdministrator = async function () {
+
+    let guilds = await MAIN.getGuilds();
+
+    for (let GUILD of guilds) {
+        let guild = GUILD;
+        populateAutoRoleMap(guild.autorole);
+        setEmojiCollectorAll(guild.autorole);
+    }
+    setInterval(resetCollectors, 30 * 60 * 1000);
+}
+exports.initialiseAdministrator = initialiseAdministrator;
+
+const resetCollectors = async function () {
+
+    for (let collector of autoRoleCollectors) {
+        collector.resetTimer();
+    }
+}
+
+const editAutoRoleTitle = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only change an autoRole message's title from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins may change an autoRole message's title");
+
+
+    let args = message.content.split(" ").slice(1).join(" ").split(',');
+    let ID = args[0];
+    args.splice(0, 1);
+    let title = args.join(',');
+
+    let autoMessage = autoRoleMap.get(ID);
+
+
+
+    if (!autoMessage)
+        return message.channel.send("I could not find an autorole message of that ID. Please ensure you are sending the ID first, title 2nd (after a comma).");
+
+
+    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(ID);
+
+    if (actualAutoMessage.author.id != MAIN.Client.user.id) {
+
+        // console.log(actualAutoMessage.author.id)
+        // console.log(MAIN.Client.id)
+
+        return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its title or description!");
+    }
+
+    autoMessage.title = title;
+    autoMessage.runningEmbed.title = title;
+
+    actualAutoMessage.edit({
+        embed: autoMessage.runningEmbed
+    });
+    updateAutoRoleObject(autoMessage, message.guild.id);
+    message.channel.send("Successfuly updated autorole message!");
+}
+exports.editAutoRoleTitle = editAutoRoleTitle;
+
+const editAutoRoleDescription = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only change an autoRole message's description from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins may change an autoRole message's description");
+
+    let args = message.content.split(" ").slice(1).join(" ").split(',');
+
+
+    if (args.length < 2)
+        return message.channel.send("You have to provide the message ID and the new description seperated by a comma!");
+
+
+    let ID = args[0];
+    args.splice(0, 1);
+    let description = args.join(',');
+
+    let autoMessage = autoRoleMap.get(ID);
+
+    if (!autoMessage) {
+        return message.channel.send("That ID does not match any known autorole messages!");
+    }
+
+    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(ID);
+
+    if (!actualAutoMessage)
+        return message.channel.send("It seems like that autorole message no longer exists! It will be deleted from the database soon!");
+
+
+    if (actualAutoMessage.author.id != MAIN.Client.user.id) {
+
+
+        return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its title or description!");
+    }
+
+    autoMessage.description = description;
+    autoMessage.runningEmbed.description = description;
+
+    actualAutoMessage.edit({
+        embed: autoMessage.runningEmbed
+    });
+    updateAutoRoleObject(autoMessage, message.guild.id);
+    message.channel.send("Successfuly updated autorole message!");
+}
+exports.editAutoRoleDescription = editAutoRoleDescription;
+
+
 const autorole = async function (message, params, user) {
 
     if (message.content == '-1')
@@ -951,381 +1369,18 @@ const autorole = async function (message, params, user) {
 }
 exports.autorole = autorole;
 
+const addAutoRoleRole = async function (message, params, user) {
 
-const reactEmoji = async function (message, emojis) {
-
-    for (let emojiPair of emojis) {
-
-        //  console.log(emojiPair)
-
-        if (emojiPair.emoji.includes(':')) {
-
-            let id = emojiPair.emoji.substring(emojiPair.emoji.indexOf(':', 3) + 1, emojiPair.emoji.indexOf('>'));
-            //   console.log(id);
-
-            let guildEmoji = message.guild.emojis.cache.get(id);
-            await message.react(guildEmoji)
-                .catch(err => { });
-        } else
-            await message.react(emojiPair.emoji)
-                .catch(err => { });
-    }
-}
-
-const giveRoleSelf = async function (message, roleID) {
-
-    let roleToAdd;
-    let guildMember = message.guild.members.cache.get(MAIN.Client.user.id);
-    try {
-        roleToAdd = message.guild.roles.cache.get(roleID);
-    } catch (err) {
-
-        return -1;
-    }
-
-    if (roleToAdd) {
-        let member1 = await guildMember.roles.add(roleToAdd)
-            .catch(function (err) {
-
-                message.channel.send("I don't have the required permission to give such a role!");
-                return -1;
-            });
-
-        let member2 = await guildMember.roles.remove(roleToAdd)
-            .catch(function (err) {
-                message.channel.send("I don't have the required permission to revoke such a role!");
-                return -1;
-            });
-
-        if (member2) {
-            if (member2.id)
-                return 1;
-        }
-        return -1;
-    } else
-        return -1;
-}
-
-const populateAutoRoleMap = function (autoRoleObj) {
-
-    for (let pair of autoRoleObj)
-        autoRoleMap.set(pair.messageID, pair);
-
-}
-
-const setEmojiCollecter = async function (autoroleObj, message) {
-
-    let collector = await message.createReactionCollector(function (reaction, user) {
-        return (!user.bot)
-    }, {
-        time: 60 * 60 * 1000,
-        dispose: true
-    });
-    collector.on('collect', async function (emoji, user) {
-
-        let tempEmoji = emoji._emoji;
-        let autorole = autoRoleMap.get(emoji.message.id);
-
-        let matchedPair = autorole.emojis.find(function (element) {
-
-            //Universal Emoji
-            if (!tempEmoji.id)
-                return element.emoji == tempEmoji.name;
-
-            else //Guild specific emoji
-                return element.emojiID == tempEmoji.id
-
-        });
-
-        let userReacted = autorole.users.find(element => element == user.id);
-        let guildMember = emoji.message.guild.members.cache.get(user.id);
-
-        if (matchedPair) {
-            if (userReacted && autorole.permenant) {
-
-                emoji.users.remove(user);
-                return MAIN.selfDestructMessage(emoji.message, 'You have already reacted to this message before! No takebacks!', 3, true);
-            } else if (!userReacted && autorole.permenant) {
-
-                let guild = await MAIN.findGuild({
-                    id: emoji.message.guild.id
-                });
-
-                let index = guild.autorole.findIndex(element => element.messageID == emoji.message.id)
-
-                guild.autorole[index].users.push(user.id);
-
-                let roleToAdd;
-
-                try {
-                    roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
-                } catch (err) {
-
-                    return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
-                }
-
-                if (roleToAdd)
-                    await guildMember.roles.add(roleToAdd)
-                        .catch(function (err) {
-
-                            emoji.message.channel.send("I didn't have the required permission to give such a role!");
-                        });
-                else
-                    return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
-
-                autoRoleMap.get(emoji.message.id).users.push(user.id);
-
-                Guild.findOneAndUpdate({
-                    id: guild.id
-                }, {
-                    $set: {
-                        autorole: guild.autorole
-                    }
-                }, function (err, doc, res) { })
-                return 1;
-
-            }
-
-            if (autorole.unique) {
-
-                let foundUser;
-
-                for (let reaction of message.reactions.cache.values()) {
-
-                    if (reaction.emoji != tempEmoji)
-                        if (reaction.users.cache.get(user.id)) {
-                            foundUser = true;
-                            break;
-                        }
-                }
-
-                if (foundUser) {
-
-                    emoji.users.remove(user);
-                    return MAIN.selfDestructMessage(emoji.message, 'You have already reacted to this message, unreact with your previous one' +
-                        ` (by clicking on it again) and then try again.`, 3, true);
-                }
-
-                for (let roly of autorole.roles) {
-
-                    if (guildMember.roles.cache.get(roly)) {
-
-                        emoji.users.remove(user);
-                        return MAIN.selfDestructMessage(emoji.message, 'You already have one of the roles from the other reactions. You can' +
-                            "'t get another until you remove the existing one.", 3, true);
-                    }
-                }
-            }
-
-            let roleToAdd;
-
-            try {
-                roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
-            } catch (err) {
-
-                return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
-            }
-
-            if (roleToAdd)
-                await guildMember.roles.add(roleToAdd)
-                    .catch(function (err) {
-
-                        emoji.message.channel.send("I didn't have the required permission to give such a role!");
-                    });
-            else
-                return emoji.message.send("A role that was used in the autorole message no longer exists, failed to assign the role.");
-
-        } else if (autorole.static) {
-
-            return emoji.users.remove(user);
-
-        } else { }
-    });
-
-    collector.on('remove', async function (emoji, user) {
-
-        let tempEmoji = emoji._emoji;
-        let autorole = autoRoleMap.get(emoji.message.id);
-
-        if (autorole.permenant)
-            return -1;
-
-        let matchedPair = autorole.emojis.find(function (element) {
-
-            //Universal Emoji
-            if (!tempEmoji.id)
-                return element.emoji == tempEmoji.name;
-
-            else //Guild specific emoji
-                return element.emojiID == tempEmoji.id
-
-        });
-
-        let userReacted = autorole.users.find(element => element == user.id);
-        let guildMember = emoji.message.guild.members.cache.get(user.id);
-
-        let roleToAdd;
-
-        try {
-            roleToAdd = emoji.message.guild.roles.cache.get(matchedPair.roleID);
-        } catch (err) {
-
-            return emoji.message.send("A role that was used in the autorole message no longer exists, failed to remove the role.");
-        }
-
-        if (roleToAdd)
-            await guildMember.roles.remove(roleToAdd)
-                .catch(function (err) {
-
-                    emoji.message.channel.send("I didn't have the required permission to remove such a role!");
-                });
-        else
-            return emoji.message.send("A role that was used in the autorole message no longer exists, failed to remove the role.");
-    });
-
-    autoRoleCollectors.push(collector);
-}
-
-const setEmojiCollectorAll = async function (autoroleObj) {
-
-
-    for (let AUTOROLE of autoroleObj) {
-
-        let message;
-
-
-        //let guldss = await MAIN.Client.guilds.fetch();
-
-        if (!MAIN.Client.guilds.cache.get(AUTOROLE.guildID))
-            continue;
-
-        try {
-            message = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID).messages.fetch(AUTOROLE.messageID);
-        } catch (err) {
-
-            console.log(err)
-            console.log('autorole needs to be deleted?');
-
-            let channel = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID);
-            if (!channel) {
-                channel.send("An autorole message channel! that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
-                continue;
-            }
-            if (!message) {
-                channel.send("An autorole message that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
-                continue;
-            }
-
-
-            fs.promises.writeFile(`${23124}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-            fs.promises.writeFile(`${2222}.json`, JSON.stringify("guildID: " + guild.id + "\n\n" + "MessageID: " + AUTOROLE.messageID), 'UTF-8');
-            // let guild = await MAIN.findGuild({
-            //     id: AUTOROLE.guildID
-            // });
-
-            // let index = guild.autorole.findIndex(element => element.messageID == AUTOROLE.messageID)
-            // guild.autorole.splice(index);
-            // Guild.findOneAndUpdate({
-            //     id: guild.id
-            // }, {
-            //     $set: {
-            //         autorole: guild.autorole
-            //     }
-            // }, function (err, doc, res) { })
-            continue;
-
-        }
-
-
-        if (message.author.id != MAIN.Client.user.id) {
-
-            autoRoleMap.delete(message.id);
-            continue;
-        }
-
-        setEmojiCollecter(AUTOROLE, message);
-
-    }
-}
-
-const initialiseAdministrator = async function () {
-
-    let guilds = await MAIN.getGuilds();
-
-    for (let GUILD of guilds) {
-        let guild = GUILD;
-        populateAutoRoleMap(guild.autorole);
-        setEmojiCollectorAll(guild.autorole);
-    }
-    setInterval(resetCollectors, 30 * 60 * 1000);
-}
-exports.initialiseAdministrator = initialiseAdministrator;
-
-const resetCollectors = async function () {
-
-    for (let collector of autoRoleCollectors) {
-        collector.resetTimer();
-    }
-}
-
-const editAutoRoleTitle = async function (message, params, user) {
-
-    if (message.channel.type == 'dm') return message.channel.send("You can only change an autoRole message's title from inside a server text channel");
+    if (message.channel.type == 'dm') return message.channel.send("You can only change an autoRole message's roles from inside a server text channel");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("Only admins may change an autoRole message's title");
-
-
-    let args = message.content.split(" ").slice(1).join(" ").split(',');
-    let ID = args[0];
-    args.splice(0, 1);
-    let title = args.join(',');
-
-    let autoMessage = autoRoleMap.get(ID);
-
-
-
-    if (!autoMessage)
-        return message.channel.send("I could not find an autorole message of that ID. Please ensure you are sending the ID first, title 2nd (after a comma).");
-
-
-    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(ID);
-
-    if (actualAutoMessage.author.id != MAIN.Client.user.id) {
-
-        // console.log(actualAutoMessage.author.id)
-        // console.log(MAIN.Client.id)
-
-        return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its title or description!");
-    }
-
-    autoMessage.title = title;
-    autoMessage.runningEmbed.title = title;
-
-    actualAutoMessage.edit({
-        embed: autoMessage.runningEmbed
-    });
-    updateAutoRoleObject(autoMessage, message.guild.id);
-}
-exports.editAutoRoleTitle = editAutoRoleTitle;
-
-const editAutoRoleDescription = async function (message, params, user) {
-
-    if (message.channel.type == 'dm') return message.channel.send("You can only change an autoRole message's description from inside a server text channel");
-
-    if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("Only admins may change an autoRole message's description");
+        return message.channel.send("Only admins may change an autoRole message's roles");
 
     let args = message.content.split(" ").slice(1).join(" ").split(',');
 
-
-    if (args.length < 2)
-        return message.channel.send("You have to provide the message ID and the new description seperated by a comma!");
-
-
     let ID = args[0];
-    args.splice(0, 1);
-    let description = args.join(',');
+
+    console.log(`ID: ${ID}`);
 
     let autoMessage = autoRoleMap.get(ID);
 
@@ -1339,22 +1394,149 @@ const editAutoRoleDescription = async function (message, params, user) {
         return message.channel.send("It seems like that autorole message no longer exists! It will be deleted from the database soon!");
 
 
-    if (actualAutoMessage.author.id != MAIN.Client.user.id) {
+    if (actualAutoMessage.author.id != MAIN.Client.user.id)
+        return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its reactions!");
 
 
-        return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify its title or description!");
+
+
+
+
+    let emojiString = message.content.split(',');
+    emojiString.splice(0, 1);
+
+    console.log(`emojiString: ${emojiString}`);
+
+
+    if (emojiString.length != 2)
+        return message.channel.send("You made an error in writing the emoji-@role. Refer to the example below!" +
+            "```*emoji*, @role```");
+
+    else if (message.mentions.roles.size != 1)
+        return message.channel.send("You made an error in writing the emoji-@role. Make sure to @mention only 1 role! Refer to the example below!" +
+            "```*emoji*, @role```");
+
+    else {
+
+        let emoji = emojiString[0].trim();
+        let emojiID = null;
+        let role = message.mentions.roles.first().id;
+
+        if ((await giveRoleSelf(message, role)) != 1)
+            return message.channel.send("Please fix my permissions for this role or try a different one.");
+
+        if (autoMessage.emojis.find(element => element.roleID == role))
+            await message.channel.send(MAIN.mentionRole(role) +
+                " is already linked to an emoji in this message! Try again");
+
+
+
+        let foundEmoji = autoMessage.emojis.find(element => element.emoji == emoji);
+
+        if (foundEmoji)
+            return message.channel.send(`That emoji is already used for this message! Try again!`);
+
+
+        if (emoji.includes(':')) {
+
+            let id = emoji.substring(emoji.indexOf(':', 3) + 1, emoji.indexOf('>'));
+            console.log(`emojiID: ${id}`);
+            emojiID = id;
+
+            let guildEmoji = message.guild.emojis.cache.get(id);
+            if (!guildEmoji)
+                return message.channel.send("You entered an invalid emoji, make sure its universal or from this server! Refer to the example below!" +
+                    "```*emoji*, @role```");
+        }
+
+
+        let finalEmoji = {
+            emoji: emoji,
+            roleID: role,
+            emojiID: emojiID
+        }
+
+        //await actualAutoMessage.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
+
+        autoMessage.emojis.push(finalEmoji);
+
+        await reactEmoji(actualAutoMessage, autoMessage.emojis);
+
+        autoMessage.collector.stop();
+
+        setEmojiCollecter(autoMessage, actualAutoMessage);
+
+        updateAutoRoleObject(autoMessage, message.guild.id);
+        message.channel.send("Successfuly added a new reaction/role pair!");
+    }
+}
+exports.addAutoRoleRole = addAutoRoleRole;
+
+
+const deleteAutoRoleRole = async function (message, params, user) {
+
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only change an autoRole message's reactions from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins may change an autoRole message's reactions");
+
+    let ID = message.content.split(" ")[1].split(',')[0];
+
+    console.log(`ID: ${ID}`);
+
+    let autoMessage = autoRoleMap.get(ID);
+
+    if (!autoMessage) {
+        return message.channel.send("That ID does not match any known autorole messages!");
     }
 
-    autoMessage.description = description;
-    autoMessage.runningEmbed.description = description;
+    let actualAutoMessage = await message.guild.channels.cache.get(autoMessage.channelID).messages.fetch(ID);
 
-    actualAutoMessage.edit({
-        embed: autoMessage.runningEmbed
-    });
-    updateAutoRoleObject(autoMessage, message.guild.id);
+    if (!actualAutoMessage)
+        return message.channel.send("It seems like that autorole message no longer exists! It will be deleted from the database soon!");
 
+
+    if (actualAutoMessage.author.id != MAIN.Client.user.id)
+        return message.channel.send("I am not the author of that autorole message! Thus, I cannot modify itsreactions!");
+
+
+
+
+    let emoji = message.content.split(',')[1].trim();
+    console.log(`emoji: ${emoji}`);
+
+    for (let i = 0; i < autoMessage.emojis.length; i++) {
+
+        if (emoji.includes(':')) {
+
+            let id = emoji.substring(emoji.indexOf(':', 3) + 1, emoji.indexOf('>'));
+            console.log(`emojiID: ${id}`);
+            console.log(autoMessage.emojis[i].emojiID)
+
+            console.log(autoMessage.emojis[i].emojiID == id)
+
+            if (autoMessage.emojis[i].emojiID == id) {
+
+                actualAutoMessage.reactions.cache.get(id).remove().catch(error => console.error('Failed to remove reactions: ', error));
+                autoMessage.emojis.splice(i, 1);
+                updateAutoRoleObject(autoMessage, message.guild.id);
+                return message.channel.send("Reaction/role pair removed!");
+            }
+        }
+        else if (autoMessage.emojis[i].emoji == emoji) {
+
+            actualAutoMessage.reactions.cache.get(emoji).remove().catch(error => console.error('Failed to remove reactions: ', error));
+            autoMessage.emojis.splice(i, 1);
+            updateAutoRoleObject(autoMessage, message.guild.id);
+            return message.channel.send("Reaction/role pair removed!");
+        }
+    }
+
+    return message.channel.send("That reaction/role pair was not found for the specified Auto-Role message!");
 }
-exports.editAutoRoleDescription = editAutoRoleDescription;
+exports.deleteAutoRoleRole = deleteAutoRoleRole;
+
 
 const updateAutoRoleObject = async function (autoRoleObj, guildID) {
 
@@ -1364,7 +1546,14 @@ const updateAutoRoleObject = async function (autoRoleObj, guildID) {
 
     let index = guild.autorole.findIndex(element => element.messageID == autoRoleObj.messageID)
 
+
+    let collector = autoRoleObj.collector;
+
+    delete autoRoleObj.collector;
+
     guild.autorole[index] = autoRoleObj;
+
+    console.log(autoRoleObj);
 
     Guild.findOneAndUpdate({
         id: guild.id
@@ -1372,7 +1561,15 @@ const updateAutoRoleObject = async function (autoRoleObj, guildID) {
         $set: {
             autorole: guild.autorole
         }
-    }, function (err, doc, res) { });
+    }, function (err, doc, res) {
+        if (err) { console.log(err); return; }
+        // if (doc) { console.log(doc); }
+        // if (res) { console.log(res); }
+    });
+
+
+    autoRoleObj.collector = collector;
+
     return 1;
 }
 

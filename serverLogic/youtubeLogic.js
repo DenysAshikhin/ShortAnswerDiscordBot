@@ -118,6 +118,7 @@ const alertYoutube = async function (params) {
                     console.log(1)
                 }
 
+                console.log(dbGuild.youtubeAlerts)
                 for (let pair of dbGuild.youtubeAlerts.get(guildArray[i].youtuberID)) {//For ever youtube/channel pair in the guildDB
 
                     if (pair[1] != guildArray[i].vidID) {//check the the pair hasnt already been notified of this song
