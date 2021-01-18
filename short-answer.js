@@ -1005,6 +1005,7 @@ connectDB.once('open', async function () {
                 return 1
             checkExistance(member);
 
+
             let guild = cachedGuilds.get(member.guild.id);
             if (!guild) {
 
@@ -1018,6 +1019,8 @@ connectDB.once('open', async function () {
             if (guild.welcomeMessage != '-1') {
                 member.user.send(guild.welcomeMessage);
             }
+
+            member.guild.members.fetch();
 
             if (guild.welcomeMessages) {
                 let permission = member.guild.systemChannel.permissionsFor(await member.guild.members.fetch(botID));
@@ -1072,26 +1075,40 @@ connectDB.once('open', async function () {
         if (defaultPrefix == '##')
             return 1
 
+
         let guild = await findGuild({
             id: newMember.guild.id
         });
 
-
         if (guild.factionNewMemberPoints != false) {
+
 
             let difference = arraysEqual(oldMember.roles.cache.keyArray(), newMember.roles.cache.keyArray());
 
-            if (!difference.difference) {
+            if (newMember.id == '208023799738793984') {
+                console.log(oldMember.roles.cache.keyArray());
+                console.log(newMember.roles.cache.keyArray());
+                console.log(`member difference: ${newMember.displayName}`)
+                console.log(difference)
+            }
+
+            if (difference.result) {
                 //console.log("not difference");
                 return;
             }
 
+
+            // console.log(guild.factions.length)
+
             if (guild.factions.length > 0) {
+
+
+                // console.log(`update for member: ${newMember.displayName}`)
 
                 let faction = guild.factions.find(element => element.role == difference.difference);
 
                 if (faction) {
-                    console.log("Found the faction to update new member points");
+                    // console.log("Found the faction to update new member points");
                     faction.points += 50;
                     faction.contributions.newMembers += 50;
 
@@ -1116,11 +1133,11 @@ connectDB.once('open', async function () {
                         }
                     }, function (err, doc, res) { });
                 }
-                else
-                    console.log("did not find the faction to update new member points");
+                // else
+                    // console.log("did not find the faction to update new member points");
             }
-           // else
-              //  console.log('no factions??')
+            // else
+            //  console.log('no factions??')
         }
     })
 });
@@ -1139,7 +1156,6 @@ function arraysEqual(a, b) {
     if (a == null || b == null) return {
         result: false
     };
-    // if (a.length !== b.length) return { result: false };
 
     a.sort();
     b.sort();
@@ -1150,6 +1166,11 @@ function arraysEqual(a, b) {
             difference: b[i]
         };
     }
+
+    if (a.length < b.length) return {
+        result: false, difference: b[b.length - 1]
+    };
+
     return {
         result: true
     };
