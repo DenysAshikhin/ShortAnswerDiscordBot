@@ -37,7 +37,17 @@ const alertYoutube = async function (params) {
 
                 // console.log(youtubeObj.authorUrl)
 
-                let vids = await ytch.getChannelVideos(youtuberID);
+                let vids;
+
+                try{
+                    vids = await ytch.getChannelVideos(youtuberID);
+                }
+                catch(err){
+                    console.log(err);
+                    console.log("issue on line 43 in youtube logic");
+                    return;
+                }
+
                 let vidID = vids.items[0].videoId;
                 //  console.log(vids.items[0].videoId)
 

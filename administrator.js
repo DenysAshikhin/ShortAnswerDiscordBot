@@ -540,7 +540,12 @@ const setEmojiCollecter = async function (autoroleObj, message) {
                     id: emoji.message.guild.id
                 });
 
-                let index = guild.autorole.findIndex(element => element.messageID == emoji.message.id)
+                let index = guild.autorole.findIndex(element => element.messageID == emoji.message.id);
+
+                if (index == -1) {
+                    console.log(`emoji message id: ${emoji.message.id}`);
+                    return console.log(`Issue finding exact autorole inside the guild??? ~~ index: ${autorole} ~~ guild: ${guild.id} ~~ guildName: ${guild.name}`);
+                }
 
                 guild.autorole[index].users.push(user.id);
 
@@ -679,6 +684,7 @@ const setEmojiCollecter = async function (autoroleObj, message) {
 
 const setEmojiCollectorAll = async function (autoroleObj) {
 
+    let toDelete = [];
 
     for (let AUTOROLE of autoroleObj) {
 
@@ -694,33 +700,32 @@ const setEmojiCollectorAll = async function (autoroleObj) {
             message = await (await MAIN.Client.guilds.fetch(AUTOROLE.guildID)).channels.cache.get(AUTOROLE.channelID).messages.fetch(AUTOROLE.messageID);
         } catch (err) {
 
-            console.log(err)
-            console.log('autorole needs to be deleted?');
-
             let guild1 = await MAIN.Client.guilds.fetch(AUTOROLE.guildID);
 
             if (!guild1) {
-
-                console.log(`Guild: ${AUTOROLE.guild} || Autorole: ${AUTOROLE.messageID} || Issue: guild missing`);
+                toDelete.push({ guildID: AUTOROLE.guildID, messageID: AUTOROLE.messageID });
+                console.log(`GuildName: ${guild1.name} || GuildID: ${AUTOROLE.guildID} || AutoRoleTitle: ${AUTOROLE.title} || Autorole: ${AUTOROLE.messageID} || Issue: guild missing`);
                 continue;
             }
 
-            let channel = await guild.channels.cache.get(AUTOROLE.channelID);
+            let channel = await guild1.channels.cache.get(AUTOROLE.channelID);
             if (!channel) {
                 //channel.send("An autorole message channel! that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
-                console.log(`Guild: ${AUTOROLE.guild} || Autorole: ${AUTOROLE.messageID} || Issue: channel missing`);
+                toDelete.push({ guildID: AUTOROLE.guildID, messageID: AUTOROLE.messageID });
+                console.log(`GuildName: ${guild1.name} || GuildID: ${AUTOROLE.guildID} || AutoRoleTitle: ${AUTOROLE.title} || Autorole: ${AUTOROLE.messageID} || Issue: channel missing`);
                 continue;
             }
             if (!message) {
                 //channel.send("An autorole message that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
-                console.log(`Guild: ${AUTOROLE.guild} || Autorole: ${AUTOROLE.messageID} || Issue: message missing`);
+                toDelete.push({ guildID: AUTOROLE.guildID, messageID: AUTOROLE.messageID });
+                console.log(`GuildName: ${guild1.name} || GuildID: ${AUTOROLE.guildID} || AutoRoleTitle: ${AUTOROLE.title} || Autorole: ${AUTOROLE.messageID} || Issue: message missing`);
                 continue;
             }
 
 
-            fs.promises.writeFile(`${23124}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
-            fs.promises.writeFile(`${2222}.json`, JSON.stringify("guildID: " + guild.id + "\n\n" + "MessageID: " + AUTOROLE.messageID), 'UTF-8');
-            // let guild = await MAIN.findGuild({
+            // fs.promises.writeFile(`${23124}.json`, JSON.stringify(err.message + "\n\n" + err.stack + "\n-------------\n\n"), 'UTF-8');
+            // fs.promises.writeFile(`${2222}.json`, JSON.stringify("guildID: " + guild1.id + "\n\n" + "MessageID: " + AUTOROLE.messageID), 'UTF-8');
+            // // let guild = await MAIN.findGuild({
             //     id: AUTOROLE.guildID
             // });
 
@@ -733,6 +738,7 @@ const setEmojiCollectorAll = async function (autoroleObj) {
             //         autorole: guild.autorole
             //     }
             // }, function (err, doc, res) { })
+
             continue;
 
         }
@@ -745,18 +751,58 @@ const setEmojiCollectorAll = async function (autoroleObj) {
         }
 
         setEmojiCollecter(AUTOROLE, message);
-
     }
+    return toDelete;
 }
 
 const initialiseAdministrator = async function () {
 
     let guilds = await MAIN.getGuilds();
 
+    let completeDeleteList = [];
+
     for (let GUILD of guilds) {
         let guild = GUILD;
         populateAutoRoleMap(guild.autorole);
-        setEmojiCollectorAll(guild.autorole);
+        let result = await setEmojiCollectorAll(guild.autorole);
+
+        if (result.length > 0) {
+
+            completeDeleteList = completeDeleteList.concat(result);
+        }
+    }
+    console.log(`Length of list: ${completeDeleteList.length}`);
+    if (completeDeleteList.length > 0) {
+
+        for (let item of completeDeleteList) {
+
+            console.log(item);
+
+            let guild = await Guild.findOne({ id: item.guildID });
+
+            for (let i = 0; i < guild.autorole.length; i++) {
+
+                let auto = guild.autorole[i];
+
+                if (auto.messageID == item.messageID) {
+                    console.log(`found the right auto role at index: ${i}`);
+                    auto = null;
+                    guild.autorole.splice(i, 1);
+                    Guild.findOneAndUpdate({
+                        id: guild.id
+                    }, {
+                        $set: {
+                            autorole: guild.autorole
+                        }
+                    }, function (err, doc, res) {
+                        if (err) { console.log(err); return; }
+                        // if (doc) { console.log(doc); }
+                        // if (res) { console.log(res); }
+                    });
+                    break;
+                }
+            }
+        }
     }
     setInterval(resetCollectors, 30 * 60 * 1000);
 }
@@ -2919,12 +2965,65 @@ const unSetImageSourceChannel = async function (message, params, user) {
 exports.unSetImageSourceChannel = unSetImageSourceChannel;
 
 
+
+const setGameRolePair = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a game - role Pair from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a game - role Pair");
+
+    const args = message.content.split(' ').slice(1).join(' ').trim().split(',');
+
+    if (args.length != 2)
+        return message.channel.send("You must specify a game title and a role **seperated by a comma**!");
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You can/have to only @mention a single role!");
+
+    let roleID = message.mentions.roles.first().id;
+
+    let test = await giveRoleSelf(message, roleID);
+
+    if (!test)
+        return message.channel.send("I don't have the permissions to work with that role!");
+
+    let editGuild = await MAIN.findGuild({ id: message.guild.id });
+
+    let gameRolePair = editGuild.gameRolePair;
+
+    if (!gameRolePair) gameRolePair = {};
+
+    console.log(gameRolePair);
+    console.log(args[0]);
+    // console.log(gameRolePair[`${args[0]}`]);
+
+    if (!gameRolePair) {
+
+        gameRolePair[`${args[0]}`] = roleID;
+        console.log(`after editS:::`);
+        console.log(gameRolePair)
+    }
+    else if (!gameRolePair[`${args[0]}`]) {
+
+        gameRolePair[`${args[0]}`] = roleID;
+        Guild.findOneAndUpdate({ id: editGuild.id }, { $set: { gameRolepair: gameRolePair } }, function (err, doc, res) {
+            if (err) console.log(err);
+            if (res) console.log(res);
+        });
+        message.channel.send(`Successfuly set game-role pair!`);
+    }
+    else
+        return message.channel.send("Overwriting the previous role assigned to this game!");
+}
+exports.setGameRolePair = setGameRolePair;
+
 const setRepRolePair = async function (message, params, user) {
 
     if (message.channel.type == 'dm') return message.channel.send("You can only set a rep point - role Pair from inside a server text channel");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("Only admins can set a rep point - role Pair")
+        return message.channel.send("Only admins can set a rep point - role Pair");
 
     const args = Number(message.content.split(" ").slice(1).join(" ").trim().split(' ')[0]);
 

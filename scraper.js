@@ -265,31 +265,60 @@ async function showResources() {
 
 async function createUser(member) {
 
-    let newUser = {
-        displayName: member.displayName,
-        id: member.id,
-        messages: [0],
-        lastMessage: ["0-0-0"],
-        timeTalked: [0],
-        lastTalked: ["0-0-0"],
-        games: [],
-        timeAFK: [0],
-        dateJoined: [getDate()],
-        excludePing: false,
-        excludeDM: false,
-        guilds: [member.guild.id],
-        activeTutorial: -1,
-        tutorialStep: -1,
-        previousTutorialStep: -1,
-        notifyUpdate: false,
-        notifyTutorial: true,
-        completedTutorials: [],
-        summoner: [0],
-        kicked: [false],
-        prefix: ["-1"],
-        defaultPrefix: "-1",
-        commands: []
-    }
+    let newUser;
+
+    if (member.guild.id)
+        newUser = {
+            displayName: member.displayName,
+            id: member.id,
+            messages: [0],
+            lastMessage: ["0-0-0"],
+            timeTalked: [0],
+            lastTalked: ["0-0-0"],
+            games: [],
+            timeAFK: [0],
+            dateJoined: [getDate()],
+            excludePing: false,
+            excludeDM: false,
+            guilds: [member.guild.id],
+            activeTutorial: -1,
+            tutorialStep: -1,
+            previousTutorialStep: -1,
+            notifyUpdate: false,
+            notifyTutorial: true,
+            completedTutorials: [],
+            summoner: [0],
+            kicked: [false],
+            prefix: ["-1"],
+            defaultPrefix: "-1",
+            commands: []
+        }
+    else
+        newUser = {
+            displayName: member.displayName,
+            id: member.id,
+            messages: [],
+            lastMessage: [],
+            timeTalked: [],
+            lastTalked: [],
+            games: [],
+            timeAFK: [],
+            dateJoined: [],
+            excludePing: false,
+            excludeDM: false,
+            guilds: [],
+            activeTutorial: -1,
+            tutorialStep: -1,
+            previousTutorialStep: -1,
+            notifyUpdate: false,
+            notifyTutorial: true,
+            completedTutorials: [],
+            summoner: [],
+            kicked: [],
+            prefix: ["-1"],
+            defaultPrefix: "-1",
+            commands: []
+        }
 
     let userModel = new User(newUser);
     await userModel.save();
@@ -605,6 +634,18 @@ const updateFactionTally = async function (guilds) {
 
         let finalEmbedArray = [];
 
+        guild.factions.sort(function (a, b) { return b.points - a.points });
+
+        let standingText = '';
+
+        for (let i = 0; i < guild.factions.length; i++) {
+
+            standingText += `${i + 1}: ${guild.factions[i].name} has ${guild.factions[i].points} points!\n`
+        }
+
+        finalEmbedArray.push({ name: `Overall Faction Standings`, value: standingText, inline: false });
+
+
         for (let faction of guild.factions) {
 
             let finalText = `#Current standing: ${faction.points}\n` +
@@ -639,14 +680,13 @@ const updateFactionTally = async function (guilds) {
                         continue;
                     }
 
-
-
-                    memberContribution += `${i + 1})<${actualyMember.displayName.replace(/\s/g, '_')}` +
-                        ` has contributed =${member.points} points!>\n`
+                    if (actualyMember)
+                        memberContribution += `${i + 1})<${actualyMember.displayName.replace(/\s/g, '_')}` +
+                            ` has contributed =${member.points} points!>\n`
                     // memberContribution += `${i + 1})<Member#${i + 1}` +
                     //     ` has contributed =${member.points} points!>\n`
                 }
-            else
+            else if (finalText.length <= 2)
                 finalText = "No members have contributed to this faction!";
 
             finalText += memberContribution;
@@ -699,7 +739,7 @@ exports.getLeagueEmoji = getLeagueEmoji;
 
 /**
  * 
- * @param {part, startTally, modifier, URL, title, description, selector, maxLength, embed} extraParams 
+ * @param {part, startTally, modifier, URL, title, description, selector, maxLength, cutOff, embed} extraParams 
  */
 async function prettyEmbed(message, array, extraParams) {
 

@@ -624,7 +624,7 @@
            "games",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Games-Admin"
     },
     {
         "title": "removeGameFromAllUsers",
@@ -637,7 +637,7 @@
            "games",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Games-Admin"
     },
     {
         "title": "signUpSpecificUser",
@@ -650,7 +650,7 @@
            "games",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Games-Admin"
     },
     {
         "title": "removeGameFromSpecificUser",
@@ -663,7 +663,7 @@
            "games",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Games-Admin"
     },
     {
         "title": "currentSong",
@@ -1137,7 +1137,8 @@
         "explanation": "Awards or removes points from a faction and/or faction member.",
         "example": [
             "1) factionPoints 25, @nameOfRole",
-            "2) factionPoints -31, @userName"
+            "2) factionPoints -31, @userName",
+            "3) factionPoints 42, NameOfFaction"
         ],
         "subsection": [
            "games",
@@ -1387,7 +1388,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "unSetChannelImageThanker",
@@ -1399,7 +1400,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "channelThankerMessage",
@@ -1413,7 +1414,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "repScore",
@@ -1487,7 +1488,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "unSetImageChannel",
@@ -1499,7 +1500,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "setImageSourceChannel",
@@ -1511,7 +1512,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "unSetImageSourceChannel",
@@ -1523,7 +1524,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "setImageForwarding",
@@ -1536,7 +1537,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "setRepRolePair",
@@ -1548,7 +1549,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Rep"
     },
     {
         "title": "removeRepRolePair",
@@ -1560,7 +1561,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Rep"
     },
     {
         "title": "blacklistRepRole",
@@ -1572,7 +1573,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Rep"
     },
     {
         "title": "removeBlacklistedRepRole",
@@ -1584,7 +1585,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Rep"
     },
     {
         "title": "setCommandChannel",
@@ -1644,7 +1645,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "unSetChannelLinkThanker",
@@ -1656,7 +1657,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Image/Link Automation"
     },
     {
         "title": "botStats",
@@ -1706,7 +1707,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Rep"
     },
     {
         "title": "removeBlacklistedGiveRepRole",
@@ -1718,7 +1719,7 @@
            "miscellaneous",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Rep"
     },
     {
         "title": "youtubeChannelPair",
@@ -1848,7 +1849,7 @@
            "games",
            "admin"
         ],
-        "category": "*Other*"
+        "category": "Games-Admin"
     },
     {
         "title": "repToFaction",
@@ -1895,8 +1896,7 @@
             "1) addAutoRoleRole messageIDHere, :emoji:, @role"
         ],
         "subsection": [
-           "admin",
-           "Faction"
+           "admin"
         ],
         "category": "autoRole"
     },
@@ -1907,9 +1907,20 @@
             "1) addAutoRoleRole messageIDHere, :emoji:"
         ],
         "subsection": [
-           "admin",
-           "Faction"
+           "admin"
         ],
         "category": "autoRole"
+    },
+    {
+        "title": "setGameRolePair",
+        "explanation": "Sets a role to be granted to a member when they are playing the specified game. MAKE SURE GAME SPELLING IS PERFECT!",
+        "example": [
+            "1) setGameRolePair name Of Game, @roleToGrant"
+        ],
+        "subsection": [
+           "admin",
+           "games"
+        ],
+        "category": "Games-Admin"
     }
 ]

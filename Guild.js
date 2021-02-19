@@ -112,7 +112,11 @@ const GuildSchema = new mongoose.Schema({
     gameRolePing: {
         type: Boolean,
         default: false
-    }
+    },
+    gameRolePair: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    } 
 });
 
 

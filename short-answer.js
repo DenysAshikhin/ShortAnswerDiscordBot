@@ -1134,12 +1134,36 @@ connectDB.once('open', async function () {
                     }, function (err, doc, res) { });
                 }
                 // else
-                    // console.log("did not find the faction to update new member points");
+                // console.log("did not find the faction to update new member points");
             }
             // else
             //  console.log('no factions??')
         }
     })
+
+    Client.on('presenceUpdate', (oldMember, newMember) => {
+
+        return 1;
+
+        if (oldMember) {
+            if (oldMember.activities.length > 0) {
+                if (oldMember.activities[0].type == 'PLAYING') {
+
+                    console.log(oldMember.member.displayName + "  Finished playing a game!")
+                }
+            }
+        }
+        else if (newMember.activities.length > 0) {
+
+            if (!newMember.activities) return;
+            if (newMember.activities[0].type != 'PLAYING')
+                return;
+
+            let game = newMember.activities[0].name;
+            console.log("user is playing " + game);
+            console.log('done');
+        }
+    });
 });
 
 
@@ -1338,6 +1362,7 @@ function populateCommandMap() {
     commandMap.set(Commands[155].title.toUpperCase(), ADMINISTRATOR.resetFactionPoints)
     commandMap.set(Commands[156].title.toUpperCase(), ADMINISTRATOR.addAutoRoleRole)
     commandMap.set(Commands[157].title.toUpperCase(), ADMINISTRATOR.deleteAutoRoleRole)
+    commandMap.set(Commands[158].title.toUpperCase(), ADMINISTRATOR.setGameRolePair)
 
     exports.commandMap = commandMap;
 }
@@ -2162,7 +2187,7 @@ exports.generalMatcher = generalMatcher;
 
 /**
  * 
- * @param {part, startTally, modifier, URL, title, description, selector, maxLength, embedReturn} extraParams 
+ * @param {part, startTally, modifier, URL, title, description, selector, maxLength, cutOff, embedReturn} extraParams 
  */
 async function prettyEmbed(message, array, extraParams) {
 
@@ -2175,7 +2200,9 @@ async function prettyEmbed(message, array, extraParams) {
     let selector = extraParams.selector;
     let description = extraParams.description ? extraParams.description : '';
     let maxLength = extraParams.maxLength ? extraParams.maxLength : 100;
+    let cutOff = extraParams.cutOff;
     let embedReturn = extraParams.embed ? extraParams.embed : false;
+    let order = extraParams.order == false ? extraParams.order : true;
 
     let runningString = "";
     let previousName = "";
@@ -2185,7 +2212,7 @@ async function prettyEmbed(message, array, extraParams) {
 
 
     let tester = 1;
-
+    let inline;
 
     for (item of array) {
         let BIGSPLIT = false;
@@ -2210,7 +2237,7 @@ async function prettyEmbed(message, array, extraParams) {
                 field.name = `${part} ${groupNumber}`;
 
             if (field.value.length != 0) {
-
+                field.inline = inline;
                 fieldArray.push(JSON.parse(JSON.stringify(field)));
             }
 
@@ -2222,6 +2249,8 @@ async function prettyEmbed(message, array, extraParams) {
                 inline: true
             };
         }
+
+        inline = item.inline == false ? false : true;
 
         if ((runningString.length < maxLength) || (field == null)) {
 
@@ -2292,7 +2321,7 @@ async function prettyEmbed(message, array, extraParams) {
                     field.name = item.name;
                     previousName = item.name;
                 }
-
+                field.inline = inline;
                 fieldArray.push(JSON.parse(JSON.stringify(field)));
 
                 runningString = "";
@@ -2316,7 +2345,7 @@ async function prettyEmbed(message, array, extraParams) {
     if (field.value.length != 0)
         fieldArray.push(JSON.parse(JSON.stringify(field)));
 
-    return await testy(fieldArray, description, message, modifier, URL, title, selector, embedReturn);
+    return await testy(fieldArray, description, message, modifier, URL, title, selector, cutOff, embedReturn, order);
 }
 exports.prettyEmbed = prettyEmbed;
 
@@ -2391,65 +2420,78 @@ function createThreeQueue(array) {
     return threeQueue;
 }
 
-async function testy(ARR, description, message, modifier, URL, title, selector, embedReturn) {
+async function testy(ARR, description, message, modifier, URL, title, selector, cutOff, embedReturn, order) {
 
     let newEmbed = JSON.parse(JSON.stringify(Embed));
     newEmbed.timestamp = new Date();
     newEmbed.description = description;
     newEmbed.title = title ? title : newEmbed.title;
     newEmbed.thumbnail.url = URL;
+    let sort = order == false ? false : true;
 
     let amount = ARR.length > 24 ? 24 : ARR.length;
 
-    let threeQueue = createThreeQueue(ARR.splice(0, amount))
 
-    threeQueue.index = 0;
 
-    for (let i = 0; i < 25; i++) {
+    if (sort) {
+        let threeQueue = createThreeQueue(ARR.splice(0, amount), cutOff, order)
+        threeQueue.index = 0;
+        for (let i = 0; i < 25; i++) {
 
-        let field = threeQueue.queue[threeQueue.index].shift();
-        if (!field) {
-            if (threeQueue.index == 0) {
-                break;
-            } else {
-                newEmbed.fields.push({
-                    name: "** **",
-                    value: "** **",
-                    inline: true
-                })
-                threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
-                continue;
+            let field = threeQueue.queue[threeQueue.index].shift();
+            if (!field) {
+                if (threeQueue.index == 0) {
+                    break;
+                } else {
+                    newEmbed.fields.push({
+                        name: "** **",
+                        value: "** **",
+                        inline: true
+                    })
+                    threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
+                    continue;
+                }
             }
-        }
 
-        if (!Array.isArray(field.value)) { } else if (modifier == -1) {
-            field.value = field.value.join('\n');
-        } else if (modifier == 1) {
-            field.value = "```" + "\n" + field.value.join('\n') + "```";
-        } else if (modifier) {
-            field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
+            if (!Array.isArray(field.value)) { } else if (modifier == -1) {
+                field.value = field.value.join('\n');
+            } else if (modifier == 1) {
+                field.value = "```" + "\n" + field.value.join('\n') + "```";
+            } else if (modifier) {
+                field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
+            }
+            newEmbed.fields.push(field);
+            threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
         }
-        newEmbed.fields.push(field);
-        threeQueue.index = threeQueue.index == 2 ? 0 : threeQueue.index + 1;
     }
+    else
+        for (let i = 0; i < ARR.length; i++) {
+            let field = ARR[i];
+            if (!Array.isArray(field.value)) { } else if (modifier == -1) {
+                field.value = field.value.join('\n');
+            } else if (modifier == 1) {
+                field.value = "```" + "\n" + field.value.join('\n') + "```";
+            } else if (modifier) {
+                field.value = "```" + modifier + "\n" + field.value.join('\n') + "```";
+            }
+            newEmbed.fields.push(field);
+        }
 
-
-    if (ARR.length > 0) {
-        message.channel.send({
+    if ((ARR.length > 0) && sort) {
+        Client.guilds.cache.get(message.guild.id).channels.cache.get(message.channel.id).send({
             embed: newEmbed
         });
         return testy(ARR, description, message, modifier);
     }
 
     if (embedReturn) {
-
         return newEmbed;
     } else if (!selector) {
-        return await message.channel.send({
+        return await Client.guilds.cache.get(message.guild.id).channels.cache.get(message.channel.id).send({
             embed: newEmbed
         });
     } else {
-        let temp = await message.channel.send({
+        let temp = await Client.guilds.cache.get(message.guild.id).channels.cache.get(message.channel.id).send({
             embed: newEmbed
         });
         setControlEmoji(temp);
