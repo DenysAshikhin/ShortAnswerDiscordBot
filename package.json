@@ -46,7 +46,7 @@
     "ofe": "^0.6.0",
     "openssl": "^1.1.0",
     "os-utils": "0.0.14",
-    "pug": "^3.0.0",
+    "pug": "^3.0.1",
     "puppeteer": "^4.0.0",
     "puppeteer-extra": "^3.1.15",
     "serve-favicon": "^2.5.0",
