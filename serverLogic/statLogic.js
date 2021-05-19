@@ -310,7 +310,7 @@ async function topStats(params) {
     let channel = guild.channels.cache.get(params[1]);
 
     channel.send("Collecting all the stats....");
-    let allUsers = await Users.find({
+    let allUsers = await User.find({
         guilds: guild.id
     }).lean();
 

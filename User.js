@@ -109,6 +109,10 @@ const UserSchema = new mongoose.Schema({
     },
     youtubeAlerts: {
         type: Map
+    },
+    autoRepDate: {
+        type: String,
+        default: '0-0-0000'
     }
 });
 

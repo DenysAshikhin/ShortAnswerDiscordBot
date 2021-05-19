@@ -116,7 +116,15 @@ const GuildSchema = new mongoose.Schema({
     gameRolePair: {
         type: mongoose.Schema.Types.Mixed,
         default: {}
-    } 
+    },
+    profanityFiler: {
+        type: Boolean,
+        default: false
+    },
+    dailyAutoRepLimit:{
+        type: Boolean,
+        default: true
+    }
 });
 
 

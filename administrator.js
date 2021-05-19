@@ -1030,7 +1030,19 @@ const autorole = async function (message, params, user) {
                             step: 3,
                         }
                     }, user);
-                } else {
+                }
+                else if ((message.content.trim().length < 1)) {
+                    await message.channel.send("The description has to be at least 1 character! Try again.")
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: autorole,
+                        commandParams: {
+                            ...params,
+                            step: 3,
+                        }
+                    }, user);
+                }
+                else {
 
                     await message.channel.send("This is what the message will currently look like:");
                     await message.channel.send({
@@ -1381,12 +1393,11 @@ const autorole = async function (message, params, user) {
 
         await message.channel.send("Welcome to the autorole message creator. This is what the message will currently look like:");
 
-        let embed1 = {
-            ...MAIN.Embed,
-            footer: '',
-            title: '',
-            timestamp: null
-        };
+        let embed1 = JSON.stringify(MAIN.Embed)
+        embed1.description = 'Temporary Description. This field is required!',
+        embed1.footer = ''
+        embed1.title = ''
+        embed1.timestamp = null
         await message.channel.send({
             embed: embed1
         });
@@ -1414,6 +1425,475 @@ const autorole = async function (message, params, user) {
     }
 }
 exports.autorole = autorole;
+
+
+
+const embedCreator = async function (message, params, user) {
+    if (message.content == '-1')
+        return 0;
+
+    if (params.step) {
+
+        params.numMessages++;
+
+        switch (params.step) {
+
+            case 1: //Comes from matcher
+
+                await message.channel.send(`1) Please enter the title for the embed (Max. 250 characters):` +
+                    "\nThis is what the message currently will look like:");
+                await message.channel.send({
+                    embed: {
+                        ...params.runningEmbed
+                    }
+                });
+                params.numMessages += 2;
+
+                return MAIN.createRunningCommand(message, {
+                    command: embedCreator,
+                    commandParams: {
+                        ...params,
+                        step: 2
+                    }
+                }, user);
+                break;
+            case 2:
+
+                if ((message.content.length > 250)) {
+
+                    await message.channel.send("The title is limited to 250 characters." + `Yours was ${message.content.length}! Try again.`)
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: embedCreator,
+                        commandParams: {
+                            ...params,
+                            step: 2,
+                        }
+                    }, user);
+                } else {
+
+                    await message.channel.send("This is what the message will currently look like:");
+                    await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed,
+                            title: message.content
+                        }
+                    });
+                    params.numMessages += 3; //might cause issues
+                    return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
+                        ...params,
+                        step: 3,
+                        title: message.content
+                    },
+                    {
+                        ...params,
+                        step: 1
+                    }
+                    ], embedCreator, `Do you wish to keep:  **${message.content}**   as the title or change it?`);
+                }
+                break;
+            case 3:
+
+                if (params.title.length > 250) {
+
+                    await message.channel.send("The title is limited to 250 characters." + `Yours was ${params.title.length}! Try again.`)
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: embedCreator,
+                        commandParams: {
+                            ...params,
+                            step: 1,
+                        }
+                    }, user);
+                } else if (message.content.length <= 1000) {
+
+                    params.runningEmbed.title = params.title;
+                    await message.channel.send("\nThis is what the message currently will look like:");
+                    await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed
+                        }
+                    });
+                    await message.channel.send("`2) Please enter the description for the embed message (Max. 1000 characters):`");
+                    params.numMessages += 3;
+
+
+                    return MAIN.createRunningCommand(message, {
+                        command: embedCreator,
+                        commandParams: {
+                            ...params,
+                            step: 4
+                        }
+                    }, user);
+                } else {
+
+                    await message.channel.send("The description is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: embedCreator,
+                        commandParams: {
+                            ...params,
+                            step: 4,
+                        }
+                    }, user);
+
+                }
+                break;
+            case 4:
+
+                if ((message.content.length > 1000)) {
+
+                    await message.channel.send("The description is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: embedCreator,
+                        commandParams: {
+                            ...params,
+                            step: 3,
+                        }
+                    }, user);
+                }
+                else if ((message.content.trim().length < 1)) {
+                    await message.channel.send("The description has to be at least 1 character! Try again.")
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: embedCreator,
+                        commandParams: {
+                            ...params,
+                            step: 3,
+                        }
+                    }, user);
+                }
+                else {
+
+                    await message.channel.send("This is what the message will currently look like:");
+                    await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed,
+                            description: message.content
+                        }
+                    });
+                    params.numMessages += 3; //might cause issues
+                    return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
+                        ...params,
+                        step: 5,
+                        description: message.content,
+                        runningEmbed: {
+                            ...params.runningEmbed,
+                            description: message.content
+                        }
+                    },
+                    {
+                        ...params,
+                        step: 3
+                    }
+                    ], embedCreator, `Do you wish to keep:  **${message.content}**   as the description or change it?`);
+                }
+            case 5:
+
+                if (params.fieldAdded)
+                    params.runningEmbed.fields.push(params.newField);
+
+                await message.channel.send("This is what the message currently will look like:");
+                let tempy = await message.channel.send({
+                    embed: {
+                        ...params.runningEmbed
+                    }
+                });
+                params.numMessages += 1;
+
+                return await MAIN.generalMatcher(message, -23, user, ['Add inline field', 'Add seperate line field', 'finish'], [{
+                    ...params,
+                    step: 6,
+                    newField: {
+                        inline: true,
+                        name: 'temp title (can be blank)',
+                        value: 'temp field body (can be blank)'
+                    }
+                },
+                {
+                    ...params,
+                    step: 6,
+                    newField: {
+                        inline: false,
+                        name: 'temp title (can be blank)',
+                        value: 'temp field body (can be blank)'
+                    }
+                },
+                {
+                    ...params,
+                    step: 9,
+                    newField: null
+                }
+                ], embedCreator, "Do you wish to add a field to your embed?");
+
+                if (params.newEmoji) {
+                    params.emojis.push(params.newEmoji);
+                    params.roles.push(params.newEmoji.roleID);
+                    params.newEmoji = null;
+                }
+                reactEmoji(tempy, params.emojis);
+
+                return MAIN.createRunningCommand(message, {
+                    command: embedCreator,
+                    commandParams: {
+                        ...params,
+                        step: 6,
+                    }
+                }, user);
+
+                break;
+            case 6:
+
+                await message.channel.send(`3) Please enter the title for the field (Max. 250 characters):` +
+                    "\nThis is what the message currently will look like:");
+
+                params.runningEmbed.fields.push(params.newField)
+                await message.channel.send({
+                    embed: {
+                        ...params.runningEmbed
+                    }
+                });
+                params.runningEmbed.fields.pop();
+
+                params.numMessages += 2;
+
+                return MAIN.createRunningCommand(message, {
+                    command: embedCreator,
+                    commandParams: {
+                        ...params,
+                        step: 7
+                    }
+                }, user);
+                break;
+            case 7:
+
+                if ((message.content.length > 250)) {
+
+                    await message.channel.send("The title is limited to 250 characters." + `Yours was ${message.content.length}! Try again.`)
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: embedCreator,
+                        commandParams: {
+                            ...params,
+                            step: 6,
+                        }
+                    }, user);
+                } else {
+
+                    await message.channel.send("This is what the message will currently look like:");
+
+                    params.newField.name = message.content;
+
+                    params.runningEmbed.fields.push(params.newField)
+                    await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed
+                        }
+                    });
+                    params.runningEmbed.fields.pop();
+
+                    params.numMessages += 3; //might cause issues
+                    return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
+                        ...params,
+                        step: 8
+                    },
+                    {
+                        ...params,
+                        step: 6
+                    }
+                    ], embedCreator, `Do you wish to keep:  **${message.content}**   as the title or change it?`);
+                }
+                break;
+            case 8:
+
+                await message.channel.send(`4) Please enter the body for the field (Max. 1000 characters):` +
+                    "\nThis is what the message currently will look like:");
+
+                params.runningEmbed.fields.push(params.newField)
+                await message.channel.send({
+                    embed: {
+                        ...params.runningEmbed
+                    }
+                });
+                params.runningEmbed.fields.pop();
+
+                params.numMessages += 2;
+
+                return MAIN.createRunningCommand(message, {
+                    command: embedCreator,
+                    commandParams: {
+                        ...params,
+                        step: 11
+                    }
+                }, user);
+                break;
+            case 9:
+
+                await message.channel.send(`Below you will find the final result!`);
+                let finalMessage = await message.channel.send({
+                    embed: params.runningEmbed
+                });
+                params.messageID = finalMessage.id;
+                params.numMessages += 2;
+
+                // MAIN.cachedGuilds.set(guild.id, guild);
+
+                // Guild.findOneAndUpdate({
+                //     id: message.guild.id
+                // }, {
+                //     $set: {
+                //         autorole: guild.autorole
+                //     }
+                // }, function (err, doc, res) { });
+
+                params.numMessages += 1;
+
+                return await MAIN.generalMatcher(message, -23, user, ['Remove Messages', 'Keep Messages'], [{
+                    ...params,
+                    step: 10,
+                    remove: true
+                },
+                {
+                    ...params,
+                    step: 10,
+                    remove: false
+                }
+                ], embedCreator, "Would you like me to delete the previous setup message? Depending on how many mistakes were made, some messages might be left over." +
+                " However, only the setup messages will be removed.");
+
+
+                break;
+            case 10:
+
+                if (params.remove) {
+
+                    console.log(`Removing ${params.numMessages} messages!`);
+
+                    // let messages = await message.channel.messages.fetch({ limit: params.numMessages - 1 })
+                    let messages = await message.channel.messages.fetch({
+                        after: params.originalMessage
+                    })
+                    console.log(messages.size)
+                    messages.delete(params.messageID);
+                    console.log(messages.size);
+
+                    if (messages.size > 99){
+                        message.channel.send("There are more than 99 messages to delete...not allowed by api. Sorry but you will have to manually delete them.");
+                    }
+
+
+                    let permission = message.channel.permissionsFor(message.guild.members.cache.get(MAIN.Client.user.id));
+                    if (!permission.has("MANAGE_MESSAGES")) {
+
+                        params.numMessages += 1;
+
+                        return await MAIN.generalMatcher(message, -23, user, ['Try Again', "Don't Try Again"], [{
+                            ...params,
+                            step: 10,
+                            remove: true
+                        },
+                        {
+                            ...params,
+                            step: 10,
+                            remove: false
+                        }
+                        ], embedCreator, "I don't have the MANAGE_MESSAGES permission in this channel to delete messages. Would you like me to try again?");
+                    }
+
+                    message.channel.bulkDelete(messages).catch(err => {
+                        console.log("Error deleting bulk messages: " + err);
+                        message.channel.send("Some of the messages you attempted to delete are older than 14 days - aborting.");
+                    });
+
+                }
+                break;
+            case 11: // added extra case to allow fields to be made, loops back into 9 once done
+            if ((message.content.length > 1000)) {
+
+                await message.channel.send("The body is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
+                params.numMessages++;
+                return MAIN.createRunningCommand(message, {
+                    command: embedCreator,
+                    commandParams: {
+                        ...params,
+                        step: 8,
+                    }
+                }, user);
+            } else {
+
+                await message.channel.send("This is what the message will currently look like:");
+
+                params.newField.value = message.content;
+
+                params.runningEmbed.fields.push(params.newField)
+                await message.channel.send({
+                    embed: {
+                        ...params.runningEmbed
+                    }
+                });
+                params.runningEmbed.fields.pop();
+
+                params.numMessages += 3; //might cause issues
+                return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
+                    ...params,
+                    step: 5,
+                    fieldAdded: true
+                },
+                {
+                    ...params,
+                    step: 8
+                }
+                ], embedCreator, `Do you wish to keep:  **${message.content}**   as the title or change it?`);
+            }
+            break;
+                break;
+        }
+
+    } else {
+
+        if (message.channel.type == 'dm') return message.channel.send("You can only create and autoRole Message from inside a server text channel");
+
+        if (!message.member.permissions.has("ADMINISTRATOR"))
+            return message.channel.send("Only admins may create an autorole message");
+
+        await message.channel.send("Welcome to the custom embed creator. Please note that embeds are limited to a total of **6,000** characters and **25** fields. The prior two restrictions are not enforced and attempting to circumvent them will break things :)\n"
+            + "This is what the message will currently look like:");
+
+        let embed1 = JSON.parse(JSON.stringify(MAIN.Embed));
+        embed1.description = 'Temporary Description. This field is required!',
+        embed1.footer = ''
+        embed1.title = 'Temporary Title. This field is required!',
+        embed1.timestamp = null
+
+        await message.channel.send({
+            embed: embed1
+        });
+        await message.channel.send("```\n You can enter **-1** at any point to stop the autorole creation process!```")
+        await message.channel.send("Please be careful with all your future inputs.\n`Step 1) Please enter the title for the message (Max. 250 characters):`");
+
+        return MAIN.createRunningCommand(message, {
+            command: embedCreator,
+            commandParams: {
+                step: 2,
+                runningEmbed: embed1,
+                guildID: message.guild.id,
+                channelID: message.channel.id,
+                messageID: null,
+                title: '',
+                description: '',
+                emojis: [],
+                newEmoji: null,
+                users: [],
+                roles: [],
+                numMessages: 5,
+                originalMessage: JSON.parse(JSON.stringify(message.id))
+            }
+        }, user);
+    }
+}
+exports.embedCreator = embedCreator;
+
 
 const addAutoRoleRole = async function (message, params, user) {
 
@@ -3402,6 +3882,91 @@ const autoRepToggle = async function (message, params, user) {
     return 1;
 }
 exports.autoRepToggle = autoRepToggle;
+
+const toggleProfanityFilter = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only toggle the autoRep from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can toggle the profanity filter");
+
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    if (guild.profanityFiler) {
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                profanityFiler: false
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
+        message.channel.send('Successfully toggled off the profanity filter!');
+    }
+    else {
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                profanityFiler: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
+
+        message.channel.send('Successfully toggled on the profanity filter!');
+    }
+}
+exports.toggleProfanityFilter = toggleProfanityFilter;
+
+
+
+const toggleDailyThankerRep = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only toggle the daily limit for Thanker Rep from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can toggle the daily limit for Thanker Rep");
+
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    if (guild.dailyAutoRepLimit) {
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                dailyAutoRepLimit: false
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
+        message.channel.send('Successfully toggled off the daily limit for Thanker Rep!');
+    }
+    else {
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                dailyAutoRepLimit: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
+
+        message.channel.send('Successfully toggled on the daily limit for Thanker Rep!');
+    }
+}
+exports.toggleDailyThankerRep = toggleDailyThankerRep;
+
+
+
 
 const youtubeHere = async function (message, params, user) {
 

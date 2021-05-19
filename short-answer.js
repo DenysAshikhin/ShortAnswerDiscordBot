@@ -169,6 +169,8 @@ exports.gameSuggest = gameSuggest;
 
 var gameSuggestCollecter;
 
+const badWords = ["2g1c", "2 girls 1 cup", "acrotomophilia", "alabama hot pocket", "alaskan pipeline", "anal", "anilingus", "anus", "apeshit", "arsehole", "ass", "asshole", "assmunch", "auto erotic", "autoerotic", "babeland", "baby batter", "baby juice", "ball gag", "ball gravy", "ball kicking", "ball licking", "ball sack", "ball sucking", "bangbros", "bangbus", "bareback", "barely legal", "barenaked", "bastard", "bastardo", "bastinado", "bbw", "bdsm", "beaner", "beaners", "beaver cleaver", "beaver lips", "beastiality", "bestiality", "big black", "big breasts", "big knockers", "big tits", "bimbos", "birdlock", "bitch", "bitches", "black cock", "blonde action", "blonde on blonde action", "blowjob", "blow job", "blow your load", "blue waffle", "blumpkin", "bollocks", "bondage", "boner", "boob", "boobs", "booty call", "brown showers", "brunette action", "bukkake", "bulldyke", "bullet vibe", "bullshit", "bung hole", "bunghole", "buttcheeks", "butthole", "camel toe", "camgirl", "camslut", "camwhore", "carpet muncher", "carpetmuncher", "chocolate rosebuds", "cialis", "circlejerk", "cleveland steamer", "clit", "clitoris", "clover clamps", "clusterfuck", "cock", "cocks", "coprolagnia", "coprophilia", "cornhole", "coon", "coons", "creampie", "cum", "cumming", "cumshot", "cumshots", "cunnilingus", "cunt", "darkie", "date rape", "daterape", "deep throat", "deepthroat", "dendrophilia", "dick", "dildo", "dingleberry", "dingleberries", "dirty pillows", "dirty sanchez", "doggie style", "doggiestyle", "doggy style", "doggystyle", "dog style", "dolcett", "domination", "dominatrix", "donkey punch", "double dong", "double penetration", "dp action", "dry hump", "dvda", "eat my ass", "ecchi", "ejaculation", "erotic", "erotism", "escort", "eunuch", "fag", "faggot", "fecal", "felch", "fellatio", "feltch", "female squirting", "femdom", "figging", "fingerbang", "fingering", "fisting", "foot fetish", "footjob", "frotting", "fuck", "fuck buttons", "fuckin", "fucking", "fucktards", "fudge packer", "fudgepacker", "futanari", "gangbang", "gang bang", "gay sex", "genitals", "giant cock", "girl on", "girl on top", "girls gone wild", "goatcx", "goatse", "god damn", "gokkun", "golden shower", "goodpoop", "goo girl", "goregasm", "grope", "group sex", "g-spot", "guro", "hand job", "handjob", "hard core", "hardcore", "hentai", "homoerotic", "honkey", "hooker", "horny", "hot carl", "hot chick", "how to kill", "how to murder", "huge fat", "humping", "incest", "intercourse", "jack off", "jail bait", "jailbait", "jelly donut", "jerk off", "jigaboo", "jiggaboo", "jiggerboo", "jizz", "juggs", "kike", "kinbaku", "kinkster", "kinky", "knobbing", "leather restraint", "leather straight jacket", "lemon party", "livesex", "lolita", "lovemaking", "make me come", "male squirting", "masturbate", "masturbating", "masturbation", "menage a trois", "milf", "missionary position", "mong", "motherfucker", "mound of venus", "mr hands", "muff diver", "muffdiving", "nambla", "nawashi", "negro", "neonazi", "nigga", "nigger", "nig nog", "nimphomania", "nipple", "nipples", "nsfw", "nsfw images", "nude", "nudity", "nutten", "nympho", "nymphomania", "octopussy", "omorashi", "one cup two girls", "one guy one jar", "orgasm", "orgy", "paedophile", "paki", "panties", "panty", "pedobear", "pedophile", "pegging", "penis", "phone sex", "piece of shit", "pikey", "pissing", "piss pig", "pisspig", "playboy", "pleasure chest", "pole smoker", "ponyplay", "poof", "poon", "poontang", "punany", "poop chute", "poopchute", "porn", "porno", "pornography", "prince albert piercing", "pthc", "pubes", "pussy", "queaf", "queef", "quim", "raghead", "raging boner", "rape", "raping", "rapist", "rectum", "reverse cowgirl", "rimjob", "rimming", "rosy palm", "rosy palm and her 5 sisters", "rusty trombone", "sadism", "santorum", "scat", "schlong", "scissoring", "semen", "sex", "sexcam", "sexo", "sexy", "sexual", "sexually", "sexuality", "shaved beaver", "shaved pussy", "shemale", "shibari", "shit", "shitblimp", "shitty", "shota", "shrimping", "skeet", "slanteye", "slut", "s&m", "smut", "snatch", "snowballing", "sodomize", "sodomy", "spastic", "spic", "splooge", "splooge moose", "spooge", "spread legs", "spunk", "strap on", "strapon", "strappado", "strip club", "style doggy", "suck", "sucks", "suicide girls", "sultry women", "swastika", "swinger", "tainted love", "taste my", "tea bagging", "threesome", "throating", "thumbzilla", "tied up", "tight white", "tits", "titties", "titty", "tongue in a", "topless", "tosser", "towelhead", "tranny", "tribadism", "tub girl", "tubgirl", "tushy", "twat", "twink", "twinkie", "two girls one cup", "undressing", "upskirt", "urethra play", "urophilia", "vagina", "venus mound", "viagra", "vibrator", "violet wand", "vorarephilia", "voyeur", "voyeurweb", "voyuer", "vulva", "wank", "wetback", "wet dream", "white power", "whore", "worldsex", "wrapping men", "wrinkled starfish", "xx", "xxx", "yaoi", "yellow showers", "yiffy", "zoophilia", "🖕"]
+
 async function gameSuggestControlEmoji() {
 
 
@@ -822,6 +824,20 @@ connectDB.once('open', async function () {
             }
 
 
+            if (guild.profanityFiler) {
+
+                let words = message.content.toLowerCase()
+                    .split('$').join('s').split('@').join('a').split('3').join('e').split('&').join('s').split('1').join('i').split('!').join('i')
+                    .split([' ']).join('');
+
+                for (let j = 0; j < badWords.length; j++) {
+
+                    if (words.includes(badWords[j]))
+                        return message.delete();
+                }
+            }
+
+
             if (guild.autoRep) {
 
                 if (guild.channelImageThanker.includes(message.channel.id)) {
@@ -833,9 +849,14 @@ connectDB.once('open', async function () {
                     ADMINISTRATOR.channelLinkThanker(message, null, user);
                 }
 
-
                 let allowedThanks = true;
                 let guildMember = message.member;
+
+                if (guild.dailyAutoRepLimit)
+                    if (user.autoRepDate == getDate())
+                        allowedThanks = false;
+
+
                 for (let roleID of guild.blacklistedGiveRepRoles) {
 
                     if (guildMember.roles.cache.keyArray().includes(roleID)) {
@@ -892,12 +913,29 @@ connectDB.once('open', async function () {
                                 for (let channy of guild.thankerMessageChannel) {
 
                                     let channel = message.guild.channels.cache.get(channy);
-                                    if (channel)
+                                    if (channel) {
+
                                         channel.send(`Gave +1 rep to ${memberList}`);
+                                        User.findOneAndUpdate({
+                                            id: user.id
+                                        }, {
+                                            $set: {
+                                                autoRepDate: getDate()
+                                            }
+                                        }).exec();
+                                    }
                                 }
                             }
-                            else
+                            else {
+
                                 message.channel.send(`Gave +1 rep to ${memberList}`);
+                                User.findOneAndUpdate({
+                                    id: user.id
+                                }, {
+                                    $set: {
+                                        autoRepDate: getDate()
+                                    }
+                                }).exec();}
                     }
             }
         }
@@ -1363,6 +1401,12 @@ function populateCommandMap() {
     commandMap.set(Commands[156].title.toUpperCase(), ADMINISTRATOR.addAutoRoleRole)
     commandMap.set(Commands[157].title.toUpperCase(), ADMINISTRATOR.deleteAutoRoleRole)
     commandMap.set(Commands[158].title.toUpperCase(), ADMINISTRATOR.setGameRolePair)
+    commandMap.set(Commands[159].title.toUpperCase(), ADMINISTRATOR.toggleProfanityFilter)
+    commandMap.set(Commands[160].title.toUpperCase(), ADMINISTRATOR.toggleDailyThankerRep)
+    commandMap.set(Commands[161].title.toUpperCase(), ADMINISTRATOR.embedCreator)
+    
+    
+
 
     exports.commandMap = commandMap;
 }

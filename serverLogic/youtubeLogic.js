@@ -12,7 +12,7 @@ var alertCache = new Map();
 
 const alertYoutube = async function (params) {
 
- //  return 1;
+    //  return 1;
     let userArray = [];
     let guildArray = [];
     let promiseArray = [];
@@ -39,54 +39,55 @@ const alertYoutube = async function (params) {
 
                 let vids;
 
-                try{
+                try {
                     vids = await ytch.getChannelVideos(youtuberID);
-                }
-                catch(err){
-                    console.log(err);
-                    console.log("issue on line 43 in youtube logic");
-                    return;
-                }
 
-                let vidID = vids.items[0].videoId;
-                //  console.log(vids.items[0].videoId)
+                    let vidID = vids.items[0].videoId;
+                    //  console.log(vids.items[0].videoId)
 
-                if (vids.items[0].premiere)
-                    return 1;
-
-                if (!vidID)
-                    return 1;
-
-                if (!alertCache.get(youtuberID)) {
-
-                    let overallLimit = 10;
-                    
-                    let limit = vids.items.length > overallLimit ? overallLimit : vids.items.length;
-                    let vidArr = [];
-                    for (let i = 0; i < limit; i++) {
-
-                        if (!vids.items[i].premiere)
-                            vidArr.push(vids.items[i].videoId)
-                    }
-
-                    alertCache.set(youtuberID, vidArr)
-                }
-
-                else
-                    if (alertCache.get(youtuberID).includes(vidID))
+                    if (vids.items[0].premiere)
                         return 1;
 
-                alertCache.get(youtuberID).push(vidID)
+                    if (!vidID)
+                        return 1;
 
-                for (guild of Object.entries(combo[1].guilds)) {
+                    if (!alertCache.get(youtuberID)) {
 
-                    guildArray.push({ guildID: guild[0], youtuberID: youtubeObj.authorId, vidID: vidID, message: `${youtubeObj.author} just posted a new video! https://www.youtube.com/watch?v=${vids.items[0].videoId}` })
+                        let overallLimit = 10;
+
+                        let limit = vids.items.length > overallLimit ? overallLimit : vids.items.length;
+                        let vidArr = [];
+                        for (let i = 0; i < limit; i++) {
+
+                            if (!vids.items[i].premiere)
+                                vidArr.push(vids.items[i].videoId)
+                        }
+
+                        alertCache.set(youtuberID, vidArr)
+                    }
+
+                    else
+                        if (alertCache.get(youtuberID).includes(vidID))
+                            return 1;
+
+                    alertCache.get(youtuberID).push(vidID)
+
+                    for (guild of Object.entries(combo[1].guilds)) {
+
+                        guildArray.push({ guildID: guild[0], youtuberID: youtubeObj.authorId, vidID: vidID, message: `${youtubeObj.author} just posted a new video! https://www.youtube.com/watch?v=${vids.items[0].videoId}` })
+                    }
+                    for (user of Object.entries(combo[1].users)) {
+
+                        userArray.push({ userID: user[0], youtuberID: youtubeObj.authorId, vidID: vidID, message: `${youtubeObj.author} just posted a new video! https://www.youtube.com/watch?v=${vids.items[0].videoId}` })
+                    }
+
                 }
-                for (user of Object.entries(combo[1].users)) {
+                catch (err) {
+                    console.log(err);
+                    console.log(`object: ${youtubeObj}`)
 
-                    userArray.push({ userID: user[0], youtuberID: youtubeObj.authorId, vidID: vidID, message: `${youtubeObj.author} just posted a new video! https://www.youtube.com/watch?v=${vids.items[0].videoId}` })
+                    console.log(`issue on line 43 in youtube logic with id: ${youtuberID}`);
                 }
-
             });
         promiseArray.push(legitYoutuber);
         await new Promise(r => setTimeout(r, 20));
@@ -119,10 +120,10 @@ const alertYoutube = async function (params) {
                 }
                 //Might not cache of guilds above since I'd only ever run across the same guild once...?
 
-              //  console.log(`${guildArray[i].youtuberID} -- is who we wanted -- ${dbGuild.name} is where we at`)
+                //  console.log(`${guildArray[i].youtuberID} -- is who we wanted -- ${dbGuild.name} is where we at`)
 
 
-                if(!dbGuild.name){
+                if (!dbGuild.name) {
 
                     console.log('wow')
                     console.log(1)
@@ -133,10 +134,10 @@ const alertYoutube = async function (params) {
 
                     if (pair[1] != guildArray[i].vidID) {//check the the pair hasnt already been notified of this song
 
-                       if (dbGuild.youtubeHERE)
-                           legitGuild.channels.cache.get(pair[0]).send('@here ' + guildArray[i].message);
-                       else
-                           legitGuild.channels.cache.get(pair[0]).send(guildArray[i].message);
+                        if (dbGuild.youtubeHERE)
+                            legitGuild.channels.cache.get(pair[0]).send('@here ' + guildArray[i].message);
+                        else
+                            legitGuild.channels.cache.get(pair[0]).send(guildArray[i].message);
 
                         pair[1] = guildArray[i].vidID;
 
@@ -163,7 +164,7 @@ const alertYoutube = async function (params) {
                     users.set(member.id, dbUser);
                 }
 
-                if(!dbUser.youtubeAlerts){
+                if (!dbUser.youtubeAlerts) {
                     console.log(`${dbUser.id} somehow slept through in youtube!`);
                     continue;
                 }

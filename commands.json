@@ -841,9 +841,10 @@
     },
     {
         "title": "timeZone",
-        "explanation": "Converts a specified time to a different timezone. Time is used in 12hour format! Formatted: fromTimeZone, the time, toTimeZone",
+        "explanation": "Converts a specified time to a different timezone. Time is used in 24hour format! Formatted: fromTimeZone, the time, toTimeZone",
         "example": [
-            "1) timeZone acst, 8:00, est"
+            "1) timeZone acst, 8:00, est",
+            "2) timeZone edt, 8:00, acst, est"
         ],
         "subsection": [
            "general"
@@ -1262,7 +1263,7 @@
             "1) privacyPolicy"
         ],
         "subsection": [
-           "admin"
+           "general"
         ],
         "category": "*Other*"
     },
@@ -1913,7 +1914,7 @@
     },
     {
         "title": "setGameRolePair",
-        "explanation": "Sets a role to be granted to a member when they are playing the specified game. MAKE SURE GAME SPELLING IS PERFECT!",
+        "explanation": "CURRENTLY IN DEVELOPMENT! Sets a role to be granted to a member when they are playing the specified game. MAKE SURE GAME SPELLING IS PERFECT!",
         "example": [
             "1) setGameRolePair name Of Game, @roleToGrant"
         ],
@@ -1922,5 +1923,41 @@
            "games"
         ],
         "category": "Games-Admin"
+    },
+    {
+        "title": "toggleProfanityFilter",
+        "explanation": "Enables or disables the default profanity filter.",
+        "example": [
+            "1) toggleProfanityFilter"
+        ],
+        "subsection": [
+           "admin",
+           "general"
+        ],
+        "category": "Admin"
+    },
+    {
+        "title": "toggleDailyThankerRep",
+        "explanation": "Enables or disables the automatic +1 rep from thanking someone to once per day.",
+        "example": [
+            "1) toggleDailyThankerRep"
+        ],
+        "subsection": [
+           "admin",
+           "rep"
+        ],
+        "category": "Admin"
+    },
+    {
+        "title": "embedCreator",
+        "explanation": "Allows you to create a custom embed!",
+        "example": [
+            "1) embedCreator"
+        ],
+        "subsection": [
+           "Genearl",
+           "qof"
+        ],
+        "category": "General"
     }
 ]

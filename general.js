@@ -49,15 +49,17 @@ async function timeZone(message, params, user) {
     args[1] = args[1].split(":");
     args[1][0] = Number(args[1][0]);
     args[1][1] = Number(args[1][1]);
-    if ((args[1][0] > 12) || (args[1][0] < 0)) return message.channel.send("The hours are limited to 0<=x<=12!");
+    if ((args[1][0] > 12) || (args[1][0] < 0)) return message.channel.send("The hours are limited to 0<=x<=24!");
     if ((args[1][1] > 59) || (args[1][1] < 0)) return message.channel.send("The minutes are limited to 0<=x<=59!");
 
     if (params.origin) args[0] = params.origin;
     if (params.destination) args[2] = params.destination;
 
-    if (args.length != 3) return message.channel.send("You did not provide proper parameters, use the help command to for more information.");
+    if (args.length < 3) return message.channel.send("You did not provide proper parameters, use the help command to for more information.");
 
-    let indexOri = zoneList.find((value) => { return value.tz == args[0] });
+
+
+    let indexOri = zoneList.find((value) => { return value.tz == args[0].trim().toUpperCase() });
 
     if (!indexOri) {
 
@@ -68,55 +70,83 @@ async function timeZone(message, params, user) {
     else
         args[0] = indexOri.tz;
 
+    let finalMessage = ""
 
-    let indexDes = zoneList.find((value) => { return value.tz == args[2] });
-
-    if (!indexDes) {
-        return MAIN.generalMatcher(message, args[2], user, zoneList.reduce((accum, current) => { accum.push(current.tz); return accum; }, []),
-            zoneList.reduce((accum, current) => { accum.push({ origin: args[0], destination: current.tz }); return accum; }, []),
-            timeZone, "Please select which destination timezone you meant:");
+    if (args.length > 3) {
+        message.channel.send('Target timezones checks are disabled when there are more than 1 target timezone listed ')
     }
-    else
-        args[2] = indexDes.tz;
 
-    let oriOff = Number(indexOri.offset.split(':')[0]) * 60;
-    if (indexOri.offset.split(':').length == 2)
-        oriOff = (oriOff < 0) ? oriOff - Number(indexOri.offset.split(':')[1]) : oriOff + Number(indexOri.offset.split(':')[1])
+    for (let i = 2; i < args.length; i++) {
 
-    let desOff = Number(indexDes.offset.split(':')[0]) * 60;
-    if (indexDes.offset.split(':').length == 2)
-        desOff = (desOff < 0) ? desOff - Number(indexDes.offset.split(':')[1]) : desOff + Number(indexDes.offset.split(':')[1])
+        let indexDes = zoneList.find((value) => { return value.tz == args[i].trim().toUpperCase() });
 
-    let givenTime = Number(args[1][0]) * 60;
-    givenTime += Number(args[1][1])
+        if (!indexDes) {
+
+            if (args.length == 3)
+                return MAIN.generalMatcher(message, args[i], user, zoneList.reduce((accum, current) => { accum.push(current.tz); return accum; }, []),
+                    zoneList.reduce((accum, current) => { accum.push({ origin: args[0], destination: current.tz }); return accum; }, []),
+                    timeZone, "Please select which Target timezone you meant:");
+        }
+        else
+            args[i] = indexDes.tz;
+
+        let oriOff = Number(indexOri.offset.split(':')[0]) * 60;
+        if (indexOri.offset.split(':').length == 2)
+            oriOff = (oriOff < 0) ? oriOff - Number(indexOri.offset.split(':')[1]) : oriOff + Number(indexOri.offset.split(':')[1])
+
+        let desOff = Number(indexDes.offset.split(':')[0]) * 60;
+        if (indexDes.offset.split(':').length == 2)
+            desOff = (desOff < 0) ? desOff - Number(indexDes.offset.split(':')[1]) : desOff + Number(indexDes.offset.split(':')[1])
+
+        let givenTime = Number(args[1][0]) * 60;
+        givenTime += Number(args[1][1])
 
 
-    let hourOffset = oriOff - desOff;
+        let hourOffset = oriOff - desOff;
 
-    if (hourOffset > 0) {
+        if (hourOffset > 0) {
 
-        message.channel.send(`Rewinding ${message.content.split(" ").slice(1).join(" ").split(',')[1].trim()} by **${Math.floor(hourOffset / 60) + ":" + (hourOffset % 60)}**`);
+            // message.channel.send(`Rewinding ${message.content.split(" ").slice(1).join(" ").split(',')[1].trim()} by **${Math.floor(hourOffset / 60) + ":" + (hourOffset % 60)}**`);
 
-        if (hourOffset > givenTime) {
-            hourOffset -= givenTime;
-            givenTime = 720;//12*60 = 720
+            let minutes = (hourOffset % 60) == 0 ? '00' : hourOffset % 60
+
+            finalMessage += `${args[0]} - **${Math.floor(hourOffset / 60) + ":" + minutes}** = ${args[i]}\n${message.content.split(" ").slice(1).join(" ").split(',')[1].trim()} ${args[0]} =>`
+
+            if (hourOffset > givenTime) {
+                hourOffset -= givenTime;
+                // givenTime = 720;//12*60 = 720
+                givenTime = 1440 // 24 * 60 = 1,440
+            }
+
+            givenTime = givenTime - hourOffset;
+        }
+        else {
+
+            hourOffset *= -1;
+            let minutes = (hourOffset % 60) == 0 ? '00' : hourOffset % 60
+
+            // message.channel.send(`Forwarding ${message.content.split(" ").slice(1).join(" ").split(',')[1].trim()} by *${Math.floor(hourOffset / 60) + ":" + (hourOffset % 60)}*`);
+
+            finalMessage += `${args[0]} + **${Math.floor(hourOffset / 60) + ":" + minutes}** = ${args[i]}\n${message.content.split(" ").slice(1).join(" ").split(',')[1].trim()} =>`
+
+            if ((hourOffset + givenTime) >= 1440) {
+
+                hourOffset = hourOffset - (1440 - givenTime); // take away 60?
+                givenTime = 0;
+
+                // hourOffset = hourOffset - (720 - givenTime);
+                // givenTime = 0;
+            }
+            givenTime = givenTime + hourOffset;
         }
 
-        givenTime = givenTime - hourOffset;
-    }
-    else {
-
-        hourOffset *= -1;
-        message.channel.send(`Forwarding ${message.content.split(" ").slice(1).join(" ").split(',')[1].trim()} by **${Math.floor(hourOffset / 60) + ":" + (hourOffset % 60)}**`);
-        if (hourOffset + givenTime >= 780) {
-            hourOffset = hourOffset - (720 - givenTime);
-            givenTime = 0;
-        }
-        givenTime = givenTime + hourOffset;
+        if (givenTime < 0) givenTime *= -1;
+        finalMessage += ` ${Math.floor(givenTime / 60) + ":" + (givenTime % 60)} ${args[i]}\n----------------------------------\n`
+        // message.channel.send(`The converted time is **${Math.floor(givenTime / 60) + ":" + (givenTime % 60)}**`);
     }
 
-    if (givenTime < 0) givenTime *= -1;
-    message.channel.send(`The converted time is **${Math.floor(givenTime / 60) + ":" + (givenTime % 60)}**`);
+
+    message.channel.send(finalMessage);
     message.channel.send("Please make sure you used the correct times for Savings/Daylight time (ST vs DT)! I don't check those~");
     return 1;
 }

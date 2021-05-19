@@ -129,9 +129,6 @@ async function setEmojiCollector(message) {
     }, { time: 29 * 60 * 1000 });
     collector.on('collect', async function (emoji, user) {
 
-        console.log(user.displayName)
-        console.log(user)
-
         if (emoji.emoji == MAIN.getEmojiObject('queue')) {
 
             let result = await Queue(emoji.message, null, user, { displayName: user.username, id: user.id });
@@ -473,9 +470,6 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         }
 
         let summonMessage;
-
-
-        console.log(message.member.displayName);
 
         if (signedUp.length > 3)
             summonMessage = await MAIN.prettyEmbed(message,
@@ -1369,11 +1363,7 @@ async function removeGameFromAllUsers(message, game, user) {
     let users = await MAIN.getUsers({ games: { $gt: '' }, guilds: message.guild.id });
     let tally = 0;
 
-    console.log(users.length);
-
     for (currUser of users) {
-
-        console.log(currUser.displayName);
 
         if (message.guild.members.cache.get(currUser.id)) {
             removeGame(message, { game: game.game, mass: true }, currUser);
