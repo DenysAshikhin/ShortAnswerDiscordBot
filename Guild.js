@@ -121,6 +121,10 @@ const GuildSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    prevRoleRemove: {
+        type: Boolean,
+        default: false
+    },
     dailyAutoRepLimit:{
         type: Boolean,
         default: true

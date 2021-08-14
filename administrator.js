@@ -716,7 +716,7 @@ const setEmojiCollectorAll = async function (autoroleObj) {
                 continue;
             }
             if (!message) {
-                //channel.send("An autorole message that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
+                channel.send("An autorole message that was here previously has been deleted. Removing it from the database and any restrictions associated with it!");
                 toDelete.push({ guildID: AUTOROLE.guildID, messageID: AUTOROLE.messageID });
                 console.log(`GuildName: ${guild1.name} || GuildID: ${AUTOROLE.guildID} || AutoRoleTitle: ${AUTOROLE.title} || Autorole: ${AUTOROLE.messageID} || Issue: message missing`);
                 continue;
@@ -758,6 +758,8 @@ const setEmojiCollectorAll = async function (autoroleObj) {
 const initialiseAdministrator = async function () {
 
     let guilds = await MAIN.getGuilds();
+
+    await MAIN.sleep(2500);
 
     let completeDeleteList = [];
 
@@ -2750,7 +2752,7 @@ const addRep = async function (message, params, user) {
         return message.channel.send("You can/have to only @mention a single user!");
 
     let userID = message.mentions.users.first().id;
-    let editUser = await MAIN.findUser(message.mentions.members.first());
+    let editUser = await MAIN.findUser(message.mentions.members.first(), true);
 
     try {
 
@@ -2759,11 +2761,13 @@ const addRep = async function (message, params, user) {
         });
         if (guild.thankerMessageChannel.length > 0) {
 
+            let newRep = (await changeRep(editUser, message.guild.id, args, message));
+
             for (let channy of guild.thankerMessageChannel) {
 
                 let channel = message.guild.channels.cache.get(channy);
                 if (channel)
-                    channel.send(`Gave ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args, message))}`);
+                    channel.send(`Gave ${MAIN.mention(userID)} ${args} rep! They are now at ${newRep}`);
             }
             return guild.thankerMessageChannel.length > 0;
         }
@@ -2837,7 +2841,6 @@ const changeRep = async function (user, guildID, amount, message) {
                 throw ('Blacklisted boi')
                 return -1;
             }
-
         }
     }
 
@@ -2879,6 +2882,7 @@ const changeRep = async function (user, guildID, amount, message) {
 
     if (amount != 0) {
 
+        // console.log(`The values: ${Number(rep)} AND ${Number(amount)}`);
 
         user.reps.set(guildID, Number(rep) + Number(amount));
 
@@ -3030,18 +3034,35 @@ const removeBlacklistedGiveRepRole = async function (message, params, user) {
 }
 exports.removeBlacklistedGiveRepRole = removeBlacklistedGiveRepRole;
 
-
-
 const checkRepThreshold = async function (userID, value, dbGuild, actualGuild) {
 
-    for (let pair of dbGuild.repRolePairs) {
+    let maxRole = null;
+    let removeRoles = [];
 
-        if (value >= pair.rep) {
-            actualGuild = await actualGuild.fetch();
+    // console.log(`the value is: ${value}`);
 
-            actualGuild.members.cache.get(userID).roles.add(actualGuild.roles.cache.get(pair.roleID));
+    for (let pair of dbGuild.repRolePairs)
+        if (value >= pair.rep) { //Finding the highest role the user is eligble for
+            if (maxRole)//Storing all the previous ones to delete from them
+                removeRoles.push(maxRole);
+            maxRole = pair.roleID;
         }
+
+    if (maxRole) {
+        // console.log('updated max role')
+        // console.log(maxRole)
+        actualGuild = await actualGuild.fetch();
+
+        actualGuild.members.cache.get(userID).roles.add(actualGuild.roles.cache.get(maxRole));
     }
+
+    if (dbGuild.prevRoleRemove)
+        for (let i = 0; i < removeRoles.length; i++) {
+            actualGuild.members.cache.get(userID).roles.remove(actualGuild.roles.cache.get(removeRoles[i]))
+                .catch((error) => {
+                    return;//If we can't remove it, ah well
+                });
+        }
 }
 
 
@@ -3950,6 +3971,46 @@ const toggleProfanityFilter = async function (message, params, user) {
     }
 }
 exports.toggleProfanityFilter = toggleProfanityFilter;
+
+const togglePrevRoleRemove = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only toggle the removal of previous roles from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can toggle the automatic role removal");
+
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    if (guild.prevRoleRemove) {
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                prevRoleRemove: false
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
+        message.channel.send('Successfully toggled off the prev role removal!');
+    }
+    else {
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                prevRoleRemove: true
+            }
+        }, function (err, doc, res) {
+            MAIN.cachedGuilds.set(message.guild.id, res);
+        });
+
+        message.channel.send('Successfully toggled on the prev role removal!');
+    }
+}
+exports.togglePrevRoleRemove = togglePrevRoleRemove;
 
 
 

@@ -1971,5 +1971,17 @@
            "other"
         ],
         "category": "General"
+    },
+    {
+        "title": "togglePrevRoleRemove",
+        "explanation": "Toggles whether the previously earned roles from Automatic Rep Role Pairs are removed when reaching a new (higher) threshold",
+        "example": [
+            "1) togglePrevRoleRemove"
+        ],
+        "subsection": [
+            "miscellaneous",
+            "admin"
+         ],
+         "category": "Rep"
     }
 ]

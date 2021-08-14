@@ -1418,6 +1418,7 @@ function populateCommandMap() {
     commandMap.set(Commands[160].title.toUpperCase(), ADMINISTRATOR.toggleDailyThankerRep)
     commandMap.set(Commands[161].title.toUpperCase(), ADMINISTRATOR.embedCreator)
     commandMap.set(Commands[162].title.toUpperCase(), GENERAL.viewRepRolePairs)
+    commandMap.set(Commands[163].title.toUpperCase(), ADMINISTRATOR.togglePrevRoleRemove)
 
 
 
