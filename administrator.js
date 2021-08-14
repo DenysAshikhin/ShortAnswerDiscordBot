@@ -1395,7 +1395,7 @@ const autorole = async function (message, params, user) {
 
         let embed1 = JSON.stringify(MAIN.Embed)
         embed1.description = 'Temporary Description. This field is required!',
-        embed1.footer = ''
+            embed1.footer = ''
         embed1.title = ''
         embed1.timestamp = null
         await message.channel.send({
@@ -1778,7 +1778,7 @@ const embedCreator = async function (message, params, user) {
                     messages.delete(params.messageID);
                     console.log(messages.size);
 
-                    if (messages.size > 99){
+                    if (messages.size > 99) {
                         message.channel.send("There are more than 99 messages to delete...not allowed by api. Sorry but you will have to manually delete them.");
                     }
 
@@ -1809,44 +1809,44 @@ const embedCreator = async function (message, params, user) {
                 }
                 break;
             case 11: // added extra case to allow fields to be made, loops back into 9 once done
-            if ((message.content.length > 1000)) {
+                if ((message.content.length > 1000)) {
 
-                await message.channel.send("The body is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
-                params.numMessages++;
-                return MAIN.createRunningCommand(message, {
-                    command: embedCreator,
-                    commandParams: {
+                    await message.channel.send("The body is limited to 1000 characters." + `Yours was ${message.content.length}! Try again.`)
+                    params.numMessages++;
+                    return MAIN.createRunningCommand(message, {
+                        command: embedCreator,
+                        commandParams: {
+                            ...params,
+                            step: 8,
+                        }
+                    }, user);
+                } else {
+
+                    await message.channel.send("This is what the message will currently look like:");
+
+                    params.newField.value = message.content;
+
+                    params.runningEmbed.fields.push(params.newField)
+                    await message.channel.send({
+                        embed: {
+                            ...params.runningEmbed
+                        }
+                    });
+                    params.runningEmbed.fields.pop();
+
+                    params.numMessages += 3; //might cause issues
+                    return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
                         ...params,
-                        step: 8,
+                        step: 5,
+                        fieldAdded: true
+                    },
+                    {
+                        ...params,
+                        step: 8
                     }
-                }, user);
-            } else {
-
-                await message.channel.send("This is what the message will currently look like:");
-
-                params.newField.value = message.content;
-
-                params.runningEmbed.fields.push(params.newField)
-                await message.channel.send({
-                    embed: {
-                        ...params.runningEmbed
-                    }
-                });
-                params.runningEmbed.fields.pop();
-
-                params.numMessages += 3; //might cause issues
-                return await MAIN.generalMatcher(message, -23, user, ['Keep', 'Change'], [{
-                    ...params,
-                    step: 5,
-                    fieldAdded: true
-                },
-                {
-                    ...params,
-                    step: 8
+                    ], embedCreator, `Do you wish to keep:  **${message.content}**   as the title or change it?`);
                 }
-                ], embedCreator, `Do you wish to keep:  **${message.content}**   as the title or change it?`);
-            }
-            break;
+                break;
                 break;
         }
 
@@ -1862,14 +1862,14 @@ const embedCreator = async function (message, params, user) {
 
         let embed1 = JSON.parse(JSON.stringify(MAIN.Embed));
         embed1.description = 'Temporary Description. This field is required!',
-        embed1.footer = ''
+            embed1.footer = ''
         embed1.title = 'Temporary Title. This field is required!',
-        embed1.timestamp = null
+            embed1.timestamp = null
 
         await message.channel.send({
             embed: embed1
         });
-        await message.channel.send("```\n You can enter **-1** at any point to stop the autorole creation process!```")
+        await message.channel.send("```\n You can enter **-1** at any point to stop the custom embed creation process!```")
         await message.channel.send("Please be careful with all your future inputs.\n`Step 1) Please enter the title for the message (Max. 250 characters):`");
 
         return MAIN.createRunningCommand(message, {
@@ -2753,6 +2753,21 @@ const addRep = async function (message, params, user) {
     let editUser = await MAIN.findUser(message.mentions.members.first());
 
     try {
+
+        let guild = await MAIN.findGuild({
+            id: message.guild.id
+        });
+        if (guild.thankerMessageChannel.length > 0) {
+
+            for (let channy of guild.thankerMessageChannel) {
+
+                let channel = message.guild.channels.cache.get(channy);
+                if (channel)
+                    channel.send(`Gave ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args, message))}`);
+            }
+            return guild.thankerMessageChannel.length > 0;
+        }
+
         return message.channel.send(`Gave ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args, message))}`);
     } catch (err) {
         console.log(err)
@@ -2782,6 +2797,19 @@ const removeRep = async function (message, params, user) {
     let editUser = await MAIN.findUser(message.mentions.members.first());
 
     try {
+        let guild = await MAIN.findGuild({
+            id: message.guild.id
+        });
+        if (guild.thankerMessageChannel.length > 0) {
+
+            for (let channy of guild.thankerMessageChannel) {
+
+                let channel = message.guild.channels.cache.get(channy);
+                if (channel)
+                    channel.send(`Gave ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args, message))}`);
+            }
+            return guild.thankerMessageChannel.length > 0;
+        }
         return message.channel.send(`Took away ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args * -1, message))}`);
     } catch (err) {
         console.log(err)

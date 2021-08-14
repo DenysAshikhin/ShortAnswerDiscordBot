@@ -1829,7 +1829,7 @@
     },
     {
         "title": "toggleAutoRep",
-        "explanation": "Enables or disables the autoRep (thanks) feature",
+        "explanation": "Enables or disables the autoRep (thanks) feature. This means that the bot will automatically grant +1 rep to a member who is thanked. Default limit is once per day per user thanking. Can be toggled off with **toggleDailyThankerRep**",
         "example": [
             "1) toggleAutoRep on",
             "2) toggleAutoRep off"
@@ -1957,6 +1957,18 @@
         "subsection": [
            "Genearl",
            "qof"
+        ],
+        "category": "General"
+    },
+    {
+        "title": "viewRepRolePairs",
+        "explanation": "Shows all the configured rep-role pairs for this server!",
+        "example": [
+            "1) viewRepRolePairs"
+        ],
+        "subsection": [
+           "Genearl",
+           "other"
         ],
         "category": "General"
     }

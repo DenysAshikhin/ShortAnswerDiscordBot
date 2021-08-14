@@ -63,6 +63,7 @@ if (ip.address() == config.IP) {
 }
 else
     uri = config.uri;
+uri = config.uri;
 console.log(uri);
 console.log(ip.address());
 console.log(config.IP)
@@ -714,7 +715,7 @@ const inviteLink = function (message) {
 }
 
 const inviteLinkServer = function (message) {
-    message.channel.send(`Here you go!\nhttps://discord.gg/nMj6UKH`);
+    message.channel.send(`Here you go!\nhttps://discord.gg/8tem3Gp`);
 }
 
 
@@ -826,14 +827,25 @@ connectDB.once('open', async function () {
 
             if (guild.profanityFiler) {
 
-                let words = message.content.toLowerCase()
-                    .split('$').join('s').split('@').join('a').split('3').join('e').split('&').join('s').split('1').join('i').split('!').join('i')
-                    .split([' ']).join('');
+                let words = message.content.toLowerCase().toLowerCase().split('$').join('s').split('@').join('a').split('3').join('e').split('&').join('s').split('1').join('i').split('!').join('i').split([' ']);
 
-                for (let j = 0; j < badWords.length; j++) {
+                let finalWords = [];
 
-                    if (words.includes(badWords[j]))
-                        return message.delete();
+                for (let z = 0; z < words.length; z++) {
+
+                    if (words[z].length > 1)
+                        finalWords.push(words[z])
+                    else
+                        finalWords[finalWords.length - 1] += words[z]
+                }
+
+                for (let i = 0; i < finalWords.length; i++) {
+
+                    for (let j = 0; j < badWords.length; j++) {
+
+                        if (finalWords[i].includes(badWords[j]))
+                            return message.delete();
+                    }
                 }
             }
 
@@ -935,7 +947,8 @@ connectDB.once('open', async function () {
                                     $set: {
                                         autoRepDate: getDate()
                                     }
-                                }).exec();}
+                                }).exec();
+                            }
                     }
             }
         }
@@ -1404,8 +1417,9 @@ function populateCommandMap() {
     commandMap.set(Commands[159].title.toUpperCase(), ADMINISTRATOR.toggleProfanityFilter)
     commandMap.set(Commands[160].title.toUpperCase(), ADMINISTRATOR.toggleDailyThankerRep)
     commandMap.set(Commands[161].title.toUpperCase(), ADMINISTRATOR.embedCreator)
-    
-    
+    commandMap.set(Commands[162].title.toUpperCase(), GENERAL.viewRepRolePairs)
+
+
 
 
     exports.commandMap = commandMap;
@@ -1464,9 +1478,16 @@ const triggerRunningCommand = async function (message, user) {
 
     if (message.channel.type != 'dm') {
 
-        let guild = await findGuild({
-            id: message.guild.id
-        });
+        // let guild = await findGuild({
+        //     id: message.guild.id
+        // });
+
+        let guild = cachedGuilds.get(message.guild.id);
+
+        if (!guild) {
+            console.log(`missing guild on message: ${message.content}`);
+            console.log(`sent from guild: ${message.guild.name}-${message.guild.id}`);
+        }
 
         if (guild.commandChannelWhiteList.length > 0) {
 

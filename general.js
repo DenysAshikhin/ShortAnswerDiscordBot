@@ -221,3 +221,32 @@ async function Delete(message, params) {
     }
 }
 exports.Delete = Delete;
+
+
+
+const viewRepRolePairs = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a rep point - role Pair from inside a server text channel");
+
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    
+    //guild.roles.cache.get(value).name
+    guild.repRolePairs.sort((a, b) => b.rep - a.rep);
+    let arr = [];
+
+    for (let i = 0; i < guild.repRolePairs.length; i++) {
+
+        arr.push(`${message.guild.roles.cache.get(guild.repRolePairs[i].roleID).name} - ${guild.repRolePairs[i].rep}`);
+    }
+
+    return MAIN.prettyEmbed(message, arr, {
+        modifier: 'md',
+        startTally: 1,
+        description: "Below are all the rep-role pairs configured for this server"
+    });
+}
+exports.viewRepRolePairs = viewRepRolePairs;
