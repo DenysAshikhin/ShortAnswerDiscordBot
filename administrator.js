@@ -3039,25 +3039,36 @@ const checkRepThreshold = async function (userID, value, dbGuild, actualGuild) {
     let maxRole = null;
     let removeRoles = [];
 
-    // console.log(`the value is: ${value}`);
-
-    for (let pair of dbGuild.repRolePairs)
+    for (let pair of dbGuild.repRolePairs) {
+        // console.log(`testing: ${pair.rep}`)
         if (value >= pair.rep) { //Finding the highest role the user is eligble for
-            if (maxRole)//Storing all the previous ones to delete from them
-                removeRoles.push(maxRole);
-            maxRole = pair.roleID;
+            if (maxRole) {
+
+                if (pair.rep > maxRole.rep) {//Current role is higher than prevMax, store previous max to delete and mark current as max
+
+                    removeRoles.push(maxRole.roleID);
+                    maxRole = pair;
+                }
+                else //otherwise just try to remove the current one
+                    removeRoles.push(pair.roleID)
+            }
+            else
+                maxRole = pair;
         }
+    }
+
 
     if (maxRole) {
         // console.log('updated max role')
         // console.log(maxRole)
         actualGuild = await actualGuild.fetch();
 
-        actualGuild.members.cache.get(userID).roles.add(actualGuild.roles.cache.get(maxRole));
+        actualGuild.members.cache.get(userID).roles.add(actualGuild.roles.cache.get(maxRole.roleID));
     }
 
     if (dbGuild.prevRoleRemove)
         for (let i = 0; i < removeRoles.length; i++) {
+            // console.log(`trying to remove: ${removeRoles[i]}`)
             actualGuild.members.cache.get(userID).roles.remove(actualGuild.roles.cache.get(removeRoles[i]))
                 .catch((error) => {
                     return;//If we can't remove it, ah well
