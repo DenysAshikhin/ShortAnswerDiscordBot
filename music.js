@@ -127,23 +127,29 @@ async function spotifyPlaylist(message, params, user) {
 
     let count = 1;
 
-    console.log("over)", playlistTracks.items.length)
+    // console.log("over)", playlistTracks.items.length)
     let orderPlaylist = [];
-    for (let trackID of playlistTracks.order) {
-        orderPlaylist.push(playlistTracks.items[trackID])
-    }
+    // console.log(playlistTracks)
+
+    if (playlistTracks.order)
+        for (let trackID of playlistTracks.order) {
+            orderPlaylist.push(playlistTracks.items[trackID])
+        }
+    else
+        for (let trackID of playlistTracks.items) {
+            orderPlaylist.push(playlistTracks.items[trackID])
+        }
 
     for (track of orderPlaylist) {
 
-        console.log("COUNT: ", count);
+        // console.log("COUNT: ", count);
 
         count++;
         //   console.log(track.artists)
         let artists = "";
 
-        for (arty of track.artists) {
+        for (arty of track.artists)
             artists += " " + arty.name;
-        }
 
         let name = (artists + " " + track.name).trim();
 
@@ -158,13 +164,13 @@ async function spotifyPlaylist(message, params, user) {
         }
 
 
-        console.log(name);
-        console.log(1)
+        // console.log(name);
+        // console.log(1)
         let searchResult = await ytsr(name, { limit: 5 });
 
 
         searchResult.items = searchResult.items.filter(element => element.type == 'video');
-        console.log(searchResult.items.length)
+        // console.log(searchResult.items.length)
 
         let searchyArray = searchResult.items.reduce((accum, current) => {
             current.title = current.title.replace(/([(){}&,\-])/g, '').replace(/\s{2,}/g, ' ');
@@ -216,7 +222,7 @@ async function spotifyPlaylist(message, params, user) {
 
         if (result.length == 0) {
 
-            console.log(`entered empty length`)
+            // console.log(`entered empty length`)
 
             let FOUND = false;
             for (let result of searchyArray) {
@@ -233,7 +239,7 @@ async function spotifyPlaylist(message, params, user) {
                         counter++;
                 }
                 if ((counter / cleanedName.split(" ").length) > 0.65) {
-                    await play(message, { custom: true, url: result.link, spoti: true }, user);
+                    await play(message, { custom: true, url: result.url, spoti: true }, user);
                     numFound++;
                     FOUND = true;
                     continue;
@@ -267,8 +273,8 @@ async function spotifyPlaylist(message, params, user) {
                 else if ((result[0].score <= 0.2) && (result.length > 0)) {
                     let topScores = result.filter(element => element.score <= 0.2);
                     topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
-                    await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
-                    found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                    await play(message, { custom: true, url: topScores[0].item.url, spoti: true }, user);
+                    found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                     //               console.log("name + fuzzy")
                 }
                 else {
@@ -283,10 +289,10 @@ async function spotifyPlaylist(message, params, user) {
                     }
 
                     if ((counter / cleanedName.split(" ").length) > 0.8) {
-                        await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
-                        found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                        await play(message, { custom: true, url: result[0].item.url, spoti: true }, user);
+                        found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                         // console.log("name word match")
-                        // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                        // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                     }
                     else {
 
@@ -299,8 +305,8 @@ async function spotifyPlaylist(message, params, user) {
                         if ((result[0].score <= 0.2) && (result.length > 0)) {
                             let topScores = result.filter(element => element.score <= 0.2);
                             topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
-                            await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
-                            found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                            await play(message, { custom: true, url: topScores[0].item.url, spoti: true }, user);
+                            found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                             //               console.log("name + fuzzy")
                         }
                         else {
@@ -315,13 +321,13 @@ async function spotifyPlaylist(message, params, user) {
                             }
 
                             if ((counter / cleanedName.split(" ").length) > 0.8) {
-                                await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
-                                found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                                await play(message, { custom: true, url: result[0].item.url, spoti: true }, user);
+                                found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                                 // console.log("name word match")
-                                // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                                // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                             }
                             else {
-                                missed.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                                missed.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                             }
                         }
                     }
@@ -337,7 +343,7 @@ async function spotifyPlaylist(message, params, user) {
         else if (result[0].score <= 0.2) {//artist + name fuzzy
             let topScores = result.filter(element => element.score <= 0.2);
             topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
-            await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
+            await play(message, { custom: true, url: topScores[0].item.url, spoti: true }, user);
             numFound++;
             //console.log("artist + name fuzzy")
 
@@ -354,7 +360,7 @@ async function spotifyPlaylist(message, params, user) {
             }
 
             if ((counter / cleanedName.split(" ").length) > 0.65) {
-                await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
+                await play(message, { custom: true, url: result[0].item.url, spoti: true }, user);
                 numFound++;
             }
             else {//name + fuzzy
@@ -373,8 +379,8 @@ async function spotifyPlaylist(message, params, user) {
                 else if ((result[0].score <= 0.2) && (result.length > 0)) {
                     let topScores = result.filter(element => element.score <= 0.2);
                     topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
-                    await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
-                    found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                    await play(message, { custom: true, url: topScores[0].item.url, spoti: true }, user);
+                    found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                     //               console.log("name + fuzzy")
                 }
                 else {
@@ -389,10 +395,10 @@ async function spotifyPlaylist(message, params, user) {
                     }
 
                     if ((counter / cleanedName.split(" ").length) > 0.8) {
-                        await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
-                        found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                        await play(message, { custom: true, url: result[0].item.url, spoti: true }, user);
+                        found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                         // console.log("name word match")
-                        // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                        // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                     }
                     else {
                         let searchResult = await ytsr(track.artists[0].name + track.name, { limit: 5 });
@@ -404,8 +410,8 @@ async function spotifyPlaylist(message, params, user) {
                         if ((result[0].score <= 0.2) && (result.length > 0)) {
                             let topScores = result.filter(element => element.score <= 0.2);
                             topScores.sort(function (a, b) { return a.item.title.length - b.item.title.length; });
-                            await play(message, { custom: true, url: topScores[0].item.link, spoti: true }, user);
-                            found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                            await play(message, { custom: true, url: topScores[0].item.url, spoti: true }, user);
+                            found.push({ original: name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                             //               console.log("name + fuzzy")
                         }
                         else {
@@ -420,13 +426,13 @@ async function spotifyPlaylist(message, params, user) {
                             }
 
                             if ((counter / cleanedName.split(" ").length) > 0.8) {
-                                await play(message, { custom: true, url: result[0].item.link, spoti: true }, user);
-                                found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                                await play(message, { custom: true, url: result[0].item.url, spoti: true }, user);
+                                found.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                                 // console.log("name word match")
-                                // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                                // console.log({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                             }
                             else {
-                                missed.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.link });
+                                missed.push({ original: track.name, found: result[0].item.title, score: result[0].score, url: result[0].item.url });
                             }
                         }
                     }
@@ -466,7 +472,7 @@ async function spotifyPlaylist(message, params, user) {
 
     if (finalReport.length > 0)
         MAIN.prettyEmbed(message, finalReport, {
-            description: `I found ${numFound}/${numSongs} song for sure.\n${found.length}/${numSongs} I wasn't sure about **but should be accurate**.\n${missed.length} songs had no matches.`
+            description: `I found ${numFound}/${numFound + found.length} song for sure.\n${found.length}/${numFound + found.length} I wasn't sure about **but should be accurate**.\n${missed.length} songs had no matches.`
                 + "```fix\nUse the currentPlaylist command to view the whole **loaded** playlist!```", modifier: 1
         });
     // MAIN.prettyEmbed(message,
@@ -903,8 +909,9 @@ async function play(message, params, user) {
                     return MAIN.selfDestructMessage(message, "You must be in the same voice channel!", 3, true)
 
     const args = params.custom ? params.url : message.content.split(" ").slice(1).join(" ");
-
-    if (!args) return message.channel.send("You have to provide a link or title of song to play!");
+    // console.log(params)
+    if (!args) throw Error('No link provided!');
+    //  return message.channel.send("You have to provide a link or title of song to play!");
 
     const voiceChannel = message.member.voice.channel;
 
@@ -951,7 +958,7 @@ async function play(message, params, user) {
         playlistID = await ytpl.getPlaylistID(args);
     }
     catch (err) {
-        console.log('not a playlist')
+        // console.log('not a playlist')
     }
 
     if (!params.spoti && ((await spotifyPlaylist(message, args, user)) != -1)) {

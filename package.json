@@ -54,7 +54,7 @@
     "twitch": "^4.2.7",
     "uniqid": "^5.2.0",
     "yt-channel-info": "^1.1.4",
-    "ytdl-core": "^4.2.1",
+    "ytdl-core": "^4.9.1",
     "ytpl": "^1.0.1",
     "ytsr": "^3.2.0"
   },
