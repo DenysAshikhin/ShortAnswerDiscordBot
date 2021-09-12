@@ -1983,5 +1983,29 @@
             "admin"
          ],
          "category": "Rep"
+    },
+    {
+        "title": "setPlayingRolePair",
+        "explanation": "Sets a specific role to be granted while a user is playing (Discord Status) a specific game",
+        "example": [
+            "1) setPlayingRolePair NameOfGame, @roleToGrant"
+        ],
+        "subsection": [
+            "miscellaneous",
+            "admin"
+         ],
+         "category": "Rep"
+    },
+    {
+        "title": "removePlayingRolePair",
+        "explanation": "Sets a specific role to be granted while a user is playing (Discord Status) a specific game",
+        "example": [
+            "1) removePlayingRolePair NameOfGame, @roleToGrant"
+        ],
+        "subsection": [
+            "game",
+            "admin"
+         ],
+         "category": "Personal Games"
     }
 ]

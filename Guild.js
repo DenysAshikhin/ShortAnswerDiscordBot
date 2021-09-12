@@ -128,6 +128,10 @@ const GuildSchema = new mongoose.Schema({
     dailyAutoRepLimit:{
         type: Boolean,
         default: true
+    },
+    playingRolePair:{
+        type: [],
+        default: []
     }
 });
 

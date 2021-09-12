@@ -3793,7 +3793,112 @@ exports.unSetThankerLogChannel = unSetThankerLogChannel;
 
 
 
+const setPlayingRolePair = async function (message, params, user) {
 
+    if (message.channel.type == 'dm') return message.channel.send("You can only set a temp. role to be granted from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set a temp. role")
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You have to @role exactly 1 role");
+
+    let gameToLink = message.content.split(' ').slice(1).join(' ').split(",").splice(0)[0].trim();
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+    let roleID = message.mentions.roles.first().id;
+    // console.log(guild.playingRolePair);
+    // console.log("------")
+    // console.log(`roleID ${roleID}`)
+    // console.log(`gameToLink: ${gameToLink}`)
+
+    let found = false;
+
+    for (let i = 0; i < guild.playingRolePair.length; i++) {
+
+        if (guild.playingRolePair[i])
+            if (guild.playingRolePair[i][0] == roleID) {
+                found = true;
+                let gameFound = false;
+                for (let j = 1; j < guild.playingRolePair[i].length; j++) {
+
+                    if (guild.playingRolePair[i][j] == gameToLink)
+                        gameFound = true;
+                }
+
+                if (!gameFound)
+                    guild.playingRolePair[i].push(gameToLink);
+            }
+    }
+
+    if (!found)
+        guild.playingRolePair.push([roleID, gameToLink]);
+
+    console.log(guild.playingRolePair);
+
+
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            playingRolePair: guild.playingRolePair
+        }
+    }).exec();
+    return message.channel.send("The temp game-role pair has been updated!");
+}
+exports.setPlayingRolePair = setPlayingRolePair;
+
+
+const removePlayingRolePair = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only remove a temp. role to be granted from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove a temp. role")
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You have to @role exactly 1 role");
+
+    let gameToLink = message.content.split(' ').slice(1).join(' ').split(",").splice(0)[0].trim();
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+    let roleID = message.mentions.roles.first().id;
+    // console.log(guild.playingRolePair);
+    // console.log("------")
+    // console.log(`roleID ${roleID}`)
+    // console.log(`gameToLink: ${gameToLink}`)
+
+
+    for (let i = 0; i < guild.playingRolePair.length; i++) {
+
+        if (guild.playingRolePair[i])
+            if (guild.playingRolePair[i][0] == roleID) {
+                for (let j = 1; j < guild.playingRolePair[i].length; j++) {
+
+                    if (guild.playingRolePair[i][j] == gameToLink)
+                        guild.playingRolePair[i].splice(j, 1);
+                }
+
+            }
+    }
+    console.log(guild.playingRolePair);
+
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            playingRolePair: guild.playingRolePair
+        }
+    }).exec();
+    return message.channel.send("The temp game-role pair has been updated!");
+}
+exports.removePlayingRolePair = removePlayingRolePair;
 
 
 const setMusicRole = async function (message, params, user) {

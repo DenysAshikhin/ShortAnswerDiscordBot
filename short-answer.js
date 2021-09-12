@@ -1192,17 +1192,38 @@ connectDB.once('open', async function () {
         }
     })
 
-    Client.on('presenceUpdate', (oldMember, newMember) => {
+    Client.on('presenceUpdate', async function (oldMember, newMember) {
 
-        return 1;
+        // return 1;
 
-        if (oldMember) {
-            if (oldMember.activities.length > 0) {
-                if (oldMember.activities[0].type == 'PLAYING') {
+        if (!oldMember || !newMember) { return 1 }
 
-                    console.log(oldMember.member.displayName + "  Finished playing a game!")
-                }
+        if (oldMember.userID != '99615909085220864')
+            return 1;
+
+
+        let guild = await findGuild({
+            id: oldMember.guild.id
+        });
+
+        if (guild.playingRolePair.length < 1) {
+            // console.log(guild.playingRolePair)
+            return 1;
+        }
+
+
+        if (oldMember.activities.length > 0) {
+
+            if (!oldMember.activities) return;
+            if (oldMember.activities[0].type != 'PLAYING')
+                return;
+
+            let rolesToRemove = findRoles(guild.playingRolePair, oldMember.activities[0].name);
+
+            for (let i = 0; i < rolesToRemove.length; i++) {
+                removeRole(oldMember.guild.members.cache.get(oldMember.userID), rolesToRemove[i]);
             }
+            // console.log(oldMember.member.displayName + "  Finished playing a game!" + `  [${oldMember.activities[0].name}]`);
         }
         else if (newMember.activities.length > 0) {
 
@@ -1210,14 +1231,50 @@ connectDB.once('open', async function () {
             if (newMember.activities[0].type != 'PLAYING')
                 return;
 
-            let game = newMember.activities[0].name;
-            console.log("user is playing " + game);
-            console.log('done');
+            let rolesToAdd = findRoles(guild.playingRolePair, newMember.activities[0].name);
+
+            for (let i = 0; i < rolesToAdd.length; i++) {
+                grantRole(newMember.guild.members.cache.get(newMember.userID), rolesToAdd[i]);
+            }
+
         }
     });
 });
 
+const findRoles = function (array, game) {
 
+    let roles = [];
+
+    for (let i = 0; i < array.length; i++) {
+
+        for (let j = 1; j < array[i].length; j++) {
+
+            if (array[i][j] == game) {
+                roles.push(array[i][0]);
+                break;
+            }
+        }
+    }
+    return roles;
+}
+
+const grantRole = async function (member, role) {
+    await member.roles.add(role)
+        .catch(function (err) {
+
+            console.log("I don't have the required permission to give such a role!");
+            return -1;
+        });
+}
+
+const removeRole = async function (member, role) {
+    await member.roles.remove(role)
+        .catch(function (err) {
+
+            console.log("I don't have the required permission to give such a role!");
+            return -1;
+        });
+}
 
 /**
  * 
@@ -1419,6 +1476,8 @@ function populateCommandMap() {
     commandMap.set(Commands[161].title.toUpperCase(), ADMINISTRATOR.embedCreator)
     commandMap.set(Commands[162].title.toUpperCase(), GENERAL.viewRepRolePairs)
     commandMap.set(Commands[163].title.toUpperCase(), ADMINISTRATOR.togglePrevRoleRemove)
+    commandMap.set(Commands[164].title.toUpperCase(), ADMINISTRATOR.setPlayingRolePair)
+    commandMap.set(Commands[165].title.toUpperCase(), ADMINISTRATOR.removePlayingRolePair)
 
 
 
