@@ -1194,13 +1194,10 @@ connectDB.once('open', async function () {
 
     Client.on('presenceUpdate', async function (oldMember, newMember) {
 
-        // return 1;
-
         if (!oldMember || !newMember) { return 1 }
 
-        if (oldMember.userID != '99615909085220864')
-            return 1;
-
+        // if (oldMember.userID != '99615909085220864')
+        //     return 1;
 
         let guild = await findGuild({
             id: oldMember.guild.id
