@@ -1192,50 +1192,58 @@ connectDB.once('open', async function () {
         }
     })
 
-    Client.on('presenceUpdate', async function (oldMember, newMember) {
+    // Client.on('presenceUpdate', async function (oldMember, newMember) {
 
-        if (!oldMember || !newMember) { return 1 }
+    //     return 1;
 
-        // if (oldMember.userID != '99615909085220864')
-        //     return 1;
+    //     if (!oldMember) return 1;
 
-        let guild = await findGuild({
-            id: oldMember.guild.id
-        });
+    //     if (!newMember) return 1;
 
-        if (guild.playingRolePair.length < 1) {
-            // console.log(guild.playingRolePair)
-            return 1;
-        }
+    //     if (oldMember.activities.length < 1) return 1;
+
+    //     if (newMember.activities.length < 1) return 1;
+
+    //     // if (oldMember.userID != '99615909085220864')
+    //     //     return 1;
+
+    //     let guild = await findGuild({
+    //         id: oldMember.guild.id
+    //     });
+
+    //     if (guild.playingRolePair.length < 1) {
+    //         // console.log(guild.playingRolePair)
+    //         return 1;
+    //     }
 
 
-        if (oldMember.activities.length > 0) {
+    //     if (oldMember.activities.length > 0) {
 
-            if (!oldMember.activities) return;
-            if (oldMember.activities[0].type != 'PLAYING')
-                return;
+    //         if (!oldMember.activities) return;
+    //         if (oldMember.activities[0].type != 'PLAYING')
+    //             return;
 
-            let rolesToRemove = findRoles(guild.playingRolePair, oldMember.activities[0].name);
+    //         let rolesToRemove = findRoles(guild.playingRolePair, oldMember.activities[0].name);
 
-            for (let i = 0; i < rolesToRemove.length; i++) {
-                removeRole(oldMember.guild.members.cache.get(oldMember.userID), rolesToRemove[i]);
-            }
-            // console.log(oldMember.member.displayName + "  Finished playing a game!" + `  [${oldMember.activities[0].name}]`);
-        }
-        else if (newMember.activities.length > 0) {
+    //         for (let i = 0; i < rolesToRemove.length; i++) {
+    //             removeRole(oldMember.guild.members.cache.get(oldMember.userID), rolesToRemove[i]);
+    //         }
+    //         // console.log(oldMember.member.displayName + "  Finished playing a game!" + `  [${oldMember.activities[0].name}]`);
+    //     }
+    //     else if (newMember.activities.length > 0) {
 
-            if (!newMember.activities) return;
-            if (newMember.activities[0].type != 'PLAYING')
-                return;
+    //         if (!newMember.activities) return;
+    //         if (newMember.activities[0].type != 'PLAYING')
+    //             return;
 
-            let rolesToAdd = findRoles(guild.playingRolePair, newMember.activities[0].name);
+    //         let rolesToAdd = findRoles(guild.playingRolePair, newMember.activities[0].name);
 
-            for (let i = 0; i < rolesToAdd.length; i++) {
-                grantRole(newMember.guild.members.cache.get(newMember.userID), rolesToAdd[i]);
-            }
+    //         for (let i = 0; i < rolesToAdd.length; i++) {
+    //             grantRole(newMember.guild.members.cache.get(newMember.userID), rolesToAdd[i]);
+    //         }
 
-        }
-    });
+    //     }
+    // });
 });
 
 const findRoles = function (array, game) {
@@ -1475,6 +1483,8 @@ function populateCommandMap() {
     commandMap.set(Commands[163].title.toUpperCase(), ADMINISTRATOR.togglePrevRoleRemove)
     commandMap.set(Commands[164].title.toUpperCase(), ADMINISTRATOR.setPlayingRolePair)
     commandMap.set(Commands[165].title.toUpperCase(), ADMINISTRATOR.removePlayingRolePair)
+    commandMap.set(Commands[166].title.toUpperCase(), ADMINISTRATOR.setRepAdminRole)
+    commandMap.set(Commands[167].title.toUpperCase(), ADMINISTRATOR.unSetsetRepAdminRole)
 
 
 

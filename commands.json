@@ -2007,5 +2007,29 @@
             "admin"
          ],
          "category": "Personal Games"
+    },
+    {
+        "title": "setRepAdminRole",
+        "explanation": "Sets a specific role to be able to use admin rep commands (without being a server administrator).",
+        "example": [
+            "1) setRepAdminRole @role"
+        ],
+        "subsection": [
+           "rep",
+           "admin"
+        ],
+        "category": "Rep"
+    },
+    {
+        "title": "unSetRepAdminRole",
+        "explanation": "Removes the specific role from being able to use admin rep commands",
+        "example": [
+            "1) unSetRepAdminRole"
+        ],
+        "subsection": [
+           "rep",
+           "admin"
+        ],
+        "category": "Rep"
     }
 ]

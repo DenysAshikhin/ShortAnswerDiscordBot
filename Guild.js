@@ -132,6 +132,10 @@ const GuildSchema = new mongoose.Schema({
     playingRolePair:{
         type: [],
         default: []
+    },
+    repAdminRole: {
+        type: String,
+        default: ''
     }
 });
 

@@ -2739,7 +2739,12 @@ const addRep = async function (message, params, user) {
     if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("Only admins can grant rep for the server");
+        if (!(await checkRepPerm(user, message.guild, message)))
+            return message.channel.send("Only admins can grant rep for the server");
+    // else
+    //     return console.log('wtf')
+    // else
+    //     return message.channel.send("Only admins can grant rep for the server");
 
     const args = Number(message.content.split(" ").slice(1).join(" ").trim().split(' ')[0]);
 
@@ -2785,7 +2790,8 @@ const removeRep = async function (message, params, user) {
     if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
 
     if (!message.member.permissions.has("ADMINISTRATOR"))
-        return message.channel.send("Only admins can remove rep for the server");
+        if (!(await checkRepPerm(user, message.guild, message)))
+            return message.channel.send("Only admins can grant rep for the server");
 
     const args = Number(message.content.split(" ").slice(1).join(" ").trim().split(' ')[0]);
 
@@ -3955,6 +3961,82 @@ const unSetMusicRole = async function (message, params, user) {
     return message.channel.send("The minimum role for music has been removed!");
 }
 exports.unSetMusicRole = unSetMusicRole
+
+const setRepAdminRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only set an admin role for rep functionality from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set an admin role for rep functionality")
+
+    if (message.mentions.roles.size != 1)
+        return message.channel.send("You have to @role exactly 1 role");
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    let roleID = message.mentions.roles.first().id;
+
+    guild.repAdminRole = roleID;
+
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            repAdminRole: guild.repAdminRole
+        }
+    }).exec();
+    return message.channel.send("The role has been set as admin for rep roles!");
+}
+exports.setRepAdminRole = setRepAdminRole;
+
+const unSetsetRepAdminRole = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("You can only remove the admin rep role functionality from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove the admin role for rep functionality")
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    guild.repAdminRole = '';
+
+    MAIN.cachedGuilds.set(guild.id, guild);
+    Guild.findOneAndUpdate({
+        id: message.guild.id
+    }, {
+        $set: {
+            repAdminRole: guild.repAdminRole
+        }
+    }).exec();
+    return message.channel.send("The admin rep role has been removed!");
+}
+exports.unSetsetRepAdminRole = unSetsetRepAdminRole
+
+
+
+const checkRepPerm = async function (user, guild, message) {
+
+
+    let guildDB = await MAIN.findGuild({ id: guild.id });
+
+    if (!guildDB.repAdminRole)
+        return false;
+
+    let role = guild.roles.cache.get(guildDB.repAdminRole);
+    let member = guild.members.cache.get(user.id);
+
+    if (member.roles.highest.comparePositionTo(role) < 0) {
+        message.channel.send("You don't have a high enough role to use the rep admin functionalities!");
+        return false;
+    }
+
+    return true;
+}
 
 
 const twitchHere = async function (message, params, user) {

@@ -2101,7 +2101,7 @@ const checkMusicPerm = async function (user, guild, message) {
     let member = guild.members.cache.get(user.id);
 
     if (member.roles.highest.comparePositionTo(role) < 0) {
-        message.channel.send("You don't have a high enough role to control the music functionalties!");
+        message.channel.send("You don't have a high enough role to control the music functionalities!");
         return false;
     }
 
