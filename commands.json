@@ -2031,5 +2031,29 @@
            "admin"
         ],
         "category": "Rep"
+    },
+    {
+        "title": "addCustomRepWord",
+        "explanation": "Adds a custom word to grant Rep automatically. A limit of 20 custom words. For more please reach out to the creator on the support server!",
+        "example": [
+            "1) addCustomRepWord Gracias"
+        ],
+        "subsection": [
+           "rep",
+           "admin"
+        ],
+        "category": "Rep"
+    },
+    {
+        "title": "removeCustomRepWord",
+        "explanation": "Removes a custom word to grant Rep automatically",
+        "example": [
+            "1) removeCustomRepWord Gracias"
+        ],
+        "subsection": [
+           "rep",
+           "admin"
+        ],
+        "category": "Rep"
     }
 ]

@@ -125,17 +125,21 @@ const GuildSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    dailyAutoRepLimit:{
+    dailyAutoRepLimit: {
         type: Boolean,
         default: true
     },
-    playingRolePair:{
+    playingRolePair: {
         type: [],
         default: []
     },
     repAdminRole: {
         type: String,
         default: ''
+    },
+    customRepWords: {
+        type: [],
+        default: []
     }
 });
 

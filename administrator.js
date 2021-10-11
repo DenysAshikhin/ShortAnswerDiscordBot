@@ -2812,11 +2812,17 @@ const removeRep = async function (message, params, user) {
         });
         if (guild.thankerMessageChannel.length > 0) {
 
+            let changed = false;
+            let rep = null;
+
             for (let channy of guild.thankerMessageChannel) {
 
                 let channel = message.guild.channels.cache.get(channy);
-                if (channel)
-                    channel.send(`Gave ${MAIN.mention(userID)} ${args} rep! They are now at ${(await changeRep(editUser, message.guild.id, args, message))}`);
+                if (channel) {
+                    if (!changed)
+                        rep = await changeRep(editUser, message.guild.id, args * -1, message);
+                    channel.send(`Gave ${MAIN.mention(userID)} ${args * -1} rep! They are now at ${rep}`);
+                }
             }
             return guild.thankerMessageChannel.length > 0;
         }
@@ -2904,6 +2910,75 @@ const changeRep = async function (user, guildID, amount, message) {
     return user.reps.get(guildID);
 }
 exports.changeRep = changeRep;
+
+
+
+const addCustomRepWord = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can add custom rep words");
+
+    let args = message.content.split(" ").slice(1).join(" ").trim();
+
+    if (args.length < 1)
+        return message.channel.send("You have to specify a word to add!");
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    if (guild.customRepWords.includes(args))
+        return message.channel.send("This word is already tracked to auto grant rep!");
+    else if (guild.customRepWords.length >= 20)
+        return message.channel.send("You have reached the limit of 20 words. Please remove some or contact the bot creator on the support server to have more added!");
+
+    guild.customRepWords.push(args);
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            customRepWords: guild.customRepWords
+        }
+    }).exec();
+    message.channel.send(`${args} has been added to the custom rep words!`);
+}
+exports.addCustomRepWord = addCustomRepWord
+
+const removeCustomRepWord = async function (message, params, user) {
+
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can remove custom rep words");
+
+    let args = message.content.split(" ").slice(1).join(" ").trim();
+
+    if (args.length < 1)
+        return message.channel.send("You have to specify a word to remove!");
+
+    let guild = await MAIN.findGuild({
+        id: message.guild.id
+    });
+
+    if (!guild.customRepWords.includes(args))
+        return message.channel.send("This word is not already tracked to auto grant rep!");
+
+    let index = guild.customRepWords.indexOf(args);
+
+    guild.customRepWords.splice(index, 1);
+
+    Guild.findOneAndUpdate({
+        id: guild.id
+    }, {
+        $set: {
+            customRepWords: guild.customRepWords
+        }
+    }).exec();
+    message.channel.send(`${args} has been removed from the custom rep words!`);
+}
+exports.removeCustomRepWord = removeCustomRepWord
 
 const blacklistRepRole = async function (message, params, user) {
 
@@ -3194,7 +3269,7 @@ const resetFactionPoints = async function (message, params, user) {
 exports.resetFactionPoints = resetFactionPoints;
 
 
-const identifyThanks = function (message) {
+const identifyThanks = function (message, guild) {
 
     if ((message.mentions.members.size > 3) || (message.mentions.members.size == 0))
         return false;
@@ -3217,7 +3292,7 @@ const identifyThanks = function (message) {
         messageContent = quoteCheck.join(' ').toLowerCase();
     }
 
-    let thanks = [
+    let thanks = [...guild.customRepWords,
         'thanks', 'thank you', ' ty ', 'tyvm', 'thx', 'tank u', 'thank u', 'thank yo', 'thank yu', 'tank yu'
     ]
 

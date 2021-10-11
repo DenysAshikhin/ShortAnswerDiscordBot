@@ -880,7 +880,7 @@ connectDB.once('open', async function () {
 
 
                 if (allowedThanks)
-                    if (ADMINISTRATOR.identifyThanks(message)) {
+                    if (ADMINISTRATOR.identifyThanks(message, guild)) {
 
                         let quoted = [];
                         let quoteCheck = message.content.split('\n');
@@ -1485,6 +1485,8 @@ function populateCommandMap() {
     commandMap.set(Commands[165].title.toUpperCase(), ADMINISTRATOR.removePlayingRolePair)
     commandMap.set(Commands[166].title.toUpperCase(), ADMINISTRATOR.setRepAdminRole)
     commandMap.set(Commands[167].title.toUpperCase(), ADMINISTRATOR.unSetsetRepAdminRole)
+    commandMap.set(Commands[168].title.toUpperCase(), ADMINISTRATOR.addCustomRepWord)
+    commandMap.set(Commands[169].title.toUpperCase(), ADMINISTRATOR.removeCustomRepWord)
 
 
 
