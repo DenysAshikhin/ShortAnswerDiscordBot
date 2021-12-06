@@ -140,6 +140,10 @@ const GuildSchema = new mongoose.Schema({
     customRepWords: {
         type: [],
         default: []
+    },
+    customSummonMessage: {
+        type: String,
+        default: ''
     }
 });
 

@@ -337,6 +337,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
     }
 
     let sizeLimit;
+    let customSummonMessage = MAIN.cachedGuilds.get(message.guild.id).customSummonMessage;
 
     if (message.content.split(',').length == 2)
         sizeLimit = message.content.split(',')[1].trim().split(' ')[0].trim();
@@ -431,13 +432,23 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                         MAIN.directMessage(message, user.id, game);
             }
 
-            if (role.members.size > 20)
-                signedUp = `${role.members.size} members from ${MAIN.mentionRole(role)}. Not listing everyone due to more than 20 members being part of the role!`;
-            else {
-                signedUp = `: `
-                for (let memby of role.members.values())
-                    if (memby.id != message.author.id)
-                        signedUp += `**${MAIN.mention(memby.id)}** :small_orange_diamond: `
+
+            if (customSummonMessage) {
+                if (customSummonMessage.length > 0) {
+                    signedUp = customSummonMessage;
+                }
+            }
+            else if (signedUp.length > 0) {
+                if (role.members.size > 20) {
+
+                    signedUp = `${role.members.size} members from ${MAIN.mentionRole(role)}. Not listing everyone due to more than 20 members being part of the role!`;
+                }
+                else {
+                    signedUp = `: `
+                    for (let memby of role.members.values())
+                        if (memby.id != message.author.id)
+                            signedUp += `**${MAIN.mention(memby.id)}** :small_orange_diamond: `
+                }
             }
         }
         else {
@@ -470,6 +481,13 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
         }
 
         let summonMessage;
+        let newDescription = signedUp.length > 3 ? message.member.displayName + " has summoned " + signedUp + " for some " + game
+            + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```" : message.member.displayName + " wants to play " + `**${game}** but no one signed up for it! You can use the ` + "`signUp " + game + "`"
+            + ` to be notifed the next time someone wants to play the game!`
+            + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```";
+        if (customSummonMessage)
+            if (customSummonMessage.length > 0)
+                newDescription = customSummonMessage;
 
         if (signedUp.length > 3)
             summonMessage = await MAIN.prettyEmbed(message,
@@ -480,8 +498,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                         return acc;
                     }, [])
                 }], {
-                description: message.member.displayName + " has summoned " + signedUp + " for some " + game
-                    + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```", modifier: 1
+                description: newDescription, modifier: 1
             });
         else
             summonMessage = await MAIN.prettyEmbed(message,
@@ -492,9 +509,7 @@ async function pingUsers(message, game, user) {//Return 0 if it was inside a DM
                         return acc;
                     }, [])
                 }], {
-                description: message.member.displayName + " wants to play " + `**${game}** but no one signed up for it! You can use the ` + "`signUp " + game + "`"
-                    + ` to be notifed the next time someone wants to play the game!`
-                    + "```fix\n" + `Use emojis to join! Or use the **q** command!` + "```", modifier: 1
+                description: newDescription, modifier: 1
             });
         setControlEmoji(summonMessage);
         let collector = await setEmojiCollector(summonMessage);

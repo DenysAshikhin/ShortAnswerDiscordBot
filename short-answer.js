@@ -1487,6 +1487,7 @@ function populateCommandMap() {
     commandMap.set(Commands[167].title.toUpperCase(), ADMINISTRATOR.unSetsetRepAdminRole)
     commandMap.set(Commands[168].title.toUpperCase(), ADMINISTRATOR.addCustomRepWord)
     commandMap.set(Commands[169].title.toUpperCase(), ADMINISTRATOR.removeCustomRepWord)
+    commandMap.set(Commands[170].title.toUpperCase(), ADMINISTRATOR.setCustomSummonMessage)
 
 
 
@@ -2144,27 +2145,49 @@ function hmsToSecondsOnly(str) {
     var p = str.split(':'),
         s = 0,
         m = 1;
+        let counter = 0;
     while (p.length > 0) {
+        console.log("wow")
+        console.log(p, m, s);
         s += m * parseInt(p.pop(), 10);
-        m *= 60;
+        
+        counter++;
+
+        m *= counter <=  2 ? 60 : 24;
+
+
+        console.log(s, counter, m);
     }
+    console.log(`returning ${s} seconds`)
     return s;
 }
 exports.hmsToSecondsOnly = hmsToSecondsOnly;
 
 function timeConvert(time) {
 
+    time = Math.round(time);
+
+    console.log(`converting: ${time} seconds`)
+
     let seconds = Math.floor(time % 60);
     if ((seconds + "").length < 2) seconds = '0' + seconds;
+
     let minutes = Math.floor(time / 60 % 60);
     if ((minutes + "").length < 2) minutes = '0' + minutes;
-    let hours = Math.floor(time / 60 / 60);
+
+    let hours = Math.floor(time / 60 / 60 % 24);
     if (("" + hours).length < 2) hours = '0' + hours;
 
-    let finalTime = seconds;
-    if (minutes > 0) finalTime = minutes + `:${finalTime}`;
-    if (hours > 0) finalTime = hours + `:${finalTime}`;
-    if ((minutes == '00') && (hours == '00')) finalTime = `00:${finalTime}`;
+    let days = Math.floor(time / 60 / 60 / 24);
+    if (("" + days).length < 2) days = '0' + days;
+
+    console.log(seconds, minutes, hours, days)
+
+    let finalTime = seconds + `s`;
+    if (minutes > 0) finalTime = minutes + `m : ${finalTime}`;
+    if (hours > 0) finalTime = hours + `h : ${finalTime}`;
+    if (days > 0) finalTime = days + `d : ${finalTime}`;
+    if ((minutes == '00') && (hours == '00') && (days == '00')) finalTime = `${finalTime}`;
     return finalTime;
 }
 exports.timeConvert = timeConvert;

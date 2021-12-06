@@ -3355,6 +3355,58 @@ function setThankerAutoRep(message, params, user) {
 }
 exports.setThankerAutoRep = setThankerAutoRep;
 
+
+const setCustomSummonMessage = async function (message, params, user) {
+    if (message.channel.type == 'dm') return message.channel.send("This command must be called from inside a server text channel");
+
+    if (!message.member.permissions.has("ADMINISTRATOR"))
+        return message.channel.send("Only admins can set custom summon messages!");
+
+
+    let param = message.content.split(" ");
+    param.splice(0, 1)
+    param = param.join(" ");
+
+    if (!param) {
+        message.channel.send("Setting the summon message to the default");
+        MAIN.cachedGuilds.get(message.guild.id).customSummonMessage = param;
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                customSummonMessage: ''
+            }
+        }, function (err, doc, res) { });
+    }
+    else if (param.length < 1) {
+        MAIN.cachedGuilds.get(message.guild.id).customSummonMessage = param;
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                customSummonMessage: ''
+            }
+        }, function (err, doc, res) { });
+        message.channel.send("Setting the summon message to the default")
+    }
+    else {
+
+        MAIN.cachedGuilds.get(message.guild.id).customSummonMessage = param;
+        Guild.findOneAndUpdate({
+            id: message.guild.id
+        }, {
+            $set: {
+                customSummonMessage: param
+            }
+        }, function (err, doc, res) { });
+        message.channel.send("Setting the summon message to: " + param);
+    }
+    return 1;
+}
+exports.setCustomSummonMessage = setCustomSummonMessage
+
+
+
 async function setImageForwarding(message, params, user) {
 
 

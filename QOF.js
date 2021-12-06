@@ -239,13 +239,32 @@ exports.commandSuggestions = commandSuggestions;
 
 async function timerTrack() {
 
+    let startDate = new Date();
+
     for (let GUILDTimers of guildTimers.entries()) {
 
         for (let timer of GUILDTimers[1]) {
             if (timer.time <= 0)
                 continue;
 
-            timer.time -= 1;
+            try {
+                let exists = await timer.message.channel.messages.fetch(timer.message.id);
+                if (!exists) {
+                    timer.time = -1000;
+                }
+                else {
+                    let elapsedTime = (new Date() - startDate) / 1000;
+                    timer.time -= 1 + elapsedTime;
+                }
+            }
+            catch (err) {
+                console.log(`caught the deleted timer`);
+                timer.time = -1000;
+                continue;
+            }
+
+
+
         }
     }
 }
@@ -283,8 +302,10 @@ const updateTimer = async function () {
 
             if (purge.time >= 1)
                 continue;
-            await purge.author.send("Your timer has finished!");
-            await purge.message.edit(":alarm_clock: *Ring*" + MAIN.mention(purge.author.id) + "*Ring* :alarm_clock:");
+            else if (purge.time >= -100) {// deleted messages get set to -1000 and no alert is needed for them
+                await purge.author.send("Your timer has finished!");
+                await purge.message.edit(":alarm_clock: *Ring*" + MAIN.mention(purge.author.id) + "*Ring* :alarm_clock:");
+            }
 
             GUILDTimers[1].splice(GUILDTimers[1].indexOf(purge), 1)
 

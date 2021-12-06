@@ -2055,5 +2055,18 @@
            "admin"
         ],
         "category": "Rep"
+    },
+    {
+        "title": "setCustomSummonMessage",
+        "explanation": "Sets a custom message for the summone (ping) embeds. If no message is specified, the default message is reset.",
+        "example": [
+            "1) setCustomSummonMessage Join The Game Peeps!",
+            "2) setCustomSummonMessage"
+        ],
+        "subsection": [
+           "game",
+           "admin"
+        ],
+        "category": "Summoning/Pinging"
     }
 ]
