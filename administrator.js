@@ -1395,11 +1395,11 @@ const autorole = async function (message, params, user) {
 
         await message.channel.send("Welcome to the autorole message creator. This is what the message will currently look like:");
 
-        let embed1 = JSON.stringify(MAIN.Embed)
-        embed1.description = 'Temporary Description. This field is required!',
-            embed1.footer = ''
-        embed1.title = ''
-        embed1.timestamp = null
+        let embed1 = { ...MAIN.Embed };
+        embed1.description = 'Temporary Description. This field is required!';
+        embed1.footer = '';
+        embed1.title = '';
+        embed1.timestamp = null;
         await message.channel.send({
             embed: embed1
         });
@@ -1415,7 +1415,7 @@ const autorole = async function (message, params, user) {
                 channelID: message.channel.id,
                 messageID: null,
                 title: '',
-                description: '',
+                description: 'test description',
                 emojis: [],
                 newEmoji: null,
                 users: [],
