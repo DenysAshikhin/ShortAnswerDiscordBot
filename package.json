@@ -24,7 +24,7 @@
     "disco-oauth": "^4.2.7",
     "discord.js": "^12.3.1",
     "enhanced-spotify-api": "^1.1.7",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "ffmpeg": "0.0.4",
     "ffmpeg-static": "^4.2.7",
     "fluent-ffmpeg": "^2.1.2",
